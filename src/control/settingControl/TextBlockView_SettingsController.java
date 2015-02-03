@@ -16,7 +16,6 @@ public class TextBlockView_SettingsController extends SettingsController
 	public void initialize(URL location, ResourceBundle resources)
 	{
 		System.out.println("Initializing TextBlockView_SettingsController.");
-		
 	}
 
 }
