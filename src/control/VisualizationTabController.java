@@ -12,7 +12,7 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.Pane;
 
-public abstract class TabController implements Initializable
+public abstract class VisualizationTabController implements Initializable
 {
 	@FXML protected Label contextHeader_label;
 	@FXML protected TextArea contextText_textArea;

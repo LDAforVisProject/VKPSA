@@ -50,7 +50,7 @@ public class Dataset
 	}
 	
 	// @todo Un-statify.
-	public static double calculateDatasetDistance(final ArrayList<Topic> dataset1, final ArrayList<Topic> dataset2, DatasetDistance distanceType)
+	public static double calculateDatasetDistance(final Dataset dataset1, final Dataset dataset2, DatasetDistance distanceType)
 	{
 		double distance = 0;
 		
@@ -79,26 +79,29 @@ public class Dataset
 	 * @param dataset2
 	 * @return
 	 */
-	private static double calculateMinimalDatasetDistance(final ArrayList<Topic> dataset1, final ArrayList<Topic> dataset2)
+	private static double calculateMinimalDatasetDistance(final Dataset dataset1, final Dataset dataset2)
 	{
 		System.out.println("Calculating dataset distance");
 		
 		double minDistance	= Double.MAX_VALUE;
 		Topic currentTopic	= null;
 		
+		ArrayList<Topic> topics1 = dataset1.getTopics();
+		ArrayList<Topic> topics2 = dataset2.getTopics();
+		
 		// Iterate through all topics of one dataset, compare each of them with all topics of the other dataset, pick minimal distance, sum up distances.
-		for (int i = 0; i < dataset1.size(); i++) {
-			currentTopic = dataset1.get(i);
+		for (int i = 0; i < topics1.size(); i++) {
+			currentTopic = topics1.get(i);
 			
 			// Unrolled loop to avoid calculation of distance i to i without using an if.
-			for (int j = 0; j < dataset2.size(); j++) {
-				double distance = currentTopic.calculateBhattacharyyaDistance(dataset2.get(j)); 
+			for (int j = 0; j < topics2.size(); j++) {
+				double distance = currentTopic.calculateBhattacharyyaDistance(topics2.get(j)); 
 				minDistance = minDistance > distance ? distance : minDistance;
 			}	
 		}
 		
 		// Return normalized distance.
-		return minDistance / (dataset1.size() * dataset2.size());
+		return minDistance / (topics1.size() * topics2.size());
 	}
 	
 	/**
@@ -109,7 +112,7 @@ public class Dataset
 	 * @param dataset2
 	 * @return
 	 */
-	private static double calculateHausdorffDatasetDistance(final ArrayList<Topic> dataset1, final ArrayList<Topic> dataset2)
+	private static double calculateHausdorffDatasetDistance(final Dataset dataset1, final Dataset dataset2)
 	{
 		System.out.println("Calculating dataset distance");
 		
@@ -117,14 +120,17 @@ public class Dataset
 		double maxMinDistance	= 0;
 		Topic currentTopic		= null;
 		
+		ArrayList<Topic> topics1 = dataset1.getTopics();
+		ArrayList<Topic> topics2 = dataset2.getTopics();
+		
 		// Iterate through all topics of one dataset, compare each of them with all topics of the other dataset, pick minimal distance, sum up distances.
-		for (int i = 0; i < dataset1.size(); i++) {
-			currentTopic 	= dataset1.get(i);
+		for (int i = 0; i < topics1.size(); i++) {
+			currentTopic 	= topics1.get(i);
 			minDistance		= Double.MAX_VALUE;
 			
 			// Unrolled loop to avoid calculation of distance i to i without using an if.
-			for (int j = 0; j < dataset2.size(); j++) {
-				double distance = currentTopic.calculateBhattacharyyaDistance(dataset2.get(j)); 
+			for (int j = 0; j < topics2.size(); j++) {
+				double distance = currentTopic.calculateBhattacharyyaDistance(topics2.get(j)); 
 				minDistance = minDistance > distance ? distance : minDistance;
 			}
 			
@@ -139,7 +145,7 @@ public class Dataset
 	{
 		// @todo Get number of datasets dynamically.
 		final int numberOfDatasets							= 25;
-		Map<LDAConfiguration, ArrayList<Topic>> datasetMap	= new HashMap<LDAConfiguration, ArrayList<Topic>>(numberOfDatasets);
+		Map<LDAConfiguration, Dataset> datasetMap	= new HashMap<LDAConfiguration, Dataset>(numberOfDatasets);
 		ArrayList<LDAConfiguration> paramSetList			= new ArrayList<LDAConfiguration>(numberOfDatasets);
 		double[][] output									= null;
 //		ArrayList<Dataset> datasetList						= new ArrayList<Dataset>();
@@ -157,7 +163,7 @@ public class Dataset
 					String alphaString	= alpha >= 1	? String.valueOf( (int) alpha)	: String.valueOf(alpha);
 					
 					ArrayList<Topic> topicList = Topic.generateTopicsFromFile("D:\\Workspace\\LDA\\core\\data\\sampling", "LDATopics_eta" + etaString + "_alpha" + alphaString + ".csv", TopicKeywordAlignment.HORIZONTAL);
-					datasetMap.put(paramSetList.get(paramSetList.size() - 1), topicList);
+					datasetMap.put(paramSetList.get(paramSetList.size() - 1), new Dataset(paramSetList.get(paramSetList.size() - 1), topicList));
 					
 	//				datasetList.add(new Dataset(new LDAConfiguration(20, alpha, eta), topicList));
 	//				ArrayList<Topic> topics = Topic.generateTopicsFromFile("D:\\Workspace\\LDA\\core\\data\\sampling", "LDATopics_eta" + etaString + "_alpha" + alphaString + ".csv", TopicKeywordAlignment.HORIZONTAL);

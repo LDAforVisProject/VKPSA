@@ -35,7 +35,7 @@ public class CoreController implements Initializable
 	/**
 	 * Stores tab controller by tab names.
 	 */
-	private Map<String, TabController> visTabControllers;
+	private Map<String, VisualizationTabController> visTabControllers;
 	/**
 	 * Stores references to tabs by tab names.
 	 */
@@ -43,7 +43,7 @@ public class CoreController implements Initializable
 	
 	public CoreController()
 	{
-		visTabControllers	= new HashMap<String, TabController>();
+		visTabControllers	= new HashMap<String, VisualizationTabController>();
 		tabs				= new HashMap<String, Tab>();
 	}
 
@@ -65,7 +65,7 @@ public class CoreController implements Initializable
 	        AnchorPane tabAnchorPane	= new AnchorPane();
 	        // Create new tab.
 	        Tab tab						= new Tab();
-	        boolean isTabUnique			= visTabControllers.containsKey(item.getId()); 
+	        boolean isTabUnique			= !visTabControllers.containsKey(item.getId()); 
 	        
 	        System.out.println(item.getId());
 	        
@@ -73,11 +73,11 @@ public class CoreController implements Initializable
 	        switch (item.getId()) {
 	        	case "menu_viewMenu_globalComparison":
 	        		// Load FXML file containing tab content.
-	        		tabContent = (Node) fxmlLoader.load(getClass().getResource("/view/GlobalComparisonTabContent.fxml").openStream());
+	        		tabContent = (Node) fxmlLoader.load(getClass().getResource("/view/GCTabContent.fxml").openStream());
 	        		
 	        		// Get controlle for tab pane.
 	        		// @todo Ensure that current tab is not duplicated.
-	        		if (!isTabUnique) {
+	        		if (isTabUnique) {
 	        			// Add reference to controller to map.
 	        			visTabControllers.put(item.getId(), (GCTabController) fxmlLoader.getController());
 
@@ -111,10 +111,10 @@ public class CoreController implements Initializable
 	        	
 	        	case "menu_viewMenu_textSimilarity":
 	        		// Load FXML file containing tab content.
-	        		tabContent = (Node) fxmlLoader.load(getClass().getResource("/view/VisTabContent.fxml").openStream());
+	        		tabContent = (Node) fxmlLoader.load(getClass().getResource("/view/LCTabContent.fxml").openStream());
 	        		
 	        		// Get controlle for tab pane.
-	        		visTabControllers.put(item.getId(), (VisTabController) fxmlLoader.getController());
+	        		visTabControllers.put(item.getId(), (LCTabController) fxmlLoader.getController());
 	        		
 	        		// Add settings pane to tab content.
 	        		visTabControllers.get(item.getId()).addSettingsPane("/view/ViewSettings_textBlocks.fxml");
@@ -130,7 +130,7 @@ public class CoreController implements Initializable
 	        		tab.setText("Topical similarity - Text view");
 					
 					// Load visualization file.
-	        		VisTabController controller_tb = (VisTabController) visTabControllers.get(item.getId()); 
+	        		LCTabController controller_tb = (LCTabController) visTabControllers.get(item.getId()); 
 	        		controller_tb.loadVisualizationFile("/js/test.html");
 	        	break;
 	        	
@@ -140,7 +140,7 @@ public class CoreController implements Initializable
 	        }
 	        
 	        // Add tab to GUI.
-	        if (!isTabUnique) {
+	        if (isTabUnique) {
 				tab.setContent(tabAnchorPane);
 				tabPane.getTabs().add(tab);
 	        }
@@ -158,7 +158,7 @@ public class CoreController implements Initializable
 	 */
 	public void redrawVisualizations(double newWidth, double newHeight)
 	{
-		for (Map.Entry<String, TabController> item : visTabControllers.entrySet()) {
+		for (Map.Entry<String, VisualizationTabController> item : visTabControllers.entrySet()) {
 			item.getValue().updateBounds(newWidth, newHeight);
 			item.getValue().draw();
 		}

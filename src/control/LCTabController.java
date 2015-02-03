@@ -7,7 +7,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.web.WebView;
 
-public class VisTabController extends TabController
+public class LCTabController extends VisualizationTabController
 {
 	@FXML private WebView webView;
 	

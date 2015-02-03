@@ -16,7 +16,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.shape.StrokeLineJoin;
 
-public class GCTabController extends TabController
+public class GCTabController extends VisualizationTabController
 {
 	// FXML elements.
 	@FXML private Canvas canvas;

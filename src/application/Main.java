@@ -23,19 +23,6 @@ public class Main extends Application
 	{
 		try {
 			// @todo Write metadata in Python generated topic files. 
-			
-			// Load core .fxml file. 
-//			FXMLLoader fxmlLoader				= new FXMLLoader();
-//			Pane root							= (Pane) fxmlLoader.load(getClass().getResource("/view/TravelChart.fxml").openStream());
-//	        CanvasController canvasController	= (CanvasController) fxmlLoader.getController();
-//	        Scene scene							= new Scene(root);
-//			
-//	        primaryStage.setTitle("Global Comparison");
-//	        primaryStage.setScene(scene);
-//	        primaryStage.show();
-//			
-//	        canvasController.setCoordinates(output);
-//	        canvasController.draw();
 	        
 			// Load core .fxml file. 
 			FXMLLoader fxmlLoader			= new FXMLLoader();
