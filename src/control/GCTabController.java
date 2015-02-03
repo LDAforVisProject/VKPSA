@@ -55,13 +55,6 @@ public class GCTabController extends TabController
 		        draw();
 		    }
 		});
-//		root.getDividers().addListener(new ListChangeListener<Divider>() {
-//			@Override
-//			public void onChanged(javafx.collections.ListChangeListener.Change<? extends Divider> arg0)
-//			{
-//				System.out.println("Change!");
-//			}
-//		});
 	}
 
 	public void setCoordinates(double[][] coordinates)
@@ -147,9 +140,7 @@ public class GCTabController extends TabController
 	public void updateBounds(final double newSceneWidth, final double newSceneHeight)
 	{
 		// Estimated height of menubar. 
-		// @todo Get dynamically.
 		final int menubarHeight = 55;
-		System.out.println("newSceneWidth = " + newSceneWidth + "; newSceneHeight = " + newSceneHeight);
 		
 		// New values for scene width and/or height.
 		if (newSceneWidth > 0)

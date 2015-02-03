@@ -15,6 +15,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
@@ -31,11 +32,19 @@ public class CoreController implements Initializable
 	
 	private Scene scene;
 	
+	/**
+	 * Stores tab controller by tab names.
+	 */
 	private Map<String, TabController> visTabControllers;
+	/**
+	 * Stores references to tabs by tab names.
+	 */
+	private Map<String, Tab> tabs;
 	
 	public CoreController()
 	{
-		visTabControllers = new HashMap<String, TabController>();
+		visTabControllers	= new HashMap<String, TabController>();
+		tabs				= new HashMap<String, Tab>();
 	}
 
 	@Override
@@ -56,6 +65,7 @@ public class CoreController implements Initializable
 	        AnchorPane tabAnchorPane	= new AnchorPane();
 	        // Create new tab.
 	        Tab tab						= new Tab();
+	        boolean isTabUnique			= visTabControllers.containsKey(item.getId()); 
 	        
 	        System.out.println(item.getId());
 	        
@@ -67,25 +77,36 @@ public class CoreController implements Initializable
 	        		
 	        		// Get controlle for tab pane.
 	        		// @todo Ensure that current tab is not duplicated.
-	        		visTabControllers.put(item.getId(), (GCTabController) fxmlLoader.getController());
+	        		if (!isTabUnique) {
+	        			// Add reference to controller to map.
+	        			visTabControllers.put(item.getId(), (GCTabController) fxmlLoader.getController());
+
+	        			// Add reference to tab to map.
+	        			tabs.put(item.getId(), tab);
+	        			
+		        		// Add settings pane to tab content.
+		        		visTabControllers.get(item.getId()).addSettingsPane("/view/ViewSettings_textBlocks.fxml");
+		        		
+		        		// Ensure resizability of tab content.	        		
+		        		tabAnchorPane.getChildren().add(tabContent);
+		        		AnchorPane.setTopAnchor(tabContent, 0.0);
+		        		AnchorPane.setBottomAnchor(tabContent, 0.0);
+		        		AnchorPane.setLeftAnchor(tabContent, 0.0);
+		        		AnchorPane.setRightAnchor(tabContent, 0.0);
+		 		
+		        		// Set title text.
+		        		tab.setText("Topical similarity - Global Comparison");
+		        		
+						// Load visualization file.
+		        		GCTabController controller_gc = (GCTabController) visTabControllers.get(item.getId());
+		        		controller_gc.setCoordinates(Dataset.sampleTestData(true));
+		        		controller_gc.draw();
+	        		}
 	        		
-	        		// Add settings pane to tab content.
-	        		visTabControllers.get(item.getId()).addSettingsPane("/view/ViewSettings_textBlocks.fxml");
-	        		
-	        		// Ensure resizability of tab content.	        		
-	        		tabAnchorPane.getChildren().add(tabContent);
-	        		AnchorPane.setTopAnchor(tabContent, 0.0);
-	        		AnchorPane.setBottomAnchor(tabContent, 0.0);
-	        		AnchorPane.setLeftAnchor(tabContent, 0.0);
-	        		AnchorPane.setRightAnchor(tabContent, 0.0);
-	 		
-	        		// Set title text.
-	        		tab.setText("Topical similarity - Global Comparison");
-	        		
-					// Load visualization file.
-	        		GCTabController controller_gc = (GCTabController) visTabControllers.get(item.getId());
-	        		controller_gc.setCoordinates(Dataset.sampleTestData(true));
-	        		controller_gc.draw();
+	        		else {
+	        			System.out.println("### Tab already opened. Switching to tab.");
+	        			tabPane.getSelectionModel().select(tabs.get(item.getId()));
+	        		}
 	        	break;
 	        	
 	        	case "menu_viewMenu_textSimilarity":
@@ -93,7 +114,6 @@ public class CoreController implements Initializable
 	        		tabContent = (Node) fxmlLoader.load(getClass().getResource("/view/VisTabContent.fxml").openStream());
 	        		
 	        		// Get controlle for tab pane.
-	        		// @todo Ensure that current tab is not duplicated.
 	        		visTabControllers.put(item.getId(), (VisTabController) fxmlLoader.getController());
 	        		
 	        		// Add settings pane to tab content.
@@ -120,8 +140,10 @@ public class CoreController implements Initializable
 	        }
 	        
 	        // Add tab to GUI.
-			tab.setContent(tabAnchorPane);
-			tabPane.getTabs().add(tab);
+	        if (!isTabUnique) {
+				tab.setContent(tabAnchorPane);
+				tabPane.getTabs().add(tab);
+	        }
 		}
         
         catch (IOException e1) {

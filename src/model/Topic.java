@@ -172,8 +172,6 @@ public class Topic
 		// i denotes number of rows in csv (up to number of features)
 		int i					= 0;
 		
-		// @todo For optimization: Reserve memory for topic list and in topic for keyword probability map.
-		
 		// Select path and charset.
 	    Path path				= Paths.get(directory, filename);
 	    Charset charset			= Charset.forName("UTF-8");
