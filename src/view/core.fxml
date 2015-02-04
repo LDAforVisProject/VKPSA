@@ -14,6 +14,7 @@
             <items>
                   <Menu fx:id="menu_viewMenu" mnemonicParsing="false" text="New view">
                     <items>
+                        <MenuItem fx:id="menu_viewMenu_database" mnemonicParsing="false" onAction="#menu_viewMenu_itemSelected" text="Database" />
                         <MenuItem fx:id="menu_viewMenu_globalComparison" mnemonicParsing="false" onAction="#menu_viewMenu_itemSelected" text="Global Comparison" />
                       <MenuItem fx:id="menu_viewMenu_textSimilarity" mnemonicParsing="false" onAction="#menu_viewMenu_itemSelected" text="Topic Similarity - Text" />
                     </items>

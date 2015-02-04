@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.*?>
 <?import javafx.scene.chart.*?>
 <?import javafx.scene.canvas.*?>
 <?import javafx.scene.shape.*?>
@@ -40,7 +39,22 @@
                               </Label>
                               <AnchorPane layoutX="23.0" layoutY="34.0" prefHeight="116.0" prefWidth="250.0">
                                  <children>
+                                    <TextField layoutX="191.0" layoutY="80.0" prefHeight="0.0" prefWidth="45.0">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </TextField>
+                                    <TextField layoutX="191.0" layoutY="5.0" prefHeight="23.0" prefWidth="45.0">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </TextField>
                                     <Label layoutX="42.0" layoutY="82.0" text="Sampling interval:" />
+                                    <TextField layoutX="191.0" layoutY="42.0" prefHeight="25.0" prefWidth="45.0">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </TextField>
                                     <Slider layoutX="37.0" layoutY="42.0" majorTickUnit="2.5" max="10.0" minorTickCount="5" rotate="180.0" showTickMarks="true" />
                                     <Slider layoutX="37.0" layoutY="9.0" majorTickUnit="2.5" max="10.0" minorTickCount="5" showTickLabels="true" showTickMarks="true" />
                                     <Label layoutX="-2.0" layoutY="28.0" text=" α">
@@ -48,17 +62,26 @@
                                           <Font size="14.0" />
                                        </font>
                                     </Label>
-                                    <TextField layoutX="199.0" layoutY="43.0" prefHeight="25.0" prefWidth="45.0" />
-                                    <TextField layoutX="199.0" layoutY="9.0" prefHeight="25.0" prefWidth="45.0" />
-                                    <TextField layoutX="199.0" layoutY="78.0" prefHeight="25.0" prefWidth="45.0" />
                                  </children>
                               </AnchorPane>
-                              <Button layoutX="280.0" layoutY="287.0" mnemonicParsing="false" text="Generate data" />
-                              <Label layoutX="23.0" layoutY="291.0" text="Generate only non-available data:" />
-                              <CheckBox layoutX="222.0" layoutY="291.0" mnemonicParsing="false" selected="true" />
                               <AnchorPane layoutX="23.0" layoutY="150.0" prefHeight="116.0" prefWidth="250.0">
                                  <children>
+                                    <TextField layoutX="191.0" layoutY="80.0" prefHeight="0.0" prefWidth="45.0">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </TextField>
+                                    <TextField layoutX="191.0" layoutY="5.0" prefHeight="23.0" prefWidth="45.0">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </TextField>
                                     <Label layoutX="42.0" layoutY="82.0" text="Sampling interval:" />
+                                    <TextField layoutX="191.0" layoutY="42.0" prefHeight="25.0" prefWidth="45.0">
+                                       <font>
+                                          <Font size="10.0" />
+                                       </font>
+                                    </TextField>
                                     <Slider layoutX="37.0" layoutY="42.0" majorTickUnit="2.5" max="10.0" minorTickCount="5" rotate="180.0" showTickMarks="true" />
                                     <Slider layoutX="37.0" layoutY="9.0" majorTickUnit="2.5" max="10.0" minorTickCount="5" showTickLabels="true" showTickMarks="true" />
                                     <Label layoutX="-2.0" layoutY="28.0" text="η">
@@ -66,11 +89,10 @@
                                           <Font size="14.0" />
                                        </font>
                                     </Label>
-                                    <TextField layoutX="199.0" layoutY="43.0" prefHeight="25.0" prefWidth="45.0" />
-                                    <TextField layoutX="199.0" layoutY="9.0" prefHeight="25.0" prefWidth="45.0" />
-                                    <TextField layoutX="199.0" layoutY="78.0" prefHeight="25.0" prefWidth="45.0" />
                                  </children>
                               </AnchorPane>
+                              <CheckBox layoutX="13.0" layoutY="291.0" mnemonicParsing="false" nodeOrientation="RIGHT_TO_LEFT" prefHeight="17.0" prefWidth="244.0" selected="true" text="Generate non-available datasets only      " />
+                              <Button layoutX="280.0" layoutY="287.0" mnemonicParsing="false" text="Generate data" />
                            </children>
                         </AnchorPane>
                      </content>
