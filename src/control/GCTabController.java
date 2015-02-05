@@ -3,6 +3,7 @@ package control;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import control.settingControl.GC_SettingsController;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -50,7 +51,6 @@ public class GCTabController extends VisualizationTabController
 		    @Override 
 		    public void changed(ObservableValue<? extends Number> observableValue, Number oldPosition, Number newPosition) 
 		    {
-		    	System.out.println("Change! " + oldPosition + ", " + newPosition);
 		        updateBounds(-1, -1);
 		        draw();
 		    }
@@ -66,7 +66,6 @@ public class GCTabController extends VisualizationTabController
 	@Override
 	public void draw()
 	{
-		System.out.println(".width = " + canvas.getWidth() + ", .height = " + canvas.getHeight());
 		double maxX						= 0;
 		double maxY						= 0;
 		double minX						= 0;
@@ -142,15 +141,25 @@ public class GCTabController extends VisualizationTabController
 		// Estimated height of menubar. 
 		final int menubarHeight = 55;
 		
+		double newSettingsPanelWidth	= 0; 
+		double newSettingsPanelHeight	= 0;
+		
 		// New values for scene width and/or height.
-		if (newSceneWidth > 0)
+		if (newSceneWidth > 0) {
 			canvas.setWidth(newSceneWidth * root.getDividerPositions()[0]);
-		if (newSceneHeight > 0)
+			newSettingsPanelWidth = newSceneWidth - canvas.getWidth();
+		}
+		if (newSceneHeight > 0) {
 			canvas.setHeight(newSceneHeight - menubarHeight);
+			newSettingsPanelHeight = canvas.getHeight();
+		}
 		
 		// Only divider position has changed. 
 		if(newSceneWidth == -1 && newSceneHeight == -1) {
 			canvas.setWidth(root.getScene().getWidth() * root.getDividerPositions()[0]);
 		}
+		
+        GC_SettingsController gc_settingsController = (GC_SettingsController) settingsController;
+		gc_settingsController.resize(newSettingsPanelWidth, newSceneHeight);
 	}
 }

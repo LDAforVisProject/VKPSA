@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.web.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<ScrollPane fx:id="root" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" minHeight="300.0" minWidth="340.0" pannable="true" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.settingControl.GC_SettingsController">
+   <content>
+      <AnchorPane fx:id="contentRoot" minHeight="300.0" minWidth="340.0">
+         <children>
+            <AnchorPane layoutX="50.0" prefHeight="116.0" prefWidth="250.0" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="0.0">
+               <children>
+                  <Slider layoutX="37.0" layoutY="42.0" majorTickUnit="2.5" max="10.0" minorTickCount="5" rotate="180.0" showTickMarks="true" />
+                  <Slider layoutX="37.0" layoutY="9.0" majorTickUnit="2.5" max="10.0" minorTickCount="5" showTickLabels="true" showTickMarks="true" />
+                  <Label layoutX="-5.0" layoutY="28.0" text=" α">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+               </children>
+            </AnchorPane>
+            <AnchorPane layoutX="50.0" layoutY="75.0" prefHeight="116.0" prefWidth="250.0" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="80.0">
+               <children>
+                  <Slider layoutX="37.0" layoutY="42.0" majorTickUnit="2.5" max="10.0" minorTickCount="5" rotate="180.0" showTickMarks="true" />
+                  <Slider layoutX="37.0" layoutY="9.0" majorTickUnit="2.5" max="10.0" minorTickCount="5" showTickLabels="true" showTickMarks="true" />
+                  <Label layoutX="-2.0" layoutY="28.0" text="η">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+               </children>
+            </AnchorPane>
+            <ComboBox layoutX="50.0" layoutY="191.0" prefHeight="25.0" prefWidth="177.0" promptText="Distance Function" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="191.0" />
+            <Button layoutX="50.0" layoutY="232.0" mnemonicParsing="false" text="Update" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="232.0" />
+         </children>
+      </AnchorPane>
+   </content>
+</ScrollPane>

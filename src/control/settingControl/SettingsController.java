@@ -7,6 +7,5 @@ import javafx.scene.control.TextField;
 
 public abstract class SettingsController implements Initializable
 {
-	@FXML private Button browse_button;
-	@FXML private TextField filepath_textfield;
+
 }

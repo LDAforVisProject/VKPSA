@@ -4,11 +4,14 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
 public class TextBlockView_SettingsController extends SettingsController
 {
+	@FXML private Button browse_button;
+	@FXML private TextField filepath_textfield;
 	@FXML private Label numberOfTopics_label;
 	@FXML private TextField keywordCount_textfield;
 	

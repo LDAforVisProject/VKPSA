@@ -53,7 +53,7 @@ public class Main extends Application
 		    @Override 
 		    public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth)
 		    {
-		        coreController.redrawVisualizations(newSceneWidth.doubleValue(), 0);
+		        coreController.resizeContent(newSceneWidth.doubleValue(), 0);
 		    }
 		});
 		
@@ -61,7 +61,7 @@ public class Main extends Application
 		    @Override 
 		    public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneHeight, Number newSceneHeight) 
 		    {
-		        coreController.redrawVisualizations(0, newSceneHeight.doubleValue());
+		        coreController.resizeContent(0, newSceneHeight.doubleValue());
 		    }
 		});
 	}

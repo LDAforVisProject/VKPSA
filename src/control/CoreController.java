@@ -86,7 +86,7 @@ public class CoreController implements Initializable
 	        			
 		        		// Add settings pane to tab content.
 	        			GCTabController controller_gc = (GCTabController) visTabControllers.get(item.getId()); 
-	        			controller_gc.addSettingsPane("/view/ViewSettings_textBlocks.fxml");
+	        			controller_gc.addSettingsPane("/view/ViewSettings_globalComparison.fxml");
 		        
 		        		// Set title text.
 		        		tab.setText("Topical similarity - Global Comparison");
@@ -178,8 +178,9 @@ public class CoreController implements Initializable
 	 * @param widthDelta
 	 * @param heightDelta
 	 */
-	public void redrawVisualizations(double newWidth, double newHeight)
+	public void resizeContent(double newWidth, double newHeight)
 	{
+		// Redraw visualizations.
 		for (Map.Entry<String, Initializable> item : visTabControllers.entrySet()) {
 			if (item.getValue() instanceof VisualizationTabController) {
 				VisualizationTabController tabController = (VisualizationTabController) item.getValue(); 
@@ -187,6 +188,8 @@ public class CoreController implements Initializable
 				tabController.draw();
 			}
 		}
+		
+		
 	}
 	
 	public void setScene(Scene scene)
