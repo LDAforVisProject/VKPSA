@@ -141,25 +141,17 @@ public class GCTabController extends VisualizationTabController
 		// Estimated height of menubar. 
 		final int menubarHeight = 55;
 		
-		double newSettingsPanelWidth	= 0; 
-		double newSettingsPanelHeight	= 0;
-		
 		// New values for scene width and/or height.
 		if (newSceneWidth > 0) {
 			canvas.setWidth(newSceneWidth * root.getDividerPositions()[0]);
-			newSettingsPanelWidth = newSceneWidth - canvas.getWidth();
 		}
 		if (newSceneHeight > 0) {
 			canvas.setHeight(newSceneHeight - menubarHeight);
-			newSettingsPanelHeight = canvas.getHeight();
 		}
 		
 		// Only divider position has changed. 
 		if(newSceneWidth == -1 && newSceneHeight == -1) {
 			canvas.setWidth(root.getScene().getWidth() * root.getDividerPositions()[0]);
 		}
-		
-        GC_SettingsController gc_settingsController = (GC_SettingsController) settingsController;
-		gc_settingsController.resize(newSettingsPanelWidth, newSceneHeight);
 	}
 }

@@ -188,8 +188,6 @@ public class CoreController implements Initializable
 				tabController.draw();
 			}
 		}
-		
-		
 	}
 	
 	public void setScene(Scene scene)

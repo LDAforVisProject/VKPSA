@@ -19,16 +19,4 @@ public class GC_SettingsController extends SettingsController
 		root.setFitToWidth(true);
 		root.setFitToHeight(true);
 	}
-
-	public void resize(double newSettingsPanelWidth, double newSettingsPanelHeight)
-	{
-		System.out.println("resize");
-		System.out.println("nSPW = " + newSettingsPanelWidth);
-//		root.setMinSize(newSettingsPanelWidth, root.getMinHeight());
-//		root.setPrefSize(newSettingsPanelWidth, root.getPrefHeight());
-//		root.setPrefWidth(10);
-//		root.setPrefViewportWidth(10);
-		
-//		contentRoot.setPrefSize(newSettingsPanelWidth, contentRoot.getPrefHeight());
-	}
 }
