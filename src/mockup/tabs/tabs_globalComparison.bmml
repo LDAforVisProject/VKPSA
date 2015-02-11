@@ -51,7 +51,7 @@
         <text>Missing%3A%20Circular%20progress%20indicator.</text>
       </controlProperties>
     </control>
-    <control controlID="98" controlTypeID="com.balsamiq.mockups::VerticalScrollBar" x="1529" y="153" w="-1" h="431" measuredW="16" measuredH="100" zOrder="9" locked="false" isInGroup="-1"/>
+    <control controlID="98" controlTypeID="com.balsamiq.mockups::VerticalScrollBar" x="1529" y="388" w="-1" h="212" measuredW="16" measuredH="100" zOrder="9" locked="false" isInGroup="-1"/>
     <control controlID="102" controlTypeID="com.balsamiq.mockups::Image" x="542" y="169" w="517" h="380" measuredW="517" measuredH="613" zOrder="11" locked="false" isInGroup="-1">
       <controlProperties>
         <src>./assets/globalComparison_screenshot.png</src>
@@ -67,7 +67,7 @@
         <rotation>180</rotation>
       </controlProperties>
     </control>
-    <control controlID="117" controlTypeID="com.balsamiq.mockups::Label" x="542" y="564" w="-1" h="-1" measuredW="106" measuredH="21" zOrder="16" locked="false" isInGroup="-1">
+    <control controlID="117" controlTypeID="com.balsamiq.mockups::Label" x="542" y="564" w="-1" h="-1" measuredW="107" measuredH="21" zOrder="16" locked="false" isInGroup="-1">
       <controlProperties>
         <text>Current%20Selection</text>
       </controlProperties>
@@ -98,11 +98,10 @@
         <override controlID="1" x="0" y="46" w="-1" h="-1">
           <text>o%20Text%20Blocks%0AMatrix%20Heatmap%0AText-based%20Matrix%0AAnchored%20Map%0AParallel%20Coordinates%0ACircle</text>
         </override>
-        <override controlID="-1"/>
         <src>./assets/Fly%20Out%20Menus.bmml#Vertical%20Flyout%20Menu%20Expanded</src>
       </controlProperties>
     </control>
-    <control controlID="125" controlTypeID="com.balsamiq.mockups::ComboBox" x="542" y="797" w="188" h="-1" measuredW="101" measuredH="110" zOrder="20" locked="false" isInGroup="-1">
+    <control controlID="125" controlTypeID="com.balsamiq.mockups::ComboBox" x="542" y="797" w="188" h="-1" measuredW="102" measuredH="110" zOrder="20" locked="false" isInGroup="-1">
       <controlProperties>
         <text>Text%20Blocks%0AMatrix%20Heatmap%0AText-based%20Matrix%0AAnchored%20Map%0AParallel%20Coordinates%0ACircle</text>
       </controlProperties>
@@ -147,6 +146,7 @@
                 <override controlID="2" x="50" y="0" w="10" h="10"/>
                 <override controlID="3" x="75" y="0" w="10" h="10"/>
                 <override controlID="4" x="99" y="0" w="10" h="10"/>
+                <override controlID="-1"/>
                 <src>./assets/Sliders.bmml#Tick%20Marks%20for%20Horizontal%20Slider</src>
               </controlProperties>
             </control>
@@ -158,6 +158,7 @@
                     <override controlID="1" x="19" y="2" w="42" h="4"/>
                     <override controlID="2" x="16" y="0" w="16" h="16"/>
                     <override controlID="3" x="58" y="0" w="16" h="16"/>
+                    <override controlID="-1"/>
                     <src>./assets/Sliders.bmml#Range%20Slider%20Horizontal%20Bar</src>
                   </controlProperties>
                 </control>
@@ -167,6 +168,7 @@
                     <override controlID="1" x="19" y="2" w="42" h="4"/>
                     <override controlID="2" x="16" y="0" w="16" h="16"/>
                     <override controlID="3" x="58" y="0" w="16" h="16"/>
+                    <override controlID="-1"/>
                     <src>./assets/Sliders.bmml#Range%20Slider%20Horizontal%20Bar</src>
                   </controlProperties>
                 </control>
@@ -176,6 +178,7 @@
                     <override controlID="1" x="19" y="2" w="42" h="4"/>
                     <override controlID="2" x="16" y="0" w="16" h="16"/>
                     <override controlID="3" x="58" y="0" w="16" h="16"/>
+                    <override controlID="-1"/>
                     <src>./assets/Sliders.bmml#Range%20Slider%20Horizontal%20Bar</src>
                   </controlProperties>
                 </control>
@@ -238,7 +241,7 @@
             <text>Hellinger%0ABhattacharyya%0AKullback-Leibler%0AJensen-Shannon%0AL2</text>
           </controlProperties>
         </control>
-        <control controlID="2" controlTypeID="com.balsamiq.mockups::Label" x="7" y="114" w="-1" h="-1" measuredW="108" measuredH="21" zOrder="2" locked="false" isInGroup="134">
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::Label" x="7" y="114" w="-1" h="-1" measuredW="110" measuredH="21" zOrder="2" locked="false" isInGroup="134">
           <controlProperties>
             <text>Distance%20Function%3A</text>
           </controlProperties>
