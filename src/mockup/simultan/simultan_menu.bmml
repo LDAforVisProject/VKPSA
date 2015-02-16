@@ -1,0 +1,164 @@
+<mockup version="1.0" skin="sketch" fontFace="Balsamiq Sans" measuredW="2125" measuredH="1003" mockupW="2065" mockupH="983">
+  <controls>
+    <control controlID="0" controlTypeID="com.balsamiq.mockups::TitleWindow" x="340" y="103" w="1440" h="900" measuredW="450" measuredH="400" zOrder="0" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>VKPSA</text>
+      </controlProperties>
+    </control>
+    <control controlID="1" controlTypeID="com.balsamiq.mockups::MenuBar" x="340" y="125" w="1440" h="29" measuredW="281" measuredH="29" zOrder="1" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Data%2C%20Analysis%2C%20Preferences%2C%20Help</text>
+      </controlProperties>
+    </control>
+    <control controlID="3" controlTypeID="com.balsamiq.mockups::VRule" x="1055" y="615" w="-1" h="335" measuredW="10" measuredH="100" zOrder="2" locked="false" isInGroup="-1"/>
+    <control controlID="9" controlTypeID="__group__" x="521" y="301" w="257" h="139" measuredW="257" measuredH="139" zOrder="3" locked="false" isInGroup="-1">
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="__group__" x="0" y="0" w="164" h="57" measuredW="164" measuredH="57" zOrder="0" locked="false" isInGroup="9">
+          <groupChildrenDescriptors>
+            <control controlID="0" controlTypeID="com.balsamiq.mockups::Title" x="70" y="7" w="-1" h="-1" measuredW="94" measuredH="50" zOrder="0" locked="false" isInGroup="0">
+              <controlProperties>
+                <text>Load</text>
+              </controlProperties>
+            </control>
+            <control controlID="1" controlTypeID="com.balsamiq.mockups::Icon" x="0" y="0" w="-1" h="-1" measuredW="48" measuredH="48" zOrder="1" locked="false" isInGroup="0">
+              <controlProperties>
+                <icon>FolderIcon%7Clarge</icon>
+              </controlProperties>
+            </control>
+          </groupChildrenDescriptors>
+        </control>
+        <control controlID="1" controlTypeID="__group__" x="0" y="72" w="257" h="67" measuredW="257" measuredH="67" zOrder="1" locked="false" isInGroup="9">
+          <groupChildrenDescriptors>
+            <control controlID="0" controlTypeID="com.balsamiq.mockups::Label" x="0" y="0" w="245" h="21" measuredW="161" measuredH="21" zOrder="0" locked="false" isInGroup="1">
+              <controlProperties>
+                <text>Select%20a%20working%20directory.</text>
+              </controlProperties>
+            </control>
+            <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="0" y="21" w="257" h="46" measuredW="421" measuredH="21" zOrder="1" locked="false" isInGroup="1">
+              <controlProperties>
+                <text>Datasets%20found%20in%20the%20directory%20are%20loaded%20and%20processed%20automatically.</text>
+              </controlProperties>
+            </control>
+          </groupChildrenDescriptors>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="12" controlTypeID="__group__" x="1315" y="301" w="248" h="139" measuredW="248" measuredH="139" zOrder="4" locked="false" isInGroup="-1">
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="__group__" x="0" y="0" w="248" h="57" measuredW="248" measuredH="57" zOrder="0" locked="false" isInGroup="12">
+          <groupChildrenDescriptors>
+            <control controlID="0" controlTypeID="com.balsamiq.mockups::Title" x="70" y="7" w="-1" h="-1" measuredW="178" measuredH="50" zOrder="0" locked="false" isInGroup="0">
+              <controlProperties>
+                <text>Generate</text>
+              </controlProperties>
+            </control>
+            <control controlID="1" controlTypeID="com.balsamiq.mockups::Icon" x="0" y="0" w="-1" h="-1" measuredW="48" measuredH="48" zOrder="1" locked="false" isInGroup="0">
+              <controlProperties>
+                <icon>SquaredPlusIcon%7Clarge</icon>
+              </controlProperties>
+            </control>
+          </groupChildrenDescriptors>
+        </control>
+        <control controlID="1" controlTypeID="__group__" x="0" y="72" w="248" h="67" measuredW="248" measuredH="67" zOrder="1" locked="false" isInGroup="12">
+          <groupChildrenDescriptors>
+            <control controlID="0" controlTypeID="com.balsamiq.mockups::Label" x="0" y="0" w="248" h="21" measuredW="233" measuredH="21" zOrder="0" locked="false" isInGroup="1">
+              <controlProperties>
+                <text>Define%20the%20parameter%20space%20to%20sample.</text>
+              </controlProperties>
+            </control>
+            <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="0" y="21" w="248" h="46" measuredW="354" measuredH="21" zOrder="1" locked="false" isInGroup="1">
+              <controlProperties>
+                <text>Newly%20generated%20data%20may%20be%20added%20to%20already%20existing%20files.</text>
+              </controlProperties>
+            </control>
+          </groupChildrenDescriptors>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="13" controlTypeID="__group__" x="1869" y="155" w="256" h="822" measuredW="256" measuredH="822" zOrder="5" locked="false" isInGroup="-1">
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::TextArea" x="0" y="42" w="256" h="780" measuredW="200" measuredH="140" zOrder="0" locked="false" isInGroup="13">
+          <controlProperties>
+            <text>Processing%20data...</text>
+          </controlProperties>
+        </control>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="0" y="0" w="121" h="21" measuredW="53" measuredH="21" zOrder="1" locked="false" isInGroup="13">
+          <controlProperties>
+            <text>Protocol</text>
+          </controlProperties>
+        </control>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::ProgressBar" x="0" y="28" w="256" h="14" measuredW="100" measuredH="20" zOrder="2" locked="false" isInGroup="13"/>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="14" controlTypeID="com.balsamiq.mockups::HSplitter" x="1769" y="154" w="-1" h="822" measuredW="11" measuredH="100" zOrder="6" locked="false" isInGroup="-1"/>
+    <control controlID="22" controlTypeID="__group__" x="1300" y="705" w="278" h="154" measuredW="278" measuredH="154" zOrder="7" locked="false" isInGroup="-1">
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="__group__" x="0" y="0" w="278" h="57" measuredW="278" measuredH="57" zOrder="0" locked="false" isInGroup="22">
+          <groupChildrenDescriptors>
+            <control controlID="0" controlTypeID="com.balsamiq.mockups::Title" x="70" y="7" w="-1" h="-1" measuredW="208" measuredH="50" zOrder="0" locked="false" isInGroup="0">
+              <controlProperties>
+                <text>Preprocess</text>
+              </controlProperties>
+            </control>
+            <control controlID="1" controlTypeID="com.balsamiq.mockups::Icon" x="0" y="0" w="-1" h="-1" measuredW="48" measuredH="48" zOrder="1" locked="false" isInGroup="0">
+              <controlProperties>
+                <icon>ShareIcon%7Clarge</icon>
+              </controlProperties>
+            </control>
+          </groupChildrenDescriptors>
+        </control>
+        <control controlID="1" controlTypeID="__group__" x="0" y="72" w="248" h="82" measuredW="248" measuredH="82" zOrder="1" locked="false" isInGroup="22">
+          <groupChildrenDescriptors>
+            <control controlID="0" controlTypeID="com.balsamiq.mockups::Label" x="0" y="0" w="248" h="41" measuredW="154" measuredH="21" zOrder="0" locked="false" isInGroup="1">
+              <controlProperties>
+                <text>Refine%20available%20database.</text>
+              </controlProperties>
+            </control>
+            <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="0" y="22" w="248" h="60" measuredW="478" measuredH="21" zOrder="1" locked="false" isInGroup="1">
+              <controlProperties>
+                <text>Calculate%20distances%20between%20topics%20and%20datasets%20using%20different%20distance%20metrices.</text>
+              </controlProperties>
+            </control>
+          </groupChildrenDescriptors>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="23" controlTypeID="__group__" x="525" y="705" w="248" h="154" measuredW="248" measuredH="154" zOrder="8" locked="false" isInGroup="-1">
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="__group__" x="0" y="0" w="213" h="57" measuredW="213" measuredH="57" zOrder="0" locked="false" isInGroup="23">
+          <groupChildrenDescriptors>
+            <control controlID="0" controlTypeID="com.balsamiq.mockups::Title" x="70" y="7" w="-1" h="-1" measuredW="143" measuredH="50" zOrder="0" locked="false" isInGroup="0">
+              <controlProperties>
+                <text>Analyse</text>
+              </controlProperties>
+            </control>
+            <control controlID="1" controlTypeID="com.balsamiq.mockups::Icon" x="0" y="0" w="-1" h="-1" measuredW="48" measuredH="48" zOrder="1" locked="false" isInGroup="0">
+              <controlProperties>
+                <icon>EyeIcon%7Clarge</icon>
+              </controlProperties>
+            </control>
+          </groupChildrenDescriptors>
+        </control>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::Label" x="0" y="72" w="248" h="41" measuredW="341" measuredH="21" zOrder="1" locked="false" isInGroup="23">
+          <controlProperties>
+            <text>Compare%20and%20analyze%20your%20data%20using%20various%20visualizations.</text>
+          </controlProperties>
+        </control>
+        <control controlID="4" controlTypeID="com.balsamiq.mockups::Label" x="0" y="113" w="248" h="41" measuredW="353" measuredH="21" zOrder="2" locked="false" isInGroup="23">
+          <controlProperties>
+            <text>Gain%20insights%20filtering%20your%20data%20and%20exploring%20the%20result%20space.</text>
+          </controlProperties>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="24" controlTypeID="com.balsamiq.mockups::HRule" x="60" y="20" w="-1" h="-1" measuredW="100" measuredH="10" zOrder="9" locked="false" isInGroup="-1"/>
+    <control controlID="25" controlTypeID="com.balsamiq.mockups::Icon" x="1036" y="529" w="-1" h="-1" measuredW="48" measuredH="48" zOrder="10" locked="false" isInGroup="-1">
+      <controlProperties>
+        <icon>ReloadIcon%7Clarge</icon>
+      </controlProperties>
+    </control>
+    <control controlID="27" controlTypeID="com.balsamiq.mockups::VRule" x="1055" y="169" w="-1" h="335" measuredW="10" measuredH="100" zOrder="11" locked="false" isInGroup="-1"/>
+    <control controlID="28" controlTypeID="com.balsamiq.mockups::HRule" x="374" y="548" w="612" h="-1" measuredW="100" measuredH="10" zOrder="12" locked="false" isInGroup="-1"/>
+    <control controlID="30" controlTypeID="com.balsamiq.mockups::HRule" x="1133" y="548" w="612" h="-1" measuredW="100" measuredH="10" zOrder="13" locked="false" isInGroup="-1"/>
+  </controls>
+</mockup>

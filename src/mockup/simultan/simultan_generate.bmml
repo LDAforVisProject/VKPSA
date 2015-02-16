@@ -1,0 +1,30 @@
+<mockup version="1.0" skin="sketch" fontFace="Balsamiq Sans" measuredW="2125" measuredH="1003" mockupW="1785" mockupH="900">
+  <controls>
+    <control controlID="0" controlTypeID="com.balsamiq.mockups::TitleWindow" x="340" y="103" w="1440" h="900" measuredW="450" measuredH="400" zOrder="0" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>VKPSA</text>
+      </controlProperties>
+    </control>
+    <control controlID="1" controlTypeID="com.balsamiq.mockups::MenuBar" x="340" y="125" w="1440" h="29" measuredW="281" measuredH="29" zOrder="1" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Data%2C%20Analysis%2C%20Preferences%2C%20Help</text>
+      </controlProperties>
+    </control>
+    <control controlID="13" controlTypeID="__group__" x="1869" y="155" w="256" h="822" measuredW="256" measuredH="822" zOrder="2" locked="false" isInGroup="-1">
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::TextArea" x="0" y="42" w="256" h="780" measuredW="200" measuredH="140" zOrder="0" locked="false" isInGroup="13">
+          <controlProperties>
+            <text>Processing%20data...</text>
+          </controlProperties>
+        </control>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="0" y="0" w="121" h="21" measuredW="53" measuredH="21" zOrder="1" locked="false" isInGroup="13">
+          <controlProperties>
+            <text>Protocol</text>
+          </controlProperties>
+        </control>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::ProgressBar" x="0" y="28" w="256" h="14" measuredW="100" measuredH="20" zOrder="2" locked="false" isInGroup="13"/>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="14" controlTypeID="com.balsamiq.mockups::HSplitter" x="1769" y="154" w="-1" h="822" measuredW="11" measuredH="100" zOrder="3" locked="false" isInGroup="-1"/>
+  </controls>
+</mockup>

@@ -96,7 +96,7 @@
     </control>
     <control controlID="38" controlTypeID="com.balsamiq.mockups::ProgressBar" x="831" y="418" w="411" h="20" measuredW="100" measuredH="20" zOrder="12" locked="false" isInGroup="-1"/>
     <control controlID="39" controlTypeID="com.balsamiq.mockups::HRule" x="831" y="467" w="421" h="-1" measuredW="100" measuredH="10" zOrder="13" locked="false" isInGroup="-1"/>
-    <control controlID="40" controlTypeID="com.balsamiq.mockups::Label" x="949" y="492" w="-1" h="-1" measuredW="161" measuredH="21" zOrder="14" locked="false" isInGroup="-1">
+    <control controlID="40" controlTypeID="com.balsamiq.mockups::Label" x="949" y="492" w="-1" h="-1" measuredW="162" measuredH="21" zOrder="14" locked="false" isInGroup="-1">
       <controlProperties>
         <text>Finished%20loaded%20X%20datasets.</text>
       </controlProperties>
@@ -120,12 +120,12 @@
     </control>
     <control controlID="45" controlTypeID="__group__" x="831" y="253" w="396" h="67" measuredW="396" measuredH="67" zOrder="9" locked="false" isInGroup="-1">
       <groupChildrenDescriptors>
-        <control controlID="0" controlTypeID="com.balsamiq.mockups::Label" x="0" y="0" w="-1" h="-1" measuredW="157" measuredH="21" zOrder="0" locked="false" isInGroup="45">
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::Label" x="0" y="0" w="-1" h="-1" measuredW="161" measuredH="21" zOrder="0" locked="false" isInGroup="45">
           <controlProperties>
             <text>Select%20a%20working%20directory.</text>
           </controlProperties>
         </control>
-        <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="0" y="21" w="396" h="46" measuredW="412" measuredH="21" zOrder="1" locked="false" isInGroup="45">
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="0" y="21" w="396" h="46" measuredW="421" measuredH="21" zOrder="1" locked="false" isInGroup="45">
           <controlProperties>
             <text>Datasets%20found%20in%20the%20directory%20are%20loaded%20and%20processed%20automatically.</text>
           </controlProperties>
