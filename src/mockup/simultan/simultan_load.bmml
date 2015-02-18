@@ -10,34 +10,34 @@
         <text>Data%2C%20Analysis%2C%20Preferences%2C%20Help</text>
       </controlProperties>
     </control>
-    <control controlID="13" controlTypeID="__group__" x="923" y="185" w="253" h="50" measuredW="253" measuredH="50" zOrder="1" locked="false" isInGroup="-1">
+    <control controlID="13" controlTypeID="__group__" x="982" y="158" w="157" h="37" measuredW="157" measuredH="37" zOrder="1" locked="false" isInGroup="-1">
       <groupChildrenDescriptors>
-        <control controlID="0" controlTypeID="com.balsamiq.mockups::Title" x="0" y="0" w="-1" h="-1" measuredW="190" measuredH="50" zOrder="0" locked="false" isInGroup="13">
-          <controlProperties>
-            <text>Load%20Data</text>
-          </controlProperties>
-        </control>
-        <control controlID="1" controlTypeID="com.balsamiq.mockups::Icon" x="205" y="1" w="-1" h="-1" measuredW="48" measuredH="48" zOrder="1" locked="false" isInGroup="13">
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::Icon" x="125" y="0" w="-1" h="-1" measuredW="32" measuredH="32" zOrder="0" locked="false" isInGroup="13">
           <controlProperties>
             <borderStyle>square</borderStyle>
-            <icon>FolderIcon%7Clarge</icon>
+            <icon>FolderIcon%7Cmedium</icon>
+          </controlProperties>
+        </control>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::SubTitle" x="0" y="4" w="-1" h="-1" measuredW="119" measuredH="33" zOrder="1" locked="false" isInGroup="13">
+          <controlProperties>
+            <text>Load%20Data</text>
           </controlProperties>
         </control>
       </groupChildrenDescriptors>
     </control>
     <control controlID="15" controlTypeID="__group__" x="850" y="302" w="396" h="82" measuredW="396" measuredH="82" zOrder="2" locked="false" isInGroup="-1">
       <groupChildrenDescriptors>
-        <control controlID="0" controlTypeID="com.balsamiq.mockups::Label" x="0" y="0" w="-1" h="-1" measuredW="157" measuredH="21" zOrder="0" locked="false" isInGroup="15">
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::Label" x="0" y="0" w="-1" h="-1" measuredW="154" measuredH="21" zOrder="0" locked="false" isInGroup="15">
           <controlProperties>
             <text>Select%20a%20working%20directory.</text>
           </controlProperties>
         </control>
-        <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="0" y="21" w="396" h="46" measuredW="412" measuredH="21" zOrder="1" locked="false" isInGroup="15">
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="0" y="21" w="396" h="46" measuredW="416" measuredH="21" zOrder="1" locked="false" isInGroup="15">
           <controlProperties>
             <text>Datasets%20found%20in%20the%20directory%20are%20loaded%20and%20processed%20automatically.</text>
           </controlProperties>
         </control>
-        <control controlID="2" controlTypeID="com.balsamiq.mockups::Label" x="0" y="60" w="396" h="22" measuredW="132" measuredH="21" zOrder="2" locked="false" isInGroup="15">
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::Label" x="0" y="60" w="396" h="22" measuredW="133" measuredH="21" zOrder="2" locked="false" isInGroup="15">
           <controlProperties>
             <text>Lorem%20ipsum%20dolorem.</text>
           </controlProperties>
@@ -45,7 +45,7 @@
       </groupChildrenDescriptors>
     </control>
     <control controlID="18" controlTypeID="com.balsamiq.mockups::HRule" x="850" y="516" w="421" h="-1" measuredW="100" measuredH="10" zOrder="3" locked="false" isInGroup="-1"/>
-    <control controlID="19" controlTypeID="com.balsamiq.mockups::Label" x="968" y="541" w="-1" h="-1" measuredW="161" measuredH="21" zOrder="4" locked="false" isInGroup="-1">
+    <control controlID="19" controlTypeID="com.balsamiq.mockups::Label" x="968" y="541" w="-1" h="-1" measuredW="163" measuredH="21" zOrder="4" locked="false" isInGroup="-1">
       <controlProperties>
         <text>Finished%20loaded%20X%20datasets.</text>
       </controlProperties>
@@ -93,30 +93,31 @@
         <icon>SpinningIcon%7Csmall</icon>
       </controlProperties>
     </control>
-    <control controlID="30" controlTypeID="com.balsamiq.mockups::HRule" x="340" y="250" w="1429" h="-1" measuredW="100" measuredH="10" zOrder="11" locked="false" isInGroup="-1"/>
-    <control controlID="31" controlTypeID="__group__" x="1557" y="125" w="290" h="131" measuredW="290" measuredH="131" zOrder="12" locked="false" isInGroup="-1">
+    <control controlID="32" controlTypeID="com.balsamiq.mockups::HRule" x="342" y="195" w="1429" h="-1" measuredW="100" measuredH="10" zOrder="11" locked="false" isInGroup="-1"/>
+    <control controlID="33" controlTypeID="__group__" x="1557" y="115" w="290" h="131" measuredW="290" measuredH="131" zOrder="12" locked="false" isInGroup="-1">
       <groupChildrenDescriptors>
-        <control controlID="0" controlTypeID="com.balsamiq.mockups::Tooltip" x="180" y="0" w="110" h="48" measuredW="117" measuredH="0" zOrder="0" locked="false" isInGroup="31">
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::Tooltip" x="180" y="0" w="110" h="48" measuredW="100" measuredH="0" zOrder="0" locked="false" isInGroup="33">
           <controlProperties>
-            <text>Hide%20title%20bar</text>
+            <text>Show%20title%20bar</text>
             <tooltipDirection>SW</tooltipDirection>
           </controlProperties>
         </control>
-        <control controlID="1" controlTypeID="__group__" x="116" y="46" w="71" h="34" measuredW="71" measuredH="34" zOrder="1" locked="false" isInGroup="31">
+        <control controlID="1" controlTypeID="__group__" x="116" y="44" w="71" h="34" measuredW="71" measuredH="34" zOrder="1" locked="false" isInGroup="33">
           <groupChildrenDescriptors>
-            <control controlID="0" controlTypeID="com.balsamiq.mockups::Icon" x="39" y="2" w="-1" h="-1" measuredW="32" measuredH="32" zOrder="0" locked="false" isInGroup="1">
+            <control controlID="0" controlTypeID="com.balsamiq.mockups::Icon" x="39" y="0" w="-1" h="-1" measuredW="32" measuredH="32" zOrder="0" locked="false" isInGroup="1">
               <controlProperties>
                 <icon>UpFillTriangleIcon%7Cmedium</icon>
+                <rotation>180</rotation>
               </controlProperties>
             </control>
-            <control controlID="1" controlTypeID="com.balsamiq.mockups::Icon" x="0" y="0" w="-1" h="-1" measuredW="32" measuredH="32" zOrder="1" locked="false" isInGroup="1">
+            <control controlID="1" controlTypeID="com.balsamiq.mockups::Icon" x="0" y="2" w="-1" h="-1" measuredW="32" measuredH="32" zOrder="1" locked="false" isInGroup="1">
               <controlProperties>
                 <icon>HomeMobileIcon%7Cmedium</icon>
               </controlProperties>
             </control>
           </groupChildrenDescriptors>
         </control>
-        <control controlID="2" controlTypeID="com.balsamiq.mockups::Tooltip" x="0" y="80" w="116" h="51" measuredW="119" measuredH="0" zOrder="2" locked="false" isInGroup="31">
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::Tooltip" x="0" y="80" w="116" h="51" measuredW="119" measuredH="0" zOrder="2" locked="false" isInGroup="33">
           <controlProperties>
             <text>Return%20to%20home%20screen</text>
             <tooltipDirection>NE</tooltipDirection>
