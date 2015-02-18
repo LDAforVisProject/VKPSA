@@ -1,0 +1,170 @@
+<mockup version="1.0" skin="sketch" fontFace="Balsamiq Sans" measuredW="2148" measuredH="1003" mockupW="1808" mockupH="900">
+  <controls>
+    <control controlID="0" controlTypeID="com.balsamiq.mockups::TitleWindow" x="340" y="103" w="1440" h="900" measuredW="450" measuredH="400" zOrder="0" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>VKPSA</text>
+      </controlProperties>
+    </control>
+    <control controlID="1" controlTypeID="com.balsamiq.mockups::MenuBar" x="340" y="125" w="1440" h="29" measuredW="281" measuredH="29" zOrder="1" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Data%2C%20Analysis%2C%20Preferences%2C%20Help</text>
+      </controlProperties>
+    </control>
+    <control controlID="13" controlTypeID="__group__" x="1892" y="154" w="256" h="822" measuredW="256" measuredH="822" zOrder="2" locked="false" isInGroup="-1">
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::TextArea" x="0" y="42" w="256" h="780" measuredW="200" measuredH="140" zOrder="0" locked="false" isInGroup="13">
+          <controlProperties>
+            <text>Processing%20data...</text>
+          </controlProperties>
+        </control>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="0" y="0" w="121" h="21" measuredW="53" measuredH="21" zOrder="1" locked="false" isInGroup="13">
+          <controlProperties>
+            <text>Protocol</text>
+          </controlProperties>
+        </control>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::ProgressBar" x="0" y="28" w="256" h="14" measuredW="100" measuredH="20" zOrder="2" locked="false" isInGroup="13"/>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="14" controlTypeID="com.balsamiq.mockups::HSplitter" x="1769" y="154" w="-1" h="822" measuredW="11" measuredH="100" zOrder="3" locked="false" isInGroup="-1"/>
+    <control controlID="31" controlTypeID="com.balsamiq.mockups::Arrow" x="1780" y="202" w="112" h="10" measuredW="150" measuredH="100" zOrder="4" locked="false" isInGroup="-1"/>
+    <control controlID="32" controlTypeID="com.balsamiq.mockups::Icon" x="2124" y="154" w="-1" h="-1" measuredW="24" measuredH="24" zOrder="5" locked="false" isInGroup="-1">
+      <controlProperties>
+        <icon>SpinningIcon%7Csmall</icon>
+      </controlProperties>
+    </control>
+    <control controlID="33" controlTypeID="__group__" x="872" y="176" w="271" h="53" measuredW="271" measuredH="53" zOrder="6" locked="false" isInGroup="-1">
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::Title" x="0" y="3" w="-1" h="-1" measuredW="208" measuredH="50" zOrder="0" locked="false" isInGroup="33">
+          <controlProperties>
+            <text>Preprocess</text>
+          </controlProperties>
+        </control>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::Icon" x="223" y="0" w="-1" h="-1" measuredW="48" measuredH="48" zOrder="1" locked="false" isInGroup="33">
+          <controlProperties>
+            <borderStyle>square</borderStyle>
+            <icon>GearIcon%7Clarge</icon>
+          </controlProperties>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="34" controlTypeID="com.balsamiq.mockups::HRule" x="340" y="250" w="1429" h="-1" measuredW="100" measuredH="10" zOrder="7" locked="false" isInGroup="-1"/>
+    <control controlID="35" controlTypeID="__group__" x="779" y="296" w="456" h="331" measuredW="456" measuredH="331" zOrder="8" locked="false" isInGroup="-1">
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::FieldSet" x="0" y="0" w="456" h="331" measuredW="200" measuredH="170" zOrder="0" locked="false" isInGroup="35">
+          <controlProperties>
+            <text>Distance%20Calculation%20Settings</text>
+          </controlProperties>
+        </control>
+        <control controlID="1" controlTypeID="__group__" x="15" y="33" w="426" h="272" measuredW="426" measuredH="272" zOrder="1" locked="false" isInGroup="35">
+          <groupChildrenDescriptors>
+            <control controlID="1" controlTypeID="com.balsamiq.mockups::CheckBox" x="278" y="1" w="-1" h="-1" measuredW="26" measuredH="22" zOrder="0" locked="false" isInGroup="1">
+              <controlProperties>
+                <state>selected</state>
+                <text/>
+              </controlProperties>
+            </control>
+            <control controlID="2" controlTypeID="com.balsamiq.mockups::Label" x="0" y="0" w="-1" h="-1" measuredW="202" measuredH="21" zOrder="1" locked="false" isInGroup="1">
+              <controlProperties>
+                <text>Append%20to%20existing%20distance%20matrix</text>
+              </controlProperties>
+            </control>
+            <control controlID="3" controlTypeID="com.balsamiq.mockups::Label" x="0" y="37" w="-1" h="-1" measuredW="132" measuredH="21" zOrder="2" locked="false" isInGroup="1">
+              <controlProperties>
+                <text>Topic%20distance%20function</text>
+              </controlProperties>
+            </control>
+            <control controlID="4" controlTypeID="com.balsamiq.mockups::CheckBoxGroup" x="278" y="37" w="-1" h="-1" measuredW="126" measuredH="105" zOrder="3" locked="false" isInGroup="1">
+              <controlProperties>
+                <text>%5B%20%5D%20Hellinger%0A%5Bx%5D%20Bhattacharyya%0A%5B%20%5D%20Kullback-Leibler%0A%5Bx%5D%20Jensen-Shannon%0A%5B%20%5D%20L2</text>
+              </controlProperties>
+            </control>
+            <control controlID="7" controlTypeID="com.balsamiq.mockups::Label" x="0" y="156" w="-1" h="-1" measuredW="146" measuredH="21" zOrder="4" locked="false" isInGroup="1">
+              <controlProperties>
+                <text>Dataset%20distance%20function</text>
+              </controlProperties>
+            </control>
+            <control controlID="8" controlTypeID="com.balsamiq.mockups::CheckBoxGroup" x="278" y="161" w="-1" h="-1" measuredW="148" measuredH="42" zOrder="5" locked="false" isInGroup="1">
+              <controlProperties>
+                <text>%5Bx%5D%20Hausdorff%20%28max-min%29%0A%5B%20%5D%20avg-min</text>
+              </controlProperties>
+            </control>
+            <control controlID="12" controlTypeID="__group__" x="0" y="227" w="308" h="45" measuredW="308" measuredH="45" zOrder="6" locked="false" isInGroup="1">
+              <groupChildrenDescriptors>
+                <control controlID="0" controlTypeID="__group__" x="0" y="0" w="308" h="22" measuredW="308" measuredH="22" zOrder="0" locked="false" isInGroup="12">
+                  <groupChildrenDescriptors>
+                    <control controlID="0" controlTypeID="com.balsamiq.mockups::Label" x="0" y="0" w="-1" h="-1" measuredW="206" measuredH="21" zOrder="0" locked="false" isInGroup="0">
+                      <controlProperties>
+                        <text>No.%20of%20datasets%20in%20working%20directory</text>
+                      </controlProperties>
+                    </control>
+                    <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="276" y="1" w="-1" h="-1" measuredW="32" measuredH="21" zOrder="1" locked="false" isInGroup="0">
+                      <controlProperties>
+                        <text>XYZ</text>
+                      </controlProperties>
+                    </control>
+                  </groupChildrenDescriptors>
+                </control>
+                <control controlID="1" controlTypeID="__group__" x="0" y="24" w="290" h="21" measuredW="290" measuredH="21" zOrder="1" locked="false" isInGroup="12">
+                  <groupChildrenDescriptors>
+                    <control controlID="0" controlTypeID="com.balsamiq.mockups::Label" x="0" y="0" w="-1" h="-1" measuredW="183" measuredH="21" zOrder="0" locked="false" isInGroup="1">
+                      <controlProperties>
+                        <text>Number%20of%20distance%20calculations</text>
+                      </controlProperties>
+                    </control>
+                    <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="275" y="0" w="-1" h="-1" measuredW="15" measuredH="21" zOrder="1" locked="false" isInGroup="1">
+                      <controlProperties>
+                        <text>X</text>
+                      </controlProperties>
+                    </control>
+                  </groupChildrenDescriptors>
+                </control>
+              </groupChildrenDescriptors>
+            </control>
+          </groupChildrenDescriptors>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="36" controlTypeID="com.balsamiq.mockups::HRule" x="753" y="646" w="509" h="-1" measuredW="100" measuredH="10" zOrder="9" locked="false" isInGroup="-1"/>
+    <control controlID="37" controlTypeID="__group__" x="825" y="683" w="365" h="30" measuredW="365" measuredH="30" zOrder="10" locked="false" isInGroup="-1">
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::Button" x="0" y="0" w="118" h="30" measuredW="104" measuredH="30" zOrder="0" locked="false" isInGroup="37">
+          <controlProperties>
+            <icon>RightFillTriangleIcon%7Csmall</icon>
+            <text>Calculate</text>
+          </controlProperties>
+        </control>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::ProgressBar" x="136" y="0" w="229" h="27" measuredW="100" measuredH="20" zOrder="1" locked="false" isInGroup="37"/>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="38" controlTypeID="__group__" x="1557" y="125" w="290" h="131" measuredW="290" measuredH="131" zOrder="11" locked="false" isInGroup="-1">
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::Tooltip" x="180" y="0" w="110" h="48" measuredW="117" measuredH="0" zOrder="0" locked="false" isInGroup="38">
+          <controlProperties>
+            <text>Hide%20title%20bar</text>
+            <tooltipDirection>SW</tooltipDirection>
+          </controlProperties>
+        </control>
+        <control controlID="1" controlTypeID="__group__" x="116" y="46" w="71" h="34" measuredW="71" measuredH="34" zOrder="1" locked="false" isInGroup="38">
+          <groupChildrenDescriptors>
+            <control controlID="0" controlTypeID="com.balsamiq.mockups::Icon" x="39" y="2" w="-1" h="-1" measuredW="32" measuredH="32" zOrder="0" locked="false" isInGroup="1">
+              <controlProperties>
+                <icon>UpFillTriangleIcon%7Cmedium</icon>
+              </controlProperties>
+            </control>
+            <control controlID="1" controlTypeID="com.balsamiq.mockups::Icon" x="0" y="0" w="-1" h="-1" measuredW="32" measuredH="32" zOrder="1" locked="false" isInGroup="1">
+              <controlProperties>
+                <icon>HomeMobileIcon%7Cmedium</icon>
+              </controlProperties>
+            </control>
+          </groupChildrenDescriptors>
+        </control>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::Tooltip" x="0" y="80" w="116" h="51" measuredW="119" measuredH="0" zOrder="2" locked="false" isInGroup="38">
+          <controlProperties>
+            <text>Return%20to%20home%20screen</text>
+            <tooltipDirection>NE</tooltipDirection>
+          </controlProperties>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+  </controls>
+</mockup>

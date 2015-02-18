@@ -1,0 +1,113 @@
+<mockup version="1.0" skin="sketch" fontFace="Balsamiq Sans" measuredW="2149" measuredH="1003" mockupW="2060" mockupH="900">
+  <controls>
+    <control controlID="0" controlTypeID="com.balsamiq.mockups::TitleWindow" x="340" y="103" w="1440" h="900" measuredW="450" measuredH="400" zOrder="0" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>VKPSA</text>
+      </controlProperties>
+    </control>
+    <control controlID="1" controlTypeID="com.balsamiq.mockups::MenuBar" x="340" y="125" w="1440" h="29" measuredW="281" measuredH="29" zOrder="3" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Data%2C%20Analysis%2C%20Preferences%2C%20Help</text>
+      </controlProperties>
+    </control>
+    <control controlID="13" controlTypeID="__group__" x="990" y="161" w="129" h="35" measuredW="129" measuredH="35" zOrder="1" locked="false" isInGroup="-1">
+      <groupChildrenDescriptors>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::Icon" x="97" y="0" w="-1" h="-1" measuredW="32" measuredH="32" zOrder="0" locked="false" isInGroup="13">
+          <controlProperties>
+            <borderStyle>none</borderStyle>
+            <icon>EyeIcon%7Cmedium</icon>
+          </controlProperties>
+        </control>
+        <control controlID="3" controlTypeID="com.balsamiq.mockups::SubTitle" x="0" y="2" w="-1" h="-1" measuredW="89" measuredH="33" zOrder="1" locked="false" isInGroup="13">
+          <controlProperties>
+            <text>Analyse</text>
+          </controlProperties>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="16" controlTypeID="com.balsamiq.mockups::HRule" x="348" y="195" w="1429" h="-1" measuredW="100" measuredH="10" zOrder="2" locked="false" isInGroup="-1"/>
+    <control controlID="20" controlTypeID="__group__" x="1893" y="154" w="256" h="822" measuredW="256" measuredH="822" zOrder="4" locked="false" isInGroup="-1">
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::TextArea" x="0" y="42" w="256" h="780" measuredW="200" measuredH="140" zOrder="0" locked="false" isInGroup="20">
+          <controlProperties>
+            <text>Processing%20data...</text>
+          </controlProperties>
+        </control>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="0" y="0" w="121" h="21" measuredW="53" measuredH="21" zOrder="1" locked="false" isInGroup="20">
+          <controlProperties>
+            <text>Protocol</text>
+          </controlProperties>
+        </control>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::ProgressBar" x="0" y="28" w="256" h="14" measuredW="100" measuredH="20" zOrder="2" locked="false" isInGroup="20"/>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="22" controlTypeID="com.balsamiq.mockups::HSplitter" x="1769" y="154" w="-1" h="822" measuredW="11" measuredH="100" zOrder="5" locked="false" isInGroup="-1"/>
+    <control controlID="48" controlTypeID="com.balsamiq.mockups::Arrow" x="1780" y="202" w="112" h="10" measuredW="150" measuredH="100" zOrder="6" locked="false" isInGroup="-1"/>
+    <control controlID="49" controlTypeID="com.balsamiq.mockups::Icon" x="2124" y="154" w="-1" h="-1" measuredW="24" measuredH="24" zOrder="7" locked="false" isInGroup="-1">
+      <controlProperties>
+        <icon>SpinningIcon%7Csmall</icon>
+      </controlProperties>
+    </control>
+    <control controlID="54" controlTypeID="__group__" x="391" y="301" w="437" h="380" measuredW="437" measuredH="380" zOrder="8" locked="false" isInGroup="-1">
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::Image" x="4" y="0" w="433" h="380" measuredW="517" measuredH="613" zOrder="0" locked="false" isInGroup="54">
+          <controlProperties>
+            <src>../tabs/assets/globalComparison_screenshot.png</src>
+            <text/>
+          </controlProperties>
+        </control>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::ModalScreen" x="264" y="165" w="102" h="90" measuredW="320" measuredH="240" zOrder="1" locked="false" isInGroup="54"/>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::Icon" x="253" y="144" w="-1" h="-1" measuredW="24" measuredH="24" zOrder="2" locked="false" isInGroup="54">
+          <controlProperties>
+            <icon>CursorIcon%7Csmall</icon>
+            <rotation>180</rotation>
+          </controlProperties>
+        </control>
+        <control controlID="3" controlTypeID="com.balsamiq.mockups::Component" x="0" y="165" w="264" h="182" measuredW="264" measuredH="182" zOrder="3" locked="false" isInGroup="54">
+          <controlProperties>
+            <override controlID="0" x="126" y="0" w="138" h="78">
+              <text>Add%20to%20selection%0ARemove%20from%20selection%0ACompare%20locally%20%3E%0A---</text>
+            </override>
+            <override controlID="1" x="0" y="46" w="126" h="136">
+              <text>o%20Text%20Blocks%0AMatrix%20Heatmap%0AText-based%20Matrix%0AAnchored%20Map%0AParallel%20Coordinates%0ACircle</text>
+            </override>
+            <src>../tabs/assets/Fly%20Out%20Menus.bmml#Vertical%20Flyout%20Menu%20Expanded</src>
+          </controlProperties>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="55" controlTypeID="com.balsamiq.mockups::VSplitter" x="89" y="161" w="-1" h="-1" measuredW="100" measuredH="11" zOrder="9" locked="false" isInGroup="-1"/>
+    <control controlID="56" controlTypeID="com.balsamiq.mockups::HSplitter" x="835" y="256" w="-1" h="-1" measuredW="11" measuredH="100" zOrder="10" locked="false" isInGroup="-1"/>
+    <control controlID="62" controlTypeID="__group__" x="1557" y="115" w="290" h="131" measuredW="290" measuredH="131" zOrder="11" locked="false" isInGroup="-1">
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::Tooltip" x="180" y="0" w="110" h="48" measuredW="100" measuredH="0" zOrder="0" locked="false" isInGroup="62">
+          <controlProperties>
+            <text>Show%20title%20bar</text>
+            <tooltipDirection>SW</tooltipDirection>
+          </controlProperties>
+        </control>
+        <control controlID="1" controlTypeID="__group__" x="116" y="44" w="71" h="34" measuredW="71" measuredH="34" zOrder="1" locked="false" isInGroup="62">
+          <groupChildrenDescriptors>
+            <control controlID="0" controlTypeID="com.balsamiq.mockups::Icon" x="39" y="0" w="-1" h="-1" measuredW="32" measuredH="32" zOrder="0" locked="false" isInGroup="1">
+              <controlProperties>
+                <icon>UpFillTriangleIcon%7Cmedium</icon>
+                <rotation>180</rotation>
+              </controlProperties>
+            </control>
+            <control controlID="1" controlTypeID="com.balsamiq.mockups::Icon" x="0" y="2" w="-1" h="-1" measuredW="32" measuredH="32" zOrder="1" locked="false" isInGroup="1">
+              <controlProperties>
+                <icon>HomeMobileIcon%7Cmedium</icon>
+              </controlProperties>
+            </control>
+          </groupChildrenDescriptors>
+        </control>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::Tooltip" x="0" y="80" w="116" h="51" measuredW="119" measuredH="0" zOrder="2" locked="false" isInGroup="62">
+          <controlProperties>
+            <text>Return%20to%20home%20screen</text>
+            <tooltipDirection>NE</tooltipDirection>
+          </controlProperties>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+  </controls>
+</mockup>
