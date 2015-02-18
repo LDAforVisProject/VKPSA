@@ -1,0 +1,56 @@
+<mockup version="1.0" skin="sketch" fontFace="Balsamiq Sans" measuredW="1494" measuredH="545" mockupW="1428" mockupH="495">
+  <controls>
+    <control controlID="0" controlTypeID="__group__" x="66" y="68" w="1044" h="477" measuredW="1044" measuredH="477" zOrder="0" locked="false" isInGroup="-1">
+      <controlProperties>
+        <controlName>Carousel</controlName>
+      </controlProperties>
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::Image" x="43" y="0" w="960" h="450" measuredW="77" measuredH="79" zOrder="0" locked="false" isInGroup="0">
+          <controlProperties>
+            <text/>
+          </controlProperties>
+        </control>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::RoundButton" x="0" y="164" w="32" h="122" measuredW="32" measuredH="32" zOrder="1" locked="false" isInGroup="0">
+          <controlProperties>
+            <shape>triangle</shape>
+            <shapeRotation>90</shapeRotation>
+            <text/>
+          </controlProperties>
+        </control>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::RoundButton" x="1012" y="164" w="32" h="122" measuredW="32" measuredH="32" zOrder="2" locked="false" isInGroup="0">
+          <controlProperties>
+            <shape>triangle</shape>
+            <shapeRotation>270</shapeRotation>
+            <text/>
+          </controlProperties>
+        </control>
+        <control controlID="3" controlTypeID="__group__" x="453" y="465" w="101" h="12" measuredW="101" measuredH="12" zOrder="3" locked="false" isInGroup="0">
+          <groupChildrenDescriptors>
+            <control controlID="0" controlTypeID="com.balsamiq.mockups::RoundButton" x="21" y="0" w="12" h="12" measuredW="32" measuredH="32" zOrder="0" locked="false" isInGroup="3"/>
+            <control controlID="1" controlTypeID="com.balsamiq.mockups::RoundButton" x="44" y="0" w="12" h="12" measuredW="32" measuredH="32" zOrder="1" locked="false" isInGroup="3">
+              <controlProperties>
+                <text/>
+              </controlProperties>
+            </control>
+            <control controlID="2" controlTypeID="com.balsamiq.mockups::RoundButton" x="65" y="0" w="12" h="12" measuredW="32" measuredH="32" zOrder="2" locked="false" isInGroup="3"/>
+            <control controlID="3" controlTypeID="com.balsamiq.mockups::RoundButton" x="89" y="0" w="12" h="12" measuredW="32" measuredH="32" zOrder="3" locked="false" isInGroup="3"/>
+            <control controlID="4" controlTypeID="com.balsamiq.mockups::RoundButton" x="0" y="0" w="12" h="12" measuredW="32" measuredH="32" zOrder="4" locked="false" isInGroup="3">
+              <controlProperties>
+                <borderColor>545684</borderColor>
+                <color>65535</color>
+                <text/>
+              </controlProperties>
+            </control>
+          </groupChildrenDescriptors>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="2" controlTypeID="com.balsamiq.mockups::StickyNote" x="1191" y="50" w="303" h="287" measuredW="109" measuredH="123" zOrder="1" locked="false" isInGroup="-1">
+      <controlProperties>
+        <bold>true</bold>
+        <size>14</size>
+        <text>%7Bcolor%3A%23ff0000%7DAbout%7Bcolor%7D%0ACarousel%0A%20%0A%7Bcolor%3A%23ff0000%7DInstallation%7Bcolor%7D%0ATo%20use%20as%20a%20symbol%20library%2C%20add%20to%20your%20account%20assets%20or%20to%20a%20project%20assets%20folder.%0A%20%0A%7Bcolor%3A%23ff0000%7DVersion%20History%7Bcolor%7D%0AContributed%20by%20Alym%20Amlani.</text>
+      </controlProperties>
+    </control>
+  </controls>
+</mockup>

@@ -136,49 +136,12 @@
     </control>
     <control controlID="92" controlTypeID="com.balsamiq.mockups::VSplitter" x="609" y="492" w="848" h="-1" measuredW="100" measuredH="11" zOrder="16" locked="false" isInGroup="-1"/>
     <control controlID="93" controlTypeID="com.balsamiq.mockups::HSplitter" x="1015" y="503" w="-1" h="247" measuredW="11" measuredH="100" zOrder="17" locked="false" isInGroup="-1"/>
-    <control controlID="97" controlTypeID="__group__" x="609" y="529" w="383" h="309" measuredW="383" measuredH="309" zOrder="18" locked="false" isInGroup="-1">
-      <groupChildrenDescriptors>
-        <control controlID="0" controlTypeID="__group__" x="3" y="0" w="380" h="189" measuredW="380" measuredH="189" zOrder="0" locked="false" isInGroup="97">
-          <groupChildrenDescriptors>
-            <control controlID="0" controlTypeID="com.balsamiq.mockups::DataGrid" x="0" y="0" w="380" h="189" measuredW="239" measuredH="423" zOrder="0" locked="false" isInGroup="0">
-              <controlProperties>
-                <rowHeight>80</rowHeight>
-                <text>Plot%2C%20alpha%2C%20eta%2C%20kappa%2C%20Remove%0A%2C10%2C%2010%2C%2010%2C%20%5B%5D%0A%2C10%2C%201%2C%200.5%2C%20%5Bx%5D%0A%2C5%2C%205%2C%201%2C%20%5Bx%5D%0A%2C1%2C%200.5%2C%2010%2C%20%5Bx%5D%0A%2C1%2C%200.5%2C%201%2C%20%5B%5D%0A%7B65C%2C%200C%2C%200C%2C%200C%2C%200C%7D</text>
-              </controlProperties>
-            </control>
-            <control controlID="1" controlTypeID="com.balsamiq.mockups::Image" x="57" y="106" w="92" h="67" measuredW="356" measuredH="334" zOrder="1" locked="false" isInGroup="0">
-              <controlProperties>
-                <src>../tabs/assets/radarChart.png</src>
-                <text/>
-              </controlProperties>
-            </control>
-            <control controlID="2" controlTypeID="com.balsamiq.mockups::Image" x="57" y="24" w="92" h="67" measuredW="356" measuredH="334" zOrder="2" locked="false" isInGroup="0">
-              <controlProperties>
-                <src>../tabs/assets/radarChart.png</src>
-                <text/>
-              </controlProperties>
-            </control>
-          </groupChildrenDescriptors>
-        </control>
-        <control controlID="1" controlTypeID="com.balsamiq.mockups::Button" x="170" y="197" w="213" h="27" measuredW="168" measuredH="27" zOrder="1" locked="false" isInGroup="97">
-          <controlProperties>
-            <icon>RightFillTriangleIcon%7Cxsmall</icon>
-            <text>Start%20local%20comparison</text>
-          </controlProperties>
-        </control>
-        <control controlID="2" controlTypeID="com.balsamiq.mockups::ComboBox" x="0" y="199" w="153" h="-1" measuredW="102" measuredH="110" zOrder="2" locked="false" isInGroup="97">
-          <controlProperties>
-            <text>Text%20Blocks%0AMatrix%20Heatmap%0AText-based%20Matrix%0AAnchored%20Map%0AParallel%20Coordinates%0ACircle</text>
-          </controlProperties>
-        </control>
-      </groupChildrenDescriptors>
-    </control>
     <control controlID="98" controlTypeID="com.balsamiq.mockups::Label" x="612" y="505" w="-1" h="-1" measuredW="107" measuredH="21" zOrder="19" locked="false" isInGroup="-1">
       <controlProperties>
         <text>Current%20Selection</text>
       </controlProperties>
     </control>
-    <control controlID="99" controlTypeID="com.balsamiq.mockups::Label" x="1041" y="508" w="-1" h="-1" measuredW="174" measuredH="21" zOrder="20" locked="false" isInGroup="-1">
+    <control controlID="99" controlTypeID="com.balsamiq.mockups::Label" x="1041" y="508" w="-1" h="-1" measuredW="182" measuredH="21" zOrder="20" locked="false" isInGroup="-1">
       <controlProperties>
         <text>Additional%20Context%20Information</text>
       </controlProperties>
@@ -193,6 +156,47 @@
       <controlProperties>
         <text/>
       </controlProperties>
+    </control>
+    <control controlID="103" controlTypeID="__group__" x="609" y="529" w="383" h="309" measuredW="383" measuredH="309" zOrder="18" locked="false" isInGroup="-1">
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="__group__" x="0" y="0" w="383" h="309" measuredW="383" measuredH="309" zOrder="0" locked="false" isInGroup="103">
+          <groupChildrenDescriptors>
+            <control controlID="0" controlTypeID="__group__" x="3" y="0" w="380" h="189" measuredW="380" measuredH="189" zOrder="0" locked="false" isInGroup="0">
+              <groupChildrenDescriptors>
+                <control controlID="0" controlTypeID="com.balsamiq.mockups::DataGrid" x="0" y="0" w="380" h="189" measuredW="239" measuredH="423" zOrder="0" locked="false" isInGroup="0">
+                  <controlProperties>
+                    <rowHeight>80</rowHeight>
+                    <text>Plot%2C%20alpha%2C%20eta%2C%20kappa%2C%20Remove%0A%2C10%2C%2010%2C%2010%2C%20%5B%5D%0A%2C10%2C%201%2C%200.5%2C%20%5Bx%5D%0A%2C5%2C%205%2C%201%2C%20%5Bx%5D%0A%2C1%2C%200.5%2C%2010%2C%20%5Bx%5D%0A%2C1%2C%200.5%2C%201%2C%20%5B%5D%0A%7B65C%2C%200C%2C%200C%2C%200C%2C%200C%7D</text>
+                  </controlProperties>
+                </control>
+                <control controlID="1" controlTypeID="com.balsamiq.mockups::Image" x="57" y="106" w="92" h="67" measuredW="356" measuredH="334" zOrder="1" locked="false" isInGroup="0">
+                  <controlProperties>
+                    <src>../tabs/assets/radarChart.png</src>
+                    <text/>
+                  </controlProperties>
+                </control>
+                <control controlID="2" controlTypeID="com.balsamiq.mockups::Image" x="57" y="24" w="92" h="67" measuredW="356" measuredH="334" zOrder="2" locked="false" isInGroup="0">
+                  <controlProperties>
+                    <src>../tabs/assets/radarChart.png</src>
+                    <text/>
+                  </controlProperties>
+                </control>
+              </groupChildrenDescriptors>
+            </control>
+            <control controlID="1" controlTypeID="com.balsamiq.mockups::Button" x="170" y="197" w="213" h="27" measuredW="168" measuredH="27" zOrder="1" locked="false" isInGroup="0">
+              <controlProperties>
+                <icon>RightFillTriangleIcon%7Cxsmall</icon>
+                <text>Start%20local%20comparison</text>
+              </controlProperties>
+            </control>
+            <control controlID="2" controlTypeID="com.balsamiq.mockups::ComboBox" x="0" y="199" w="153" h="-1" measuredW="101" measuredH="110" zOrder="2" locked="false" isInGroup="0">
+              <controlProperties>
+                <text>Text%20Blocks%0AMatrix%20Heatmap%0AText-based%20Matrix%0AAnchored%20Map%0AParallel%20Coordinates%0ACircle</text>
+              </controlProperties>
+            </control>
+          </groupChildrenDescriptors>
+        </control>
+      </groupChildrenDescriptors>
     </control>
   </controls>
 </mockup>
