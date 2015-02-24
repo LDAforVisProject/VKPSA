@@ -1115,14 +1115,14 @@
         </control>
       </groupChildrenDescriptors>
     </control>
-    <control controlID="205" controlTypeID="com.balsamiq.mockups::StickyNote" x="3127" y="886" w="303" h="136" measuredW="109" measuredH="123" zOrder="55" locked="false" isInGroup="-1">
-      <controlProperties>
-        <text>Advantage%3A%20Multiple%20parameters%20may%20be%20fixed%20-%20may%20be%20useful%20to%20identify%20/%20visualize%20contributions%20to%20cluster%20development.%0A%20%0AWorth%20trying%20or%20not%3F</text>
-      </controlProperties>
-    </control>
-    <control controlID="206" controlTypeID="com.balsamiq.mockups::Arrow" x="2657" y="942" w="464" h="10" measuredW="150" measuredH="100" zOrder="56" locked="false" isInGroup="-1">
+    <control controlID="206" controlTypeID="com.balsamiq.mockups::Arrow" x="2657" y="942" w="464" h="10" measuredW="150" measuredH="100" zOrder="55" locked="false" isInGroup="-1">
       <controlProperties>
         <curvature>0</curvature>
+      </controlProperties>
+    </control>
+    <control controlID="207" controlTypeID="com.balsamiq.mockups::StickyNote" x="3127" y="886" w="303" h="154" measuredW="109" measuredH="123" zOrder="56" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Advantage%3A%20Multiple%20parameters%20may%20be%20fixed%20-%20may%20be%20useful%20to%20identify%20/%20visualize%20contributions%20to%20cluster%20development.%0A%20%0ABar%20or%20line%20chart%3F%0A%20%0AWorth%20trying%20or%20not%3F</text>
       </controlProperties>
     </control>
   </controls>
