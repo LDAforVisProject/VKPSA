@@ -54,6 +54,7 @@
             <override controlID="1" x="0" y="46" w="122" h="136">
               <text>o%20Text%20Blocks%0AMatrix%20Heatmap%0AText-based%20Matrix%0AAnchored%20Map%0AParallel%20Coordinates%0ACircle</text>
             </override>
+            <override controlID="-1"/>
             <src>../tabs/assets/Fly%20Out%20Menus.bmml#Vertical%20Flyout%20Menu%20Expanded</src>
           </controlProperties>
         </control>
@@ -94,7 +95,7 @@
                     <text>alpha%0Aeta%0Akappa</text>
                   </controlProperties>
                 </control>
-                <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="0" y="1" w="146" h="21" measuredW="97" measuredH="21" zOrder="1" locked="false" isInGroup="0">
+                <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="0" y="1" w="146" h="21" measuredW="95" measuredH="21" zOrder="1" locked="false" isInGroup="0">
                   <controlProperties>
                     <text>First%20parameter</text>
                   </controlProperties>
@@ -109,7 +110,7 @@
                     <text>eta%0Aalpha%0Akappa</text>
                   </controlProperties>
                 </control>
-                <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="0" y="2" w="167" h="21" measuredW="115" measuredH="21" zOrder="1" locked="false" isInGroup="1">
+                <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="0" y="2" w="167" h="21" measuredW="114" measuredH="21" zOrder="1" locked="false" isInGroup="1">
                   <controlProperties>
                     <text>Second%20parameter</text>
                   </controlProperties>
@@ -129,7 +130,7 @@
           <groupChildrenDescriptors>
             <control controlID="0" controlTypeID="__group__" x="0" y="27" w="283" h="63" measuredW="283" measuredH="63" zOrder="0" locked="false" isInGroup="2">
               <groupChildrenDescriptors>
-                <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="0" y="0" w="146" h="21" measuredW="130" measuredH="21" zOrder="0" locked="false" isInGroup="0">
+                <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="0" y="0" w="146" h="21" measuredW="131" measuredH="21" zOrder="0" locked="false" isInGroup="0">
                   <controlProperties>
                     <text>Parameters%20to%20couple</text>
                   </controlProperties>
@@ -151,13 +152,13 @@
               <groupChildrenDescriptors>
                 <control controlID="0" controlTypeID="__group__" x="0" y="0" w="330" h="23" measuredW="330" measuredH="23" zOrder="0" locked="false" isInGroup="3">
                   <groupChildrenDescriptors>
-                    <control controlID="0" controlTypeID="com.balsamiq.mockups::ComboBox" x="219" y="0" w="111" h="-1" measuredW="154" measuredH="23" zOrder="0" locked="false" isInGroup="0">
+                    <control controlID="0" controlTypeID="com.balsamiq.mockups::ComboBox" x="219" y="0" w="111" h="-1" measuredW="155" measuredH="23" zOrder="0" locked="false" isInGroup="0">
                       <controlProperties>
                         <state>closed</state>
                         <text>Bind%20to%20global%20settings%0AHellinger%0ABhattacharyya%0AKullback-Leibler%0AJensen-Shannon%0AL2</text>
                       </controlProperties>
                     </control>
-                    <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="0" y="1" w="146" h="21" measuredW="138" measuredH="21" zOrder="1" locked="false" isInGroup="0">
+                    <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="0" y="1" w="146" h="21" measuredW="137" measuredH="21" zOrder="1" locked="false" isInGroup="0">
                       <controlProperties>
                         <text>Topic%20Distance%20Function</text>
                       </controlProperties>
@@ -166,7 +167,7 @@
                 </control>
                 <control controlID="1" controlTypeID="__group__" x="0" y="26" w="330" h="23" measuredW="330" measuredH="23" zOrder="1" locked="false" isInGroup="3">
                   <groupChildrenDescriptors>
-                    <control controlID="0" controlTypeID="com.balsamiq.mockups::ComboBox" x="219" y="0" w="111" h="-1" measuredW="154" measuredH="23" zOrder="0" locked="false" isInGroup="1">
+                    <control controlID="0" controlTypeID="com.balsamiq.mockups::ComboBox" x="219" y="0" w="111" h="-1" measuredW="155" measuredH="23" zOrder="0" locked="false" isInGroup="1">
                       <controlProperties>
                         <state>closed</state>
                         <text>Bind%20to%20global%20settings%0AHausdorff%0Amin-avg</text>
@@ -199,7 +200,7 @@
             <verticalScrollbar>true</verticalScrollbar>
           </controlProperties>
         </control>
-        <control controlID="33" controlTypeID="com.balsamiq.mockups::Label" x="28" y="242" w="-1" h="-1" measuredW="72" measuredH="21" zOrder="7" locked="false" isInGroup="67">
+        <control controlID="33" controlTypeID="com.balsamiq.mockups::Label" x="28" y="242" w="-1" h="-1" measuredW="76" measuredH="21" zOrder="7" locked="false" isInGroup="67">
           <controlProperties>
             <text>Color%20range</text>
           </controlProperties>
@@ -218,7 +219,6 @@
                 <override controlID="1" x="56" y="1" w="129" h="2"/>
                 <override controlID="2" x="49" y="0" w="16" h="16"/>
                 <override controlID="3" x="178" y="0" w="16" h="16"/>
-                <override controlID="-1"/>
                 <src>./assets/Sliders.bmml#Range%20Slider%20Horizontal%20Bar</src>
               </controlProperties>
             </control>
@@ -479,13 +479,13 @@
         <curvature>0</curvature>
       </controlProperties>
     </control>
-    <control controlID="104" controlTypeID="com.balsamiq.mockups::Label" x="2148" y="473" w="117" h="21" measuredW="77" measuredH="21" zOrder="30" locked="false" isInGroup="-1">
+    <control controlID="104" controlTypeID="com.balsamiq.mockups::Label" x="2148" y="473" w="117" h="21" measuredW="81" measuredH="21" zOrder="30" locked="false" isInGroup="-1">
       <controlProperties>
         <bold>true</bold>
         <text>Local%20Scope</text>
       </controlProperties>
     </control>
-    <control controlID="105" controlTypeID="com.balsamiq.mockups::Label" x="1696" y="472" w="196" h="20" measuredW="81" measuredH="21" zOrder="31" locked="false" isInGroup="-1">
+    <control controlID="105" controlTypeID="com.balsamiq.mockups::Label" x="1696" y="472" w="196" h="20" measuredW="85" measuredH="21" zOrder="31" locked="false" isInGroup="-1">
       <controlProperties>
         <bold>true</bold>
         <text>Global%20Scope</text>
@@ -540,6 +540,7 @@
                     <override controlID="1" x="17" y="3" w="39" h="5"/>
                     <override controlID="2" x="14" y="0" w="16" h="16"/>
                     <override controlID="3" x="55" y="0" w="16" h="16"/>
+                    <override controlID="-1"/>
                     <src>../tabs/assets/Sliders.bmml#Range%20Slider%20Horizontal%20Bar</src>
                   </controlProperties>
                 </control>
@@ -550,6 +551,7 @@
                     <override controlID="2" x="49" y="0" w="10" h="9"/>
                     <override controlID="3" x="73" y="0" w="10" h="9"/>
                     <override controlID="4" x="98" y="0" w="10" h="9"/>
+                    <override controlID="-1"/>
                     <src>../tabs/assets/Sliders.bmml#Tick%20Marks%20for%20Horizontal%20Slider</src>
                   </controlProperties>
                 </control>
@@ -564,7 +566,6 @@
                     <override controlID="1" x="17" y="3" w="39" h="5"/>
                     <override controlID="2" x="14" y="0" w="16" h="16"/>
                     <override controlID="3" x="55" y="0" w="16" h="16"/>
-                    <override controlID="-1"/>
                     <src>../tabs/assets/Sliders.bmml#Range%20Slider%20Horizontal%20Bar</src>
                   </controlProperties>
                 </control>
@@ -575,7 +576,6 @@
                     <override controlID="2" x="49" y="0" w="10" h="9"/>
                     <override controlID="3" x="73" y="0" w="10" h="9"/>
                     <override controlID="4" x="98" y="0" w="10" h="9"/>
-                    <override controlID="-1"/>
                     <src>../tabs/assets/Sliders.bmml#Tick%20Marks%20for%20Horizontal%20Slider</src>
                   </controlProperties>
                 </control>
@@ -590,7 +590,6 @@
                     <override controlID="1" x="17" y="3" w="39" h="5"/>
                     <override controlID="2" x="14" y="0" w="16" h="16"/>
                     <override controlID="3" x="55" y="0" w="16" h="16"/>
-                    <override controlID="-1"/>
                     <src>../tabs/assets/Sliders.bmml#Range%20Slider%20Horizontal%20Bar</src>
                   </controlProperties>
                 </control>
@@ -601,7 +600,6 @@
                     <override controlID="2" x="49" y="0" w="10" h="9"/>
                     <override controlID="3" x="73" y="0" w="10" h="9"/>
                     <override controlID="4" x="98" y="0" w="10" h="9"/>
-                    <override controlID="-1"/>
                     <src>../tabs/assets/Sliders.bmml#Tick%20Marks%20for%20Horizontal%20Slider</src>
                   </controlProperties>
                 </control>
@@ -792,7 +790,7 @@
       <groupChildrenDescriptors>
         <control controlID="0" controlTypeID="__group__" x="0" y="0" w="411" h="151" measuredW="411" measuredH="151" zOrder="0" locked="false" isInGroup="174">
           <groupChildrenDescriptors>
-            <control controlID="0" controlTypeID="com.balsamiq.mockups::Label" x="0" y="0" w="-1" h="-1" measuredW="174" measuredH="21" zOrder="0" locked="false" isInGroup="0">
+            <control controlID="0" controlTypeID="com.balsamiq.mockups::Label" x="0" y="0" w="-1" h="-1" measuredW="172" measuredH="21" zOrder="0" locked="false" isInGroup="0">
               <controlProperties>
                 <bold>true</bold>
                 <text>Dataset%20Distance%20Evaluation</text>
@@ -856,6 +854,7 @@
             <override controlID="2" x="201" y="0" w="10" h="11"/>
             <override controlID="3" x="301" y="0" w="10" h="11"/>
             <override controlID="4" x="401" y="0" w="10" h="11"/>
+            <override controlID="-1"/>
             <src>./assets/Sliders.bmml#Tick%20Marks%20for%20Horizontal%20Slider</src>
           </controlProperties>
         </control>
@@ -910,7 +909,7 @@
                     </control>
                   </groupChildrenDescriptors>
                 </control>
-                <control controlID="2" controlTypeID="com.balsamiq.mockups::IconLabel" x="6" y="0" w="-1" h="-1" measuredW="96" measuredH="32" zOrder="1" locked="false" isInGroup="0">
+                <control controlID="2" controlTypeID="com.balsamiq.mockups::IconLabel" x="6" y="0" w="-1" h="-1" measuredW="95" measuredH="32" zOrder="1" locked="false" isInGroup="0">
                   <controlProperties>
                     <bold>true</bold>
                     <borderStyle>square</borderStyle>
@@ -946,7 +945,6 @@
                         <override controlID="2" x="218" y="0" w="10" h="5"/>
                         <override controlID="3" x="326" y="0" w="10" h="5"/>
                         <override controlID="4" x="435" y="0" w="10" h="5"/>
-                        <override controlID="-1"/>
                         <src>./assets/Sliders.bmml#Tick%20Marks%20for%20Horizontal%20Slider</src>
                       </controlProperties>
                     </control>
@@ -957,6 +955,7 @@
                         <override controlID="2" x="0" y="61" w="19" h="10"/>
                         <override controlID="3" x="0" y="91" w="19" h="10"/>
                         <override controlID="4" x="0" y="121" w="19" h="10"/>
+                        <override controlID="-1"/>
                         <src>./assets/Sliders.bmml#Tick%20Marks%20for%20Vertical%20Slider</src>
                       </controlProperties>
                     </control>
@@ -1019,6 +1018,7 @@
         <override controlID="2" x="103" y="0" w="10" h="10"/>
         <override controlID="3" x="154" y="0" w="10" h="10"/>
         <override controlID="4" x="206" y="0" w="10" h="10"/>
+        <override controlID="-1"/>
         <src>./assets/Sliders.bmml#Tick%20Marks%20for%20Horizontal%20Slider</src>
       </controlProperties>
     </control>
@@ -1029,6 +1029,7 @@
         <override controlID="2" x="0" y="95" w="10" h="10"/>
         <override controlID="3" x="0" y="143" w="10" h="10"/>
         <override controlID="4" x="0" y="190" w="10" h="10"/>
+        <override controlID="-1"/>
         <src>./assets/Sliders.bmml#Tick%20Marks%20for%20Vertical%20Slider</src>
       </controlProperties>
     </control>
@@ -1038,20 +1039,14 @@
         <text/>
       </controlProperties>
     </control>
-    <control controlID="202" controlTypeID="__group__" x="2339" y="1079" w="534" h="507" measuredW="534" measuredH="507" zOrder="53" locked="false" isInGroup="-1">
+    <control controlID="202" controlTypeID="__group__" x="2339" y="1079" w="403" h="372" measuredW="534" measuredH="507" zOrder="53" locked="false" isInGroup="-1">
       <groupChildrenDescriptors>
-        <control controlID="0" controlTypeID="com.balsamiq.mockups::Image" x="332" y="317" w="202" h="190" measuredW="322" measuredH="273" zOrder="0" locked="false" isInGroup="202">
-          <controlProperties>
-            <src>./assets/scatterplot.png</src>
-            <text/>
-          </controlProperties>
-        </control>
-        <control controlID="1" controlTypeID="com.balsamiq.mockups::StickyNote" x="186" y="241" w="217" h="131" measuredW="109" measuredH="123" zOrder="1" locked="false" isInGroup="202">
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::StickyNote" x="186" y="241" w="217" h="131" measuredW="109" measuredH="123" zOrder="0" locked="false" isInGroup="202">
           <controlProperties>
             <text>Parameter%20space%20plot%20as%20heatmap%20or%20scatter%20plot%3F%20If%20scatter%20plot%2C%20how%20to%20display%20occurence%20density%3F</text>
           </controlProperties>
         </control>
-        <control controlID="2" controlTypeID="com.balsamiq.mockups::Arrow" x="0" y="0" w="186" h="250" measuredW="150" measuredH="100" zOrder="2" locked="false" isInGroup="202">
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::Arrow" x="0" y="0" w="186" h="250" measuredW="150" measuredH="100" zOrder="1" locked="false" isInGroup="202">
           <controlProperties>
             <curvature>-1</curvature>
             <direction>top</direction>
@@ -1085,6 +1080,7 @@
                 <override controlID="2" x="104" y="0" w="10" h="10"/>
                 <override controlID="3" x="154" y="0" w="10" h="10"/>
                 <override controlID="4" x="206" y="0" w="10" h="10"/>
+                <override controlID="-1"/>
                 <src>./assets/Sliders.bmml#Tick%20Marks%20for%20Horizontal%20Slider</src>
               </controlProperties>
             </control>
@@ -1095,6 +1091,7 @@
                 <override controlID="2" x="0" y="96" w="10" h="10"/>
                 <override controlID="3" x="0" y="143" w="10" h="10"/>
                 <override controlID="4" x="0" y="190" w="10" h="10"/>
+                <override controlID="-1"/>
                 <src>./assets/Sliders.bmml#Tick%20Marks%20for%20Vertical%20Slider</src>
               </controlProperties>
             </control>
@@ -1122,7 +1119,7 @@
     </control>
     <control controlID="207" controlTypeID="com.balsamiq.mockups::StickyNote" x="3127" y="886" w="303" h="154" measuredW="109" measuredH="123" zOrder="56" locked="false" isInGroup="-1">
       <controlProperties>
-        <text>Advantage%3A%20Multiple%20parameters%20may%20be%20fixed%20-%20may%20be%20useful%20to%20identify%20/%20visualize%20contributions%20to%20cluster%20development.%0A%20%0ABar%20or%20line%20chart%3F%0A%20%0AWorth%20trying%20or%20not%3F</text>
+        <text>Advantage%3A%20Multiple%20parameters%20may%20be%20fixed%20-%20may%20be%20useful%20to%20identify%20/%20visualize%20contributions%20to%20cluster%20development.%0A%20%0ABar%20or%20line%20chart%3F%0A%20%0ADiscard%3F</text>
       </controlProperties>
     </control>
   </controls>
