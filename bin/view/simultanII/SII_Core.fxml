@@ -8,8 +8,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-
-<AnchorPane fx:id="root" prefHeight="900.0" prefWidth="1440.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="control.SimultanII_CoreControlle">
+<AnchorPane fx:id="root" prefHeight="900.0" prefWidth="1440.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.SimultanII_CoreControlle">
    <children>
       <BorderPane prefHeight="900.0" prefWidth="1440.0">
          <top>
@@ -17,28 +16,28 @@
                <children>
                   <HBox maxHeight="40.0" minHeight="40.0" prefHeight="40.0" prefWidth="165.0">
                      <children>
-                        <ImageView fitHeight="40.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="35.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@icons/cog.png" />
                            </image>
                            <HBox.margin>
-                              <Insets />
+                              <Insets top="2.5" />
                            </HBox.margin>
                         </ImageView>
-                        <ImageView fitHeight="40.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="37.5" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@icons/question-mark-black-and-white-Icon-round-Question_mark_small.jpg" />
                            </image>
                            <HBox.margin>
-                              <Insets left="10.0" />
+                              <Insets left="15.0" top="2.5" />
                            </HBox.margin>
                         </ImageView>
-                        <ImageView fitHeight="40.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="35.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@icons/lockclosed.jpg" />
                            </image>
                            <HBox.margin>
-                              <Insets left="10.0" />
+                              <Insets left="15.0" top="2.5" />
                            </HBox.margin>
                         </ImageView>
                      </children>
@@ -74,17 +73,35 @@
                   </HBox>
                   <HBox maxHeight="40.0" minHeight="40.0" prefHeight="40.0" prefWidth="220.0">
                      <children>
-                        <ImageView fitHeight="40.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="35.0" fitWidth="45.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@icons/folder_small.jpg" />
                            </image>
                            <HBox.margin>
-                              <Insets top="2.0" />
+                              <Insets top="2.5" />
                            </HBox.margin>
                         </ImageView>
-                        <ImageView fitHeight="40.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true" />
-                        <ImageView fitHeight="40.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true" />
-                        <ImageView fitHeight="40.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true" />
+                        <ImageView fitHeight="35.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@icons/plus.png" />
+                           </image>
+                           <HBox.margin>
+                              <Insets left="15.0" top="2.5" />
+                           </HBox.margin></ImageView>
+                        <ImageView fitHeight="40.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@icons/thin-0545_map_travel_distance_directions-128.png" />
+                           </image>
+                           <HBox.margin>
+                              <Insets left="15.0" top="2.5" />
+                           </HBox.margin></ImageView>
+                        <ImageView fitHeight="30.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true">
+                           <HBox.margin>
+                              <Insets left="10.0" top="2.5" />
+                           </HBox.margin>
+                           <image>
+                              <Image url="@icons/eye.jpg" />
+                           </image></ImageView>
                      </children>
                      <opaqueInsets>
                         <Insets />
@@ -99,6 +116,9 @@
                </padding>
             </HBox>
          </top>
+         <center>
+            <AnchorPane prefHeight="200.0" BorderPane.alignment="CENTER" />
+         </center>
       </BorderPane>
    </children>
 </AnchorPane>
