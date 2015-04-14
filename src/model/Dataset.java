@@ -145,7 +145,7 @@ public class Dataset
 	{
 		// @todo Get number of datasets dynamically.
 		final int numberOfDatasets							= 25;
-		Map<LDAConfiguration, Dataset> datasetMap	= new HashMap<LDAConfiguration, Dataset>(numberOfDatasets);
+		Map<LDAConfiguration, Dataset> datasetMap			= new HashMap<LDAConfiguration, Dataset>(numberOfDatasets);
 		ArrayList<LDAConfiguration> paramSetList			= new ArrayList<LDAConfiguration>(numberOfDatasets);
 		double[][] output									= null;
 //		ArrayList<Dataset> datasetList						= new ArrayList<Dataset>();
@@ -216,6 +216,8 @@ public class Dataset
 		    Charset charset		= Charset.forName("UTF-8");
 		    int lineCount		= 0;
 		    int coordinateCount	= 0;
+		    double max = Double.MIN_VALUE;
+		    double min = Double.MAX_VALUE;
 		    
 			try {
 				List<String> lines	= Files.readAllLines(path, charset);
@@ -227,10 +229,15 @@ public class Dataset
 						output = new double[2][coordinates.length];
 					
 					for (String coordinate : coordinates) {
-						output[lineCount][coordinateCount] = Double.parseDouble(coordinate); 
+						output[lineCount][coordinateCount] = Double.parseDouble(coordinate);
+						
+						max = output[lineCount][coordinateCount] > max ? output[lineCount][coordinateCount] : max;
+						min = output[lineCount][coordinateCount] < min ? output[lineCount][coordinateCount] : min;
+						
 						coordinateCount++;
 					}
 					
+					System.out.println("max = " + max + ", min = " + min);
 					lineCount++;
 					coordinateCount	= 0;
 				}

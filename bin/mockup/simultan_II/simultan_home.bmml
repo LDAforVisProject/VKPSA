@@ -1,0 +1,168 @@
+<mockup version="1.0" skin="sketch" fontFace="Balsamiq Sans" measuredW="2149" measuredH="1003" mockupW="1809" mockupH="900">
+  <controls>
+    <control controlID="0" controlTypeID="com.balsamiq.mockups::TitleWindow" x="340" y="103" w="1440" h="900" measuredW="450" measuredH="400" zOrder="0" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>VKPSA</text>
+      </controlProperties>
+    </control>
+    <control controlID="1" controlTypeID="com.balsamiq.mockups::MenuBar" x="340" y="125" w="1440" h="29" measuredW="281" measuredH="29" zOrder="1" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Data%2C%20Analysis%2C%20Preferences%2C%20Help</text>
+      </controlProperties>
+    </control>
+    <control controlID="20" controlTypeID="__group__" x="1893" y="154" w="256" h="822" measuredW="256" measuredH="822" zOrder="2" locked="false" isInGroup="-1">
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::TextArea" x="0" y="42" w="256" h="780" measuredW="200" measuredH="140" zOrder="0" locked="false" isInGroup="20">
+          <controlProperties>
+            <text>Processing%20data...</text>
+          </controlProperties>
+        </control>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="0" y="0" w="121" h="21" measuredW="53" measuredH="21" zOrder="1" locked="false" isInGroup="20">
+          <controlProperties>
+            <text>Protocol</text>
+          </controlProperties>
+        </control>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::ProgressBar" x="0" y="28" w="256" h="14" measuredW="100" measuredH="20" zOrder="2" locked="false" isInGroup="20"/>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="22" controlTypeID="com.balsamiq.mockups::HSplitter" x="1769" y="154" w="-1" h="822" measuredW="11" measuredH="100" zOrder="3" locked="false" isInGroup="-1"/>
+    <control controlID="48" controlTypeID="com.balsamiq.mockups::Arrow" x="1780" y="202" w="112" h="10" measuredW="150" measuredH="100" zOrder="4" locked="false" isInGroup="-1"/>
+    <control controlID="49" controlTypeID="com.balsamiq.mockups::Icon" x="2124" y="154" w="-1" h="-1" measuredW="24" measuredH="24" zOrder="5" locked="false" isInGroup="-1">
+      <controlProperties>
+        <icon>SpinningIcon%7Csmall</icon>
+      </controlProperties>
+    </control>
+    <control controlID="50" controlTypeID="com.balsamiq.mockups::Image" x="862" y="367" w="396" h="396" measuredW="2000" measuredH="2000" zOrder="6" locked="false" isInGroup="-1">
+      <controlProperties>
+        <src>./assets/Repulsive_arrow.png</src>
+        <text/>
+      </controlProperties>
+    </control>
+    <control controlID="51" controlTypeID="com.balsamiq.mockups::HRule" x="426" y="548" w="442" h="-1" measuredW="100" measuredH="10" zOrder="7" locked="false" isInGroup="-1"/>
+    <control controlID="52" controlTypeID="com.balsamiq.mockups::HRule" x="1258" y="548" w="442" h="-1" measuredW="100" measuredH="10" zOrder="8" locked="false" isInGroup="-1"/>
+    <control controlID="53" controlTypeID="com.balsamiq.mockups::VRule" x="1055" y="193" w="-1" h="212" measuredW="10" measuredH="100" zOrder="9" locked="false" isInGroup="-1"/>
+    <control controlID="54" controlTypeID="com.balsamiq.mockups::VRule" x="1055" y="719" w="-1" h="212" measuredW="10" measuredH="100" zOrder="10" locked="false" isInGroup="-1"/>
+    <control controlID="58" controlTypeID="__group__" x="493" y="696" w="308" h="112" measuredW="308" measuredH="112" zOrder="11" locked="false" isInGroup="-1">
+      <controlProperties>
+        <href>simultan_analyse_hiddenTitleBar%26bm%3Bsimultan_analyse_hiddenTitleBar.bmml%26bm%3Bsimultan_analyse_hiddenTitleBar.bmml%26bm%3Bsimultan_analyse_hiddenTitleBar.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22153%2C593%2C461%2C705%22%20href%3D%22simultan_analyse_hiddenTitleBar.bmml%22%20alt%3D%22simultan_analyse_hiddenTitleBar%22%20id%3D%2258%22/%3E</map>
+      </controlProperties>
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="__group__" x="0" y="0" w="206" h="55" measuredW="206" measuredH="55" zOrder="0" locked="false" isInGroup="58">
+          <groupChildrenDescriptors>
+            <control controlID="0" controlTypeID="com.balsamiq.mockups::Title" x="0" y="5" w="-1" h="-1" measuredW="143" measuredH="50" zOrder="0" locked="false" isInGroup="0">
+              <controlProperties>
+                <text>Analyse</text>
+              </controlProperties>
+            </control>
+            <control controlID="1" controlTypeID="com.balsamiq.mockups::Icon" x="158" y="0" w="-1" h="-1" measuredW="48" measuredH="48" zOrder="1" locked="false" isInGroup="0">
+              <controlProperties>
+                <borderStyle>square</borderStyle>
+                <icon>EyeIcon%7Clarge</icon>
+              </controlProperties>
+            </control>
+          </groupChildrenDescriptors>
+        </control>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="0" y="70" w="-1" h="-1" measuredW="308" measuredH="21" zOrder="1" locked="false" isInGroup="58">
+          <controlProperties>
+            <text>Explore%20your%20data%20using%20various%20visualization%20methods.</text>
+          </controlProperties>
+        </control>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::Label" x="0" y="91" w="-1" h="-1" measuredW="284" measuredH="21" zOrder="2" locked="false" isInGroup="58">
+          <controlProperties>
+            <text>Find%20links%20between%20parameter%20and%20solution%20space.</text>
+          </controlProperties>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="59" controlTypeID="__group__" x="493" y="278" w="242" h="136" measuredW="242" measuredH="136" zOrder="12" locked="false" isInGroup="-1">
+      <controlProperties>
+        <href>simultan_load%26bm%3Bsimultan_load.bmml%26bm%3Bsimultan_load.bmml%26bm%3Bsimultan_load.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22153%2C175%2C395%2C311%22%20href%3D%22simultan_load.bmml%22%20alt%3D%22simultan_load%22%20id%3D%2259%22/%3E</map>
+      </controlProperties>
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="__group__" x="0" y="0" w="156" h="55" measuredW="156" measuredH="55" zOrder="0" locked="false" isInGroup="59">
+          <groupChildrenDescriptors>
+            <control controlID="0" controlTypeID="com.balsamiq.mockups::Title" x="0" y="5" w="-1" h="-1" measuredW="94" measuredH="50" zOrder="0" locked="false" isInGroup="0">
+              <controlProperties>
+                <text>Load</text>
+              </controlProperties>
+            </control>
+            <control controlID="1" controlTypeID="com.balsamiq.mockups::Icon" x="108" y="0" w="-1" h="-1" measuredW="48" measuredH="48" zOrder="1" locked="false" isInGroup="0">
+              <controlProperties>
+                <borderStyle>square</borderStyle>
+                <icon>FolderIcon%7Clarge</icon>
+              </controlProperties>
+            </control>
+          </groupChildrenDescriptors>
+        </control>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="0" y="70" w="-1" h="-1" measuredW="156" measuredH="21" zOrder="1" locked="false" isInGroup="59">
+          <controlProperties>
+            <text>Define%20a%20working%20directory.</text>
+          </controlProperties>
+        </control>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::Label" x="0" y="91" w="242" h="45" measuredW="417" measuredH="21" zOrder="2" locked="false" isInGroup="59">
+          <controlProperties>
+            <text>The%20%28meta-%29data%20of%20all%20files%20in%20this%20directory%20are%20processed%20automatically.</text>
+          </controlProperties>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="60" controlTypeID="__group__" x="1325" y="278" w="266" h="132" measuredW="266" measuredH="132" zOrder="13" locked="false" isInGroup="-1">
+      <controlProperties>
+        <href>simultan_generate%26bm%3Bsimultan_generate.bmml%26bm%3Bsimultan_generate.bmml%26bm%3Bsimultan_generate.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22985%2C175%2C1251%2C307%22%20href%3D%22simultan_generate.bmml%22%20alt%3D%22simultan_generate%22%20id%3D%2260%22/%3E</map>
+      </controlProperties>
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="__group__" x="0" y="0" w="242" h="55" measuredW="242" measuredH="55" zOrder="0" locked="false" isInGroup="60">
+          <groupChildrenDescriptors>
+            <control controlID="0" controlTypeID="com.balsamiq.mockups::Title" x="0" y="5" w="-1" h="-1" measuredW="178" measuredH="50" zOrder="0" locked="false" isInGroup="0">
+              <controlProperties>
+                <text>Generate</text>
+              </controlProperties>
+            </control>
+            <control controlID="1" controlTypeID="com.balsamiq.mockups::Icon" x="194" y="0" w="-1" h="-1" measuredW="48" measuredH="48" zOrder="1" locked="false" isInGroup="0">
+              <controlProperties>
+                <borderStyle>none</borderStyle>
+                <icon>SquaredPlusIcon%7Clarge</icon>
+              </controlProperties>
+            </control>
+          </groupChildrenDescriptors>
+        </control>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="0" y="70" w="266" h="62" measuredW="539" measuredH="21" zOrder="1" locked="false" isInGroup="60">
+          <controlProperties>
+            <text>Determine%20parameter%20intervals%20and%20other%20settings%20and%20generate%20datasets%20using%20these%20options.</text>
+          </controlProperties>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="61" controlTypeID="__group__" x="1325" y="696" w="266" h="112" measuredW="266" measuredH="112" zOrder="14" locked="false" isInGroup="-1">
+      <controlProperties>
+        <href>simultan_preprocess%26bm%3Bsimultan_preprocess.bmml%26bm%3Bsimultan_preprocess.bmml%26bm%3Bsimultan_preprocess.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22985%2C593%2C1251%2C705%22%20href%3D%22simultan_preprocess.bmml%22%20alt%3D%22simultan_preprocess%22%20id%3D%2261%22/%3E</map>
+      </controlProperties>
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="__group__" x="0" y="0" w="266" h="55" measuredW="266" measuredH="55" zOrder="0" locked="false" isInGroup="61">
+          <groupChildrenDescriptors>
+            <control controlID="0" controlTypeID="com.balsamiq.mockups::Title" x="0" y="5" w="-1" h="-1" measuredW="208" measuredH="50" zOrder="0" locked="false" isInGroup="0">
+              <controlProperties>
+                <text>Preprocess</text>
+              </controlProperties>
+            </control>
+            <control controlID="1" controlTypeID="com.balsamiq.mockups::Icon" x="218" y="0" w="-1" h="-1" measuredW="48" measuredH="48" zOrder="1" locked="false" isInGroup="0">
+              <controlProperties>
+                <borderStyle>square</borderStyle>
+                <icon>GearIcon%7Clarge</icon>
+              </controlProperties>
+            </control>
+          </groupChildrenDescriptors>
+        </control>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="0" y="70" w="266" h="42" measuredW="473" measuredH="21" zOrder="1" locked="false" isInGroup="61">
+          <controlProperties>
+            <text>Calculate%20distances%20between%20topics%20and%20datasets%20using%20different%20distance%20functions.</text>
+          </controlProperties>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+  </controls>
+</mockup>

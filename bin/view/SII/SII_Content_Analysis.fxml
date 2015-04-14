@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.canvas.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.web.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane maxHeight="694.0" maxWidth="1366.0" prefHeight="694.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.SII.SII_AnalysisController">
+   <children>
+      <SplitPane dividerPositions="0.9374130737134909" prefHeight="694.0" prefWidth="1366.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <items>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="900.0" prefWidth="100.0">
+               <children>
+                  <SplitPane dividerPositions="0.7305122494432071" orientation="VERTICAL" prefHeight="850.0" prefWidth="1440.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <items>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                           <children>
+                              <SplitPane dividerPositions="0.29797979797979796" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                <items>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                       <children>
+                                          <Accordion layoutX="34.0" layoutY="13.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="45.0">
+                                            <panes>
+                                              <TitledPane animated="false" text="Result Space | Global Scope | Filter">
+                                                <content>
+                                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                         <children>
+                                                            <ScrollPane prefHeight="200.0" prefWidth="200.0" vbarPolicy="ALWAYS" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                              <content>
+                                                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="445.0" prefWidth="373.0">
+                                                                     <children>
+                                                                        <Label layoutX="11.0" layoutY="44.0" text="beta" />
+                                                                        <Label layoutX="11.0" layoutY="14.0" text="alpha" />
+                                                                        <Slider layoutX="116.0" layoutY="15.0" />
+                                                                        <Slider layoutX="116.0" layoutY="46.0" />
+                                                                     </children>
+                                                                  </AnchorPane>
+                                                              </content>
+                                                            </ScrollPane>
+                                                         </children>
+                                                      </AnchorPane>
+                                                </content>
+                                              </TitledPane>
+                                              <TitledPane animated="false" text="Result Space | Global Scope | General">
+                                                <content>
+                                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                                                </content>
+                                              </TitledPane>
+                                              <TitledPane animated="false" text="Result Space | Local Space">
+                                                <content>
+                                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                                                </content>
+                                              </TitledPane>
+                                                <TitledPane animated="false" text="Parameter Space">
+                                                  <content>
+                                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                                                  </content>
+                                                </TitledPane>
+                                            </panes>
+                                          </Accordion>
+                                          <Label layoutX="45.0" layoutY="12.0" text="Filter" AnchorPane.leftAnchor="45.0" AnchorPane.topAnchor="12.0">
+                                             <font>
+                                                <Font name="System Bold" size="12.0" />
+                                             </font>
+                                          </Label>
+                                          <ImageView fitHeight="30.0" fitWidth="30.0" layoutX="11.0" layoutY="8.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                             <image>
+                                                <Image url="@icons/filter.gif" />
+                                             </image>
+                                          </ImageView>
+                                       </children>
+                                    </AnchorPane>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                       <children>
+                                          <SplitPane dividerPositions="0.4386839481555334" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                            <items>
+                                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                                   <children>
+                                                      <SplitPane dividerPositions="0.5" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                        <items>
+                                                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                                                               <children>
+                                                                  <Label layoutX="7.0" layoutY="5.0" text="Global Scope" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                                                     <font>
+                                                                        <Font name="System Bold" size="12.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <ScatterChart fx:id="scatterchart_global" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="30.0">
+                                                                    <xAxis>
+                                                                      <NumberAxis side="BOTTOM" />
+                                                                    </xAxis>
+                                                                    <yAxis>
+                                                                      <NumberAxis side="LEFT" />
+                                                                    </yAxis>
+                                                                  </ScatterChart>
+                                                                  <Canvas height="50.0" layoutX="216.0" layoutY="221.0" width="50.0" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="28.0" />
+                                                               </children>
+                                                            </AnchorPane>
+                                                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                                                               <children>
+                                                                  <Label layoutX="7.0" layoutY="4.0" text="Distance Evaluation">
+                                                                     <font>
+                                                                        <Font name="System Bold" size="12.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <BarChart layoutX="-173.0" layoutY="-88.0" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="30.0">
+                                                                    <xAxis>
+                                                                      <CategoryAxis side="BOTTOM" />
+                                                                    </xAxis>
+                                                                    <yAxis>
+                                                                      <NumberAxis side="LEFT" />
+                                                                    </yAxis>
+                                                                  </BarChart>
+                                                                  <Label layoutX="44.0" layoutY="271.0" text="Median" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="44.0" />
+                                                                  <Label layoutX="276.0" layoutY="272.0" text="Maximum" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="90.0" />
+                                                                  <Label layoutX="276.0" layoutY="254.0" text="Minimum" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="90.0" />
+                                                                  <Label layoutX="135.0" layoutY="253.0" text="Label" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="120.0">
+                                                                     <font>
+                                                                        <Font name="System Italic" size="12.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <Label layoutX="135.0" layoutY="271.0" text="Label" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="120.0">
+                                                                     <font>
+                                                                        <Font name="System Italic" size="12.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <Label layoutX="379.0" layoutY="254.0" text="Label" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="30.0">
+                                                                     <font>
+                                                                        <Font name="System Italic" size="12.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <Label layoutX="379.0" layoutY="272.0" text="Label" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="30.0">
+                                                                     <font>
+                                                                        <Font name="System Italic" size="12.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <Label layoutX="44.0" layoutY="253.0" text="Average" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="44.0" />
+                                                               </children>
+                                                            </AnchorPane>
+                                                        </items>
+                                                      </SplitPane>
+                                                   </children>
+                                                </AnchorPane>
+                                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="612.0" prefWidth="776.0">
+                                                   <children>
+                                                      <SplitPane dividerPositions="0.5" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                        <items>
+                                                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                                                               <children>
+                                                                  <WebView layoutX="104.0" layoutY="-7.0" prefHeight="-1.0" prefWidth="-1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                                                                  <Label layoutX="10.0" layoutY="5.0" text="Local Scope" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                                                     <font>
+                                                                        <Font name="System Bold" size="12.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <Label layoutX="221.0" layoutY="6.0" text="Parallel Text Blocks" AnchorPane.rightAnchor="10.0">
+                                                                     <font>
+                                                                        <Font name="System Italic" size="12.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                               </children>
+                                                            </AnchorPane>
+                                                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                                                               <children>
+                                                                  <SplitPane dividerPositions="0.5494978479196556" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                    <items>
+                                                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                                                           <children>
+                                                                              <Label layoutX="12.0" layoutY="5.0" text="Parameter Space | Distribution" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                                                                 <font>
+                                                                                    <Font name="System Bold" size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <Label layoutX="223.0" layoutY="5.0" text="alpha / eta" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                                                                 <font>
+                                                                                    <Font name="System Italic" size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <Canvas height="210.0" layoutY="37.0" width="267.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                                                                           </children>
+                                                                        </AnchorPane>
+                                                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                                                           <children>
+                                                                              <Label layoutX="14.0" layoutY="5.0" text="Parameter Space | Distance Correlation" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                                                                 <font>
+                                                                                    <Font name="System Bold" size="12.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <LineChart AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="30.0">
+                                                                                <xAxis>
+                                                                                  <NumberAxis side="BOTTOM" />
+                                                                                </xAxis>
+                                                                                <yAxis>
+                                                                                  <NumberAxis side="LEFT" />
+                                                                                </yAxis>
+                                                                              </LineChart>
+                                                                           </children>
+                                                                        </AnchorPane>
+                                                                    </items>
+                                                                  </SplitPane>
+                                                               </children>
+                                                            </AnchorPane>
+                                                        </items>
+                                                      </SplitPane>
+                                                   </children>
+                                                </AnchorPane>
+                                            </items>
+                                          </SplitPane>
+                                       </children>
+                                    </AnchorPane>
+                                </items>
+                              </SplitPane>
+                           </children>
+                        </AnchorPane>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                           <children>
+                            <AnchorPane minHeight="212.0" minWidth="300.0" prefHeight="212.0" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <children>
+                                    <Label layoutX="51.0" layoutY="15.0" text="History" AnchorPane.topAnchor="13.0">
+                                       <font>
+                                          <Font name="System Bold" size="12.0" />
+                                       </font>
+                                    </Label>
+                                    <ImageView fitHeight="30.0" fitWidth="30.0" layoutX="10.0" layoutY="7.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="7.0">
+                                       <image>
+                                          <Image url="@icons/clock-128.png" />
+                                       </image>
+                                    </ImageView>
+                                    <Label layoutX="167.0" layoutY="14.0" text="Advanced Settings" />
+                                    <ImageView fitHeight="15.0" fitWidth="15.0" layoutX="272.0" layoutY="16.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@icons/cog.png" />
+                                       </image>
+                                    </ImageView>
+                                    <TextField layoutX="46.0" layoutY="63.0" prefHeight="25.0" prefWidth="243.0" text="Search Term" />
+                                    <ImageView fitHeight="15.0" fitWidth="15.0" layoutX="20.0" layoutY="66.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@icons/490px-Magnifying_glass_icon.svg.png" />
+                                       </image>
+                                    </ImageView>
+                                    <Label layoutX="19.0" layoutY="107.0" text="Scope" />
+                                    <Label layoutX="19.0" layoutY="141.0" text="Type" />
+                                    <ComboBox layoutX="146.0" layoutY="102.0" prefHeight="25.0" prefWidth="140.0" />
+                                    <ComboBox layoutX="146.0" layoutY="137.0" prefHeight="25.0" prefWidth="140.0" />
+                                 </children>
+                              </AnchorPane>
+                              <ScrollPane hbarPolicy="ALWAYS" layoutX="300.0" layoutY="6.0" vbarPolicy="NEVER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                           </children>
+                        </AnchorPane>
+                    </items>
+                  </SplitPane>
+               </children>
+            </AnchorPane>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="900.0" prefWidth="100.0">
+               <children>
+                  <TextArea layoutX="-1.0" layoutY="14.0" prefHeight="200.0" prefWidth="87.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0" />
+                  <Label layoutX="8.0" layoutY="14.0" text="Protocol" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0" />
+                  <ProgressIndicator layoutX="69.0" layoutY="-1.0" prefHeight="25.0" prefWidth="15.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0" />
+               </children>
+            </AnchorPane>
+        </items>
+      </SplitPane>
+   </children>
+</AnchorPane>

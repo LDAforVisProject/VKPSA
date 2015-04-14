@@ -1,0 +1,307 @@
+<mockup version="1.0" skin="sketch" measuredW="995" measuredH="744" mockupW="935" mockupH="712">
+  <controls>
+    <control controlID="1" controlTypeID="__group__" x="60" y="432" w="378" h="16" measuredW="378" measuredH="16" zOrder="1" locked="false" isInGroup="-1">
+      <controlProperties>
+        <controlName>Range%20Slider%20Horizontal%20Bar</controlName>
+      </controlProperties>
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::Canvas" x="0" y="3" w="378" h="10" measuredW="100" measuredH="70" zOrder="0" locked="false" isInGroup="1">
+          <controlProperties>
+            <borderStyle>none</borderStyle>
+            <color>13421772</color>
+          </controlProperties>
+        </control>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::Canvas" x="64" y="4" w="147" h="10" measuredW="100" measuredH="70" zOrder="1" locked="false" isInGroup="1">
+          <controlProperties>
+            <borderStyle>none</borderStyle>
+            <color>2848996</color>
+          </controlProperties>
+        </control>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::Icon" x="56" y="0" w="-1" h="-1" measuredW="16" measuredH="16" zOrder="2" locked="false" isInGroup="1">
+          <controlProperties>
+            <icon>UpFillTriangleIcon%7Cxsmall</icon>
+          </controlProperties>
+        </control>
+        <control controlID="3" controlTypeID="com.balsamiq.mockups::Icon" x="204" y="0" w="-1" h="-1" measuredW="16" measuredH="16" zOrder="3" locked="false" isInGroup="1">
+          <controlProperties>
+            <icon>UpFillTriangleIcon%7Cxsmall</icon>
+          </controlProperties>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="2" controlTypeID="__group__" x="496" y="358" w="16" h="234" measuredW="16" measuredH="234" zOrder="2" locked="false" isInGroup="-1">
+      <controlProperties>
+        <controlName>Range%20Slider%20Vertical</controlName>
+      </controlProperties>
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::VRule" x="4" y="0" w="-1" h="234" measuredW="5" measuredH="100" zOrder="0" locked="false" isInGroup="2"/>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::Icon" x="0" y="20" w="-1" h="-1" measuredW="16" measuredH="16" zOrder="1" locked="false" isInGroup="2">
+          <controlProperties>
+            <icon>RightFillTriangleIcon%7Cxsmall</icon>
+          </controlProperties>
+        </control>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::Icon" x="0" y="97" w="-1" h="-1" measuredW="16" measuredH="16" zOrder="2" locked="false" isInGroup="2">
+          <controlProperties>
+            <icon>RightFillTriangleIcon%7Cxsmall</icon>
+          </controlProperties>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="3" controlTypeID="__group__" x="547" y="358" w="16" h="234" measuredW="16" measuredH="234" zOrder="3" locked="false" isInGroup="-1">
+      <controlProperties>
+        <controlName>Range%20Slider%20Vertical%20Bar</controlName>
+      </controlProperties>
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::Canvas" x="3" y="0" w="10" h="234" measuredW="100" measuredH="70" zOrder="0" locked="false" isInGroup="3">
+          <controlProperties>
+            <borderStyle>none</borderStyle>
+            <color>13421772</color>
+          </controlProperties>
+        </control>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::Canvas" x="3" y="28" w="10" h="74" measuredW="100" measuredH="70" zOrder="1" locked="false" isInGroup="3">
+          <controlProperties>
+            <borderStyle>none</borderStyle>
+            <color>2848996</color>
+          </controlProperties>
+        </control>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::Icon" x="0" y="20" w="-1" h="-1" measuredW="16" measuredH="16" zOrder="2" locked="false" isInGroup="3">
+          <controlProperties>
+            <icon>RightFillTriangleIcon%7Cxsmall</icon>
+          </controlProperties>
+        </control>
+        <control controlID="3" controlTypeID="com.balsamiq.mockups::Icon" x="0" y="97" w="-1" h="-1" measuredW="16" measuredH="16" zOrder="3" locked="false" isInGroup="3">
+          <controlProperties>
+            <icon>RightFillTriangleIcon%7Cxsmall</icon>
+          </controlProperties>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="4" controlTypeID="__group__" x="60" y="362" w="378" h="16" measuredW="378" measuredH="16" zOrder="0" locked="false" isInGroup="-1">
+      <controlProperties>
+        <controlName>Range%20Slider%20Horizontal</controlName>
+      </controlProperties>
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="__group__" x="0" y="0" w="378" h="16" measuredW="378" measuredH="16" zOrder="0" locked="false" isInGroup="4">
+          <controlProperties>
+            <controlName>Horizontal%20Range%20Slider</controlName>
+          </controlProperties>
+          <groupChildrenDescriptors>
+            <control controlID="0" controlTypeID="com.balsamiq.mockups::HRule" x="0" y="6" w="378" h="-1" measuredW="100" measuredH="5" zOrder="0" locked="false" isInGroup="0"/>
+            <control controlID="1" controlTypeID="com.balsamiq.mockups::Icon" x="56" y="0" w="-1" h="-1" measuredW="16" measuredH="16" zOrder="1" locked="false" isInGroup="0">
+              <controlProperties>
+                <icon>UpFillTriangleIcon%7Cxsmall</icon>
+              </controlProperties>
+            </control>
+            <control controlID="2" controlTypeID="com.balsamiq.mockups::Icon" x="204" y="0" w="-1" h="-1" measuredW="16" measuredH="16" zOrder="2" locked="false" isInGroup="0">
+              <controlProperties>
+                <icon>UpFillTriangleIcon%7Cxsmall</icon>
+              </controlProperties>
+            </control>
+          </groupChildrenDescriptors>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="5" controlTypeID="com.balsamiq.mockups::StickyNote" x="692" y="32" w="303" h="346" measuredW="109" measuredH="123" zOrder="4" locked="false" isInGroup="-1">
+      <controlProperties>
+        <bold>true</bold>
+        <size>14</size>
+        <text>%7Bcolor%3A%23ff0000%7DAbout%7Bcolor%7D%0AThis%20is%20an%20extension%20of%20the%20slider%20control%2C%20including%20a%20set%20of%20sliders%20with%20bar%20tracks%20and%20tick%20marks%2C%20range%20sliders%20with%20start%20and%20end%20points%2C%20and%20a%20circular%20slider%20with%20thumb%20control.%0A%20%0A%7Bcolor%3A%23ff0000%7DInstallation%7Bcolor%7D%0ATo%20use%20as%20a%20symbol%20library%2C%20add%20to%20your%20account%20assets%20or%20to%20a%20project%20assets%20folder.%0A%20%0A%7Bcolor%3A%23ff0000%7DVersion%20History%7Bcolor%7D%0ACreated%20by%20Balsamiq%20on%2022%20Feb%202011.</text>
+      </controlProperties>
+    </control>
+    <control controlID="6" controlTypeID="__group__" x="60" y="507" w="378" h="16" measuredW="378" measuredH="16" zOrder="5" locked="false" isInGroup="-1">
+      <controlProperties>
+        <controlName>Range%20Slider%20Horizontal%20Bar%20Plain</controlName>
+      </controlProperties>
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::Canvas" x="0" y="3" w="378" h="10" measuredW="100" measuredH="70" zOrder="0" locked="false" isInGroup="6">
+          <controlProperties>
+            <borderStyle>none</borderStyle>
+            <color>13421772</color>
+          </controlProperties>
+        </control>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::Canvas" x="64" y="4" w="147" h="10" measuredW="100" measuredH="70" zOrder="1" locked="false" isInGroup="6">
+          <controlProperties>
+            <borderStyle>none</borderStyle>
+            <color>10066329</color>
+          </controlProperties>
+        </control>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::Icon" x="56" y="0" w="-1" h="-1" measuredW="16" measuredH="16" zOrder="2" locked="false" isInGroup="6">
+          <controlProperties>
+            <icon>UpFillTriangleIcon%7Cxsmall</icon>
+          </controlProperties>
+        </control>
+        <control controlID="3" controlTypeID="com.balsamiq.mockups::Icon" x="204" y="0" w="-1" h="-1" measuredW="16" measuredH="16" zOrder="3" locked="false" isInGroup="6">
+          <controlProperties>
+            <icon>UpFillTriangleIcon%7Cxsmall</icon>
+          </controlProperties>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="7" controlTypeID="__group__" x="603" y="358" w="16" h="234" measuredW="16" measuredH="234" zOrder="6" locked="false" isInGroup="-1">
+      <controlProperties>
+        <controlName>Range%20Slider%20Vertical%20Bar%20Plain</controlName>
+      </controlProperties>
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::Canvas" x="3" y="0" w="10" h="234" measuredW="100" measuredH="70" zOrder="0" locked="false" isInGroup="7">
+          <controlProperties>
+            <borderStyle>none</borderStyle>
+            <color>13421772</color>
+          </controlProperties>
+        </control>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::Canvas" x="3" y="28" w="10" h="74" measuredW="100" measuredH="70" zOrder="1" locked="false" isInGroup="7">
+          <controlProperties>
+            <borderStyle>none</borderStyle>
+            <color>10066329</color>
+          </controlProperties>
+        </control>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::Icon" x="0" y="20" w="-1" h="-1" measuredW="16" measuredH="16" zOrder="2" locked="false" isInGroup="7">
+          <controlProperties>
+            <icon>RightFillTriangleIcon%7Cxsmall</icon>
+          </controlProperties>
+        </control>
+        <control controlID="3" controlTypeID="com.balsamiq.mockups::Icon" x="0" y="97" w="-1" h="-1" measuredW="16" measuredH="16" zOrder="3" locked="false" isInGroup="7">
+          <controlProperties>
+            <icon>RightFillTriangleIcon%7Cxsmall</icon>
+          </controlProperties>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="8" controlTypeID="com.balsamiq.mockups::SubTitle" x="60" y="310" w="-1" h="-1" measuredW="154" measuredH="33" zOrder="7" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>2848996</color>
+        <text>Range%20Sliders</text>
+      </controlProperties>
+    </control>
+    <control controlID="10" controlTypeID="__group__" x="60" y="75" w="378" h="16" measuredW="378" measuredH="16" zOrder="8" locked="false" isInGroup="-1">
+      <controlProperties>
+        <controlName>Slider%20Horizontal%20Bar</controlName>
+      </controlProperties>
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::Canvas" x="0" y="3" w="378" h="10" measuredW="100" measuredH="70" zOrder="0" locked="false" isInGroup="10">
+          <controlProperties>
+            <borderStyle>none</borderStyle>
+            <color>13421772</color>
+          </controlProperties>
+        </control>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::Icon" x="56" y="0" w="-1" h="-1" measuredW="16" measuredH="16" zOrder="1" locked="false" isInGroup="10">
+          <controlProperties>
+            <icon>UpFillTriangleIcon%7Cxsmall</icon>
+          </controlProperties>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="11" controlTypeID="com.balsamiq.mockups::SubTitle" x="60" y="32" w="-1" h="-1" measuredW="78" measuredH="33" zOrder="9" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>2848996</color>
+        <text>Sliders</text>
+      </controlProperties>
+    </control>
+    <control controlID="13" controlTypeID="__group__" x="496" y="38" w="16" h="234" measuredW="16" measuredH="234" zOrder="10" locked="false" isInGroup="-1">
+      <controlProperties>
+        <controlName>Slider%20Vertical%20Bar</controlName>
+      </controlProperties>
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::Canvas" x="3" y="0" w="10" h="234" measuredW="100" measuredH="70" zOrder="0" locked="false" isInGroup="13">
+          <controlProperties>
+            <borderStyle>none</borderStyle>
+            <color>13421772</color>
+          </controlProperties>
+        </control>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::Icon" x="0" y="20" w="-1" h="-1" measuredW="16" measuredH="16" zOrder="1" locked="false" isInGroup="13">
+          <controlProperties>
+            <icon>RightFillTriangleIcon%7Cxsmall</icon>
+          </controlProperties>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="15" controlTypeID="com.balsamiq.mockups::SubTitle" x="60" y="628" w="-1" h="-1" measuredW="290" measuredH="33" zOrder="11" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>2848996</color>
+        <text>Circular%20Slider%20/%20Jog%20Wheel</text>
+      </controlProperties>
+    </control>
+    <control controlID="18" controlTypeID="__group__" x="60" y="680" w="64" h="64" measuredW="64" measuredH="64" zOrder="12" locked="false" isInGroup="-1">
+      <controlProperties>
+        <controlName>Circular%20Slider</controlName>
+      </controlProperties>
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::RoundButton" x="0" y="0" w="64" h="64" measuredW="32" measuredH="32" zOrder="0" locked="false" isInGroup="18">
+          <controlProperties>
+            <color>14540253</color>
+            <markup>false</markup>
+          </controlProperties>
+        </control>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::RoundButton" x="39" y="38" w="13" h="13" measuredW="32" measuredH="32" zOrder="1" locked="false" isInGroup="18">
+          <controlProperties>
+            <color>6710886</color>
+            <markup>false</markup>
+          </controlProperties>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="24" controlTypeID="__group__" x="60" y="106" w="379" h="10" measuredW="379" measuredH="10" zOrder="13" locked="false" isInGroup="-1">
+      <controlProperties>
+        <controlName>Tick%20Marks%20for%20Horizontal%20Slider</controlName>
+      </controlProperties>
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::VRule" x="0" y="0" w="-1" h="10" measuredW="5" measuredH="100" zOrder="0" locked="false" isInGroup="24">
+          <controlProperties>
+            <color>3355443</color>
+          </controlProperties>
+        </control>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::VRule" x="94" y="0" w="-1" h="10" measuredW="5" measuredH="100" zOrder="1" locked="false" isInGroup="24">
+          <controlProperties>
+            <color>3355443</color>
+          </controlProperties>
+        </control>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::VRule" x="187" y="0" w="-1" h="10" measuredW="5" measuredH="100" zOrder="2" locked="false" isInGroup="24">
+          <controlProperties>
+            <color>3355443</color>
+          </controlProperties>
+        </control>
+        <control controlID="3" controlTypeID="com.balsamiq.mockups::VRule" x="281" y="0" w="-1" h="10" measuredW="5" measuredH="100" zOrder="3" locked="false" isInGroup="24">
+          <controlProperties>
+            <color>3355443</color>
+          </controlProperties>
+        </control>
+        <control controlID="4" controlTypeID="com.balsamiq.mockups::VRule" x="374" y="0" w="-1" h="10" measuredW="5" measuredH="100" zOrder="4" locked="false" isInGroup="24">
+          <controlProperties>
+            <color>3355443</color>
+          </controlProperties>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+    <control controlID="30" controlTypeID="__group__" x="547" y="38" w="13" h="234" measuredW="13" measuredH="234" zOrder="14" locked="false" isInGroup="-1">
+      <controlProperties>
+        <controlName>Tick%20Marks%20for%20Vertical%20Slider</controlName>
+      </controlProperties>
+      <groupChildrenDescriptors>
+        <control controlID="0" controlTypeID="com.balsamiq.mockups::HRule" x="0" y="0" w="13" h="-1" measuredW="100" measuredH="5" zOrder="0" locked="false" isInGroup="30">
+          <controlProperties>
+            <color>3355443</color>
+          </controlProperties>
+        </control>
+        <control controlID="1" controlTypeID="com.balsamiq.mockups::HRule" x="0" y="57" w="13" h="-1" measuredW="100" measuredH="5" zOrder="1" locked="false" isInGroup="30">
+          <controlProperties>
+            <color>3355443</color>
+          </controlProperties>
+        </control>
+        <control controlID="2" controlTypeID="com.balsamiq.mockups::HRule" x="0" y="115" w="13" h="-1" measuredW="100" measuredH="5" zOrder="2" locked="false" isInGroup="30">
+          <controlProperties>
+            <color>3355443</color>
+          </controlProperties>
+        </control>
+        <control controlID="3" controlTypeID="com.balsamiq.mockups::HRule" x="0" y="172" w="13" h="-1" measuredW="100" measuredH="5" zOrder="3" locked="false" isInGroup="30">
+          <controlProperties>
+            <color>3355443</color>
+          </controlProperties>
+        </control>
+        <control controlID="4" controlTypeID="com.balsamiq.mockups::HRule" x="0" y="229" w="13" h="-1" measuredW="100" measuredH="5" zOrder="4" locked="false" isInGroup="30">
+          <controlProperties>
+            <color>3355443</color>
+          </controlProperties>
+        </control>
+      </groupChildrenDescriptors>
+    </control>
+  </controls>
+</mockup>
