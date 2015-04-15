@@ -1,5 +1,6 @@
 package model;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
@@ -11,6 +12,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.MultiMap;
+
+import javafx.util.Pair;
 import mdsj.MDSJ;
 
 /**
@@ -25,108 +29,53 @@ import mdsj.MDSJ;
  */
 public class Workspace
 {
+	/**
+	 * Current directory.
+	 */
 	private String directory;
+	/**
+	 * Holds all (loaded) datasets from the specified
+	 * directory.
+	 */
+	private Map<LDAConfiguration, Dataset> datasetMap;
+	/**
+	 * Contains all LDA configurations (alias datasets) that
+	 * are assigned this MDS / global scatterplot coordinate.
+	 */
+	private MultiMap<Pair<Double, Double>, LDAConfiguration> reverseMDSCoordinateLookup;
+	
+	
 	
 	public Workspace(String directory)
 	{
 		this.directory = directory;
-	}
-	
-	// @todo Un-statify.
-	public static double calculateDatasetDistance(final Dataset dataset1, final Dataset dataset2, DatasetDistance distanceType)
-	{
-		double distance = 0;
-		
-		switch (distanceType) {
-			case MinimalDistance:
-				distance = (Workspace.calculateMinimalDatasetDistance(dataset1, dataset2) + Workspace.calculateMinimalDatasetDistance(dataset2, dataset1)) / 2;
-			break;
-			
-			case HausdorffDistance:
-				distance = (Workspace.calculateHausdorffDatasetDistance(dataset1, dataset2) + Workspace.calculateHausdorffDatasetDistance(dataset2, dataset1)) / 2;
-			break;
-			
-			default:
-				System.out.println("Invalid dataset distance type specified: " + distanceType.toString() + " is unknown.");
-		}
-		
-		return distance;
+		loadDatasets();
 	}
 	
 	/**
-	 * @todo Add relaxed/strict enum parameter to distuingish whether the same topic may be used for
-	 * multiple other topics.
-	 * Calculates distance between two datasets using the average of all minimal distances between
-	 * one topic of one dataset and all topics of the other Workspace. 
-	 * @param dataset1
-	 * @param dataset2
-	 * @return
+	 * Loads datasets from specified directory.
+	 * @return The number of found datasets.
 	 */
-	private static double calculateMinimalDatasetDistance(final Dataset dataset1, final Dataset dataset2)
+	private int loadDatasets()
 	{
-		System.out.println("Calculating dataset distance");
+		// @todo CURRENT: Load files dynamically. Modify python script so that
+		// generated files contain metadata in first line.
+		String[] filenames		= new File(directory).list();
+		int numberOfDatasets	= 0;
 		
-		double minDistance	= Double.MAX_VALUE;
-		Topic currentTopic	= null;
-		
-		ArrayList<Topic> topics1 = dataset1.getTopics();
-		ArrayList<Topic> topics2 = dataset2.getTopics();
-		
-		// Iterate through all topics of one dataset, compare each of them with all topics of the other dataset, pick minimal distance, sum up distances.
-		for (int i = 0; i < topics1.size(); i++) {
-			currentTopic = topics1.get(i);
-			
-			// Unrolled loop to avoid calculation of distance i to i without using an if.
-			for (int j = 0; j < topics2.size(); j++) {
-				double distance = currentTopic.calculateBhattacharyyaDistance(topics2.get(j)); 
-				minDistance = minDistance > distance ? distance : minDistance;
-			}	
-		}
-		
-		// Return normalized distance.
-		return minDistance / (topics1.size() * topics2.size());
-	}
-	
-	/**
-	 * @todo Add relaxed/strict enum parameter to distuingish whether the same topic may be used for
-	 * multiple other topics.
-	 * Calculates distance between two datasets using the Hausdorff distance.
-	 * @param dataset1
-	 * @param dataset2
-	 * @return
-	 */
-	private static double calculateHausdorffDatasetDistance(final Dataset dataset1, final Dataset dataset2)
-	{
-		System.out.println("Calculating dataset distance");
-		
-		double minDistance		= Double.MAX_VALUE;
-		double maxMinDistance	= 0;
-		Topic currentTopic		= null;
-		
-		ArrayList<Topic> topics1 = dataset1.getTopics();
-		ArrayList<Topic> topics2 = dataset2.getTopics();
-		
-		// Iterate through all topics of one dataset, compare each of them with all topics of the other dataset, pick minimal distance, sum up distances.
-		for (int i = 0; i < topics1.size(); i++) {
-			currentTopic 	= topics1.get(i);
-			minDistance		= Double.MAX_VALUE;
-			
-			// Unrolled loop to avoid calculation of distance i to i without using an if.
-			for (int j = 0; j < topics2.size(); j++) {
-				double distance = currentTopic.calculateBhattacharyyaDistance(topics2.get(j)); 
-				minDistance = minDistance > distance ? distance : minDistance;
+		for (String filename : filenames) {
+			if (filename.endsWith(".csv")) {
+				numberOfDatasets++;
+				
+				
 			}
-			
-			maxMinDistance = maxMinDistance < minDistance ? minDistance : maxMinDistance;
 		}
 		
-		// Return normalized distance.
-		return maxMinDistance;
+		return numberOfDatasets;
 	}
 	
 	public double[][] test_sampleData(boolean useExistingData)
 	{
-		// @todo Get number of datasets dynamically.
 		final int numberOfDatasets							= 25;
 		Map<LDAConfiguration, Dataset> datasetMap			= new HashMap<LDAConfiguration, Dataset>(numberOfDatasets);
 		ArrayList<LDAConfiguration> paramSetList			= new ArrayList<LDAConfiguration>(numberOfDatasets);
@@ -163,7 +112,7 @@ public class Workspace
 					System.out.println(i + " to " + j);
 					
 					// Assume symmetric distance calculations.
-					distances[i][j] = Workspace.calculateDatasetDistance( datasetMap.get(paramSetList.get(i)), datasetMap.get(paramSetList.get(j)), DatasetDistance.HausdorffDistance );
+					distances[i][j] = datasetMap.get(paramSetList.get(i)).calculateDatasetDistance(datasetMap.get(paramSetList.get(j)), DatasetDistance.HausdorffDistance);
 					distances[j][i] = distances[i][j];
 				}	
 			}
@@ -212,13 +161,9 @@ public class Workspace
 					for (String coordinate : coordinates) {
 						output[lineCount][coordinateCount] = Double.parseDouble(coordinate);
 						
-						max = output[lineCount][coordinateCount] > max ? output[lineCount][coordinateCount] : max;
-						min = output[lineCount][coordinateCount] < min ? output[lineCount][coordinateCount] : min;
-						
 						coordinateCount++;
 					}
 					
-					System.out.println("max = " + max + ", min = " + min);
 					lineCount++;
 					coordinateCount	= 0;
 				}

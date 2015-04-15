@@ -6,8 +6,6 @@ public class LDAConfiguration
 	private double alpha;
 	private double eta;
 	
-	private String filename;
-	
 	public LDAConfiguration(int k, double alpha, double eta)
 	{
 		this.k		= k;

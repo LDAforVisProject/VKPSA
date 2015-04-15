@@ -5,5 +5,6 @@
 	<classpathentry kind="lib" path="D:/Workspace/Scientific Computing/VKPSA/dependencies/mdsj.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="lib" path="D:/Workspace/Scientific Computing/VKPSA/dependencies/controlsfx-8.20.8/controlsfx-8.20.8.jar"/>
+	<classpathentry kind="lib" path="D:/Workspace/Scientific Computing/VKPSA/dependencies/commons-collections4-4.0/commons-collections4-4.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

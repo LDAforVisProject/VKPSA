@@ -165,6 +165,13 @@ public class Topic
 		return keywordProbabilityMap;
 	}
 	
+	/**
+	 * Reads one file / dataset and generates a list topics from it.
+	 * @param directory
+	 * @param filename
+	 * @param topicKeywordAlignment
+	 * @return
+	 */
 	public static ArrayList<Topic> generateTopicsFromFile(String directory, String filename, TopicKeywordAlignment topicKeywordAlignment)
 	{
 	    // Init container for k topics

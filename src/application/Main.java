@@ -22,7 +22,7 @@ public class Main extends Application
 	public void start(Stage primaryStage)
 	{
 		try {
-			// @todo Write metadata in Python generated topic files. 
+			// @todo Write file/dataset metadata in Python generated topic files. 
 	        
 			// Load core .fxml file. 
 			FXMLLoader fxmlLoader			= new FXMLLoader();

@@ -8,6 +8,7 @@ package model;
  */
 public class Configuration
 {
+	private Workspace workspace;
 	private boolean lockPanels;
 	
 	public Configuration()
