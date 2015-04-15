@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import model.Dataset;
+import model.Workspace;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -22,23 +23,29 @@ public class SII_AnalysisController implements Initializable
 	
 	private double[][] coordinates;
 	
+	private Workspace workspace;
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources)
 	{
 		System.out.println("Initializing SII_AnalysisController.");
 		
-		// Calculate/load MDS'ed data from test data archive.
-		coordinates = Dataset.sampleTestData(true);
-		
 		// Init scatterchart. @todo Get maxima and minima automatically.
 		xAxis = scatterchart_global.getXAxis();
-        yAxis = scatterchart_global.getYAxis();//new NumberAxis(-0.5, 0.5, 0.0001);
+        yAxis = scatterchart_global.getYAxis();
         
         xAxis.setAutoRanging(true);
         yAxis.setAutoRanging(true);
-        
-        // Load data @todo Load data dynamically, not just at initialization.
+	}
+	
+	/**
+	 * Refresh scatterchart with data from coordinate. 
+	 */
+	public void refreshScatterchart()
+	{	
+		// Calculate/load MDS'ed data from test data archive.
+		coordinates = workspace.test_sampleData(true);
+		
         final Series<Number, Number> dataSeries = new XYChart.Series<>();
         dataSeries.setName("Testdata");
         
@@ -47,11 +54,11 @@ public class SII_AnalysisController implements Initializable
         }
         
         // Add data in scatterchart.
-        scatterchart_global.getData().addAll(dataSeries);
+        scatterchart_global.getData().add(dataSeries);
 	}
 	
-	public void drawScatterplot()
+	public void setWorkspace(Workspace workspace)
 	{
-		
+		this.workspace = workspace;
 	}
 }

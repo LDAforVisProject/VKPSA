@@ -11,10 +11,36 @@
 <AnchorPane fx:id="root" maxHeight="748.0" maxWidth="1366.0" prefHeight="748.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.SII.SII_CoreController">
    <children>
       <BorderPane prefHeight="748.0" prefWidth="1366.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <center>
+            <AnchorPane fx:id="pane_content" BorderPane.alignment="CENTER" />
+         </center>
          <top>
-            <HBox maxHeight="50.0" minHeight="50.0" prefHeight="50.0" prefWidth="1366.0" BorderPane.alignment="CENTER">
+            <AnchorPane maxHeight="50.0" minHeight="50.0" prefHeight="50.0" prefWidth="1366.0" style="-fx-background-color: #fff;" BorderPane.alignment="CENTER">
                <children>
-                  <HBox maxHeight="40.0" minHeight="40.0" prefHeight="40.0" prefWidth="165.0">
+                  <HBox layoutX="544.0" layoutY="29.0" maxHeight="40.0" minHeight="30.0" prefHeight="30.0" prefWidth="136.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="600.0" AnchorPane.rightAnchor="600.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <Label fx:id="label_title" text="VKPSA">
+                           <font>
+                              <Font size="24.0" />
+                           </font>
+                           <padding>
+                              <Insets right="15.0" />
+                           </padding>
+                           <HBox.margin>
+                              <Insets />
+                           </HBox.margin>
+                        </Label>
+                        <ImageView fx:id="icon_current" fitHeight="40.0" fitWidth="45.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@icons/eye_small.jpg" />
+                           </image>
+                           <HBox.margin>
+                              <Insets />
+                           </HBox.margin>
+                        </ImageView>
+                     </children>
+                  </HBox>
+                  <HBox maxHeight="40.0" minHeight="40.0" prefHeight="40.0" prefWidth="165.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="0.0">
                      <children>
                         <ImageView fx:id="icon_settings" fitHeight="35.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -45,33 +71,7 @@
                         <Insets left="20.0" />
                      </padding>
                   </HBox>
-                  <HBox maxHeight="40.0" minHeight="40.0" prefHeight="40.0" prefWidth="1055.0">
-                     <children>
-                        <Label fx:id="label_title" text="Section Title">
-                           <font>
-                              <Font size="24.0" />
-                           </font>
-                           <padding>
-                              <Insets right="15.0" />
-                           </padding>
-                           <HBox.margin>
-                              <Insets />
-                           </HBox.margin>
-                        </Label>
-                        <ImageView fx:id="icon_current" fitHeight="40.0" fitWidth="45.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@icons/eye_small.jpg" />
-                           </image>
-                           <HBox.margin>
-                              <Insets />
-                           </HBox.margin>
-                        </ImageView>
-                     </children>
-                     <padding>
-                        <Insets left="480.0" />
-                     </padding>
-                  </HBox>
-                  <HBox maxHeight="40.0" minHeight="40.0" prefHeight="40.0" prefWidth="220.0">
+                  <HBox layoutX="1164.0" maxHeight="40.0" minHeight="40.0" prefHeight="40.0" prefWidth="220.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <children>
                         <ImageView fx:id="icon_load" fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -87,21 +87,24 @@
                            </image>
                            <HBox.margin>
                               <Insets left="15.0" top="2.5" />
-                           </HBox.margin></ImageView>
+                           </HBox.margin>
+                        </ImageView>
                         <ImageView fx:id="icon_preprocess" fitHeight="40.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@icons/thin-0545_map_travel_distance_directions-128.png" />
                            </image>
                            <HBox.margin>
                               <Insets left="15.0" top="2.5" />
-                           </HBox.margin></ImageView>
-                        <ImageView fx:id="icon_analyze" fitHeight="30.0" fitWidth="35.0" onMouseClicked="#actionButtonClicked" pickOnBounds="true" preserveRatio="true">
+                           </HBox.margin>
+                        </ImageView>
+                        <ImageView fx:id="icon_analyze" fitHeight="30.0" fitWidth="35.0" onMouseClicked="#actionButtonClicked" onMouseEntered="#enableActiveCursor" onMouseExited="#disableActiveCursor" pickOnBounds="true" preserveRatio="true">
                            <HBox.margin>
                               <Insets left="10.0" top="2.5" />
                            </HBox.margin>
                            <image>
                               <Image url="@icons/eye.jpg" />
-                           </image></ImageView>
+                           </image>
+                        </ImageView>
                      </children>
                      <opaqueInsets>
                         <Insets />
@@ -114,11 +117,8 @@
                <padding>
                   <Insets top="10.0" />
                </padding>
-            </HBox>
+            </AnchorPane>
          </top>
-         <center>
-            <AnchorPane fx:id="pane_content" BorderPane.alignment="CENTER" />
-         </center>
       </BorderPane>
    </children>
 </AnchorPane>

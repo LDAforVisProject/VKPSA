@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import model.Workspace;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -33,7 +35,11 @@ public class SII_CoreController implements Initializable
 	
 	private @FXML AnchorPane pane_content;
 	
+	// Reference to main scene.
 	private Scene scene;
+	
+	// Holds and administrates data contained in one (specified) directory. 
+	private Workspace workspace;
 	
 	// References to instances of content pane's controllers.
 	private SII_AnalysisController analysisController;
@@ -42,6 +48,10 @@ public class SII_CoreController implements Initializable
 	public void initialize(URL location, ResourceBundle resources)
 	{
 		System.out.println("Initializing SII_CoreController.");
+		
+		// Init test workspace.
+		String directory	= "D:\\Workspace\\LDA\\core\\data\\sampling";
+		workspace			= new Workspace(directory);
 	}
 	
 	public void setScene(Scene scene)
@@ -49,7 +59,10 @@ public class SII_CoreController implements Initializable
 		this.scene = scene;
 	}
 	
-	// Action icon event.
+	/**
+	 * 
+	 * @param e
+	 */
 	@FXML
 	public void actionButtonClicked(MouseEvent e) 
 	{
@@ -75,6 +88,11 @@ public class SII_CoreController implements Initializable
 					// If so: Don't add it again, rather manipulate z-index of associated child
 					// of pane_content.
 					pane_content.getChildren().add(contentNode);
+					
+					// Set current workspace in analysis controller.
+					analysisController.setWorkspace(workspace);
+					// Draw scatterchart.
+					analysisController.refreshScatterchart();
 				break;
 			}
 			
@@ -85,9 +103,27 @@ public class SII_CoreController implements Initializable
     		AnchorPane.setRightAnchor(contentNode, 0.0);
         }
         
-        catch (IOException ioEx) {
-        	
+        catch (IOException ioEx) {	
         }
-		
 	}
+	
+	/**
+	 * Enable active / "button" cursor if it hovers over an active ImageView.
+	 * @param e
+	 */
+	@FXML
+	public void enableActiveCursor(MouseEvent e)
+	{
+		scene.setCursor(Cursor.HAND);
+	}
+	
+	/**
+	 * Disable active / "button" cursor if it hovers over an active ImageView.
+	 * @param e
+	 */
+	@FXML
+	public void disableActiveCursor(MouseEvent e)
+	{
+		scene.setCursor(Cursor.DEFAULT);
+	}	
 }

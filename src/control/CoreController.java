@@ -92,7 +92,7 @@ public class CoreController implements Initializable
 		        		tab.setText("Topical similarity - Global Comparison");
 		        		
 						// Load visualization file.
-		        		controller_gc.setCoordinates(Dataset.sampleTestData(true));
+//		        		controller_gc.setCoordinates(Dataset.sampleTestData(true));
 		        		controller_gc.draw();
 	        		}
 	        		

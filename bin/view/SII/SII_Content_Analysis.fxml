@@ -31,7 +31,7 @@
                                                 <content>
                                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                                          <children>
-                                                            <ScrollPane prefHeight="200.0" prefWidth="200.0" vbarPolicy="ALWAYS" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                            <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" prefHeight="353.0" prefWidth="376.0" vbarPolicy="ALWAYS" AnchorPane.bottomAnchor="-0.6" AnchorPane.leftAnchor="0.6" AnchorPane.rightAnchor="-0.6" AnchorPane.topAnchor="-0.6">
                                                               <content>
                                                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="445.0" prefWidth="373.0">
                                                                      <children>
