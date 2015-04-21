@@ -5,6 +5,7 @@ import java.util.ResourceBundle;
 
 import model.Dataset;
 import model.Workspace;
+import model.WorkspaceAction;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -44,7 +45,8 @@ public class SII_AnalysisController implements Initializable
 	public void refreshScatterchart()
 	{	
 		// Calculate/load MDS'ed data from test data archive.
-		coordinates = workspace.test_sampleData(true);
+//		coordinates = workspace.test_sampleData(false);
+		coordinates = workspace.executeWorkspaceAction(WorkspaceAction.LOAD_MDS_COORDINATES);
 		
         final Series<Number, Number> dataSeries = new XYChart.Series<>();
         dataSeries.setName("Testdata");

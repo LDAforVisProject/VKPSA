@@ -100,7 +100,7 @@ public class Dataset
 	 */
 	private double calculateMinimalDatasetDistance(final Dataset dataset)
 	{
-		System.out.println("Calculating dataset distance");
+//		System.out.println("Calculating dataset distance");
 		
 		double minDistance	= Double.MAX_VALUE;
 		Topic currentTopic	= null;
@@ -133,7 +133,7 @@ public class Dataset
 	 */
 	private double calculateHausdorffDatasetDistance(final Dataset dataset)
 	{
-		System.out.println("Calculating dataset distance");
+//		System.out.println("Calculating dataset distance");
 		
 		double minDistance		= Double.MAX_VALUE;
 		double maxMinDistance	= 0;

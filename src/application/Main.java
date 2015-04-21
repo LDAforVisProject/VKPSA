@@ -69,5 +69,11 @@ public class Main extends Application
 	public static void main(String[] args) 
 	{
 		launch(args);
+//		String var = "k=33|alpha=3.4|eta=4.23";
+//		int pos = var.indexOf("alpha=");
+//		System.out.println("pos = " + pos);
+//		int length = var.indexOf("|", pos) - (pos + 5 + 1);
+//		System.out.println("length = " + length);
+//		System.out.println(var.substring(pos + 5 + 1, pos + 5 + 1 + length));
 	}
 }

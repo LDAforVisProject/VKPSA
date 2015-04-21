@@ -33,4 +33,19 @@ public class LDAConfiguration
 		
 		return false;
 	}
+
+	public int getK()
+	{
+		return k;
+	}
+
+	public double getAlpha()
+	{
+		return alpha;
+	}
+
+	public double getEta()
+	{
+		return eta;
+	}
 }

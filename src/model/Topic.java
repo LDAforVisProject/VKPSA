@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javafx.util.Pair;
+
 public class Topic
 {
 	private int topicNumber;
@@ -170,44 +172,75 @@ public class Topic
 	 * @param directory
 	 * @param filename
 	 * @param topicKeywordAlignment
-	 * @return
+	 * @return Pair of (1) the LDA configuration of this file and (2) all topics
+	 * (with the corresponding probability) contained in this file.
+	 * @throws Exception 
 	 */
-	public static ArrayList<Topic> generateTopicsFromFile(String directory, String filename, TopicKeywordAlignment topicKeywordAlignment)
+	public static Pair<LDAConfiguration, ArrayList<Topic>> generateTopicsFromFile(String directory, String filename, TopicKeywordAlignment topicKeywordAlignment) throws Exception
 	{
-	    // Init container for k topics
+		// Init container for k topics
 		ArrayList<Topic> topics = new ArrayList<Topic>();
-		// i denotes number of rows in csv (up to number of features)
+		// i denotes number of rows in csv (up to number of features).
 		int i					= 0;
+		
+		// Store indices of parameter value locations.
+		Map<String, Integer> paramValueIndexMap	= new HashMap<String, Integer>();
+		// Store parameter values.
+		Map<String, Double> paramValueMap		= new HashMap<String, Double>();
 		
 		// Select path and charset.
 	    Path path				= Paths.get(directory, filename);
 	    Charset charset			= Charset.forName("UTF-8");
 	    
+//	    System.out.println("\n\nFILE = " + filename + "\n");
 	    try {
 			List<String> lines = Files.readAllLines(path, charset);
-
-			int kPosition = lines.get(0).indexOf("k=");
-
+			
+			// Get start parameter's start positions in configuration line (#0) in dataset.
+			paramValueIndexMap.put("k", lines.get(0).indexOf("k="));
+			paramValueIndexMap.put("eta", lines.get(0).indexOf("eta="));
+			paramValueIndexMap.put("alpha", lines.get(0).indexOf("alpha="));
+			// Check if all parameters are available.
+			for (String key : paramValueIndexMap.keySet()) {
+				if (paramValueIndexMap.get(key) < 0) {
+					throw new Exception("### ERROR ### No metadata found in dataset " + filename + "; @" + key);
+				}
+			}
+			
+			// ----------------------------------------------------------------
+			// Read parameter values first, then keyword/probability pairs.
+			// ----------------------------------------------------------------
 			if (topicKeywordAlignment == TopicKeywordAlignment.HORIZONTAL) {
-				if (kPosition > -1) {
-					// @todo Read metadata.
-					int k = Integer.parseInt(lines.get(0).substring(kPosition + 2));
+				// @todo Read metadata.
+				// Length for respectively the identifier ("k", "alpha", ...) and the value ("33.4", "0.5", "20", ...).
+				int substringLength = -1;
+				int valueLength		= -1;
+				int startIndex		= -1;
+				int valueIndex		= -1;
+				
+				// Read parameter values.
+				for (String key : paramValueIndexMap.keySet()) {
+					substringLength = key.length();
+					startIndex		= paramValueIndexMap.get(key);
+					valueIndex		= startIndex + substringLength + 1;
+					valueLength		= lines.get(0).indexOf("|", startIndex) > -1 ? lines.get(0).indexOf("|", startIndex) - valueIndex : lines.get(0).length() - valueIndex;
+					
+//					System.out.println("key = " + key + ", startIndex = " + startIndex + ", valueIndex = " + valueIndex + ", next | = " + lines.get(0).indexOf("|", startIndex) + ", valueLength = " + valueLength);
+					paramValueMap.put(key, Double.parseDouble(lines.get(0).substring(valueIndex, valueIndex + valueLength)));
+				}
+				
+				// Read keyword/probability pairs.
+				for (String line : lines.subList(1, lines.size())) {
+					topics.add(new Topic(i++));
 
-					for (String line : lines.subList(1, lines.size())) {
-						topics.add(new Topic(i++));
-
-						// Process all keyword/probability pairings in current line/topic.
-						String[] keywordDatasets = line.split(",");
-
-						for (String keywordDataset : keywordDatasets) {
-							topics.get(topics.size() - 1).addKeywordDataset(keywordDataset);
-						}
+					// Process all keyword/probability pairings in current line/topic.
+					String[] keywordDatasets	= line.split(",");
+					Topic currentTopic			= topics.get(topics.size() - 1);
+					for (String keywordDataset : keywordDatasets) {
+						currentTopic.addKeywordDataset(keywordDataset);
 					}
 				}
 
-				else {
-					System.out.println("### ERROR ### No metadata found in dataset " + filename + ".");
-				}
 			}
 		}
 	    
@@ -215,7 +248,13 @@ public class Topic
 	    catch (IOException e) {
 	      System.out.println(e);
 	    }
-                        
-        return topics;
+         
+	    // Create LDA configuration.
+	    LDAConfiguration ldaConfiguration = new LDAConfiguration( 	paramValueMap.get("k").intValue(), 
+	    															paramValueMap.get("alpha"),
+	    															paramValueMap.get("eta"));
+//        System.out.println("@" + filename + "; LDAConfiguration: k = " + ldaConfiguration.getK() + ", alpha = " + ldaConfiguration.getAlpha() + ", eta = " + ldaConfiguration.getEta());
+	    
+        return new Pair<LDAConfiguration, ArrayList<Topic>>(ldaConfiguration, topics);
 	}
 }
