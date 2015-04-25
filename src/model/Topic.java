@@ -197,9 +197,11 @@ public class Topic
 			List<String> lines = Files.readAllLines(path, charset);
 			
 			// Get start parameter's start positions in configuration line (#0) in dataset.
+			// Add new parameters to be processed here. Has to be in the form of "param1=x|param2=y|blub=z".
 			paramValueIndexMap.put("k", lines.get(0).indexOf("k="));
 			paramValueIndexMap.put("eta", lines.get(0).indexOf("eta="));
 			paramValueIndexMap.put("alpha", lines.get(0).indexOf("alpha="));
+			
 			// Check if all parameters are available.
 			for (String key : paramValueIndexMap.keySet()) {
 				if (paramValueIndexMap.get(key) < 0) {
@@ -211,7 +213,6 @@ public class Topic
 			// Read parameter values first, then keyword/probability pairs.
 			// ----------------------------------------------------------------
 			if (topicKeywordAlignment == TopicKeywordAlignment.HORIZONTAL) {
-				// @todo Read metadata.
 				// Length for respectively the identifier ("k", "alpha", ...) and the value ("33.4", "0.5", "20", ...).
 				int substringLength = -1;
 				int valueLength		= -1;

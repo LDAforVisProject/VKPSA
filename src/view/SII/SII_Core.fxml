@@ -73,7 +73,7 @@
                   </HBox>
                   <HBox layoutX="1164.0" layoutY="30.0" maxHeight="30.0" minHeight="20.0" prefHeight="20.0" prefWidth="136.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="0.0">
                      <children>
-                        <ImageView fx:id="icon_load" fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="icon_load" fitHeight="25.0" fitWidth="25.0" onMouseClicked="#actionButtonClicked" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@icons/folder_small.jpg" />
                            </image>

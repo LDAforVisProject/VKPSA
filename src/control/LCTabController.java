@@ -25,13 +25,10 @@ public class LCTabController extends VisualizationTabController
 	@Override
 	public void draw()
 	{
-		// @todo Auto-generated method stub
 	}
 
 	@Override
 	public void updateBounds(double newWidth, double newHeight)
-	{
-		// @todo Auto-generated method stub
-		
+	{	
 	}
 }

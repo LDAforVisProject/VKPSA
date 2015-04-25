@@ -31,7 +31,7 @@ public class SII_AnalysisController implements Initializable
 	{
 		System.out.println("Initializing SII_AnalysisController.");
 		
-		// Init scatterchart. @todo Get maxima and minima automatically.
+		// Init scatterchart.
 		xAxis = scatterchart_global.getXAxis();
         yAxis = scatterchart_global.getYAxis();
         

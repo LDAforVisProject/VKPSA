@@ -58,17 +58,13 @@ public class Workspace
 		this.ldaConfigurations	= new ArrayList<LDAConfiguration>();
 		
 //		this.reverseMDSCoordinateLookup = new MultiMap<Pair<Double, Double>, LDAConfiguration>();
-		
-		// Load specified directory.
-		double[][] output = null;
-//		executeWorkspaceAction(WorkspaceAction.ALL);
 	}
 	
 	/**
 	 * Executes workspace actions (such as "load files in directory", "generate new files",
 	 * "calculate distances" etc.).
 	 * @param workspaceAction
-	 * @return Boolean indicating whether action was successfully executed or not.
+	 * @return Requested result as two-dimensional array. 
 	 */
 	public double[][] executeWorkspaceAction(WorkspaceAction workspaceAction)
 	{
@@ -87,7 +83,7 @@ public class Workspace
 			break;
 			
 			case LOAD_MDS_COORDINATES:
-				// @todo Other sections (besides "ALL"), test dynamic loading.
+				result = loadMDSCoordinates("src/data", "testdata.txt");
 			break;	
 			
 			case ALL:
@@ -239,6 +235,13 @@ public class Workspace
 		return output;
 	}
 	
+	/**
+	 * For testing purposes only.
+	 * @deprecated
+	 * @param useExistingData
+	 * @return
+	 */
+	/*
 	public double[][] test_sampleData(boolean useExistingData)
 	{
 		final int numberOfDatasets							= 25;
@@ -352,7 +355,8 @@ public class Workspace
 		
 		return output;
 	}
-
+	*/
+	
 	// ------------------------------
 	// From here: Getter and setter.
 	// ------------------------------
