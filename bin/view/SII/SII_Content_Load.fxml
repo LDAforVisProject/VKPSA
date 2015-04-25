@@ -7,28 +7,28 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="850.0" prefWidth="1440.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.SII.SII_LoadController">
+<AnchorPane prefHeight="850.0" prefWidth="1440.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.LoadController">
    <children>
-      <Label layoutX="393.0" layoutY="179.0" text="Select a working directory." wrapText="true">
+      <Label layoutX="393.0" layoutY="157.0" text="Select a working directory." wrapText="true">
          <font>
             <Font size="22.0" />
          </font>
       </Label>
-      <Label layoutX="395.0" layoutY="276.0" prefHeight="44.0" prefWidth="265.0" text="Datasets found in this directory are loaded and processed automatically." wrapText="true">
+      <Label layoutX="395.0" layoutY="254.0" prefHeight="44.0" prefWidth="265.0" text="Datasets found in this directory are loaded and processed automatically." wrapText="true">
          <font>
             <Font size="14.0" />
          </font>
       </Label>
-      <Label layoutX="396.0" layoutY="317.0" prefHeight="62.0" prefWidth="263.0" text="If not datasets are found, new data has to be generated (available under GENERATE) before an analysis may be started." wrapText="true">
+      <Label layoutX="396.0" layoutY="295.0" prefHeight="62.0" prefWidth="263.0" text="If not datasets are found, new data has to be generated before an analysis may be conducted." wrapText="true">
          <font>
             <Font size="14.0" />
          </font>
       </Label>
-      <TextField fx:id="textfield_directory" layoutX="765.0" layoutY="286.0" />
-      <Button fx:id="button_browse" layoutX="923.0" layoutY="286.0" mnemonicParsing="false" text="Browse" />
-      <Button fx:id="button_load" layoutX="765.0" layoutY="330.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="148.0" text="Load directory" />
-      <Separator layoutX="716.0" layoutY="266.0" orientation="VERTICAL" prefHeight="137.0" prefWidth="6.0" />
-      <Separator layoutX="392.0" layoutY="233.0" prefHeight="3.0" prefWidth="613.0" />
-      <ProgressIndicator fx:id="progressIndicator_load" layoutX="935.0" layoutY="333.0" progress="0.0" />
+      <TextField fx:id="textfield_directory" layoutX="765.0" layoutY="264.0" />
+      <Button fx:id="button_browse" layoutX="923.0" layoutY="264.0" mnemonicParsing="false" onAction="#openFileBrowser" text="Browse" />
+      <Button fx:id="button_load" layoutX="765.0" layoutY="308.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="148.0" text="Load directory" />
+      <Separator layoutX="716.0" layoutY="244.0" orientation="VERTICAL" prefHeight="137.0" prefWidth="6.0" />
+      <Separator layoutX="392.0" layoutY="211.0" prefHeight="3.0" prefWidth="613.0" />
+      <ProgressIndicator fx:id="progressIndicator_load" layoutX="935.0" layoutY="311.0" progress="0.0" />
    </children>
 </AnchorPane>

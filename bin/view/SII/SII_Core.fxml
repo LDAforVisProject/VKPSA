@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane fx:id="root" maxHeight="748.0" maxWidth="1366.0" prefHeight="748.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.SII.SII_CoreController">
+<AnchorPane fx:id="root" maxHeight="748.0" maxWidth="1366.0" prefHeight="748.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.CoreController">
    <children>
       <BorderPane prefHeight="748.0" prefWidth="1366.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <center>
@@ -73,7 +73,7 @@
                   </HBox>
                   <HBox layoutX="1164.0" layoutY="30.0" maxHeight="30.0" minHeight="20.0" prefHeight="20.0" prefWidth="136.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="0.0">
                      <children>
-                        <ImageView fx:id="icon_load" fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="icon_load" fitHeight="25.0" fitWidth="25.0" onMouseClicked="#actionButtonClicked" onMouseEntered="#enableActiveCursor" onMouseExited="#disableActiveCursor" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@icons/folder_small.jpg" />
                            </image>

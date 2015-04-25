@@ -6,192 +6,177 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import model.Dataset;
+import model.Workspace;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SingleSelectionModel;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 
-public class CoreController implements Initializable
+public class CoreController extends Controller
 {
-	@FXML private Node root;
-	@FXML private Menu menu;
-	@FXML private Menu menu_viewMenu;
-	@FXML private MenuItem menu_viewMenu_textSimilarity;
-	@FXML private MenuItem menu_viewMenu_globalComparison;
-	@FXML private MenuItem menu_viewMenu_database;
-	@FXML private MenuItem menu_help; 
-	@FXML private TabPane tabPane;
+	private @FXML Node root;
 	
+	private @FXML ImageView icon_settings;
+	private @FXML ImageView icon_help;
+	private @FXML ImageView icon_lock;
+	
+	private @FXML Label label_title;
+	private @FXML ImageView icon_current;
+	
+	private @FXML ImageView icon_load;
+	private @FXML ImageView icon_generate;
+	private @FXML ImageView icon_preprocess;
+	private @FXML ImageView icon_analyze;
+	
+	private @FXML AnchorPane pane_content;
+	
+	// Reference to main scene.
 	private Scene scene;
 	
-	/**
-	 * Stores tab controller by tab names.
-	 */
-	private Map<String, Initializable> visTabControllers;
-	/**
-	 * Stores references to tabs by tab names.
-	 */
-	private Map<String, Tab> tabs;
+	// References to instances of content pane's controllers.
+	private Map<String, Controller> controllerMap;
 	
-	public CoreController()
-	{
-		visTabControllers	= new HashMap<String, Initializable>();
-		tabs				= new HashMap<String, Tab>();
-	}
-
+	// References to loaded UI pane views.
+	private Map<String, Node> viewNodeMap;
+	
 	@Override
-	public void initialize(URL url, ResourceBundle resourceBundle)
+	public void initialize(URL location, ResourceBundle resources)
 	{
-		System.out.println("Initializing Controller.");
-	}
-	
-	@FXML
-	public void menu_viewMenu_itemSelected(ActionEvent e) 
-	{
-		MenuItem item = (MenuItem) e.getSource();
-        
-        try {
-        	// Load .fxml file, get reference to controller.
-        	FXMLLoader fxmlLoader		= new FXMLLoader();
-	        Node tabContent				= null;
-	        AnchorPane tabAnchorPane	= new AnchorPane();
-	        // Create new tab.
-	        Tab tab						= new Tab();
-	        boolean isTabUnique			= !visTabControllers.containsKey(item.getId()); 
-	        
-	        System.out.println(item.getId());
-	        
-			// Create new tab, anchor it, then fill it with content.
-	        switch (item.getId()) {
-	        	case "menu_viewMenu_globalComparison":
-	        		// Load FXML file containing tab content.
-	        		tabContent = (Node) fxmlLoader.load(getClass().getResource("/view/GCTabContent.fxml").openStream());
-	        		
-	        		// Get controlle for tab pane.
-	        		if (isTabUnique) {
-	        			// Add reference to controller to map.
-	        			visTabControllers.put(item.getId(), (GCTabController) fxmlLoader.getController());
-
-	        			// Add reference to tab to map.
-	        			tabs.put(item.getId(), tab);
-	        			
-		        		// Add settings pane to tab content.
-	        			GCTabController controller_gc = (GCTabController) visTabControllers.get(item.getId()); 
-	        			controller_gc.addSettingsPane("/view/ViewSettings_globalComparison.fxml");
-		        
-		        		// Set title text.
-		        		tab.setText("Topical similarity - Global Comparison");
-		        		
-						// Load visualization file.
-//		        		controller_gc.setCoordinates(Dataset.sampleTestData(true));
-		        		controller_gc.draw();
-	        		}
-	        		
-	        		else {
-	        			System.out.println("### Tab already opened. Switching to tab.");
-	        			tabPane.getSelectionModel().select(tabs.get(item.getId()));
-	        		}
-	        	break;
-	        	
-	        	case "menu_viewMenu_database":
-	        		// Load FXML file containing tab content.
-	        		tabContent = (Node) fxmlLoader.load(getClass().getResource("/view/DBTabContent.fxml").openStream());
-	        		
-	        		// Get controlle for tab pane.
-	        		if (isTabUnique) {
-	        			// Add reference to controller to map.
-	        			visTabControllers.put(item.getId(), (DBTabController) fxmlLoader.getController());
-
-	        			// Add reference to tab to map.
-	        			tabs.put(item.getId(), tab);
-	        			
-		        		// Get controller
-	        			DBTabController controller_db = (DBTabController) visTabControllers.get(item.getId());
-	        			
-		        		// Set title text.
-		        		tab.setText("Database");
-	        		}
-	        		
-	        		else {
-	        			System.out.println("### Tab already opened. Switching to tab.");
-	        			tabPane.getSelectionModel().select(tabs.get(item.getId()));	
-	        		}
-	        	break;
-	        	
-	        	case "menu_viewMenu_textSimilarity":
-	        		// Load FXML file containing tab content.
-	        		tabContent = (Node) fxmlLoader.load(getClass().getResource("/view/LCTabContent.fxml").openStream());
-	        		
-	        		// Get controlle for tab pane.
-	        		visTabControllers.put(item.getId(), (LCTabController) fxmlLoader.getController());
-	        		
-	        		// Add settings pane to tab content.
-	        		LCTabController controller_lc = (LCTabController) visTabControllers.get(item.getId()); 
-	        		controller_lc.addSettingsPane("/view/ViewSettings_textBlocks.fxml");
-
-	        		// Set title text.
-	        		tab.setText("Topical similarity - Text view");
-					
-					// Load visualization file. 
-	        		controller_lc.loadVisualizationFile("/js/test.html");
-	        	break;
-	        	
-	        	default:
-	        		System.out.println("fx:id '" + item.getId() + "' not known.");
-	        	break;
-	        }
-	        
-	        // Add tab to GUI.
-	        if (isTabUnique) {
-	        	// Add content to container.
-        		tabAnchorPane.getChildren().add(tabContent);
-        		
-        		// Ensure resizability of tab content.
-        		AnchorPane.setTopAnchor(tabContent, 0.0);
-        		AnchorPane.setBottomAnchor(tabContent, 0.0);
-        		AnchorPane.setLeftAnchor(tabContent, 0.0);
-        		AnchorPane.setRightAnchor(tabContent, 0.0);
-        		
-        		// Move loaded content into newly created tab.
-				tab.setContent(tabAnchorPane);
-				// Add newly created tab to existing tab pane. 
-				tabPane.getTabs().add(tab);
-	        }
-		}
-        
-        catch (IOException e1) {
-			e1.printStackTrace();
-		}
-    }
-	
-	/**
-	 * Induces redraw of visualizations after resizing of stage.
-	 * @param widthDelta
-	 * @param heightDelta
-	 */
-	public void resizeContent(double newWidth, double newHeight)
-	{
-		// Redraw visualizations.
-		for (Map.Entry<String, Initializable> item : visTabControllers.entrySet()) {
-			if (item.getValue() instanceof VisualizationTabController) {
-				VisualizationTabController tabController = (VisualizationTabController) item.getValue(); 
-				tabController.updateBounds(newWidth, newHeight);
-				tabController.draw();
-			}
-		}
+		System.out.println("Initializing SII_CoreController.");
+		
+		// Init map of UI views.
+		viewNodeMap		= new HashMap<String, Node>();
+		controllerMap	= new HashMap<String, Controller>();
+		
+		// Init test workspace.
+		String directory	= "D:\\Workspace\\LDA\\core\\data\\sampling";
+		workspace			= new Workspace(directory);
 	}
 	
 	public void setScene(Scene scene)
 	{
 		this.scene = scene;
 	}
+	
+	/**
+	 * 
+	 * @param e
+	 */
+	@FXML
+	public void actionButtonClicked(MouseEvent e) 
+	{
+		// Do nothing if ImageView is not source of the event.
+		if (!(e.getSource() instanceof ImageView))
+			return;
+		
+        // Get event source.
+        ImageView source = (ImageView) e.getSource();
+		
+		switch (source.getId()) {
+			case "icon_analyze":
+				label_title.setText("Analyze");
+				
+				// Is controller already initiated? If so, node was already created.
+				if (!viewNodeMap.containsKey("analyze")) {
+					initView("analyze", "/view/SII/SII_Content_Analysis.fxml");
+					
+					// Draw scatterchart.
+					((AnalysisController)controllerMap.get("analyze")).refreshScatterchart();
+				}
+				
+				// Controller already exists: Switch to node.
+				else {
+					enableView("analyze");
+				}
+			break;
+			
+			case "icon_load":
+				label_title.setText("Load");
+				
+				if (!viewNodeMap.containsKey("load")) {
+					initView("load", "/view/SII/SII_Content_Load.fxml");
+				}
+				
+				else {
+					enableView("load");
+				}
+			break;
+		}
+	}
+	
+	/**
+	 * Creates view (called at first action with this view).
+	 * @param viewID
+	 * @param path
+	 */
+	private void initView(String viewID, String path)
+	{
+    	FXMLLoader fxmlLoader		= new FXMLLoader();
+        Node contentNode			= null;
+        Controller controller	= null;
+        
+        try {
+        	// Store node of this view.
+			viewNodeMap.put( viewID, (Node) fxmlLoader.load(getClass().getResource(path).openStream()) );
+			contentNode = viewNodeMap.get(viewID);
+			
+			// Get controller.
+			controllerMap.put(viewID, (Controller)fxmlLoader.getController());
+			controller = controllerMap.get(viewID);
+			
+			// Add to content pane.
+			pane_content.getChildren().add(contentNode);
+			
+			// Set current workspace in analysis controller.
+			controller.setWorkspace(workspace);
+			
+			// Ensure resizability of tab content.
+			AnchorPane.setTopAnchor(contentNode, 0.0);
+    		AnchorPane.setBottomAnchor(contentNode, 0.0);
+    		AnchorPane.setLeftAnchor(contentNode, 0.0);
+    		AnchorPane.setRightAnchor(contentNode, 0.0);
+		} 
+        
+        catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void enableView(String viewID)
+	{
+		for (Node viewNode : viewNodeMap.values()) {
+			viewNode.setDisable(true);
+			viewNode.setVisible(false);
+		}
+		
+		viewNodeMap.get(viewID).setDisable(false);
+		viewNodeMap.get(viewID).setVisible(true);
+	}
+	
+	/**
+	 * Enable active / "button" cursor if it hovers over an active ImageView.
+	 * @param e
+	 */
+	@FXML
+	public void enableActiveCursor(MouseEvent e)
+	{
+		scene.setCursor(Cursor.HAND);
+	}
+	
+	/**
+	 * Disable active / "button" cursor if it hovers over an active ImageView.
+	 * @param e
+	 */
+	@FXML
+	public void disableActiveCursor(MouseEvent e)
+	{
+		scene.setCursor(Cursor.DEFAULT);
+	}	
 }

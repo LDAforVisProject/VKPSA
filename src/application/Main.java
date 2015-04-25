@@ -1,34 +1,25 @@
 package application;
-	
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-
-import control.CoreController;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXMLLoader;
-import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
-
+import javafx.stage.Stage;
+import control.CoreController;
 
 public class Main extends Application
-{	
+{
 	@Override
 	public void start(Stage primaryStage)
 	{
 		try {
-			// @todo Write file/dataset metadata in Python generated topic files. 
-	        
 			// Load core .fxml file. 
-			FXMLLoader fxmlLoader			= new FXMLLoader();
-			Pane root 						= (Pane) fxmlLoader.load(getClass().getResource("/view/Core.fxml").openStream());
+			FXMLLoader fxmlLoader				= new FXMLLoader();
+			Pane root 							= (Pane) fxmlLoader.load(getClass().getResource("/view/SII/SII_Core.fxml").openStream());
 			CoreController coreController	= (CoreController) fxmlLoader.getController();
-			Scene scene						= new Scene(root);
+			Scene scene							= new Scene(root);
 			
 			coreController.setScene(scene);
 	        primaryStage.setTitle("VKPSA");
@@ -39,21 +30,21 @@ public class Main extends Application
 			scene.getStylesheets().add(getClass().getResource("/view/css/visTabContent.css").toExternalForm());
 			
 			// Add resize listeners.
-			addResizeListeners(scene, coreController);
+//			addResizeListeners(scene, coreController);
 		}
 		
 		catch(Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void addResizeListeners(Scene scene, final CoreController coreController)
 	{
 		scene.widthProperty().addListener(new ChangeListener<Number>() {
 		    @Override 
 		    public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth)
 		    {
-		        coreController.resizeContent(newSceneWidth.doubleValue(), 0);
+//		        coreController.resizeContent(newSceneWidth.doubleValue(), 0);
 		    }
 		});
 		
@@ -61,19 +52,14 @@ public class Main extends Application
 		    @Override 
 		    public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneHeight, Number newSceneHeight) 
 		    {
-		        coreController.resizeContent(0, newSceneHeight.doubleValue());
+//		        coreController.resizeContent(0, newSceneHeight.doubleValue());
 		    }
 		});
 	}
-		
-	public static void main(String[] args) 
+	
+	public static void main(String[] args)
 	{
 		launch(args);
-//		String var = "k=33|alpha=3.4|eta=4.23";
-//		int pos = var.indexOf("alpha=");
-//		System.out.println("pos = " + pos);
-//		int length = var.indexOf("|", pos) - (pos + 5 + 1);
-//		System.out.println("length = " + length);
-//		System.out.println(var.substring(pos + 5 + 1, pos + 5 + 1 + length));
 	}
+
 }

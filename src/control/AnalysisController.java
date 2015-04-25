@@ -1,21 +1,16 @@
-package control.SII;
+package control;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import model.Dataset;
-import model.Workspace;
 import model.WorkspaceAction;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.chart.Axis;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
 
-public class SII_AnalysisController implements Initializable
+public class AnalysisController extends Controller
 {
 	private @FXML ScatterChart<Number, Number> scatterchart_global;
 	
@@ -23,8 +18,6 @@ public class SII_AnalysisController implements Initializable
 	private Axis<Number> yAxis;
 	
 	private double[][] coordinates;
-	
-	private Workspace workspace;
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources)
@@ -57,10 +50,5 @@ public class SII_AnalysisController implements Initializable
         
         // Add data in scatterchart.
         scatterchart_global.getData().add(dataSeries);
-	}
-	
-	public void setWorkspace(Workspace workspace)
-	{
-		this.workspace = workspace;
 	}
 }
