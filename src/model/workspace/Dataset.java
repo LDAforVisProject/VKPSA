@@ -1,4 +1,4 @@
-package model;
+package model.workspace;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -15,6 +15,8 @@ import java.util.Map;
 
 import javafx.util.Pair;
 import mdsj.MDSJ;
+import model.LDAConfiguration;
+import model.topic.Topic;
 
 /**
  * One instance of dataset corresponds to the output of a execution of the LDA

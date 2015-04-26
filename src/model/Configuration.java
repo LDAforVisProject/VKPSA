@@ -1,5 +1,7 @@
 package model;
 
+import model.workspace.Workspace;
+
 /**
  * Contains configurable options (panel locking, other preferences).
  * 

@@ -1,4 +1,4 @@
-package model;
+package model.workspace;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +18,9 @@ import org.apache.commons.collections4.MultiMap;
 import javafx.util.Pair;
 import mdsj.Data;
 import mdsj.MDSJ;
+import model.LDAConfiguration;
+import model.topic.Topic;
+import model.topic.TopicKeywordAlignment;
 
 /**
  * Encompasses:
@@ -36,6 +39,12 @@ public class Workspace
 	 */
 	private String directory;
 	/**
+	 * Name of file containing already calculated MDS coordinates.
+	 */
+	private static final String FILENAME_MDSCOORDINATES = "workspace.mds";
+	
+	
+	/**
 	 * Holds all (loaded) datasets from the specified
 	 * directory.
 	 */
@@ -49,8 +58,7 @@ public class Workspace
 	 * are assigned this MDS / global scatterplot coordinate.
 	 */
 	private MultiMap<Pair<Double, Double>, LDAConfiguration> reverseMDSCoordinateLookup;
-	
-	
+
 	public Workspace(String directory)
 	{
 		this.directory			= directory;
@@ -83,8 +91,15 @@ public class Workspace
 			break;
 			
 			case LOAD_MDS_COORDINATES:
-				result = loadMDSCoordinates("src/data", "testdata.txt");
-			break;	
+				result = loadMDSCoordinates(directory, FILENAME_MDSCOORDINATES);
+			break;
+			
+			case RESET:
+				directory = "";
+				datasetMap.clear();
+				ldaConfigurations.clear();
+				reverseMDSCoordinateLookup.clear();
+			break;
 			
 			case ALL:
 				// Load datasets.
@@ -95,7 +110,7 @@ public class Workspace
 				distances			= calculateDistances(numberOfDatasets, false);
 				// Calculate MDS coordinates.
 				System.out.println("MDSCoordinates");
-				mdsCoordinates		= calculateMDSCoordinates(distances, true, "src/data/testdata.txt");
+				mdsCoordinates		= calculateMDSCoordinates(distances, true, directory + "\\" + FILENAME_MDSCOORDINATES);
 				result				= mdsCoordinates;
 			break;		
 		}
@@ -208,30 +223,37 @@ public class Workspace
 	    int lineCount		= 0;
 	    int coordinateCount	= 0;
 	    
-		try {
-			List<String> lines	= Files.readAllLines(path, charset);
-			
-			for (String line : lines) {
-				String[] coordinates = line.split(" ");
+	    if (Files.exists(path)) {
+			try {
+				List<String> lines	= Files.readAllLines(path, charset);
 				
-				if (output == null)
-					output = new double[2][coordinates.length];
-				
-				for (String coordinate : coordinates) {
-					output[lineCount][coordinateCount] = Double.parseDouble(coordinate);
+				for (String line : lines) {
+					String[] coordinates = line.split(" ");
 					
-					coordinateCount++;
+					if (output == null)
+						output = new double[2][coordinates.length];
+					
+					for (String coordinate : coordinates) {
+						output[lineCount][coordinateCount] = Double.parseDouble(coordinate);
+						
+						coordinateCount++;
+					}
+					
+					lineCount++;
+					coordinateCount	= 0;
 				}
-				
-				lineCount++;
-				coordinateCount	= 0;
+			} 
+			
+			catch (IOException e) {
+				e.printStackTrace();
 			}
-		} 
-		
-		catch (IOException e) {
-			e.printStackTrace();
-		}
-		
+	    }
+	    
+	    // File doesn't exist.
+	    else {
+	    	
+	    }
+	    
 		return output;
 	}
 	

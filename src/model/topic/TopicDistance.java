@@ -1,4 +1,4 @@
-package model;
+package model.topic;
 
 public enum TopicDistance
 {

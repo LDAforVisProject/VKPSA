@@ -1,6 +1,6 @@
 package control;
 
-import model.Workspace;
+import model.workspace.Workspace;
 import javafx.fxml.Initializable;
 
 public abstract class Controller implements Initializable

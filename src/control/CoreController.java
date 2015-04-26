@@ -6,11 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import model.Workspace;
-import javafx.event.ActionEvent;
+import model.workspace.Workspace;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -55,8 +53,8 @@ public class CoreController extends Controller
 		viewNodeMap		= new HashMap<String, Node>();
 		controllerMap	= new HashMap<String, Controller>();
 		
-		// Init test workspace.
-		String directory	= "D:\\Workspace\\LDA\\core\\data\\sampling";
+		// Init workspace.
+		String directory	= "D:\\Workspace\\Scientific Computing\\VKPSA\\src\\data";
 		workspace			= new Workspace(directory);
 	}
 	
@@ -118,8 +116,8 @@ public class CoreController extends Controller
 	 */
 	private void initView(String viewID, String path)
 	{
-    	FXMLLoader fxmlLoader		= new FXMLLoader();
-        Node contentNode			= null;
+    	FXMLLoader fxmlLoader	= new FXMLLoader();
+        Node contentNode		= null;
         Controller controller	= null;
         
         try {

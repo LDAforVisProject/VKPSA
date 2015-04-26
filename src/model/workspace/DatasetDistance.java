@@ -1,4 +1,4 @@
-package model;
+package model.workspace;
 
 public enum DatasetDistance
 {
