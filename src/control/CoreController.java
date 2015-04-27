@@ -86,7 +86,7 @@ public class CoreController extends Controller
 					initView("analyze", "/view/SII/SII_Content_Analysis.fxml");
 					
 					// Draw scatterchart.
-					((AnalysisController)controllerMap.get("analyze")).refreshScatterchart();
+					((AnalysisController)controllerMap.get("analyze")).refreshVisualizations();
 				}
 				
 				// Controller already exists: Switch to node.
@@ -176,5 +176,5 @@ public class CoreController extends Controller
 	public void disableActiveCursor(MouseEvent e)
 	{
 		scene.setCursor(Cursor.DEFAULT);
-	}	
+	}
 }

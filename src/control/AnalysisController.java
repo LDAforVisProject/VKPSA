@@ -32,13 +32,18 @@ public class AnalysisController extends Controller
         yAxis.setAutoRanging(true);
 	}
 	
+	public void refreshVisualizations()
+	{
+		refreshScatterchart();
+	}
+	
 	/**
-	 * Refresh scatterchart with data from coordinate. 
+	 * Refresh scatterchart with data from MDS coordinates. 
 	 */
-	public void refreshScatterchart()
+	private void refreshScatterchart()
 	{	
-		// Calculate/load MDS'ed data from test data archive.
-		coordinates = workspace.executeWorkspaceAction(WorkspaceAction.ALL);
+		// Calculate/load MDS'ed data from workspace.
+		coordinates = workspace.getMDSCoordinates();
 		
         final Series<Number, Number> dataSeries = new XYChart.Series<>();
         dataSeries.setName("Data");

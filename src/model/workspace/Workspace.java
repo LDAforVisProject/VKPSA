@@ -15,12 +15,18 @@ import java.util.Set;
 
 import org.apache.commons.collections4.MultiMap;
 
+import javafx.beans.property.DoubleProperty;
+import javafx.concurrent.Task;
+import javafx.scene.control.ProgressIndicator;
 import javafx.util.Pair;
 import mdsj.Data;
 import mdsj.MDSJ;
 import model.LDAConfiguration;
 import model.topic.Topic;
 import model.topic.TopicKeywordAlignment;
+import model.workspace.tasks.ITaskListener;
+import model.workspace.tasks.Task_LoadMDSCoordinates;
+import model.workspace.tasks.Task_WorkspaceTask;
 
 /**
  * Encompasses:
@@ -41,12 +47,18 @@ public class Workspace
 	/**
 	 * Name of file containing already calculated MDS coordinates.
 	 */
-	private static final String FILENAME_MDSCOORDINATES = "workspace.mds";
-	
+	public static final String FILENAME_DISCOORDINATES = "workspace.dis";	
+	/**
+	 * Name of file containing already calculated MDS coordinates.
+	 */
+	public static final String FILENAME_MDSCOORDINATES = "workspace.mds";
 	
 	/**
-	 * Holds all (loaded) datasets from the specified
-	 * directory.
+	 * Contains pre-calculated MDS coordinates. Read from .FILENAME_MDSCOORDINATES.
+	 */
+	private double[][] mdsCoordinates;
+	/**
+	 * Holds all (loaded) datasets from the specified directory.
 	 */
 	private Map<LDAConfiguration, Dataset> datasetMap;
 	/**
@@ -58,7 +70,16 @@ public class Workspace
 	 * are assigned this MDS / global scatterplot coordinate.
 	 */
 	private MultiMap<Pair<Double, Double>, LDAConfiguration> reverseMDSCoordinateLookup;
-
+	
+	/**
+	 * Number of datasets in workspace. Used to check workspace integrity.
+	 */
+	private int numberOfMDSCoordinatesInWS;
+	/**
+	 * Number of datasets in workspace. Used to check workspace integrity.
+	 */
+	private int numberOfDatasetsInWS;
+	
 	public Workspace(String directory)
 	{
 		this.directory			= directory;
@@ -72,14 +93,16 @@ public class Workspace
 	 * Executes workspace actions (such as "load files in directory", "generate new files",
 	 * "calculate distances" etc.).
 	 * @param workspaceAction
-	 * @return Requested result as two-dimensional array. 
+	 * @param progressProperty Property to bind to task progress (used for ProgressIndicators and ProgressBars).
+	 * @param listener IThreadCompleteListener to be notified when thread has finished. 
+	 * @return Thread processing the request.
 	 */
-	public double[][] executeWorkspaceAction(WorkspaceAction workspaceAction)
+	public Task_WorkspaceTask executeWorkspaceAction(WorkspaceAction workspaceAction, DoubleProperty progressProperty, ITaskListener listener)
 	{
+		Task_WorkspaceTask task		= null;
 		int numberOfDatasets		= -1;
 		double[][] distances		= null;
 		double[][] mdsCoordinates	= null;
-		double[][] result			= null;
 		
 		switch (workspaceAction) {
 			case LOAD_RAW_DATA:
@@ -91,14 +114,34 @@ public class Workspace
 			break;
 			
 			case LOAD_MDS_COORDINATES:
-				result = loadMDSCoordinates(directory, FILENAME_MDSCOORDINATES);
+				// Load MDS coordinates from file.
+				task = new Task_LoadMDSCoordinates(this, WorkspaceAction.LOAD_MDS_COORDINATES);
+				task.addListener(listener);
+				if (progressProperty != null) {
+					progressProperty.bind(task.progressProperty());
+				}
+				
+				task.run();
+				
+//				executingThread = new Thread_LoadMDSCoordinates(this, progressProperty);
+//				executingThread.addListener(listener);
+//				executingThread.setDaemon(true);
+//				executingThread.start();
 			break;
 			
 			case RESET:
 				directory = "";
 				datasetMap.clear();
 				ldaConfigurations.clear();
-				reverseMDSCoordinateLookup.clear();
+//				reverseMDSCoordinateLookup.clear();
+			break;
+			
+			case SWITCH_DIRECTORY:
+				datasetMap.clear();
+				ldaConfigurations.clear();
+//				reverseMDSCoordinateLookup.clear();
+				
+				executeWorkspaceAction(WorkspaceAction.LOAD_MDS_COORDINATES, progressProperty, listener);
 			break;
 			
 			case ALL:
@@ -111,11 +154,10 @@ public class Workspace
 				// Calculate MDS coordinates.
 				System.out.println("MDSCoordinates");
 				mdsCoordinates		= calculateMDSCoordinates(distances, true, directory + "\\" + FILENAME_MDSCOORDINATES);
-				result				= mdsCoordinates;
 			break;		
 		}
 		
-		return result;
+		return task;
 	}
 	
 	/**
@@ -195,6 +237,7 @@ public class Workspace
 				System.out.println("2: " + output[0].length);
 				
 				for (int i = 0; i < output.length; i++) {
+					
 					for (int j = 0; j < output[i].length; j++) {
 						writer.print(output[i][j] + " ");
 					}
@@ -213,48 +256,53 @@ public class Workspace
 		
 		return output;
 	}
-
-	private double[][] loadMDSCoordinates(String directory, String filename)
+	
+	/**
+	 * Returns number of .csv files in this directory.
+	 * Does not check whether this .csv is actually an appropriate file.
+	 * @return Number of .csv files in this directory.
+	 */
+	private int readNumberOfDatasets()
 	{
-		double[][] output	= null;
-		Path path			= Paths.get(directory, filename);
-	    Charset charset		= Charset.forName("UTF-8");
-	    
-	    int lineCount		= 0;
-	    int coordinateCount	= 0;
-	    
-	    if (Files.exists(path)) {
-			try {
-				List<String> lines	= Files.readAllLines(path, charset);
-				
-				for (String line : lines) {
-					String[] coordinates = line.split(" ");
-					
-					if (output == null)
-						output = new double[2][coordinates.length];
-					
-					for (String coordinate : coordinates) {
-						output[lineCount][coordinateCount] = Double.parseDouble(coordinate);
-						
-						coordinateCount++;
-					}
-					
-					lineCount++;
-					coordinateCount	= 0;
-				}
-			} 
+		numberOfDatasetsInWS = 0;
+		
+		for(File f : new File(directory).listFiles()) {
+			String filePath			= f.getAbsolutePath();
+			String fileExtension	= filePath.substring(filePath.lastIndexOf(".") + 1, filePath.length());
 			
-			catch (IOException e) {
-				e.printStackTrace();
-			}
-	    }
-	    
-	    // File doesn't exist.
-	    else {
-	    	
-	    }
-	    
-		return output;
+			numberOfDatasetsInWS	= "csv".equals(fileExtension) ? numberOfDatasetsInWS + 1 : numberOfDatasetsInWS;
+		}
+		
+		return numberOfDatasetsInWS;
+	}
+	
+	/**
+	 * Checks if .mds file exists.
+	 * @return
+	 */
+	public boolean containsMDSFile()
+	{
+		return Files.exists(Paths.get(directory, Workspace.FILENAME_MDSCOORDINATES));
+	}
+	
+	/**
+	 * Checks if .dis file exists.
+	 * @return
+	 */
+	public boolean containsDISFile()
+	{
+		return Files.exists(Paths.get(directory, Workspace.FILENAME_DISCOORDINATES));
+	}
+	
+	/**
+	 * Checks whether or not the .dis and .mds files are consistent
+	 * with the data files contained in the workspace.
+	 * @return Flag indicating integrity of metadata/consistency of metadata and data in this workspace. True if workspace is consistent.
+	 */
+	public boolean checkMetadataIntegrity()
+	{
+		return 	(getNumberOfDatasetsInWS() == getNumberOfMDSCoordinatesInWS()); //&& 
+//				isDISFileConistentWithDatasets());
 	}
 	
 	// ------------------------------
@@ -269,5 +317,35 @@ public class Workspace
 	public void setDirectory(String directory)
 	{
 		this.directory = directory;
+	}
+	
+	public int getNumberOfMDSCoordinatesInWS()
+	{
+		return numberOfMDSCoordinatesInWS;
+	}
+	
+	public int getNumberOfDatasetsInWS()
+	{
+		return readNumberOfDatasets();
+	}
+	
+	public double[][] getMDSCoordinates()
+	{
+		return mdsCoordinates;
+	}
+
+	public void setMDSCoordinates(double[][] mdsCoordinates)
+	{
+		this.mdsCoordinates = mdsCoordinates;
+	}
+
+	public void setNumberOfMDSCoordinatesInWS(int numberOfMDSCoordinatesInWS)
+	{
+		this.numberOfMDSCoordinatesInWS = numberOfMDSCoordinatesInWS;
+	}
+
+	public void setNumberOfDatasetsInWS(int numberOfDatasetsInWS)
+	{
+		this.numberOfDatasetsInWS = numberOfDatasetsInWS;
 	}
 }
