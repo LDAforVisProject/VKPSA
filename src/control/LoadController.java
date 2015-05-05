@@ -74,12 +74,13 @@ public class LoadController extends Controller
 			
 			// Specified is current directory.
 			else {
+				// @todo Output error message.
 			}
 		}
 		
 		// Directory doesn't exist.
 		else {
-			
+			// @todo Output error message.			
 		}
 	}
 	
@@ -90,7 +91,13 @@ public class LoadController extends Controller
 	{
 		switch (workspaceAction) {
 			case LOAD_MDS_COORDINATES:
-				displayIntegrityCheck();
+				// Execute and display integrity check, set summary as tooltip.
+				Tooltip tooltip = new Tooltip(displayIntegrityCheck());
+				tooltip.setMaxWidth(250);
+				tooltip.setAutoHide(false);
+				tooltip.setWrapText(true);
+				
+		        Tooltip.install( shape_integrity, tooltip);
 			break;
 
 			default:
@@ -108,6 +115,7 @@ public class LoadController extends Controller
 		label_numberMDSCoordinates.setText(String.valueOf(workspace.getNumberOfMDSCoordinatesInWS()));
 		label_mdsFound.setText(String.valueOf(mdsFileExists));
 		label_disFound.setText(String.valueOf(disFileExists));
+		label_consistency.setText(String.valueOf(workspace.checkMetadataIntegrity()));
 		
 		// Check workspace integrity. @todo Cross-check with .dis file to see if datasets in
 		// directory and referenced datasets in .dis are the same.
@@ -120,19 +128,21 @@ public class LoadController extends Controller
 					+ "other and datasets in this directory or preprocess raw topic data again.";
 		}
 		
+		// Worskpace consistent, but neither .mds nor .dis exists:
 		else if (!mdsFileExists && !disFileExists) {
 			shape_integrity.setFill(Color.ORANGE);
 			message = "Warning: Neither .mds or .dis file exist in this workspace. Run preprocessing on "
 					+ "the raw topic data in this workspace.";
 		}
 		
-		// One of both metadata file exists (and is consistent): Yellow.
+		// Workspace consistent and one of both metadata file exists (and is consistent): Yellow.
 		else if ( (mdsFileExists && !disFileExists) || (!mdsFileExists && disFileExists)) {
 			shape_integrity.setFill(Color.YELLOW);
 			message = "Warning: .mds or .dis file doesn't exist in this workspace. Run preprocessing on "
 					+ "the raw topic data in this workspace.";
 		}
 		
+		// Workspace consistent and complete:
 		else if (mdsFileExists && disFileExists) {
 			shape_integrity.setFill(Color.GREEN);
 			message = "Success: Workspace is consistent and complete.";

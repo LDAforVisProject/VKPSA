@@ -19,6 +19,5 @@ public abstract class Controller implements Initializable, ITaskListener
 	@Override
 	public void notifyOfTaskCompleted(final WorkspaceAction workspaceAction)
 	{
-		// @todo Implement thread notification method.
 	}
 }

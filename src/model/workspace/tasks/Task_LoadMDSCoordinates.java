@@ -18,18 +18,6 @@ public class Task_LoadMDSCoordinates extends Task_WorkspaceTask
 	public Task_LoadMDSCoordinates(Workspace workspace, WorkspaceAction workspaceAction)
 	{
 		super(workspace, workspaceAction);
-		
-		// Set notification handle for successful and failed exit.
-		this.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-	        @Override
-	        public void handle(WorkerStateEvent t)
-	        {
-	        	// Notify all listeners.
-	            for (ITaskListener listener : listeners) {
-	            	listener.notifyOfTaskCompleted(WorkspaceAction.LOAD_MDS_COORDINATES);
-	            }
-	        }
-		});
 	}
 	
 	/**
@@ -87,8 +75,12 @@ public class Task_LoadMDSCoordinates extends Task_WorkspaceTask
 				e.printStackTrace();
 			}
 			
+			// Update workspace variables.
 			workspace.setNumberOfMDSCoordinatesInWS(numberOfMDSCoordinatesInWS);
 			workspace.setMDSCoordinates(mdsCoordinates);
+			
+			// Tell workspace that MDS data was loaded.
+			workspace.setMDSDataLoaded(true);
 	    }
 	    
 	    // File doesn't exist.

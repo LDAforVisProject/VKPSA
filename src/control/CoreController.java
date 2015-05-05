@@ -76,7 +76,7 @@ public class CoreController extends Controller
 		
         // Get event source.
         ImageView source = (ImageView) e.getSource();
-		
+        
 		switch (source.getId()) {
 			case "icon_analyze":
 				label_title.setText("Analyze");
@@ -106,6 +106,18 @@ public class CoreController extends Controller
 					enableView("load");
 				}
 			break;
+			
+			case "icon_preprocess":
+				label_title.setText("Preprocess");
+				
+				if (!viewNodeMap.containsKey("preprocess")) {
+					initView("preprocess", "/view/SII/SII_Content_Preprocess.fxml");
+				}
+				
+				else {
+					enableView("preprocess");
+				}
+			break;
 		}
 	}
 	
@@ -121,6 +133,9 @@ public class CoreController extends Controller
         Controller controller	= null;
         
         try {
+        	// Hide all other views.
+        	hideAllViews();
+        	
         	// Store node of this view.
 			viewNodeMap.put( viewID, (Node) fxmlLoader.load(getClass().getResource(path).openStream()) );
 			contentNode = viewNodeMap.get(viewID);
@@ -147,12 +162,17 @@ public class CoreController extends Controller
 		}
 	}
 	
-	private void enableView(String viewID)
+	private void hideAllViews()
 	{
 		for (Node viewNode : viewNodeMap.values()) {
 			viewNode.setDisable(true);
 			viewNode.setVisible(false);
 		}
+	}
+	
+	private void enableView(String viewID)
+	{
+		hideAllViews();
 		
 		viewNodeMap.get(viewID).setDisable(false);
 		viewNodeMap.get(viewID).setVisible(true);

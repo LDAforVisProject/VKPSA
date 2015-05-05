@@ -8,11 +8,11 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="850.0" prefWidth="1440.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.LoadController">
+<AnchorPane prefHeight="748.0" prefWidth="1440.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.LoadController">
    <children>
       <Label layoutX="393.0" layoutY="117.0" text="Select a working directory." wrapText="true">
          <font>
-            <Font size="22.0" />
+            <Font name="System Bold" size="22.0" />
          </font>
       </Label>
       <Label layoutX="395.0" layoutY="214.0" prefHeight="44.0" prefWidth="265.0" text="Datasets found in this directory are loaded and processed automatically." wrapText="true">
