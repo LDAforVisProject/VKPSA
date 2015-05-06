@@ -112,7 +112,7 @@ public class LoadController extends Controller
 		String message			= ""; 
 		
 		label_datasetNumber.setText(String.valueOf(workspace.getNumberOfDatasetsInWS()));
-		label_numberMDSCoordinates.setText(String.valueOf(workspace.getNumberOfMDSCoordinatesInWS()));
+		label_numberMDSCoordinates.setText(String.valueOf(workspace.getNumberOfDatasetsInMDSFile()));
 		label_mdsFound.setText(String.valueOf(mdsFileExists));
 		label_disFound.setText(String.valueOf(disFileExists));
 		label_consistency.setText(String.valueOf(workspace.checkMetadataIntegrity()));

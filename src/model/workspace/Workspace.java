@@ -1,34 +1,48 @@
 package model.workspace;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.collections4.MultiMap;
 
 import javafx.beans.property.DoubleProperty;
-import javafx.concurrent.Task;
-import javafx.scene.control.ProgressIndicator;
 import javafx.util.Pair;
 import mdsj.Data;
 import mdsj.MDSJ;
 import model.LDAConfiguration;
-import model.topic.Topic;
-import model.topic.TopicKeywordAlignment;
 import model.workspace.tasks.ITaskListener;
 import model.workspace.tasks.Task_CalculateDistances;
+import model.workspace.tasks.Task_CalculateMDSCoordinates;
+import model.workspace.tasks.Task_LoadDistanceData;
 import model.workspace.tasks.Task_LoadMDSCoordinates;
 import model.workspace.tasks.Task_LoadRawData;
 import model.workspace.tasks.Task_WorkspaceTask;
+
+// -----------------------------------------------
+// 		ROADMAP / Todos, in sequential order
+// -----------------------------------------------
+
+// @todox Write distance calculation task.
+// @todox Then write raw data loading task.
+// @todox Then write results to file.
+// @todox Write distance data loading task.
+// @todo CURRENT: Rewrite MDS coordinate calculation/outputting - output LDA configuration binding too (which coordinate belongs to which LDA configuration?).
+// @todo Then: Adapt reading methods to new file structures.
+// @todo Then: Complement workspace integrity check (are .dis and .mds and datasets consistent in terms of the number of datasets and which datasets they contain/index?). 
+// @todo Then: Testdrive.
+// @todo Test and augment program workflow.
+// @todo Create data generation view.
+// @todo Improve LDA python script (fixes, parameter output in files). Modify so that generated files contain metadata in first line.
+	// @todo: Add removal of quotation marks in preprocessing of data.
+	// @todo: Add removal of commas in preprocessing of data.
+// @todo Integrate python script binding in VKPSA GUI.
+// @todo Test data generation.
+// @todo Formulate work items for analysis view / phase.
 
 /**
  * Encompasses:
@@ -42,6 +56,10 @@ import model.workspace.tasks.Task_WorkspaceTask;
  */
 public class Workspace
 {
+	// -----------------------------------------------
+	// 				Path variables
+	// -----------------------------------------------
+	
 	/**
 	 * Current directory.
 	 */
@@ -54,6 +72,11 @@ public class Workspace
 	 * Name of file containing already calculated MDS coordinates.
 	 */
 	public static final String FILENAME_MDSCOORDINATES = "workspace.mds";
+	
+	
+	// -----------------------------------------------
+	// 		Actual (raw and (pre-)processed) data
+	// -----------------------------------------------
 	
 	/**
 	 * Contains pre-calculated MDS coordinates. Read from .FILENAME_MDSCOORDINATES.
@@ -79,13 +102,21 @@ public class Workspace
 	private MultiMap<Pair<Double, Double>, LDAConfiguration> reverseMDSCoordinateLookup;
 	
 	/**
-	 * Number of datasets in workspace. Used to check workspace integrity.
+	 * Number of MDS coordinates in in this workspace's .mds file. Used to check workspace integrity.
 	 */
-	private int numberOfMDSCoordinatesInWS;
+	private int numberOfDatasetsInMDSFile;
 	/**
 	 * Number of datasets in workspace. Used to check workspace integrity.
 	 */
 	private int numberOfDatasetsInWS;
+	/**
+	 * Number of datasets/LDA configurations in in this workspace's .dis file. Used to check workspace integrity.
+	 */
+	private int numberOfDatasetsInDISFile;
+	
+	// -----------------------------------------------
+	// 		Auxiliary options and flags
+	// -----------------------------------------------	
 	
 	/**
 	 * Define whether or not calculated distances are appended to an existing
@@ -111,6 +142,15 @@ public class Workspace
 	 */
 	private boolean isMDSDataLoaded;
 	
+	
+	
+	// -----------------------------------------------	
+	// -----------------------------------------------
+	// 					Methods
+	// -----------------------------------------------
+	// -----------------------------------------------	
+	
+	
 	public Workspace(String directory)
 	{
 		this.directory			= directory;
@@ -135,29 +175,49 @@ public class Workspace
 	 * @param workspaceAction
 	 * @param progressProperty Property to bind to task progress (used for ProgressIndicators and ProgressBars).
 	 * @param listener IThreadCompleteListener to be notified when thread has finished. 
-	 * @return Thread processing the request.
+	 * @return Task processing the request.
 	 */
 	public Task_WorkspaceTask executeWorkspaceAction(WorkspaceAction workspaceAction, DoubleProperty progressProperty, ITaskListener listener)
 	{
-		Task_WorkspaceTask task		= null;
+		Task_WorkspaceTask task	= null;
 		
 		switch (workspaceAction) {
+			// -----------------------------------------------
+			// 				Loading operations
+			// -----------------------------------------------
+			
 			case LOAD_RAW_DATA:
 				// Load datasets.
-				task = new Task_LoadRawData(this, WorkspaceAction.LOAD_RAW_DATA);
+				isRawDataLoaded 		= false;
+				task					= new Task_LoadRawData(this, WorkspaceAction.LOAD_RAW_DATA);
 			break;
 			
 			case LOAD_DISTANCES:
+				isDistanceDataLoaded	= false;
+				task					= new Task_LoadDistanceData(this, WorkspaceAction.LOAD_DISTANCES);
 			break;
 			
 			case LOAD_MDS_COORDINATES:
 				// Load MDS coordinates from file.
-				task = new Task_LoadMDSCoordinates(this, WorkspaceAction.LOAD_MDS_COORDINATES);
+				isMDSDataLoaded 		= false;
+				task					= new Task_LoadMDSCoordinates(this, WorkspaceAction.LOAD_MDS_COORDINATES);
 			break;
+			
+			// -----------------------------------------------
+			// 		Calculation / writing operations
+			// -----------------------------------------------
 			
 			case CALCULATE_DISTANCES:
 				task = new Task_CalculateDistances(this, WorkspaceAction.CALCULATE_DISTANCES);
 			break;
+			
+			case CALCULATE_MDS_COORDINATES:
+				task = new Task_CalculateMDSCoordinates(this, WorkspaceAction.CALCULATE_MDS_COORDINATES);
+			break;
+			
+			// -----------------------------------------------
+			// 			Other operations
+			// -----------------------------------------------
 			
 			case RESET:
 				directory = "";
@@ -171,7 +231,9 @@ public class Workspace
 				ldaConfigurations.clear();
 //				reverseMDSCoordinateLookup.clear();
 				
-				// Load MDS coordinates
+				// Load distance data.
+				// @todo Load distance data after choosing new directory.
+				// Load MDS coordinates.
 				executeWorkspaceAction(WorkspaceAction.LOAD_MDS_COORDINATES, progressProperty, listener);
 			break;
 			
@@ -208,69 +270,6 @@ public class Workspace
 		
 		return task;
 	}
-	
-	/**
-	 * Loads datasets from specified directory. Uses the value
-	 * specified in @Workspace#directory.
-	 * @return The number of found datasets.
-	 */
-	/*
-	private int loadDatasets()
-	{
-		// @todo Modify python script so that generated files contain metadata in first line.
-		String[] filenames		= new File(directory).list();
-		int numberOfDatasets	= 0;
-				
-		// Iterate through files.
-		for (String filename : filenames) {
-			// If .csv: Process next file.
-			try {
-				if (filename.endsWith(".csv")) {
-					numberOfDatasets++;
-					
-					Pair<LDAConfiguration, ArrayList<Topic>> topicsetTuple = Topic.generateTopicsFromFile(directory, filename, TopicKeywordAlignment.HORIZONTAL);
-					ldaConfigurations.add(topicsetTuple.getKey());
-					datasetMap.put( topicsetTuple.getKey(), new Dataset(topicsetTuple.getKey(), topicsetTuple.getValue()) );
-				}
-			}
-			
-			catch (Exception e) {
-				System.out.println("Exception: ");
-				e.printStackTrace();
-			}
-		}
-		
-		return numberOfDatasets;
-	}
-	*/
-	
-	/*
-	private double[][] calculateDistances(int numberOfDatasets, boolean writeToFile)
-	{
-		double distances[][] = new double[datasetMap.size()][datasetMap.size()];
-		
-		// Compare all datasets with each other.
-		for (int i = 0; i < ldaConfigurations.size(); i++) {
-			distances[i][i] = 0;
-			
-			for (int j = i + 1; j < ldaConfigurations.size(); j++) {
-				System.out.println(i + " to " + j);
-				
-				// Assume symmetric distance calculations.
-				distances[i][j] = datasetMap.get(ldaConfigurations.get(i)).calculateDatasetDistance(datasetMap.get(ldaConfigurations.get(j)), DatasetDistance.HausdorffDistance);
-				distances[j][i] = distances[i][j];
-				
-				System.out.println(distances[i][j] + " " + distances[j][i]);
-			}	
-		}
-		
-		// @todo Implement mechanism for writing to file.
-		if (writeToFile) {
-		}
-		
-		return distances;
-	}
-	*/
 	
 	private double[][] calculateMDSCoordinates(double[][] distances, boolean writeToFile, String path)
 	{
@@ -314,7 +313,7 @@ public class Workspace
 	 * Does not check whether this .csv is actually an appropriate file.
 	 * @return Number of .csv files in this directory.
 	 */
-	private int readNumberOfDatasets()
+	public int readNumberOfDatasets()
 	{
 		numberOfDatasetsInWS = 0;
 		
@@ -353,7 +352,7 @@ public class Workspace
 	 */
 	public boolean checkMetadataIntegrity()
 	{
-		return 	(getNumberOfDatasetsInWS() == getNumberOfMDSCoordinatesInWS()); //&& 
+		return 	(getNumberOfDatasetsInWS() == getNumberOfDatasetsInMDSFile()); //&& 
 //				isDISFileConistentWithDatasets());
 	}
 	
@@ -371,9 +370,9 @@ public class Workspace
 		this.directory = directory;
 	}
 	
-	public int getNumberOfMDSCoordinatesInWS()
+	public int getNumberOfDatasetsInMDSFile()
 	{
-		return numberOfMDSCoordinatesInWS;
+		return numberOfDatasetsInMDSFile;
 	}
 	
 	public int getNumberOfDatasetsInWS()
@@ -391,24 +390,14 @@ public class Workspace
 		this.mdsCoordinates = mdsCoordinates;
 	}
 
-	public void setNumberOfMDSCoordinatesInWS(int numberOfMDSCoordinatesInWS)
+	public void setNumberOfDatasetsInMDSFile(int numberOfMDSCoordinatesInWS)
 	{
-		this.numberOfMDSCoordinatesInWS = numberOfMDSCoordinatesInWS;
+		this.numberOfDatasetsInMDSFile = numberOfMDSCoordinatesInWS;
 	}
 
 	public void setNumberOfDatasetsInWS(int numberOfDatasetsInWS)
 	{
 		this.numberOfDatasetsInWS = numberOfDatasetsInWS;
-	}
-
-	public double[][] getMdsCoordinates()
-	{
-		return mdsCoordinates;
-	}
-
-	public void setMdsCoordinates(double[][] mdsCoordinates)
-	{
-		this.mdsCoordinates = mdsCoordinates;
 	}
 
 	public Map<LDAConfiguration, Dataset> getDatasetMap()
@@ -421,12 +410,12 @@ public class Workspace
 		this.datasetMap = datasetMap;
 	}
 
-	public ArrayList<LDAConfiguration> getLdaConfigurations()
+	public ArrayList<LDAConfiguration> getLDAConfigurations()
 	{
 		return ldaConfigurations;
 	}
 
-	public void setLdaConfigurations(ArrayList<LDAConfiguration> ldaConfigurations)
+	public void setLDAConfigurations(ArrayList<LDAConfiguration> ldaConfigurations)
 	{
 		this.ldaConfigurations = ldaConfigurations;
 	}
@@ -489,5 +478,15 @@ public class Workspace
 	public void setMDSDataLoaded(boolean isMDSDataLoaded)
 	{
 		this.isMDSDataLoaded = isMDSDataLoaded;
+	}
+
+	public int getNumberOfDatasetsInDISFile()
+	{
+		return numberOfDatasetsInDISFile;
+	}
+
+	public void setNumberOfDatasetsInDISFile(int numberOfDatasetsInDISFile)
+	{
+		this.numberOfDatasetsInDISFile = numberOfDatasetsInDISFile;
 	}
 }

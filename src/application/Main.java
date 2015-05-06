@@ -3,6 +3,8 @@ package application;
 // @todo Next steps: Preprocessing; then connection to Python script (implement improvements!) and generation step.
 //For now: Load all data files + metadata files when new directory is loaded. Later on: Replace with database.
 
+import java.math.BigDecimal;
+
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -17,6 +19,52 @@ public class Main extends Application
 	@Override
 	public void start(Stage primaryStage)
 	{
+		// -----------------------------------------------
+		// 		Actual (raw and (pre-)processed) data
+		// -----------------------------------------------
+		
+		int n						= 10000;
+		int numberOfTopics			= 20;
+		int numberOfKeywords		= 7000;
+		int keywordStringSize		= 15;
+		int primitiveSizeInBytes	= 8;
+		
+		// Calculated sizes.
+		float size_MDS				= n * 2 * primitiveSizeInBytes;
+		BigDecimal size_distances	= new BigDecimal(1);
+		BigDecimal size_rawData		= new BigDecimal(1);
+		
+		// size_distances: n * n * primitiveSizeInBytes
+		size_distances = size_distances.multiply(new BigDecimal(n));
+		size_distances = size_distances.multiply(new BigDecimal(n));
+		size_distances = size_distances.multiply(new BigDecimal(primitiveSizeInBytes));
+		
+		size_distances = size_distances.divide(new BigDecimal(1024));
+		size_distances = size_distances.divide(new BigDecimal(1024));
+		size_distances = size_distances.divide(new BigDecimal(1024));
+		
+		// size_rawData: n * numberOfTopics * numberOfKeywords * (keywordStringSize + primitiveSizeInBytes)
+		size_rawData = size_rawData.multiply(new BigDecimal(n));
+		size_rawData = size_rawData.multiply(new BigDecimal(numberOfTopics));
+		size_rawData = size_rawData.multiply(new BigDecimal(numberOfKeywords));
+		size_rawData = size_rawData.multiply(new BigDecimal(keywordStringSize + primitiveSizeInBytes));
+		
+		size_rawData = size_rawData.divide(new BigDecimal(1024));
+		size_rawData = size_rawData.divide(new BigDecimal(1024));
+		size_rawData = size_rawData.divide(new BigDecimal(1024));
+		
+		System.out.println("# Rough estimate of amount of data in or out of memory:");
+		System.out.println("# \tEstimated for (n = " + n + ", primitive size in bytes = " + primitiveSizeInBytes + "), without optimizations. ");
+		System.out.println("# \tMDS data (in MB)\t= " + size_MDS / (1024 * 1024));
+		System.out.println("# \tDistance data (in GB)\t= " + size_distances);
+		System.out.println("# \tRaw data (in GB)\t= " + size_rawData);
+		System.out.println("\n\n");
+		
+		
+		// -----------------------------------------------
+		// 					Run VKPSA
+		// -----------------------------------------------
+		
 		try {
 			// Load core .fxml file. 
 			FXMLLoader fxmlLoader			= new FXMLLoader();

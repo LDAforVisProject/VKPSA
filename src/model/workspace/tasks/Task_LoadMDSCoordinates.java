@@ -76,7 +76,7 @@ public class Task_LoadMDSCoordinates extends Task_WorkspaceTask
 			}
 			
 			// Update workspace variables.
-			workspace.setNumberOfMDSCoordinatesInWS(numberOfMDSCoordinatesInWS);
+			workspace.setNumberOfDatasetsInMDSFile(numberOfMDSCoordinatesInWS);
 			workspace.setMDSCoordinates(mdsCoordinates);
 			
 			// Tell workspace that MDS data was loaded.

@@ -81,7 +81,10 @@ public class PreprocessingController extends Controller
 			break;
 			
 			case "button_calculateMDSCoordinates":
-				System.out.println("Calculating MDS coordinates");
+//				System.out.println("Calculating MDS coordinates");
+//				workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_MDS_COORDINATES, progressIndicator_calculateMDSCoordinates.progressProperty(), this);
+				System.out.println("TEST - Loading distance data");
+				workspace.executeWorkspaceAction(WorkspaceAction.LOAD_DISTANCES, progressIndicator_calculateMDSCoordinates.progressProperty(), this);
 			break;			
 		}
 	}

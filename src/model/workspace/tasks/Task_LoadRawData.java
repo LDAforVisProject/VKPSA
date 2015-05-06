@@ -32,20 +32,14 @@ public class Task_LoadRawData extends Task_WorkspaceTask
 	@Override
 	protected Integer call() throws Exception
 	{
-		// @todo Modify python script so that generated files contain metadata in first line.
 		Map<LDAConfiguration, Dataset> datasetMap		= new HashMap<LDAConfiguration, Dataset>();
 		ArrayList<LDAConfiguration> ldaConfigurations	= new ArrayList<LDAConfiguration>();
 		
-		String[] filenames		= new File(workspace.getDirectory()).list();
-		int numberOfDatasets	= 0;
+		final String[] filenames						= new File(workspace.getDirectory()).list();
+		int numberOfDatasets							= 0;
 		
 		// Get number of .csv files in directory (for progress indicators).
-		int csvCount = 0;
-		for (String filename : filenames) {
-			if (filename.endsWith(".csv")) {
-				csvCount++;
-			}
-		}
+		int csvCount = workspace.getNumberOfDatasetsInWS();
 		
 		// Iterate through files.
 		for (String filename : filenames) {
@@ -71,7 +65,7 @@ public class Task_LoadRawData extends Task_WorkspaceTask
 		
 		// Update workspace variables.
 		workspace.setDatasetMap(datasetMap);
-		workspace.setLdaConfigurations(ldaConfigurations);
+		workspace.setLDAConfigurations(ldaConfigurations);
 		
 		// Tell workspace that raw topic data was loaded.
 		workspace.setRawDataLoaded(true);

@@ -17,20 +17,20 @@ public class Topic
 {
 	private int topicNumber;
 	private Map<String, Double> keywordProbabilityMap;
-	private double log2;
+	
+	// Pre-calculate log_2 for distance calculations.
+	private static final double log2 = Math.log(2);
 	
 	public Topic(int topicNumber)
 	{
 		this.topicNumber			= topicNumber;
 		this.keywordProbabilityMap	= new HashMap<String, Double>(4056);
-		this.log2					= Math.log(2);
 	}
 	
 	public Topic(Topic source)
 	{
 		this.topicNumber			= source.topicNumber;
 		this.keywordProbabilityMap	= new HashMap<String, Double>(source.keywordProbabilityMap);
-		this.log2					= source.log2;
 	}
 	
 	/**
@@ -40,9 +40,6 @@ public class Topic
 	 */
 	public boolean addKeywordDataset(String keywordDataset)
 	{
-		// @todo: Add removal of quotation marks in preprocessing of data.
-		// @todo: Add removal of commas in preprocessing of data.
-		
 		keywordDataset		= keywordDataset.replace("\"", "");
 		int separatorIndex	= keywordDataset.indexOf('|');
 		
@@ -196,6 +193,8 @@ public class Topic
 //	    System.out.println("\n\nFILE = " + filename + "\n");
 	    try {
 			List<String> lines = Files.readAllLines(path, charset);
+
+			// @todo Use LDAConfiguration.generateLDAConfiguration() instead.
 			
 			// Get start parameter's start positions in configuration line (#0) in dataset.
 			// Add new parameters to be processed here. Has to be in the form of "param1=x|param2=y|blub=z".

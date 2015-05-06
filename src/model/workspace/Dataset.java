@@ -60,9 +60,9 @@ public class Dataset
 		this.topics				= new ArrayList<Topic>(topics);
 	}
 	
-	// ######################################
-	// 		Distance calculation methods
-	// ######################################
+	// -----------------------------------------------
+	// 			Distance calculation methods
+	// -----------------------------------------------
 	
 	/**
 	 * Calculates symmetric distance between two datasets.
@@ -116,8 +116,8 @@ public class Dataset
 			
 			// Unrolled loop to avoid calculation of distance i to i without using an if.
 			for (int j = 0; j < topics2.size(); j++) {
-				double distance = currentTopic.calculateBhattacharyyaDistance(topics2.get(j)); 
-				minDistance = minDistance > distance ? distance : minDistance;
+				double distance	= currentTopic.calculateBhattacharyyaDistance(topics2.get(j)); 
+				minDistance		= minDistance > distance ? distance : minDistance;
 			}	
 		}
 		
