@@ -18,6 +18,7 @@ import model.LDAConfiguration;
 import model.workspace.tasks.ITaskListener;
 import model.workspace.tasks.Task_CalculateDistances;
 import model.workspace.tasks.Task_CalculateMDSCoordinates;
+import model.workspace.tasks.Task_CollectFileMetadata;
 import model.workspace.tasks.Task_LoadDistanceData;
 import model.workspace.tasks.Task_LoadMDSCoordinates;
 import model.workspace.tasks.Task_LoadRawData;
@@ -32,6 +33,10 @@ import model.workspace.tasks.Task_WorkspaceTask;
 // @todox Then write results to file.
 // @todox Write distance data loading task.
 // @todo CURRENT: Rewrite MDS coordinate calculation/outputting - output LDA configuration binding too (which coordinate belongs to which LDA configuration?).
+	// @todo Think about whether distances and MDS coordinates should be stored in array or map. Requirement for array: Indices as read and stored by
+	// 		 collectFileMetadata() is consistent with how .dis and .mds files are structured. This should be done by the integrity check - if the result is
+	//		 positive, distance and .mds data can be stored in arrays (with data at [i] bound to LDAConfiguration at ldaConfigurations[i]).
+// @todo Improve and finish (first version of) workspace integrity check. 
 // @todo Then: Adapt reading methods to new file structures.
 // @todo Then: Complement workspace integrity check (are .dis and .mds and datasets consistent in terms of the number of datasets and which datasets they contain/index?). 
 // @todo Then: Testdrive.
@@ -141,6 +146,10 @@ public class Workspace
 	 * Indicates whether MDS coordinates are loaded or not.
 	 */
 	private boolean isMDSDataLoaded;
+	/**
+	 * Indicates whether metadata from raw topic files were loaded and processed or not.
+	 */
+	private boolean isMetadataLoaded;
 	
 	
 	
@@ -164,6 +173,7 @@ public class Workspace
 		appendToDistanceMatrix			= false;
 		appendToMDSCoordinateMatrix		= false;
 		
+		isMetadataLoaded				= false;
 		isRawDataLoaded					= false;
 		isDistanceDataLoaded			= false;
 		isMDSDataLoaded					= false;
@@ -185,6 +195,17 @@ public class Workspace
 			// -----------------------------------------------
 			// 				Loading operations
 			// -----------------------------------------------
+			
+			case COLLECT_FILE_METADATA:
+				isMetadataLoaded		= false;
+				isRawDataLoaded			= false;
+				isDistanceDataLoaded	= false;
+				isMDSDataLoaded			= false;
+				
+				// Collect metadata from raw topic files.
+				task					= new Task_CollectFileMetadata(this, WorkspaceAction.COLLECT_FILE_METADATA);
+				
+			break;
 			
 			case LOAD_RAW_DATA:
 				// Load datasets.
@@ -220,21 +241,28 @@ public class Workspace
 			// -----------------------------------------------
 			
 			case RESET:
-				directory = "";
-				datasetMap.clear();
-				ldaConfigurations.clear();
-//				reverseMDSCoordinateLookup.clear();
-			break;
-			
-			case SWITCH_DIRECTORY:
+				// Reset directory path.
+				directory					= "";
+				
+				// Clear containers.
 				datasetMap.clear();
 				ldaConfigurations.clear();
 //				reverseMDSCoordinateLookup.clear();
 				
-				// Load distance data.
-				// @todo Load distance data after choosing new directory.
-				// Load MDS coordinates.
-				executeWorkspaceAction(WorkspaceAction.LOAD_MDS_COORDINATES, progressProperty, listener);
+				// Clear arrays.
+				distances					= null;
+				mdsCoordinates				= null;
+				
+				// Reset counters.
+				numberOfDatasetsInDISFile	= 0;
+				numberOfDatasetsInMDSFile	= 0;
+				numberOfDatasetsInWS		= 0;
+				
+				// Reset flags.
+				isMetadataLoaded			= false;
+				isRawDataLoaded				= false;
+				isDistanceDataLoaded		= false;
+				isMDSDataLoaded				= false;
 			break;
 			
 			case ALL:
@@ -352,6 +380,8 @@ public class Workspace
 	 */
 	public boolean checkMetadataIntegrity()
 	{
+		// @todo Add comparison with number of datasets in distance file as well as a comparison
+		// of the LDA configuration stored there.
 		return 	(getNumberOfDatasetsInWS() == getNumberOfDatasetsInMDSFile()); //&& 
 //				isDISFileConistentWithDatasets());
 	}
@@ -468,6 +498,16 @@ public class Workspace
 	public void setDistanceDataLoaded(boolean isDistanceDataLoaded)
 	{
 		this.isDistanceDataLoaded = isDistanceDataLoaded;
+	}
+
+	public boolean isMetadataLoaded()
+	{
+		return isMetadataLoaded;
+	}
+
+	public void setMetadataLoaded(boolean isMetadataLoaded)
+	{
+		this.isMetadataLoaded = isMetadataLoaded;
 	}
 
 	public boolean isMDSDataLoaded()

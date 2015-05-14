@@ -189,12 +189,12 @@ public class Topic
 		// Select path and charset.
 	    Path path				= Paths.get(directory, filename);
 	    Charset charset			= Charset.forName("UTF-8");
-	    
-//	    System.out.println("\n\nFILE = " + filename + "\n");
+
+	    // Load and process file.
 	    try {
 			List<String> lines = Files.readAllLines(path, charset);
 
-			// @todo Use LDAConfiguration.generateLDAConfiguration() instead.
+			// @todo Use LDAConfiguration.generateLDAConfiguration() for generation of LDAConfiguration instance instead.
 			
 			// Get start parameter's start positions in configuration line (#0) in dataset.
 			// Add new parameters to be processed here. Has to be in the form of "param1=x|param2=y|blub=z".

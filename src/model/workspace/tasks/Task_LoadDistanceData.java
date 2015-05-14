@@ -31,18 +31,19 @@ public class Task_LoadDistanceData extends Task_WorkspaceTask
 	@Override
 	protected Integer call() throws Exception
 	{
-		ArrayList<LDAConfiguration> ldaConfigurations	= new ArrayList<LDAConfiguration>();
-		int n											= -1;
-		double distances[][]							= null;
+		// Assume integrity check was executed and LDA configurations are consistent with data in file.
+		final ArrayList<LDAConfiguration> ldaConfigurations	= workspace.getLDAConfigurations();
+		int n												= -1;
+		double distances[][]								= null;
 		
-		// File data.
-		Path path										= Paths.get(workspace.getDirectory(), Workspace.FILENAME_DISTANCES);
-	    Charset charset									= Charset.forName("UTF-8");
+		// File(-path) metadata.
+		Path path											= Paths.get(workspace.getDirectory(), Workspace.FILENAME_DISTANCES);
+	    Charset charset										= Charset.forName("UTF-8");
 	    
 	    // Auxiliary variables.
-	    int totalItems					= 1;
-	    int processedItems				= 0;
-	    int numberOfDatasetsInDISFile	= 0;
+	    int numberOfDatasetsInDISFile						= 0;
+	    int totalItems										= 1;
+	    int processedItems									= 0;
 	    
 	    updateProgress(0, Double.MAX_VALUE);
 	    
@@ -51,12 +52,13 @@ public class Task_LoadDistanceData extends Task_WorkspaceTask
 			try {
 				List<String> lines = Files.readAllLines(path, charset);
 				
-				String[] ldaConfigStrings = lines.get(0).split("\t");
-				for (String ldaConfigString : ldaConfigStrings) {
-					if (ldaConfigString.length() > 1) {
-						ldaConfigurations.add(LDAConfiguration.generateLDAConfiguration(ldaConfigString));
-					}
-				}
+				// @deprecated
+//				String[] ldaConfigStrings = lines.get(0).split("\t");
+//				for (String ldaConfigString : ldaConfigStrings) {
+//					if (ldaConfigString.length() > 1) {
+//						ldaConfigurations.add(LDAConfiguration.generateLDAConfiguration(ldaConfigString));
+//					}
+//				}
 				
 				// Init variables.
 				n			= ldaConfigurations.size();
@@ -83,17 +85,17 @@ public class Task_LoadDistanceData extends Task_WorkspaceTask
 								
 								toIndex++;
 								processedItems++;
-								
-								System.out.println("\t\tHERE 4-4");
 							}
 						}
-							
 					}
 					
 					fromIndex++;
 				}
 				
-				// Wrap up.
+				// Store number of datasets in this .dis file.
+				numberOfDatasetsInDISFile = fromIndex;
+				
+				// Output data.
 				for (int i = 0; i < distances.length; i++) {
 					for (int j = 0; j < distances[i].length; j++) {
 						System.out.print(distances[i][j] + " ");
@@ -101,9 +103,10 @@ public class Task_LoadDistanceData extends Task_WorkspaceTask
 					System.out.println();
 				}
 				
-				// Update workspace variables.
+				// Update number of datasets in .dis file in workspace reference.
 				workspace.setNumberOfDatasetsInDISFile(numberOfDatasetsInDISFile);
-				workspace.setLDAConfigurations(ldaConfigurations);
+				
+				// Transfer distances between datasets.
 				workspace.setDistances(distances);
 				
 				// Tell workspace that distance data was loaded.

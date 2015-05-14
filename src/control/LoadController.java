@@ -65,44 +65,84 @@ public class LoadController extends Controller
 		if ( Files.exists(Paths.get(currentPath)) ) {
 			// Load data from new directory.
 			if (currentPath != workspace.getDirectory()) {
+				// 	Reset workspace.
+				workspace.executeWorkspaceAction(WorkspaceAction.RESET, null, this);
+				
 				// Set new path.
 				workspace.setDirectory(currentPath);
 				
-				// Switch to new directory. Bind progressIndicator to this task.
-				workspace.executeWorkspaceAction(WorkspaceAction.SWITCH_DIRECTORY, progressIndicator_load.progressProperty(), this);
+				// Collect file metadata. Execute other actions once file metadata reading is complete.
+				workspace.executeWorkspaceAction(WorkspaceAction.COLLECT_FILE_METADATA, progressIndicator_load.progressProperty(), this);
 			}
 			
 			// Specified is current directory.
 			else {
-				// @todo Output error message.
+				System.out.println("### WARNING ### Specified is current directory. Nothing to do here.");
 			}
 		}
 		
 		// Directory doesn't exist.
 		else {
-			// @todo Output error message.			
+			System.out.println("### ERROR ### Directory " + currentPath + " doesn't exist.");			
 		}
 	}
 	
 	
-	// Check workspace integrity, display info message as tooltip.
+	// Gets called once workspace action/task has completed.
 	@Override
 	public void notifyOfTaskCompleted(final WorkspaceAction workspaceAction)
 	{
 		switch (workspaceAction) {
-			case LOAD_MDS_COORDINATES:
-				// Execute and display integrity check, set summary as tooltip.
-				Tooltip tooltip = new Tooltip(displayIntegrityCheck());
-				tooltip.setMaxWidth(250);
-				tooltip.setAutoHide(false);
-				tooltip.setWrapText(true);
+			case COLLECT_FILE_METADATA:
+				System.out.println("Collected file metadata.");
 				
-		        Tooltip.install( shape_integrity, tooltip);
+				// If .dis exists: Load it.
+				if (workspace.containsDISFile()) {
+					// Load distance data.
+					workspace.executeWorkspaceAction(workspaceAction.LOAD_DISTANCES, progressIndicator_load.progressProperty(), this);
+				}
+				
+				// Otherwise: Execute and display integrity check, set summary as tooltip.
+				else {
+					showIntegrityCheckTooltip(displayIntegrityCheck());
+				}
+			break;
+			
+			case LOAD_DISTANCES:
+				System.out.println("Loaded distance data.");
+				
+				// Once distance data is loaded: Check if .mds file exists. If so: load it.
+				if (workspace.containsMDSFile()) {
+					// Load MDS coordinates.
+					workspace.executeWorkspaceAction(workspaceAction.LOAD_MDS_COORDINATES, progressIndicator_load.progressProperty(), this);					
+				}
+				
+				// Otherwise: Execute and display integrity check, set summary as tooltip.
+				else {
+					showIntegrityCheckTooltip(displayIntegrityCheck());
+				}
+			break;
+			
+			case LOAD_MDS_COORDINATES:
+				System.out.println("Loaded MDS coordinates.");
+				
+				// Once MDS coordinates are loaded. Execute and display integriy check.
+				showIntegrityCheckTooltip(displayIntegrityCheck());
 			break;
 
 			default:
 			break;
 		}
+	}
+	
+	private void showIntegrityCheckTooltip(String tooltipMessage)
+	{
+		Tooltip tooltip = new Tooltip(tooltipMessage);
+		tooltip.setMaxWidth(250);
+		tooltip.setAutoHide(false);
+		tooltip.setWrapText(true);
+		
+        Tooltip.install( shape_integrity, tooltip);
 	}
 	
 	private String displayIntegrityCheck()
@@ -121,15 +161,8 @@ public class LoadController extends Controller
 		// directory and referenced datasets in .dis are the same.
 		// Workspace may be consistent (green), incomplete (orange to yellow) or corrupted (red). 
 		
-		// Workspace not consistent: .mds and .dis files don't fit each other or the actual datasets.
-		if (!workspace.checkMetadataIntegrity()) {
-			shape_integrity.setFill(Color.RED);
-			message = "Error: Workspace is not consistent. Check if .dis and .mds files match each "
-					+ "other and datasets in this directory or preprocess raw topic data again.";
-		}
-		
 		// Worskpace consistent, but neither .mds nor .dis exists:
-		else if (!mdsFileExists && !disFileExists) {
+		if (!mdsFileExists && !disFileExists) {
 			shape_integrity.setFill(Color.ORANGE);
 			message = "Warning: Neither .mds or .dis file exist in this workspace. Run preprocessing on "
 					+ "the raw topic data in this workspace.";
@@ -142,10 +175,20 @@ public class LoadController extends Controller
 					+ "the raw topic data in this workspace.";
 		}
 		
-		// Workspace consistent and complete:
+		// Both .mds and .dis exist. Conistent?
 		else if (mdsFileExists && disFileExists) {
-			shape_integrity.setFill(Color.GREEN);
-			message = "Success: Workspace is consistent and complete.";
+			// Workspace not consistent: .mds and .dis files don't fit each other or the actual datasets.
+			if (!workspace.checkMetadataIntegrity()) {
+				shape_integrity.setFill(Color.RED);
+				message = "Error: Workspace is not consistent. Check if .dis and .mds files match each "
+						+ "other and datasets in this directory or preprocess raw topic data again.";
+			}
+
+			// Workspace consistent and complete:			
+			else {
+				shape_integrity.setFill(Color.GREEN);
+				message = "Success: Workspace is consistent and complete.";
+			}
 		}
 		
 		return message;

@@ -48,7 +48,10 @@ public class Task_LoadRawData extends Task_WorkspaceTask
 				if (filename.endsWith(".csv")) {
 					numberOfDatasets++;
 					
+					// Generate topic instance from file data.
 					Pair<LDAConfiguration, ArrayList<Topic>> topicsetTuple = Topic.generateTopicsFromFile(workspace.getDirectory(), filename, TopicKeywordAlignment.HORIZONTAL);
+					
+					// Add dataset to collections.
 					ldaConfigurations.add(topicsetTuple.getKey());
 					datasetMap.put( topicsetTuple.getKey(), new Dataset(topicsetTuple.getKey(), topicsetTuple.getValue()) );
 					

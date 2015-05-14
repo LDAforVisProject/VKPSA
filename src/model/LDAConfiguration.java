@@ -73,7 +73,7 @@ public class LDAConfiguration
 		
 		for (String key : paramMapCopy.keySet()) {
 			if (paramMapCopy.get(key) < 0) {
-				throw new Exception("### ERROR ### No metadata found in configuration string @" + key);
+				throw new Exception("### ERROR ### Metadata incomplete in configuration string @" + key);
 			}
 		}
 		
