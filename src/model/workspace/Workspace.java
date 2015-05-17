@@ -1,8 +1,15 @@
 package model.workspace;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,12 +39,11 @@ import model.workspace.tasks.Task_WorkspaceTask;
 // @todox Then write raw data loading task.
 // @todox Then write results to file.
 // @todox Write distance data loading task.
-// @todo CURRENT: Rewrite MDS coordinate calculation/outputting - output LDA configuration binding too (which coordinate belongs to which LDA configuration?).
-	// @todo Think about whether distances and MDS coordinates should be stored in array or map. Requirement for array: Indices as read and stored by
+// @todox CURRENT: Rewrite MDS coordinate calculation/outputting - output LDA configuration binding too (which coordinate belongs to which LDA configuration?).
+	// @todox Think about whether distances and MDS coordinates should be stored in array or map. Requirement for array: Indices as read and stored by
 	// 		 collectFileMetadata() is consistent with how .dis and .mds files are structured. This should be done by the integrity check - if the result is
 	//		 positive, distance and .mds data can be stored in arrays (with data at [i] bound to LDAConfiguration at ldaConfigurations[i]).
-// @todo Improve and finish (first version of) workspace integrity check. 
-// @todo Then: Adapt reading methods to new file structures.
+// @todox Then: Adapt reading methods to new file structures.
 // @todo Then: Complement workspace integrity check (are .dis and .mds and datasets consistent in terms of the number of datasets and which datasets they contain/index?). 
 // @todo Then: Testdrive.
 // @todo Test and augment program workflow.
@@ -299,6 +305,13 @@ public class Workspace
 		return task;
 	}
 	
+	/**
+	 * @deprecated
+	 * @param distances
+	 * @param writeToFile
+	 * @param path
+	 * @return
+	 */
 	private double[][] calculateMDSCoordinates(double[][] distances, boolean writeToFile, String path)
 	{
 		// Storage location for MDS coordinates.
@@ -374,16 +387,89 @@ public class Workspace
 	}
 	
 	/**
-	 * Checks whether or not the .dis and .mds files are consistent
-	 * with the data files contained in the workspace.
+	 * Checks whether or not the .dis and .mds files are consistent with the data files contained in the workspace.
+	 * Executed after all available metadata was loaded.
+	 * Does check for integrity, does not check for completeness.
 	 * @return Flag indicating integrity of metadata/consistency of metadata and data in this workspace. True if workspace is consistent.
 	 */
-	public boolean checkMetadataIntegrity()
+	public boolean checkIntegrity()
 	{
+		boolean isIntegrous			= true;
+		int numberOfDatasetsInWS	= getNumberOfDatasetsInWS();
+		
+		// Check for integrity of pre-calculated distance data.
+		if (isDistanceDataLoaded) {
+			if (numberOfDatasetsInWS != numberOfDatasetsInDISFile) {
+				isIntegrous = false;
+			}
+			
+			// Check if configuration in line in .dis file is consistent with configuration line
+			// parsed from raw topic data files.
+			else {
+				isIntegrous = compareToLDAConfiguration(Paths.get(directory, FILENAME_DISTANCES), "\t");
+			}
+		}
+
+		// Check for integrity of pre-calculated MDS coordinate data.
+		if (isMDSDataLoaded) {
+			if (numberOfDatasetsInWS != numberOfDatasetsInMDSFile) {
+				isIntegrous = false;
+			}
+			
+			// Check if configuration in line in .mds file is consistent with configuration line
+			// parsed from raw topic data files.
+			else {
+				
+			}
+		}
+		
 		// @todo Add comparison with number of datasets in distance file as well as a comparison
 		// of the LDA configuration stored there.
-		return 	(getNumberOfDatasetsInWS() == getNumberOfDatasetsInMDSFile()); //&& 
-//				isDISFileConistentWithDatasets());
+	
+		
+		return isIntegrous;
+	}
+	
+	/**
+	 * Compares LDA configuration string in first line of given line (LDA configurations 
+	 * are separated by spaces) to the current workspace.ldaConfigurations.
+	 * @param path
+	 * @param delimiter
+	 * @return
+	 */
+	private boolean compareToLDAConfiguration(Path path, String delimiter)
+	{
+		try {
+			// Open file reader.
+			InputStream fis			= new FileInputStream(path.toString());
+		    InputStreamReader isr	= new InputStreamReader(fis, Charset.forName("UTF-8"));
+		    BufferedReader reader	= new BufferedReader(isr);
+		    
+			// Read first line in dataset (contains metadata).
+		    String line	= reader.readLine();
+
+		    int i = 0;
+		    // Process and compare LDA configuration data.
+		    for (String ldaConfigString : line.split(delimiter)) {
+		    	if (!ldaConfigString.isEmpty()) {
+		    		// Compare with already loaded LDA configuration collection.
+		    		if (!LDAConfiguration.generateLDAConfiguration(ldaConfigString).equals(ldaConfigurations.get(i))) {
+		    			return false;
+		    		}
+		    		
+		    		i++;
+		    	}
+		    }
+
+			// Close reader.
+			reader.close();
+		}
+		
+		catch (Exception exception) {
+			exception.printStackTrace();
+		}
+		
+		return true;
 	}
 	
 	// ------------------------------

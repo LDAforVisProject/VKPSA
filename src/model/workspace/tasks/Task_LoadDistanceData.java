@@ -52,14 +52,6 @@ public class Task_LoadDistanceData extends Task_WorkspaceTask
 			try {
 				List<String> lines = Files.readAllLines(path, charset);
 				
-				// @deprecated
-//				String[] ldaConfigStrings = lines.get(0).split("\t");
-//				for (String ldaConfigString : ldaConfigStrings) {
-//					if (ldaConfigString.length() > 1) {
-//						ldaConfigurations.add(LDAConfiguration.generateLDAConfiguration(ldaConfigString));
-//					}
-//				}
-				
 				// Init variables.
 				n			= ldaConfigurations.size();
 				distances	= new double[n][n];
@@ -96,12 +88,12 @@ public class Task_LoadDistanceData extends Task_WorkspaceTask
 				numberOfDatasetsInDISFile = fromIndex;
 				
 				// Output data.
-				for (int i = 0; i < distances.length; i++) {
-					for (int j = 0; j < distances[i].length; j++) {
-						System.out.print(distances[i][j] + " ");
-					}
-					System.out.println();
-				}
+//				for (int i = 0; i < distances.length; i++) {
+//					for (int j = 0; j < distances[i].length; j++) {
+//						System.out.print(distances[i][j] + " ");
+//					}
+//					System.out.println();
+//				}
 				
 				// Update number of datasets in .dis file in workspace reference.
 				workspace.setNumberOfDatasetsInDISFile(numberOfDatasetsInDISFile);
@@ -111,6 +103,9 @@ public class Task_LoadDistanceData extends Task_WorkspaceTask
 				
 				// Tell workspace that distance data was loaded.
 				workspace.setDistanceDataLoaded(true);
+				
+				// Update task progress.
+				updateProgress(1, 1);
 			} 
 			
 			catch (IOException e) {

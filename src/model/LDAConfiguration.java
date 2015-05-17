@@ -47,18 +47,55 @@ public class LDAConfiguration
 		this.eta	= source.eta;		
 	}
 	
-//	@todo Override .hashCode() - http://stackoverflow.com/questions/27581/what-issues-should-be-considered-when-overriding-equals-and-hashcode-in-java.
+	/**
+	 * Auto-generated method for generating the hash code of this object.
+	 * @return
+	 */
 	@Override
-	public boolean equals(Object object)
+	public int hashCode()
 	{
-		if (object instanceof LDAConfiguration) {
-			LDAConfiguration set = (LDAConfiguration) object;
-			
-			if (this.k == set.k && this.alpha == set.alpha && this.eta == set.eta)
-				return true;
-		}
+		final int prime = 31;
+		int result		= 1;
+		long temp;
 		
-		return false;
+		temp	= Double.doubleToLongBits(alpha);
+		result	= prime * result + (int) (temp ^ (temp >>> 32));
+		temp	= Double.doubleToLongBits(eta);
+		result	= prime * result + (int) (temp ^ (temp >>> 32));
+		result	= prime * result + k;
+		
+		return result;
+	}
+
+	/**
+	 * Auto-generated method for comparing two objects.
+	 * @param obj
+	 * @return
+	 */	
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+			return true;
+		
+		if (obj == null)
+			return false;
+		
+		if (getClass() != obj.getClass())
+			return false;
+		
+		LDAConfiguration other = (LDAConfiguration) obj;
+		
+		if (Double.doubleToLongBits(alpha) != Double.doubleToLongBits(other.alpha))
+			return false;
+		
+		if (Double.doubleToLongBits(eta) != Double.doubleToLongBits(other.eta))
+			return false;
+		
+		if (k != other.k)
+			return false;
+		
+		return true;
 	}
 	
 	public static LDAConfiguration generateLDAConfiguration(String ldaConfigString) throws Exception

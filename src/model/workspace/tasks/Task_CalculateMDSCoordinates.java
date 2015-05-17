@@ -29,32 +29,35 @@ public class Task_CalculateMDSCoordinates extends Task_WorkspaceTask
 	@Override
 	protected Integer call() throws Exception
 	{
-		// @todo Check if distance data has already been loaded. If not, load it before MDS calculation. If so, use workspace.getDistances().
-		
 		// Get data from workspace.
 		final ArrayList<LDAConfiguration> ldaConfigurations	= workspace.getLDAConfigurations();
 		final double[][] distances							= workspace.getDistances();
 		
-		// Execute MDS on topic distance matrix.
+		// Apply MDS on topic distance matrix.
 		double[][] output									= MDSJ.classicalScaling(distances, 2);
 		System.out.println(Data.format(output));
 
 		try {
-			String path			= Paths.get(workspace.getDirectory() + Workspace.FILENAME_MDSCOORDINATES).toString();
+			String path			= Paths.get(workspace.getDirectory(), Workspace.FILENAME_MDSCOORDINATES).toString();
 			PrintWriter writer	= new PrintWriter(path, "UTF-8");
 			
 			System.out.println("1: " + output.length);
-			System.out.println("2: " + output[0].length);
+			System.out.println("2: " + output[0].length + "/" + output[1].length);
 			
 			// Write LDA configurations above the respective columns.
 			for (int j = 0; j < output[0].length; j++) {
 				writer.print(ldaConfigurations.get(j) + " ");
 			}
 			
+			writer.println("");
+			
+			// Output MDS coordinates.
 			for (int i = 0; i < output.length; i++) {
-				
 				for (int j = 0; j < output[i].length; j++) {
 					writer.print(output[i][j] + " ");
+					
+					// Update task progress.
+					updateProgress(i * output[0].length + j, output.length * output[0].length);
 				}
 				
 				if (i < output.length - 1)
@@ -64,8 +67,10 @@ public class Task_CalculateMDSCoordinates extends Task_WorkspaceTask
 			// Update task progress.
 			updateProgress(1, 1);
 			
-			// Update workspace variables.
+			// Transfer MDS coordinate data to workspace intance.
 			workspace.setMDSCoordinates(output);
+			
+			// Signal that MDS data is available.
 			workspace.setMDSDataLoaded(true);
 			
 			// Close file writer.

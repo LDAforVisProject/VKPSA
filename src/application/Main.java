@@ -1,8 +1,5 @@
 package application;
 
-// @todo Next steps: Preprocessing; then connection to Python script (implement improvements!) and generation step.
-//For now: Load all data files + metadata files when new directory is loaded. Later on: Replace with database.
-
 import java.math.BigDecimal;
 
 import javafx.application.Application;

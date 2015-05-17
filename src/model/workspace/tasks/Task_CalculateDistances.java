@@ -50,10 +50,10 @@ public class Task_CalculateDistances extends Task_WorkspaceTask
 		String path = Paths.get(workspace.getDirectory(), Workspace.FILENAME_DISTANCES).toString();
 		try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path), "utf-8"))) 
 		{
-			// Update task progress. .2: Arbitrary portion of progress indicator reserved for file loading.
-			updateProgress(0.2, 1);
+			// Update task progress. .1: Arbitrary portion of progress indicator reserved for file loading.
+			updateProgress(0.1, 1);
 			
-			// Write first line.
+			// Write first (configuration) line.
 			writer.write("\t\t\t\t\t\t\t");
 			for (int i = 0; i < ldaConfigurations.size(); i++) {
 				writer.write(ldaConfigurations.get(i).toString() + "\t");
@@ -66,21 +66,23 @@ public class Task_CalculateDistances extends Task_WorkspaceTask
 				
 				String fileOutput = ldaConfigurations.get(i).toString() + "\t\t";
 				
-				// Fill in text file. To be removed once database access is integrated.
+				// Fill in text file with already calculated distances.
 				for (int k = 0; k < i + 1; k++) {
 					fileOutput += distances[i][k] + " ";
 				}
 				
+				// Calculate other distances.
 				for (int j = i + 1; j < ldaConfigurations.size(); j++) {
-					// Update task progress. .1: Arbitrary portion of progress indicator reserved for file loading.
-					updateProgress(totalNumberOfDistances * 0.1 + numberOfCalculatedDistances * 0.9, totalNumberOfDistances);
+					// Update task progress.
+					updateProgress(numberOfCalculatedDistances, totalNumberOfDistances);
 					
-					System.out.println(i + " to " + j);
-					
+//					System.out.println(i + " to " + j);
+				
 					// Assume symmetric distance calculations is done in .calculateDatasetDistance().
 					distances[i][j] = datasetMap.get(ldaConfigurations.get(i)).calculateDatasetDistance(datasetMap.get(ldaConfigurations.get(j)), DatasetDistance.HausdorffDistance);
 					distances[j][i] = distances[i][j];
 					
+					// Append newly calculated distance.
 					fileOutput += distances[i][j] + " ";
 					
 					numberOfCalculatedDistances++;
@@ -97,8 +99,10 @@ public class Task_CalculateDistances extends Task_WorkspaceTask
 			// Update task progress.
 			updateProgress(1, 1);
 			
-			// Update workspace variables.
+			// Transfer distance data to workspace instance.
 			workspace.setDistances(distances);
+			
+			// Notify workspace that distance data is loaded.
 			workspace.setDistanceDataLoaded(true);
 			
 			// Close file writer.

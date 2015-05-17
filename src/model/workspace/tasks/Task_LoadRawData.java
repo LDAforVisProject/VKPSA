@@ -32,11 +32,11 @@ public class Task_LoadRawData extends Task_WorkspaceTask
 	@Override
 	protected Integer call() throws Exception
 	{
-		Map<LDAConfiguration, Dataset> datasetMap		= new HashMap<LDAConfiguration, Dataset>();
-		ArrayList<LDAConfiguration> ldaConfigurations	= new ArrayList<LDAConfiguration>();
+		Map<LDAConfiguration, Dataset> datasetMap			= new HashMap<LDAConfiguration, Dataset>();
+		final ArrayList<LDAConfiguration> ldaConfigurations	= workspace.getLDAConfigurations();
 		
-		final String[] filenames						= new File(workspace.getDirectory()).list();
-		int numberOfDatasets							= 0;
+		final String[] filenames							= new File(workspace.getDirectory()).list();
+		int numberOfDatasets								= 0;
 		
 		// Get number of .csv files in directory (for progress indicators).
 		int csvCount = workspace.getNumberOfDatasetsInWS();
@@ -52,12 +52,13 @@ public class Task_LoadRawData extends Task_WorkspaceTask
 					Pair<LDAConfiguration, ArrayList<Topic>> topicsetTuple = Topic.generateTopicsFromFile(workspace.getDirectory(), filename, TopicKeywordAlignment.HORIZONTAL);
 					
 					// Add dataset to collections.
-					ldaConfigurations.add(topicsetTuple.getKey());
+					if (!ldaConfigurations.contains(topicsetTuple.getKey()))
+						System.out.println("### ERROR ### LDAConfiguration " + topicsetTuple.getKey() + " not found.");
+					
 					datasetMap.put( topicsetTuple.getKey(), new Dataset(topicsetTuple.getKey(), topicsetTuple.getValue()) );
 					
-					// Update task progress. * 10: Workaround / auxiliary variable to display progress
-					// accurately when progress is bound to distance calculation progress indicator. 
-					updateProgress(numberOfDatasets, csvCount * 10);
+					// Update task progress. 
+					updateProgress(numberOfDatasets, csvCount);
 				}
 			}
 			
@@ -68,7 +69,6 @@ public class Task_LoadRawData extends Task_WorkspaceTask
 		
 		// Update workspace variables.
 		workspace.setDatasetMap(datasetMap);
-		workspace.setLDAConfigurations(ldaConfigurations);
 		
 		// Tell workspace that raw topic data was loaded.
 		workspace.setRawDataLoaded(true);

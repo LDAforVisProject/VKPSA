@@ -88,7 +88,10 @@ public class LoadController extends Controller
 	}
 	
 	
-	// Gets called once workspace action/task has completed.
+	/** 
+	 * Gets called once workspace action/task has been completed.
+	 * @param workspaceAction
+	 */
 	@Override
 	public void notifyOfTaskCompleted(final WorkspaceAction workspaceAction)
 	{
@@ -126,7 +129,7 @@ public class LoadController extends Controller
 			case LOAD_MDS_COORDINATES:
 				System.out.println("Loaded MDS coordinates.");
 				
-				// Once MDS coordinates are loaded. Execute and display integriy check.
+				// Once MDS coordinates are loaded: Execute and display integriy check.
 				showIntegrityCheckTooltip(displayIntegrityCheck());
 			break;
 
@@ -155,7 +158,7 @@ public class LoadController extends Controller
 		label_numberMDSCoordinates.setText(String.valueOf(workspace.getNumberOfDatasetsInMDSFile()));
 		label_mdsFound.setText(String.valueOf(mdsFileExists));
 		label_disFound.setText(String.valueOf(disFileExists));
-		label_consistency.setText(String.valueOf(workspace.checkMetadataIntegrity()));
+		label_consistency.setText(String.valueOf(workspace.checkIntegrity()));
 		
 		// Check workspace integrity. @todo Cross-check with .dis file to see if datasets in
 		// directory and referenced datasets in .dis are the same.
@@ -178,7 +181,7 @@ public class LoadController extends Controller
 		// Both .mds and .dis exist. Conistent?
 		else if (mdsFileExists && disFileExists) {
 			// Workspace not consistent: .mds and .dis files don't fit each other or the actual datasets.
-			if (!workspace.checkMetadataIntegrity()) {
+			if (!workspace.checkIntegrity()) {
 				shape_integrity.setFill(Color.RED);
 				message = "Error: Workspace is not consistent. Check if .dis and .mds files match each "
 						+ "other and datasets in this directory or preprocess raw topic data again.";

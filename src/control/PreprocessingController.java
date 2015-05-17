@@ -69,6 +69,7 @@ public class PreprocessingController extends Controller
 			case "button_calculateDistances":
 				// Check if raw data has already been loaded. If not: Load it.
 				if (!workspace.isRawDataLoaded()) {
+					System.out.println("Loading raw data.");
 					workspace.executeWorkspaceAction(WorkspaceAction.LOAD_RAW_DATA, progressIndicator_distanceCalculation.progressProperty(), this);
 				}
 				
@@ -81,10 +82,25 @@ public class PreprocessingController extends Controller
 			break;
 			
 			case "button_calculateMDSCoordinates":
-//				System.out.println("Calculating MDS coordinates");
-//				workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_MDS_COORDINATES, progressIndicator_calculateMDSCoordinates.progressProperty(), this);
-				System.out.println("TEST - Loading distance data");
-				workspace.executeWorkspaceAction(WorkspaceAction.LOAD_DISTANCES, progressIndicator_calculateMDSCoordinates.progressProperty(), this);
+				// If distance is already loaded: Calculate MDS coordinates.
+				if (workspace.isDistanceDataLoaded()) {
+					System.out.println("Calculating MDS coordinates");
+					workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_MDS_COORDINATES, progressIndicator_calculateMDSCoordinates.progressProperty(), this);
+				}
+				
+				// Otherwise: Load distance data, then calculate MDS coordinates.
+				else {
+					// If .dis file exists: Load it, then calculate MDS data.
+					if (workspace.containsDISFile()) {
+						System.out.println("Loading distance data.");
+						workspace.executeWorkspaceAction(WorkspaceAction.LOAD_DISTANCES, progressIndicator_calculateMDSCoordinates.progressProperty(), this);
+					}
+					
+					// Otherwise: Prompt user to calculate distance data first.
+					else {
+						System.out.println("### WARNING ### Distance data is required, but not yet calculated.");
+					}
+				}
 			break;			
 		}
 	}
@@ -96,6 +112,11 @@ public class PreprocessingController extends Controller
 			case LOAD_RAW_DATA:
 				System.out.println("Finished loading raw data. Calculating distances.");
 				workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_DISTANCES, progressIndicator_distanceCalculation.progressProperty(), this);
+			break;
+			
+			case LOAD_DISTANCES:
+				System.out.println("Finished loading distance data. Calculating MDS coordinates.");
+				//workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_MDS_COORDINATES, progressIndicator_distanceCalculation.progressProperty(), this);
 			break;
 			
 			case CALCULATE_DISTANCES:

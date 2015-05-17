@@ -43,6 +43,7 @@ public class Task_CollectFileMetadata extends Task_WorkspaceTask
 				if (filename.endsWith(".csv")) {
 					numberOfDatasets++;
 					
+					// Open file reader.
 					InputStream fis			= new FileInputStream(Paths.get(workspace.getDirectory(), filename).toString());
 				    InputStreamReader isr	= new InputStreamReader(fis, Charset.forName("UTF-8"));
 				    BufferedReader reader	= new BufferedReader(isr);
