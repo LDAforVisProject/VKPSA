@@ -45,12 +45,12 @@ import model.workspace.tasks.Task_WorkspaceTask;
 	//		 positive, distance and .mds data can be stored in arrays (with data at [i] bound to LDAConfiguration at ldaConfigurations[i]).
 // @todox Then: Adapt reading methods to new file structures.
 // @todox Then: Complement workspace integrity check (are .dis and .mds and datasets consistent in terms of the number of datasets and which datasets they contain/index?). 
-// @todo Then: Testdrive.
+// @todox Then: Testdrive.
 // @todo Test and augment program workflow.
 // @todo Create data generation view.
-// @todo Improve LDA python script (fixes, parameter output in files). Modify so that generated files contain metadata in first line.
-	// @todo: Add removal of quotation marks in preprocessing of data.
-	// @todo: Add removal of commas in preprocessing of data.
+// @todox Improve LDA python script (fixes, parameter output in files). Modify so that generated files contain metadata in first line.
+	// @todox: Add removal of quotation marks in preprocessing of data.
+	// @todox: Add removal of commas in preprocessing of data.
 // @todo Integrate python script binding in VKPSA GUI.
 // @todo Test data generation.
 // @todo Formulate work items for analysis view / phase.
