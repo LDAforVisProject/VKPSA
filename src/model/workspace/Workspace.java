@@ -44,7 +44,7 @@ import model.workspace.tasks.Task_WorkspaceTask;
 	// 		 collectFileMetadata() is consistent with how .dis and .mds files are structured. This should be done by the integrity check - if the result is
 	//		 positive, distance and .mds data can be stored in arrays (with data at [i] bound to LDAConfiguration at ldaConfigurations[i]).
 // @todox Then: Adapt reading methods to new file structures.
-// @todo Then: Complement workspace integrity check (are .dis and .mds and datasets consistent in terms of the number of datasets and which datasets they contain/index?). 
+// @todox Then: Complement workspace integrity check (are .dis and .mds and datasets consistent in terms of the number of datasets and which datasets they contain/index?). 
 // @todo Then: Testdrive.
 // @todo Test and augment program workflow.
 // @todo Create data generation view.
@@ -419,12 +419,9 @@ public class Workspace
 			// Check if configuration in line in .mds file is consistent with configuration line
 			// parsed from raw topic data files.
 			else {
-				
+				isIntegrous = compareToLDAConfiguration(Paths.get(directory, FILENAME_MDSCOORDINATES), " "); 
 			}
 		}
-		
-		// @todo Add comparison with number of datasets in distance file as well as a comparison
-		// of the LDA configuration stored there.
 	
 		
 		return isIntegrous;
@@ -446,8 +443,11 @@ public class Workspace
 		    BufferedReader reader	= new BufferedReader(isr);
 		    
 			// Read first line in dataset (contains metadata).
-		    String line	= reader.readLine();
-
+		    String line				= reader.readLine();
+		    
+			// Close reader.
+			reader.close();
+			
 		    int i = 0;
 		    // Process and compare LDA configuration data.
 		    for (String ldaConfigString : line.split(delimiter)) {
@@ -460,9 +460,6 @@ public class Workspace
 		    		i++;
 		    	}
 		    }
-
-			// Close reader.
-			reader.close();
 		}
 		
 		catch (Exception exception) {
