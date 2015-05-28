@@ -33,7 +33,6 @@ public class LoadController extends Controller
 	private @FXML Label label_consistency;
 	private @FXML Shape shape_integrity;
 	
-	
 	private DirectoryChooser directoryChooser;
 	private String currentPath;
 	

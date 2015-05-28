@@ -2,6 +2,9 @@ package application;
 
 import java.math.BigDecimal;
 
+import org.controlsfx.control.RangeSlider;
+import org.controlsfx.control.SegmentedButton;
+
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -19,7 +22,7 @@ public class Main extends Application
 		// -----------------------------------------------
 		// 		Actual (raw and (pre-)processed) data
 		// -----------------------------------------------
-		
+	
 		int n						= 10000;
 		int numberOfTopics			= 20;
 		int numberOfKeywords		= 7000;

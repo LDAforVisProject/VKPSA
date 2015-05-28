@@ -81,7 +81,7 @@
                               <Insets top="2.5" />
                            </HBox.margin>
                         </ImageView>
-                        <ImageView fx:id="icon_generate" fitHeight="25.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="icon_generate" fitHeight="25.0" fitWidth="20.0" onMouseClicked="#actionButtonClicked" onMouseEntered="#enableActiveCursor" onMouseExited="#disableActiveCursor" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@icons/plus.png" />
                            </image>

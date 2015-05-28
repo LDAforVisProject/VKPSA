@@ -118,6 +118,18 @@ public class CoreController extends Controller
 					enableView("preprocess");
 				}
 			break;
+			
+			case "icon_generate":
+				label_title.setText("Generate");
+				
+				if (!viewNodeMap.containsKey("generate")) {
+					initView("generate", "/view/SII/SII_Content_Generate.fxml");
+				}
+				
+				else {
+					enableView("generate");
+				}
+			break;
 		}
 	}
 	
