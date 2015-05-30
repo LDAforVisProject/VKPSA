@@ -1,5 +1,6 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -127,6 +128,30 @@ public class LDAConfiguration
 										paramValueMap.get("alpha"),
 										paramValueMap.get("eta")
 									);
+	}
+	
+	public static ArrayList<LDAConfiguration> generateLDAConfigurations(int numberOfDivisions, int numberOfDatasetsToGenerate, String samplingMode, Map<String, ArrayList<Double>> parameterValueLists)
+	{
+		ArrayList<LDAConfiguration> configList = new ArrayList<LDAConfiguration>();
+		
+		switch (samplingMode) {
+			// numberOfDivisions == numberOfDatasetsToGenerate.
+			// Combine element at index [i] in list of every parameter to new LDAConfiguration.
+			case "Random":
+				for (int i = 0; i < numberOfDatasetsToGenerate; i++) {
+					int kappa		= parameterValueLists.get("kappa").get(i).intValue();
+					double alpha	= parameterValueLists.get("alpha").get(i);
+					double eta		= parameterValueLists.get("eta").get(i);
+					
+					configList.add(new LDAConfiguration(kappa, alpha, eta)); 
+				}
+			break;
+			
+			default:
+				System.out.println("Sampling mode '" + samplingMode + "' currently not supported.");
+		}
+		
+		return configList;
 	}
 	
 	// -----------------------------------------------

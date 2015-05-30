@@ -8,31 +8,32 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="748.0" prefWidth="1440.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.LoadController">
+<AnchorPane maxHeight="298.0" prefHeight="298.0" prefWidth="720.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.LoadController">
    <children>
-      <Label layoutX="393.0" layoutY="117.0" text="Select a working directory." wrapText="true">
+      <Label layoutX="226.0" layoutY="14.0" text="Select a working directory." wrapText="true">
          <font>
-            <Font name="System Bold" size="22.0" />
+            <Font name="System Bold" size="16.0" />
          </font>
       </Label>
-      <Label layoutX="395.0" layoutY="214.0" prefHeight="44.0" prefWidth="265.0" text="Datasets found in this directory are loaded and processed automatically." wrapText="true">
-         <font>
-            <Font size="14.0" />
-         </font>
-      </Label>
-      <Label layoutX="396.0" layoutY="255.0" prefHeight="62.0" prefWidth="263.0" text="If not datasets are found, new data has to be generated before an analysis may be conducted." wrapText="true">
-         <font>
-            <Font size="14.0" />
-         </font>
-      </Label>
-      <TextField fx:id="textfield_directory" layoutX="765.0" layoutY="224.0" />
-      <Button fx:id="button_browse" layoutX="923.0" layoutY="224.0" mnemonicParsing="false" onAction="#openFileBrowser" text="Browse" />
-      <Button fx:id="button_load" layoutX="766.0" layoutY="277.0" mnemonicParsing="false" onAction="#loadData" prefHeight="25.0" prefWidth="148.0" text="Load directory" />
-      <Separator layoutX="716.0" layoutY="204.0" orientation="VERTICAL" prefHeight="137.0" prefWidth="6.0" />
-      <Separator layoutX="392.0" layoutY="171.0" prefHeight="3.0" prefWidth="613.0" />
-      <ProgressIndicator fx:id="progressIndicator_load" layoutX="935.0" layoutY="271.0" progress="0.0" />
-      <Separator layoutX="393.0" layoutY="371.0" prefHeight="3.0" prefWidth="613.0" />
-      <GridPane gridLinesVisible="true" layoutX="579.0" layoutY="402.0" prefHeight="182.0" prefWidth="276.0">
+      <GridPane hgap="10.0" layoutX="81.0" layoutY="112.0" vgap="10.0">
+         <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+         </rowConstraints>
+         <children>
+            <Button fx:id="button_load" layoutX="766.0" layoutY="277.0" mnemonicParsing="false" onAction="#loadData" prefHeight="25.0" prefWidth="148.0" text="Load directory" GridPane.rowIndex="1" />
+            <Button fx:id="button_browse" layoutX="923.0" layoutY="224.0" mnemonicParsing="false" onAction="#openFileBrowser" text="Browse" GridPane.columnIndex="1" />
+            <ProgressIndicator fx:id="progressIndicator_load" layoutX="935.0" layoutY="271.0" progress="0.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <TextField fx:id="textfield_directory" layoutX="765.0" layoutY="224.0" />
+         </children>
+      </GridPane>
+      <Separator layoutX="321.0" layoutY="89.0" orientation="VERTICAL" prefHeight="137.0" prefWidth="6.0" />
+      <Separator layoutX="54.0" layoutY="44.0" prefHeight="3.0" prefWidth="613.0" />
+      <GridPane gridLinesVisible="true" layoutX="362.0" layoutY="66.0" prefHeight="182.0" prefWidth="276.0">
          <columnConstraints>
             <ColumnConstraints hgrow="SOMETIMES" maxWidth="245.0" minWidth="10.0" prefWidth="204.0" />
             <ColumnConstraints hgrow="SOMETIMES" maxWidth="112.0" minWidth="10.0" prefWidth="72.0" />
@@ -44,73 +45,64 @@
             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
          </rowConstraints>
          <children>
-            <Label fx:id="label_consistency" layoutX="660.0" layoutY="508.0" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="5">
+            <Label fx:id="label_consistency" layoutX="660.0" layoutY="508.0" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="4">
                <GridPane.margin>
                   <Insets left="20.0" />
                </GridPane.margin>
             </Label>
-            <Label layoutX="396.0" layoutY="507.0" text=".DIS/.MDS/datasets consistent:" GridPane.rowIndex="5">
+            <Label layoutX="396.0" layoutY="507.0" text=".DIS/.MDS/datasets consistent:" GridPane.rowIndex="4">
                <GridPane.margin>
                   <Insets left="10.0" />
                </GridPane.margin>
             </Label>
-            <Label layoutX="395.0" layoutY="427.0" text="Number of datasets:" GridPane.rowIndex="1">
+            <Label layoutX="395.0" layoutY="427.0" text="Number of datasets:">
                <GridPane.margin>
                   <Insets left="10.0" />
                </GridPane.margin>
             </Label>
-            <Label fx:id="label_datasetNumber" layoutX="660.0" layoutY="427.0" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <Label fx:id="label_datasetNumber" layoutX="660.0" layoutY="427.0" text="Label" GridPane.columnIndex="1">
                <GridPane.margin>
                   <Insets left="20.0" />
                </GridPane.margin>
             </Label>
-            <Label fx:id="label_numberMDSCoordinates" layoutX="660.0" layoutY="447.0" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="2">
+            <Label fx:id="label_numberMDSCoordinates" layoutX="660.0" layoutY="447.0" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="1">
                <GridPane.margin>
                   <Insets left="20.0" />
                </GridPane.margin>
             </Label>
-            <Label layoutX="396.0" layoutY="487.0" text=".DIS file found:" GridPane.rowIndex="4">
+            <Label layoutX="396.0" layoutY="487.0" text=".DIS file found:" GridPane.rowIndex="3">
                <GridPane.margin>
                   <Insets left="10.0" />
                </GridPane.margin>
             </Label>
-            <Label layoutX="395.0" layoutY="448.0" text="Number of MDS coordinates:" GridPane.rowIndex="2">
+            <Label layoutX="395.0" layoutY="448.0" text="Number of MDS coordinates:" GridPane.rowIndex="1">
                <GridPane.margin>
                   <Insets left="10.0" />
                </GridPane.margin>
             </Label>
-            <Label layoutX="396.0" layoutY="534.0" text="Workspace Integrity" GridPane.rowIndex="6">
+            <Label layoutX="396.0" layoutY="534.0" text="Workspace Integrity" GridPane.rowIndex="5">
                <GridPane.margin>
                   <Insets left="10.0" />
                </GridPane.margin>
             </Label>
-            <Label fx:id="label_mdsFound" layoutX="660.0" layoutY="468.0" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="3">
+            <Label fx:id="label_mdsFound" layoutX="660.0" layoutY="468.0" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="2">
                <GridPane.margin>
                   <Insets left="20.0" />
                </GridPane.margin>
             </Label>
-            <Circle fx:id="shape_integrity" fill="#42ff1f" layoutX="674.0" layoutY="543.0" radius="8.0" stroke="BLACK" strokeType="INSIDE" GridPane.columnIndex="1" GridPane.rowIndex="6">
+            <Circle fx:id="shape_integrity" fill="#42ff1f" layoutX="674.0" layoutY="543.0" radius="8.0" stroke="BLACK" strokeType="INSIDE" GridPane.columnIndex="1" GridPane.rowIndex="5">
                <GridPane.margin>
                   <Insets left="25.0" />
                </GridPane.margin>
             </Circle>
-            <Label layoutX="396.0" layoutY="394.0" text="Status">
-               <font>
-                  <Font size="18.0" />
-               </font>
+            <Label layoutX="396.0" layoutY="468.0" text=".MDS file found:" GridPane.rowIndex="2">
                <GridPane.margin>
                   <Insets left="10.0" />
                </GridPane.margin>
             </Label>
-            <Label layoutX="396.0" layoutY="468.0" text=".MDS file found:" GridPane.rowIndex="3">
-               <GridPane.margin>
-                  <Insets left="10.0" />
-               </GridPane.margin>
-            </Label>
-            <Label fx:id="label_disFound" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="4">
+            <Label fx:id="label_disFound" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="3">
                <GridPane.margin>
                   <Insets left="20.0" />
                </GridPane.margin>
@@ -120,5 +112,6 @@
             <Insets />
          </opaqueInsets>
       </GridPane>
+      <Separator layoutX="54.0" layoutY="269.0" prefHeight="3.0" prefWidth="613.0" />
    </children>
 </AnchorPane>

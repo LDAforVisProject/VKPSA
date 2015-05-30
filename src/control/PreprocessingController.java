@@ -8,52 +8,63 @@ import model.workspace.tasks.Task_LoadRawData;
 import model.workspace.tasks.Task_WorkspaceTask;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TitledPane;
 import javafx.scene.image.ImageView;
 
 public class PreprocessingController extends Controller
 {
 	// Buttons.
 	
-	@FXML Button button_calculateDistances;
-	@FXML Button button_calculateMDSCoordinates;
+	private @FXML Button button_calculateDistances;
+	private @FXML Button button_calculateMDSCoordinates;
 	
 	// Checkboxes.
 	
-	@FXML CheckBox checkbox_appendToDistanceMatrix;
-	@FXML CheckBox checkbox_appendToMDSCoordinateMatrix;
+	private @FXML CheckBox checkbox_appendToDistanceMatrix;
+	private @FXML CheckBox checkbox_appendToMDSCoordinateMatrix;
 
-	@FXML CheckBox checkbox_bhattacharyya;
-	@FXML CheckBox checkbox_hellinger;
-	@FXML CheckBox checkbox_jensenshannon;
-	@FXML CheckBox checkbox_kullbackleibler;
-	@FXML CheckBox checkbox_l2;
+	private @FXML CheckBox checkbox_bhattacharyya;
+	private @FXML CheckBox checkbox_hellinger;
+	private @FXML CheckBox checkbox_jensenshannon;
+	private @FXML CheckBox checkbox_kullbackleibler;
+	private @FXML CheckBox checkbox_l2;
 	
-	@FXML CheckBox checkbox_hausdorff;
-	@FXML CheckBox checkbox_avgmin;
+	private @FXML CheckBox checkbox_hausdorff;
+	private @FXML CheckBox checkbox_avgmin;
 	
 	// Comboboxes.
 	
-	@FXML ComboBox<String> combobox_scalingAlgorithm;
+	private @FXML ComboBox<String> combobox_scalingAlgorithm;
 	
 	// Labels.
 	
-	@FXML Label label_numberOfDatasets;
-	@FXML Label label_numberOfDistanceCalculations;
+	private @FXML Label label_numberOfDatasets;
+	private @FXML Label label_numberOfDistanceCalculations;
 	
 	// Progress indicators.
 	
-	@FXML ProgressIndicator progressIndicator_calculateMDSCoordinates;
-	@FXML ProgressIndicator progressIndicator_distanceCalculation;
+	private @FXML ProgressIndicator progressIndicator_calculateMDSCoordinates;
+	private @FXML ProgressIndicator progressIndicator_distanceCalculation;
+	
+	// Accordion.
+	private @FXML Accordion accordion_calculation;
+	private @FXML TitledPane titledPane_distances;
+	private @FXML TitledPane titledPane_mds;
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources)
 	{
 		System.out.println("Initializing SII_PreprocessingController.");
+		
+		accordion_calculation.setExpandedPane(titledPane_distances);
 	}
 	
 	@FXML

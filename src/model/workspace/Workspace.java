@@ -26,6 +26,7 @@ import model.workspace.tasks.ITaskListener;
 import model.workspace.tasks.Task_CalculateDistances;
 import model.workspace.tasks.Task_CalculateMDSCoordinates;
 import model.workspace.tasks.Task_CollectFileMetadata;
+import model.workspace.tasks.Task_GenerateData;
 import model.workspace.tasks.Task_LoadDistanceData;
 import model.workspace.tasks.Task_LoadMDSCoordinates;
 import model.workspace.tasks.Task_LoadRawData;
@@ -35,22 +36,13 @@ import model.workspace.tasks.Task_WorkspaceTask;
 // 		ROADMAP / Todos, in sequential order
 // -----------------------------------------------
 
-// @todox Write distance calculation task.
-// @todox Then write raw data loading task.
-// @todox Then write results to file.
-// @todox Write distance data loading task.
-// @todox CURRENT: Rewrite MDS coordinate calculation/outputting - output LDA configuration binding too (which coordinate belongs to which LDA configuration?).
-	// @todox Think about whether distances and MDS coordinates should be stored in array or map. Requirement for array: Indices as read and stored by
-	// 		 collectFileMetadata() is consistent with how .dis and .mds files are structured. This should be done by the integrity check - if the result is
-	//		 positive, distance and .mds data can be stored in arrays (with data at [i] bound to LDAConfiguration at ldaConfigurations[i]).
-// @todox Then: Adapt reading methods to new file structures.
-// @todox Then: Complement workspace integrity check (are .dis and .mds and datasets consistent in terms of the number of datasets and which datasets they contain/index?). 
-// @todox Then: Testdrive.
 // @todo Test and augment program workflow.
 // @todo Create data generation view.
 // @todox Improve LDA python script (fixes, parameter output in files). Modify so that generated files contain metadata in first line.
 	// @todox: Add removal of quotation marks in preprocessing of data.
 	// @todox: Add removal of commas in preprocessing of data.
+// @todo Process sampling parameter lists in python script.
+// @todo Export python script as independent .exe.
 // @todo Integrate python script binding in VKPSA GUI.
 // @todo Test data generation.
 // @todo Formulate work items for analysis view / phase.
@@ -83,18 +75,25 @@ public class Workspace
 	 * Name of file containing already calculated MDS coordinates.
 	 */
 	public static final String FILENAME_MDSCOORDINATES = "workspace.mds";
-	
+	/**
+	 * Name of file containing parameters that have yet to be calculated.
+	 */
+	public static final String FILENAME_TOGENERATE = "toGenerate.lda";
 	
 	// -----------------------------------------------
 	// 		Actual (raw and (pre-)processed) data
 	// -----------------------------------------------
 	
 	/**
+	 * Contains newly generated parameter values that yet have to generated.
+	 * After the generation is done, this collection is emptied.
+	 */
+	private ArrayList<LDAConfiguration> configurationsToGenerate;
+	/**
 	 * Contains pre-calculated MDS coordinates. Read from .FILENAME_MDSCOORDINATES.
 	 */
 	private double[][] mdsCoordinates;
-	/**
-	 * Contains pre-calculated distance values (between datasets). Read from .FILENAME_DISTANCES.
+	/**	 * Contains pre-calculated distance values (between datasets). Read from .FILENAME_DISTANCES.
 	 */
 	private double[][] distances;
 	
@@ -168,9 +167,10 @@ public class Workspace
 	
 	public Workspace(String directory)
 	{
-		this.directory			= directory;
-		this.datasetMap			= new HashMap<LDAConfiguration, Dataset>();
-		this.ldaConfigurations	= new ArrayList<LDAConfiguration>();
+		this.directory					= directory;
+		this.datasetMap					= new HashMap<LDAConfiguration, Dataset>();
+		this.ldaConfigurations			= new ArrayList<LDAConfiguration>();
+		this.configurationsToGenerate	= new ArrayList<LDAConfiguration>();
 		
 //		this.reverseMDSCoordinateLookup = new MultiMap<Pair<Double, Double>, LDAConfiguration>();
 		
@@ -240,6 +240,10 @@ public class Workspace
 			
 			case CALCULATE_MDS_COORDINATES:
 				task = new Task_CalculateMDSCoordinates(this, WorkspaceAction.CALCULATE_MDS_COORDINATES);
+			break;
+			
+			case GENERATE_DATA:
+				task = new Task_GenerateData(this, WorkspaceAction.GENERATE_DATA);
 			break;
 			
 			// -----------------------------------------------
@@ -611,5 +615,15 @@ public class Workspace
 	public void setNumberOfDatasetsInDISFile(int numberOfDatasetsInDISFile)
 	{
 		this.numberOfDatasetsInDISFile = numberOfDatasetsInDISFile;
+	}
+
+	public ArrayList<LDAConfiguration> getConfigurationsToGenerate()
+	{
+		return configurationsToGenerate;
+	}
+
+	public void setConfigurationsToGenerate(ArrayList<LDAConfiguration> parameterValuesToGenerate)
+	{
+		this.configurationsToGenerate = parameterValuesToGenerate;
 	}
 }

@@ -22,7 +22,6 @@ import model.workspace.WorkspaceAction;
 
 public class Task_LoadDistanceData extends Task_WorkspaceTask
 {
-
 	public Task_LoadDistanceData(Workspace workspace, WorkspaceAction workspaceAction)
 	{
 		super(workspace, workspaceAction);

@@ -78,7 +78,7 @@ public class Main extends Application
 	        primaryStage.show();
 	        
 	        // Add CSS sheet.
-			scene.getStylesheets().add(getClass().getResource("/view/css/visTabContent.css").toExternalForm());
+			scene.getStylesheets().add(getClass().getResource("/view/css/styles.css").toExternalForm());
 			
 			// Add resize listeners.
 //			addResizeListeners(scene, coreController);

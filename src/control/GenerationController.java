@@ -7,16 +7,29 @@ import java.util.Map;
 import java.util.Random;
 import java.util.ResourceBundle;
 
+import javax.xml.ws.handler.MessageContext.Scope;
+
+import model.LDAConfiguration;
+import model.workspace.WorkspaceAction;
+
 import org.controlsfx.control.RangeSlider;
 
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
@@ -24,45 +37,49 @@ import javafx.scene.layout.VBox;
 
 public class GenerationController extends Controller
 {
-	@FXML
-	private GridPane parameterConfiguration_gridPane;
+	// -----------------------------------------------
+	// 				FXML data.
+	// -----------------------------------------------
 	
-	@FXML
-	private BarChart<String, Integer> alpha_barchart;
-	@FXML
-	private BarChart<String, Integer> eta_barchart;
-	@FXML
-	private BarChart<String, Integer> kappa_barchart;
+	@FXML private GridPane parameterConfiguration_gridPane;
 	
-	@FXML
-	private TextField alpha_min_textfield;
-	@FXML
-	private TextField alpha_max_textfield;
-	@FXML
-	private TextField eta_min_textfield;
-	@FXML
-	private TextField eta_max_textfield;
-	@FXML
-	private TextField kappa_min_textfield;
-	@FXML
-	private TextField kappa_max_textfield;
+	@FXML private BarChart<String, Integer> alpha_barchart;
+	@FXML private BarChart<String, Integer> eta_barchart;
+	@FXML private BarChart<String, Integer> kappa_barchart;
 	
-	@FXML
-	private TextField numberOfDatasets_textfield;
-	@FXML
-	private TextField numberOfDivisions_textfield;
+	@FXML private TextField alpha_min_textfield;
+	@FXML private TextField alpha_max_textfield;
+	@FXML private TextField eta_min_textfield;
+	@FXML private TextField eta_max_textfield;
+	@FXML private TextField kappa_min_textfield;
+	@FXML private TextField kappa_max_textfield;
+	@FXML private TextField numberOfDatasets_textfield;
+	@FXML private TextField numberOfDivisions_textfield;
 	
-	@FXML
-	private Button parameterCoupling_button;
+	@FXML private Button parameterCoupling_button;
+	@FXML private Button generate_button;
 	
-	@FXML
-	private ComboBox<String> sampling_combobox;
+	@FXML private ComboBox<String> sampling_combobox;
 
+	@FXML private ScrollPane parameter_scrollPane;
+	
+	@FXML private ProgressIndicator generate_progressIndicator;
+	
 	private Map<String, RangeSlider> rangeSliders;
 	private Map<String, VBox> vBoxes;
 	
+	// -----------------------------------------------
+	// 				Content data.
+	// -----------------------------------------------
+	
+	private Map<String, ArrayList<Double>> parameterValues;
 	private int numberOfDatasetsToGenerate;
 	private int numberOfDivisions;
+	
+	
+	// -----------------------------------------------
+	// 				Methods.
+	// -----------------------------------------------
 	
 	
 	@Override
@@ -70,12 +87,19 @@ public class GenerationController extends Controller
 	{
 		System.out.println("Initializing SII_GenerationController.");
 		
-		//spinners		= new HashMap<String, Spinner<Float>>();
-		rangeSliders	= new HashMap<String, RangeSlider>();
-		vBoxes			= new HashMap<String, VBox>();
+		parameterValues = new HashMap<String, ArrayList<Double>>();
+		
+//		parameterConfiguration_gridPane.heightProperty().addListener(new ChangeListener<Number>() {
+//				public void changed(ObservableValue<? extends Number> ov, Number old_val, Number new_val) {
+//					System.out.println("height changed - " + old_val + ", " + new_val);
+//	            }
+//		    }) ;
 		
 		// Init UI elements.
 		initUIElements();
+		
+		// Generate initial parameter values (and histograms).
+		generateParameterValues();
 	}
 	
 	/**
@@ -84,6 +108,12 @@ public class GenerationController extends Controller
 	 */
 	private void initUIElements() 
 	{
+		// Init UI element collections.
+		//spinners		= new HashMap<String, Spinner<Float>>();
+		rangeSliders	= new HashMap<String, RangeSlider>();
+		vBoxes			= new HashMap<String, VBox>();
+		
+		
 		// Parse pre-configured textfield valus.
 		initTextFields();
 		
@@ -186,9 +216,14 @@ public class GenerationController extends Controller
 			rs.setMax(100);
 			rs.setMajorTickUnit(5);
 			rs.setSnapToTicks(false);
+			rs.setShowTickLabels(true);
 			rs.setShowTickMarks(true);
+			rs.setMajorTickUnit(25);
 			rs.setLowValue(0);
 			rs.setHighValue(100);
+			
+			// Get some distance between range sliders and bar charts.
+			rs.setPadding(new Insets(10, 0, 0, 0));
 			
 			addEventHandlerToRangeSlider(rs, entry.getKey());
 		}
@@ -335,13 +370,13 @@ public class GenerationController extends Controller
 		 */
 		
 		// Init storage.
-		Map<String, ArrayList<Double>> parameterValues = new HashMap<String, ArrayList<Double>>();
+		parameterValues.clear();
 		parameterValues.put("alpha", new ArrayList<Double>(numberOfDivisions));
 		parameterValues.put("eta", new ArrayList<Double>(numberOfDivisions));
 		parameterValues.put("kappa", new ArrayList<Double>(numberOfDivisions));
 		
 		// Init bins.
-		final int numberOfBins 					= 100;
+		final int numberOfBins 					= 50;
 		Map<String, int[]> parameterBinLists	= new HashMap<String, int[]>();
 		parameterBinLists.put("alpha", new int[numberOfBins]);
 		parameterBinLists.put("eta", new int[numberOfBins]);
@@ -367,9 +402,10 @@ public class GenerationController extends Controller
 		}
 		
 		/**
-		 * @todo Bin data for use in histograms/scented widgets.
+		 * Bin data for use in histograms/scented widgets.
 		 */
-		// @todo Use .getHighValue() instead of .getMax()? What's more appropriate?
+		
+		// @todo Use .getHighValue() instead of .getMax()? What's more useful?
 		double binInterval		= (rangeSliders.get("alpha").getMax() - rangeSliders.get("alpha").getMin()) / numberOfBins;
 		// Bin data.
 		for (Map.Entry<String, ArrayList<Double>> entry : parameterValues.entrySet()) {
@@ -380,47 +416,47 @@ public class GenerationController extends Controller
 			}
 		}
 		
-		for (int x : parameterBinLists.get("alpha")) {
-			System.out.println(x);
-		}
-		System.out.println();
 		/**
 		 * Transfer data to scented widgets.
 		 */
 		
 		// Clear old data.
 		alpha_barchart.getData().clear();
-		
-		// @todo Find way to prevent BarChart from dynamically adjusting bar height per unit.
-		// @todo Move BarCharts slightly to the left.
-		
-		// Add data to barcharts.
-		
-		
+		eta_barchart.getData().clear();
+		kappa_barchart.getData().clear();
+
 		// Add data series to barcharts.
-		alpha_barchart.getData().add(generateParameterHistogramDataSeries("alpha", parameterBinLists));
+		alpha_barchart.getData().add(generateParameterHistogramDataSeries("alpha", parameterBinLists, numberOfBins));
+		eta_barchart.getData().add(generateParameterHistogramDataSeries("eta", parameterBinLists, numberOfBins));
+		kappa_barchart.getData().add(generateParameterHistogramDataSeries("kappa", parameterBinLists, numberOfBins));
 	}
 	
-	private XYChart.Series<String, Integer> generateParameterHistogramDataSeries(String key, Map<String, int[]> parameterBinLists)
+	private XYChart.Series<String, Integer> generateParameterHistogramDataSeries(String key, Map<String, int[]> parameterBinLists, final int numberOfBins)
 	{
 		final XYChart.Series<String, Integer> data_series = new XYChart.Series<String, Integer>();
-		System.out.println(rangeSliders.get(key).getMin() + " - " + rangeSliders.get(key).getMax());
-		data_series.getData().add(new XYChart.Data<String, Integer>("-1", 10));
-		for (int i = (int) rangeSliders.get(key).getMin(); i < rangeSliders.get(key).getMax(); i++) {
+		
+		for (int i = 0; i < numberOfBins; i++) {
 			int binContent = parameterBinLists.get(key)[i];
-			System.out.println(binContent);
 			data_series.getData().add(new XYChart.Data<String, Integer>(String.valueOf(i), binContent ));
-			// If in defined range: Output parameter counts.
-//			if (i >= rangeSliders.get(key).getLowValue() && i <= rangeSliders.get(key).getHighValue()) {
-//				data_series.getData().add(new XYChart.Data<String, Float>(String.valueOf(i), (float)(i * 10) ));
-//				
-//			}
-			// Otherwise: Output 0.
-//			else {
-//				data_series.getData().add(new XYChart.Data<String, Float>(String.valueOf(i), (float)0 ));
-//			}
 		}
 		
 		return data_series;
+	}
+	
+	@FXML
+	private void generateData(ActionEvent e)
+	{
+		System.out.println("Generating data (" + numberOfDivisions + " divisons per parameter -> " + numberOfDatasetsToGenerate + " datasets using " + sampling_combobox.getValue() + " sampling).");
+		
+		// Create LDA configurations out of parameter lists, transfer to workspace.
+		workspace.setConfigurationsToGenerate(LDAConfiguration.generateLDAConfigurations( numberOfDivisions, numberOfDatasetsToGenerate, sampling_combobox.getValue(), parameterValues ));
+		
+		workspace.executeWorkspaceAction(WorkspaceAction.GENERATE_DATA, generate_progressIndicator.progressProperty(), this);
+	}
+	
+	@Override
+	public void notifyOfTaskCompleted(final WorkspaceAction workspaceAction)
+	{
+		System.out.println("Finished workspace task.");
 	}
 }

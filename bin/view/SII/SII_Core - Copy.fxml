@@ -63,7 +63,7 @@
                         </ImageView>
                      </children>
                   </HBox>
-                  <HBox layoutX="1164.0" layoutY="30.0" maxHeight="30.0" minHeight="20.0" prefHeight="20.0" prefWidth="90.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <HBox layoutX="1164.0" layoutY="30.0" maxHeight="30.0" minHeight="20.0" prefHeight="20.0" prefWidth="136.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="0.0">
                      <children>
                         <ImageView fx:id="icon_dataview" fitHeight="25.0" fitWidth="25.0" onMouseClicked="#actionButtonClicked" onMouseEntered="#enableActiveCursor" onMouseExited="#disableActiveCursor" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -80,6 +80,30 @@
                            <image>
                               <Image url="@icons/eye.jpg" />
                            </image>
+                        </ImageView>
+                        <ImageView fx:id="icon_load" disable="true" fitHeight="25.0" fitWidth="25.0" onMouseClicked="#actionButtonClicked" onMouseEntered="#enableActiveCursor" onMouseExited="#disableActiveCursor" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@icons/folder_small.jpg" />
+                           </image>
+                           <HBox.margin>
+                              <Insets left="15.0" top="2.5" />
+                           </HBox.margin>
+                        </ImageView>
+                        <ImageView fx:id="icon_generate" disable="true" fitHeight="25.0" fitWidth="20.0" onMouseClicked="#actionButtonClicked" onMouseEntered="#enableActiveCursor" onMouseExited="#disableActiveCursor" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@icons/plus.png" />
+                           </image>
+                           <HBox.margin>
+                              <Insets left="15.0" top="2.5" />
+                           </HBox.margin>
+                        </ImageView>
+                        <ImageView fx:id="icon_preprocess" disable="true" fitHeight="30.0" fitWidth="25.0" onMouseClicked="#actionButtonClicked" onMouseEntered="#enableActiveCursor" onMouseExited="#disableActiveCursor" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@icons/thin-0545_map_travel_distance_directions-128.png" />
+                           </image>
+                           <HBox.margin>
+                              <Insets left="15.0" top="2.5" />
+                           </HBox.margin>
                         </ImageView>
                      </children>
                      <opaqueInsets>

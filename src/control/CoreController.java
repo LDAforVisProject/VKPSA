@@ -32,6 +32,7 @@ public class CoreController extends Controller
 	private @FXML ImageView icon_generate;
 	private @FXML ImageView icon_preprocess;
 	private @FXML ImageView icon_analyze;
+	private @FXML ImageView icon_dataview;
 	
 	private @FXML AnchorPane pane_content;
 	
@@ -86,7 +87,7 @@ public class CoreController extends Controller
 					initView("analyze", "/view/SII/SII_Content_Analysis.fxml");
 					
 					// Draw scatterchart.
-					((AnalysisController)controllerMap.get("analyze")).refreshVisualizations();
+					//((AnalysisController)controllerMap.get("analyze")).refreshVisualizations();
 				}
 				
 				// Controller already exists: Switch to node.
@@ -95,39 +96,16 @@ public class CoreController extends Controller
 				}
 			break;
 			
-			case "icon_load":
-				label_title.setText("Load");
+			case "icon_dataview":
+				label_title.setText("Provide Data");
 				
-				if (!viewNodeMap.containsKey("load")) {
-					initView("load", "/view/SII/SII_Content_Load.fxml");
+				if (!viewNodeMap.containsKey("dataview")) {
+					initView("dataview", "/view/SII/SII_Content_Data.fxml");
+					initDataView();
 				}
 				
 				else {
-					enableView("load");
-				}
-			break;
-			
-			case "icon_preprocess":
-				label_title.setText("Preprocess");
-				
-				if (!viewNodeMap.containsKey("preprocess")) {
-					initView("preprocess", "/view/SII/SII_Content_Preprocess.fxml");
-				}
-				
-				else {
-					enableView("preprocess");
-				}
-			break;
-			
-			case "icon_generate":
-				label_title.setText("Generate");
-				
-				if (!viewNodeMap.containsKey("generate")) {
-					initView("generate", "/view/SII/SII_Content_Generate.fxml");
-				}
-				
-				else {
-					enableView("generate");
+					enableView("dataview");
 				}
 			break;
 		}
@@ -174,6 +152,48 @@ public class CoreController extends Controller
 		}
 	}
 	
+	/**
+	 * Creates data view (called at first action with this view).
+	 */
+	private void initDataView()
+	{
+        DataViewController dvController	= (DataViewController)controllerMap.get("dataview");
+        String[] viewIDs				= {"load", "preprocess", "generate"};
+        String[] fxmlFilePaths			= {"/view/SII/SII_Content_Load.fxml", "/view/SII/SII_Content_Preprocess.fxml", "/view/SII/SII_Content_Generate.fxml"};
+        
+        try {
+        	// Add all relevant sub-views to DataView.
+        	for (int i = 0; i < viewIDs.length; i++) {
+            	FXMLLoader fxmlLoader	= new FXMLLoader();
+                Node contentNode		= null;
+                
+        		String viewID			= viewIDs[i];
+        		String filepath			= fxmlFilePaths[i];
+        		
+	        	// Store node of this view.
+	        	viewNodeMap.put( viewID, (Node) fxmlLoader.load(getClass().getResource(filepath).openStream()) );
+				contentNode = viewNodeMap.get(viewID);
+				
+	        	// Get and store controller.
+	        	controllerMap.put(viewID, (Controller)fxmlLoader.getController());
+				controllerMap.get(viewID).setWorkspace(workspace);
+				
+				// Add to container.
+				dvController.getContainer(viewID).getChildren().add(contentNode);
+				
+				// Ensure resizability of tab content.
+				AnchorPane.setTopAnchor(contentNode, 0.0);
+	    		AnchorPane.setBottomAnchor(contentNode, 0.0);
+	    		AnchorPane.setLeftAnchor(contentNode, 0.0);
+	    		AnchorPane.setRightAnchor(contentNode, 0.0);
+        	}
+		} 
+        
+        catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	private void hideAllViews()
 	{
 		for (Node viewNode : viewNodeMap.values()) {
@@ -188,6 +208,18 @@ public class CoreController extends Controller
 		
 		viewNodeMap.get(viewID).setDisable(false);
 		viewNodeMap.get(viewID).setVisible(true);
+		
+		// Show subview of dataview, if viewID is "dataview".
+		if (viewID == "dataview") {
+			viewNodeMap.get("load").setDisable(false);
+			viewNodeMap.get("load").setVisible(true);
+			
+			viewNodeMap.get("preprocess").setDisable(false);
+			viewNodeMap.get("preprocess").setVisible(true);
+			
+			viewNodeMap.get("generate").setDisable(false);
+			viewNodeMap.get("generate").setVisible(true);
+		}
 	}
 	
 	/**
