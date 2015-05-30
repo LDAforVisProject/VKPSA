@@ -228,6 +228,9 @@ public class GenerationController extends Controller
 			addEventHandlerToRangeSlider(rs, entry.getKey());
 		}
 		
+		// Set minima and maxima.
+		rangeSliders.get("kappa").setMin(1);
+		
 		// Add to respective parents.
 		vBoxes.get("alpha").getChildren().add(rangeSliders.get("alpha"));
 		vBoxes.get("eta").getChildren().add(rangeSliders.get("eta"));
@@ -309,7 +312,6 @@ public class GenerationController extends Controller
 	{
 		try {
 			numberOfDatasetsToGenerate = Integer.parseInt(numberOfDatasets_textfield.getText());
-			System.out.println("New number of datasets to generate: " + numberOfDatasetsToGenerate);
 			
 			switch(sampling_combobox.getValue())
 			{
@@ -324,7 +326,10 @@ public class GenerationController extends Controller
 				
 				case "Hypercube":
 				break;
-			}			
+			}
+			
+			// Update scented widget histograms.
+			generateParameterValues();
 		}
 		
 		catch (NumberFormatException ex) {
@@ -337,7 +342,6 @@ public class GenerationController extends Controller
 	{
 		try {
 			numberOfDivisions = Integer.parseInt(numberOfDivisions_textfield.getText());
-			System.out.println("New number of divisions: " + numberOfDivisions);
 			
 			switch(sampling_combobox.getValue())
 			{
@@ -353,6 +357,9 @@ public class GenerationController extends Controller
 				case "Hypercube":
 				break;
 			}
+			
+			// Update scented widget histograms.
+			generateParameterValues();
 		}
 		
 		catch (NumberFormatException ex) {
@@ -405,14 +412,15 @@ public class GenerationController extends Controller
 		 * Bin data for use in histograms/scented widgets.
 		 */
 		
-		// @todo Use .getHighValue() instead of .getMax()? What's more useful?
-		double binInterval		= (rangeSliders.get("alpha").getMax() - rangeSliders.get("alpha").getMin()) / numberOfBins;
 		// Bin data.
 		for (Map.Entry<String, ArrayList<Double>> entry : parameterValues.entrySet()) {
+			// @todo Use .getHighValue() instead of .getMax()? What's more useful?
+			double binInterval = (rangeSliders.get(entry.getKey()).getMax() - rangeSliders.get(entry.getKey()).getMin()) / numberOfBins;
+			
 			// Check every value and assign it to the correct bin.
 			for (double value : entry.getValue()) {
 				// Increment content of corresponding bin.
-				parameterBinLists.get(entry.getKey())[(int) (value / binInterval)]++;
+				parameterBinLists.get(entry.getKey())[(int) ( (value - rangeSliders.get(entry.getKey()).getMin()) / binInterval)]++;	
 			}
 		}
 		
