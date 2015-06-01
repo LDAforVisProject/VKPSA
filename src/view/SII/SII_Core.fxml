@@ -17,29 +17,6 @@
          <top>
             <AnchorPane maxHeight="40.0" minHeight="40.0" prefHeight="40.0" prefWidth="1366.0" style="-fx-background-color: #fff;" BorderPane.alignment="CENTER">
                <children>
-                  <HBox layoutY="20.0" maxHeight="40.0" minHeight="30.0" prefHeight="30.0" prefWidth="89.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
-                     <children>
-                        <ImageView fx:id="icon_settings" fitHeight="25.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@icons/cog.png" />
-                           </image>
-                           <HBox.margin>
-                              <Insets top="2.5" />
-                           </HBox.margin>
-                        </ImageView>
-                        <ImageView fx:id="icon_help" fitHeight="27.5" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@icons/question-mark-black-and-white-Icon-round-Question_mark_small.jpg" />
-                           </image>
-                           <HBox.margin>
-                              <Insets left="15.0" top="2.5" />
-                           </HBox.margin>
-                        </ImageView>
-                     </children>
-                     <padding>
-                        <Insets left="20.0" />
-                     </padding>
-                  </HBox>
                   <HBox layoutX="544.0" layoutY="29.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" prefWidth="136.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="600.0" AnchorPane.rightAnchor="600.0" AnchorPane.topAnchor="0.0">
                      <children>
                         <Label fx:id="label_title" text="VKPSA">
@@ -63,19 +40,35 @@
                         </ImageView>
                      </children>
                   </HBox>
-                  <HBox layoutX="1164.0" layoutY="30.0" maxHeight="30.0" minHeight="20.0" prefHeight="20.0" prefWidth="90.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <HBox layoutX="1216.0" layoutY="6.0" maxHeight="30.0" minHeight="20.0" prefHeight="20.0" prefWidth="90.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="0.0">
                      <children>
+                        <ImageView fx:id="icon_help" fitHeight="27.5" fitWidth="22.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@icons/question-mark-black-and-white-Icon-round-Question_mark_small.jpg" />
+                           </image>
+                           <HBox.margin>
+                              <Insets top="5.0" />
+                           </HBox.margin>
+                        </ImageView>
+                        <ImageView fx:id="icon_settings" fitHeight="25.0" fitWidth="22.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@icons/cog.png" />
+                           </image>
+                           <HBox.margin>
+                              <Insets left="15.0" top="5.0" />
+                           </HBox.margin>
+                        </ImageView>
                         <ImageView fx:id="icon_dataview" fitHeight="25.0" fitWidth="25.0" onMouseClicked="#actionButtonClicked" onMouseEntered="#enableActiveCursor" onMouseExited="#disableActiveCursor" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@icons/data_small.jpg" />
                            </image>
                            <HBox.margin>
-                              <Insets top="2.5" />
+                              <Insets left="25.0" top="2.5" />
                            </HBox.margin>
                         </ImageView>
-                        <ImageView fx:id="icon_analyze" fitHeight="20.0" fitWidth="25.0" onMouseClicked="#actionButtonClicked" onMouseEntered="#enableActiveCursor" onMouseExited="#disableActiveCursor" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="icon_analyze" fitHeight="20.0" fitWidth="27.0" onMouseClicked="#actionButtonClicked" onMouseEntered="#enableActiveCursor" onMouseExited="#disableActiveCursor" pickOnBounds="true" preserveRatio="true">
                            <HBox.margin>
-                              <Insets left="10.0" top="2.5" />
+                              <Insets left="10.0" top="5.0" />
                            </HBox.margin>
                            <image>
                               <Image url="@icons/eye.jpg" />

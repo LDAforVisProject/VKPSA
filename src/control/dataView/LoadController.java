@@ -1,4 +1,4 @@
-package control;
+package control.dataView;
 
 import java.net.URL;
 import java.nio.file.Files;
@@ -19,11 +19,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 import javafx.stage.DirectoryChooser;
 
-public class LoadController extends Controller
+public class LoadController extends DataSubViewController
 {
 	private @FXML TextField textfield_directory;
 	private @FXML Button button_browse;
-	private @FXML Button button_load;
 	private @FXML ProgressIndicator progressIndicator_load;
 	
 	private @FXML Label label_datasetNumber;
@@ -35,6 +34,9 @@ public class LoadController extends Controller
 	
 	private DirectoryChooser directoryChooser;
 	private String currentPath;
+	
+	// Reference to DataViewController controlling (among other controls) the LoadController PopOver.
+	private DataViewController dvController;
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources)
@@ -51,11 +53,26 @@ public class LoadController extends Controller
 		currentPath = "";
 	}
 	
+	public void setDataViewController(DataViewController dvController)
+	{
+		this.dvController = dvController;
+	}
+	
 	@FXML
 	public void openFileBrowser(ActionEvent event)
 	{
+		// Hide workspace chooser popup.
+		dvController.toggleWorkspaceChooserStatus();
+		
+		// Get current path from file dialog.
 		currentPath = directoryChooser.showDialog(null).getAbsolutePath();
 		textfield_directory.setText(currentPath);
+
+		// Show workspace chooser popup.
+		dvController.toggleWorkspaceChooserStatus();
+		
+		// Load workspace.
+		loadData(event);
 	}
 	
 	@FXML

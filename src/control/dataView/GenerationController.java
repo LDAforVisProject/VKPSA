@@ -1,4 +1,4 @@
- package control;
+ package control.dataView;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
-public class GenerationController extends Controller
+public class GenerationController extends DataSubViewController
 {
 	// -----------------------------------------------
 	// 				FXML data.

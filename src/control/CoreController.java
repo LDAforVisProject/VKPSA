@@ -6,11 +6,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import control.dataView.DataSubViewController;
+import control.dataView.DataViewController;
 import model.workspace.Workspace;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
@@ -102,6 +105,9 @@ public class CoreController extends Controller
 				if (!viewNodeMap.containsKey("dataview")) {
 					initView("dataview", "/view/SII/SII_Content_Data.fxml");
 					initDataView();
+					
+			        // Show workspace chooser.
+					((DataViewController)controllerMap.get("dataview")).showWorkspaceChooser(viewNodeMap.get("load"), root, scene);
 				}
 				
 				else {
@@ -177,9 +183,11 @@ public class CoreController extends Controller
 	        	// Get and store controller.
 	        	controllerMap.put(viewID, (Controller)fxmlLoader.getController());
 				controllerMap.get(viewID).setWorkspace(workspace);
+				// Set dataViewController in respective sub-controller.
+				((DataSubViewController)controllerMap.get(viewID)).setDataViewController(dvController);
 				
 				// Add to container.
-				dvController.getContainer(viewID).getChildren().add(contentNode);
+				((AnchorPane) dvController.getContainer(viewID)).getChildren().add(contentNode);
 				
 				// Ensure resizability of tab content.
 				AnchorPane.setTopAnchor(contentNode, 0.0);

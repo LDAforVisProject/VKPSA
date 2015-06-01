@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="420.0" prefWidth="722.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.PreprocessingController">
+<AnchorPane prefHeight="420.0" prefWidth="722.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.dataView.PreprocessingController">
    <children>
       <Accordion fx:id="accordion_calculation" layoutX="14.0" layoutY="37.0" prefHeight="383.0" prefWidth="722.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <panes>

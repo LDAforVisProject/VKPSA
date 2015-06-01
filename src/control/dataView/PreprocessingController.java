@@ -1,4 +1,4 @@
-package control;
+package control.dataView;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -19,7 +19,7 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.ImageView;
 
-public class PreprocessingController extends Controller
+public class PreprocessingController extends DataSubViewController
 {
 	// Buttons.
 	
