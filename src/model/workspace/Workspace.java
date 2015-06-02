@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -13,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.MultiMap;
@@ -27,6 +29,7 @@ import model.workspace.tasks.Task_CalculateDistances;
 import model.workspace.tasks.Task_CalculateMDSCoordinates;
 import model.workspace.tasks.Task_CollectFileMetadata;
 import model.workspace.tasks.Task_GenerateData;
+import model.workspace.tasks.Task_GenerateParameterList;
 import model.workspace.tasks.Task_LoadDistanceData;
 import model.workspace.tasks.Task_LoadMDSCoordinates;
 import model.workspace.tasks.Task_LoadRawData;
@@ -36,13 +39,7 @@ import model.workspace.tasks.Task_WorkspaceTask;
 // 		ROADMAP / Todos, in sequential order
 // -----------------------------------------------
 
-// @todo Test and augment program workflow.
-// @todo Create data generation view.
-// @todox Improve LDA python script (fixes, parameter output in files). Modify so that generated files contain metadata in first line.
-	// @todox: Add removal of quotation marks in preprocessing of data.
-	// @todox: Add removal of commas in preprocessing of data.
-// @todo Process sampling parameter lists in python script.
-// @todo Export python script as independent .exe.
+// @todox Process sampling parameter lists in python script.
 // @todo Integrate python script binding in VKPSA GUI.
 // @todo Test data generation.
 // @todo Formulate work items for analysis view / phase.
@@ -70,7 +67,7 @@ public class Workspace
 	/**
 	 * Name of file containing already calculated MDS coordinates.
 	 */
-	public static final String FILENAME_DISTANCES = "workspace.dis";	
+	public static final String FILENAME_DISTANCES = "workspace.dis";	 
 	/**
 	 * Name of file containing already calculated MDS coordinates.
 	 */
@@ -79,6 +76,16 @@ public class Workspace
 	 * Name of file containing parameters that have yet to be calculated.
 	 */
 	public static final String FILENAME_TOGENERATE = "toGenerate.lda";
+	/**
+	 * Name of file containing diverse options (preferences, paths to executables etc.).
+	 */
+	public static final String FILENAME_CONFIGURATION = "workspace.opt";
+	
+	// -----------------------------------------------
+	// 		Variables storing configuration data
+	// -----------------------------------------------
+	
+	Map<String, String> configurationOptions;
 	
 	// -----------------------------------------------
 	// 		Actual (raw and (pre-)processed) data
@@ -171,6 +178,7 @@ public class Workspace
 		this.datasetMap					= new HashMap<LDAConfiguration, Dataset>();
 		this.ldaConfigurations			= new ArrayList<LDAConfiguration>();
 		this.configurationsToGenerate	= new ArrayList<LDAConfiguration>();
+		this.configurationOptions		= new HashMap<String, String>();
 		
 //		this.reverseMDSCoordinateLookup = new MultiMap<Pair<Double, Double>, LDAConfiguration>();
 		
@@ -210,7 +218,6 @@ public class Workspace
 				
 				// Collect metadata from raw topic files.
 				task					= new Task_CollectFileMetadata(this, WorkspaceAction.COLLECT_FILE_METADATA);
-				
 			break;
 			
 			case LOAD_RAW_DATA:
@@ -240,6 +247,10 @@ public class Workspace
 			
 			case CALCULATE_MDS_COORDINATES:
 				task = new Task_CalculateMDSCoordinates(this, WorkspaceAction.CALCULATE_MDS_COORDINATES);
+			break;
+			
+			case GENERATE_PARAMETER_LIST:
+				task = new Task_GenerateParameterList(this, WorkspaceAction.GENERATE_PARAMETER_LIST);
 			break;
 			
 			case GENERATE_DATA:
@@ -473,6 +484,40 @@ public class Workspace
 		return true;
 	}
 	
+	private void parseConfigurationFile()
+	{
+		// Check if configuration file exists.
+		if (Files.exists(Paths.get(directory, FILENAME_CONFIGURATION))) {
+			Path path		= Paths.get(directory, Workspace.FILENAME_CONFIGURATION);
+		    Charset charset	= Charset.forName("UTF-8");
+		    
+		    try {
+				List<String> lines = Files.readAllLines(path, charset);
+				
+				for (String line : lines) {
+					String[] optionParts = line.split("=");
+					
+					if (optionParts.length == 2) {
+						configurationOptions.put(optionParts[0], optionParts[1]);
+					}
+					
+					else {
+						System.out.println("### WARNING ### Option '" + line + "' was ignored.");
+					}
+				}
+			} 
+		    
+		    catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+		}
+		
+		else {
+			System.out.println("### ERROR ### Add a configuration file to the current workspace.");
+		}
+	}
+	
 	// ------------------------------
 	// From here: Getter and setter.
 	// ------------------------------
@@ -485,6 +530,9 @@ public class Workspace
 	public void setDirectory(String directory)
 	{
 		this.directory = directory;
+		
+		// Parse configuration file in directory.
+		parseConfigurationFile();
 	}
 	
 	public int getNumberOfDatasetsInMDSFile()
@@ -625,5 +673,30 @@ public class Workspace
 	public void setConfigurationsToGenerate(ArrayList<LDAConfiguration> parameterValuesToGenerate)
 	{
 		this.configurationsToGenerate = parameterValuesToGenerate;
+	}
+
+	public static String getFilenameDistances()
+	{
+		return FILENAME_DISTANCES;
+	}
+
+	public static String getFilenameMdscoordinates()
+	{
+		return FILENAME_MDSCOORDINATES;
+	}
+
+	public static String getFilenameTogenerate()
+	{
+		return FILENAME_TOGENERATE;
+	}
+
+	public static String getFilenameConfiguration()
+	{
+		return FILENAME_CONFIGURATION;
+	}
+
+	public Map<String, String> getConfigurationOptions()
+	{
+		return configurationOptions;
 	}
 }

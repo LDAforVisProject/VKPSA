@@ -26,6 +26,7 @@ import javafx.scene.Node;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
@@ -38,7 +39,7 @@ import javafx.scene.layout.VBox;
 public class GenerationController extends DataSubViewController
 {
 	// -----------------------------------------------
-	// 				FXML data.
+	// 				UI elements.
 	// -----------------------------------------------
 	
 	@FXML private GridPane parameterConfiguration_gridPane;
@@ -56,8 +57,10 @@ public class GenerationController extends DataSubViewController
 	@FXML private TextField numberOfDatasets_textfield;
 	@FXML private TextField numberOfDivisions_textfield;
 	
-	@FXML private Button parameterCoupling_button;
 	@FXML private Button generate_button;
+	
+	@FXML private CheckBox parameterCoupling_checkbox;
+	@FXML private CheckBox includePreprocessing_checkbox;
 	
 	@FXML private ComboBox<String> sampling_combobox;
 
@@ -88,12 +91,6 @@ public class GenerationController extends DataSubViewController
 		System.out.println("Initializing SII_GenerationController.");
 		
 		parameterValues = new HashMap<String, ArrayList<Double>>();
-		
-//		parameterConfiguration_gridPane.heightProperty().addListener(new ChangeListener<Number>() {
-//				public void changed(ObservableValue<? extends Number> ov, Number old_val, Number new_val) {
-//					System.out.println("height changed - " + old_val + ", " + new_val);
-//	            }
-//		    }) ;
 		
 		// Init UI elements.
 		initUIElements();
@@ -260,7 +257,7 @@ public class GenerationController extends DataSubViewController
 	
 	private void updateTextFields(RangeSlider rs, String parameter)
 	{
-    	if (!parameterCoupling_button.isDefaultButton()) {
+		if (!parameterCoupling_checkbox.isSelected()) {
         	switch (parameter) 
         	{
         		case "alpha":
@@ -293,18 +290,6 @@ public class GenerationController extends DataSubViewController
         		rangeSlider.setHighValue(rs.getHighValue());
         	}
     	}
-	}
-	
-	@FXML
-	public void changeParameterCouplingMode(ActionEvent e)
-	{
-		parameterCoupling_button.setDefaultButton(!parameterCoupling_button.isDefaultButton());
-		
-		if (parameterCoupling_button.isDefaultButton())
-			System.out.println("Enabled parameter coupling.");
-		
-		else
-			System.out.println("Disabled parameter coupling.");
 	}
 	
 	@FXML
@@ -454,17 +439,27 @@ public class GenerationController extends DataSubViewController
 	@FXML
 	private void generateData(ActionEvent e)
 	{
-		System.out.println("Generating data (" + numberOfDivisions + " divisons per parameter -> " + numberOfDatasetsToGenerate + " datasets using " + sampling_combobox.getValue() + " sampling).");
-		
 		// Create LDA configurations out of parameter lists, transfer to workspace.
 		workspace.setConfigurationsToGenerate(LDAConfiguration.generateLDAConfigurations( numberOfDivisions, numberOfDatasetsToGenerate, sampling_combobox.getValue(), parameterValues ));
 		
-		workspace.executeWorkspaceAction(WorkspaceAction.GENERATE_DATA, generate_progressIndicator.progressProperty(), this);
+		// Write list to file.
+		workspace.executeWorkspaceAction(WorkspaceAction.GENERATE_PARAMETER_LIST, generate_progressIndicator.progressProperty(), this);
 	}
 	
 	@Override
 	public void notifyOfTaskCompleted(final WorkspaceAction workspaceAction)
 	{
-		System.out.println("Finished workspace task.");
+		switch (workspaceAction) 
+		{
+			case GENERATE_PARAMETER_LIST:
+				System.out.println("Finished generating the parameter list.");
+
+				// Call Python script and execute data.
+				workspace.executeWorkspaceAction(WorkspaceAction.GENERATE_DATA, generate_progressIndicator.progressProperty(), this);
+			break;
+			
+			case GENERATE_DATA:
+			break;
+		}
 	}
 }

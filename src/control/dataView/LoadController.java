@@ -35,9 +35,6 @@ public class LoadController extends DataSubViewController
 	private DirectoryChooser directoryChooser;
 	private String currentPath;
 	
-	// Reference to DataViewController controlling (among other controls) the LoadController PopOver.
-	private DataViewController dvController;
-	
 	@Override
 	public void initialize(URL location, ResourceBundle resources)
 	{
@@ -53,23 +50,23 @@ public class LoadController extends DataSubViewController
 		currentPath = "";
 	}
 	
-	public void setDataViewController(DataViewController dvController)
+	public void setDataViewController(DataViewController dataViewController)
 	{
-		this.dvController = dvController;
+		this.dataViewController = dataViewController;
 	}
 	
 	@FXML
 	public void openFileBrowser(ActionEvent event)
 	{
 		// Hide workspace chooser popup.
-		dvController.toggleWorkspaceChooserStatus();
+		dataViewController.toggleWorkspaceChooserStatus(false);
 		
 		// Get current path from file dialog.
 		currentPath = directoryChooser.showDialog(null).getAbsolutePath();
 		textfield_directory.setText(currentPath);
 
 		// Show workspace chooser popup.
-		dvController.toggleWorkspaceChooserStatus();
+		dataViewController.toggleWorkspaceChooserStatus(false);
 		
 		// Load workspace.
 		loadData(event);
@@ -124,6 +121,7 @@ public class LoadController extends DataSubViewController
 				// Otherwise: Execute and display integrity check, set summary as tooltip.
 				else {
 					showIntegrityCheckTooltip(displayIntegrityCheck());
+					dataViewController.setDataLoaded(true);
 				}
 			break;
 			
@@ -139,6 +137,7 @@ public class LoadController extends DataSubViewController
 				// Otherwise: Execute and display integrity check, set summary as tooltip.
 				else {
 					showIntegrityCheckTooltip(displayIntegrityCheck());
+					dataViewController.setDataLoaded(true);
 				}
 			break;
 			
@@ -147,6 +146,7 @@ public class LoadController extends DataSubViewController
 				
 				// Once MDS coordinates are loaded: Execute and display integriy check.
 				showIntegrityCheckTooltip(displayIntegrityCheck());
+				dataViewController.setDataLoaded(true);
 			break;
 
 			default:
@@ -175,7 +175,7 @@ public class LoadController extends DataSubViewController
 		label_mdsFound.setText(String.valueOf(mdsFileExists));
 		label_disFound.setText(String.valueOf(disFileExists));
 		
-		// Check workspace integrity. @todo Cross-check with .dis file to see if datasets in
+		// Check workspace integrity. Cross-check with .dis file to see if datasets in
 		// directory and referenced datasets in .dis are the same.
 		// Workspace may be consistent (green), incomplete (orange to yellow) or corrupted (red). 
 		

@@ -54,17 +54,10 @@ public class PreprocessingController extends DataSubViewController
 	private @FXML ProgressIndicator progressIndicator_calculateMDSCoordinates;
 	private @FXML ProgressIndicator progressIndicator_distanceCalculation;
 	
-	// Accordion.
-	private @FXML Accordion accordion_calculation;
-	private @FXML TitledPane titledPane_distances;
-	private @FXML TitledPane titledPane_mds;
-	
 	@Override
 	public void initialize(URL location, ResourceBundle resources)
 	{
 		System.out.println("Initializing SII_PreprocessingController.");
-		
-		accordion_calculation.setExpandedPane(titledPane_distances);
 	}
 	
 	@FXML
@@ -114,6 +107,12 @@ public class PreprocessingController extends DataSubViewController
 				}
 			break;			
 		}
+	}
+	
+	@FXML
+	public void generateData(ActionEvent e)
+	{
+		System.out.println("Generating Data");
 	}
 	
 	@Override

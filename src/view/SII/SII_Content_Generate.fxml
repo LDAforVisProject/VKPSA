@@ -9,11 +9,11 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="738.0" prefWidth="720.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.dataView.GenerationController">
+<AnchorPane prefHeight="695.0" prefWidth="695.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.dataView.GenerationController">
    <children>
-    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="738.0" prefWidth="720.0">
+    <AnchorPane>
          <children>
-            <ScrollPane fx:id="parameter_scrollPane" hbarPolicy="NEVER" layoutX="90.0" layoutY="81.0" prefHeight="250.0" prefViewportHeight="90.0" prefViewportWidth="400.0" prefWidth="548.0" vbarPolicy="ALWAYS">
+            <ScrollPane fx:id="parameter_scrollPane" hbarPolicy="NEVER" layoutX="80.0" layoutY="81.0" prefHeight="250.0" prefViewportHeight="90.0" prefViewportWidth="400.0" prefWidth="548.0" vbarPolicy="ALWAYS">
                <content>
                   <GridPane fx:id="parameterConfiguration_gridPane" hgap="10.0" layoutX="217.0" layoutY="117.0" prefHeight="247.0" prefWidth="526.0" vgap="5.0">
                     <columnConstraints>
@@ -158,7 +158,6 @@
                   </GridPane>
                </content>
             </ScrollPane>
-            <Separator layoutX="90.0" layoutY="408.0" prefHeight="3.0" prefWidth="548.0" />
             <GridPane layoutX="90.0" layoutY="432.0" prefHeight="120.0" prefWidth="415.0" vgap="20.0">
               <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" maxWidth="277.0" minWidth="10.0" prefWidth="277.0" />
@@ -184,25 +183,22 @@
                   <TextField fx:id="numberOfDatasets_textfield" editable="false" maxWidth="50.0" onAction="#updateNumberOfDatasets" prefHeight="25.0" text="1000" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                </children>
             </GridPane>
-            <Button fx:id="generate_button" layoutX="304.0" layoutY="613.0" mnemonicParsing="false" onAction="#generateData" text="Generate" />
-            <ProgressIndicator fx:id="generate_progressIndicator" layoutX="384.0" layoutY="608.0" progress="0.0" />
-            <Separator layoutX="90.0" layoutY="586.0" prefHeight="3.0" prefWidth="548.0" />
-            <GridPane layoutX="90.0" layoutY="340.0" prefHeight="31.0" prefWidth="245.0">
-               <children>
-                  <Button fx:id="parameterCoupling_button" defaultButton="true" layoutX="352.0" layoutY="549.0" mnemonicParsing="false" onAction="#changeParameterCouplingMode" text="Couple parameter intervals" />
-               </children>
-               <columnConstraints>
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-               </columnConstraints>
-               <rowConstraints>
-                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-               </rowConstraints>
-            </GridPane>
+            <Button fx:id="generate_button" layoutX="280.0" layoutY="624.0" mnemonicParsing="false" onAction="#generateData" text="Generate topic files">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Button>
+            <ProgressIndicator fx:id="generate_progressIndicator" layoutX="457.0" layoutY="620.0" prefHeight="45.0" prefWidth="39.0" progress="0.0" />
             <Label layoutX="244.0" layoutY="21.0" text="Data Generation Configuration">
                <font>
-                  <Font name="System Bold" size="16.0" />
+                  <Font name="System Bold" size="14.0" />
                </font>
             </Label>
+            <CheckBox fx:id="parameterCoupling_checkbox" layoutX="80.0" layoutY="351.0" mnemonicParsing="false" text="Couple parameter intervals" />
+            <Separator layoutX="39.0" layoutY="56.0" prefHeight="3.0" prefWidth="614.0" />
+            <Separator layoutX="39.0" layoutY="404.0" prefHeight="3.0" prefWidth="614.0" />
+            <Separator layoutX="39.0" layoutY="596.0" prefHeight="3.0" prefWidth="614.0" />
+            <CheckBox fx:id="includePreprocessing_checkbox" layoutX="76.0" layoutY="630.0" mnemonicParsing="false" selected="true" text="Include preprocessing" />
          </children>
       </AnchorPane>
    </children>

@@ -58,8 +58,7 @@ public class CoreController extends Controller
 		controllerMap	= new HashMap<String, Controller>();
 		
 		// Init workspace.
-		String directory	= "D:\\Workspace\\Scientific Computing\\VKPSA\\src\\data";
-		workspace			= new Workspace(directory);
+		workspace			= new Workspace("");
 	}
 	
 	public void setScene(Scene scene)
@@ -85,6 +84,9 @@ public class CoreController extends Controller
 			case "icon_analyze":
 				label_title.setText("Analyze");
 				
+				// Hide workspace chooser, if it is still open.
+				((DataViewController)controllerMap.get("dataview")).hideWorkspaceChooser(true);
+				
 				// Is controller already initiated? If so, node was already created.
 				if (!viewNodeMap.containsKey("analyze")) {
 					initView("analyze", "/view/SII/SII_Content_Analysis.fxml");
@@ -94,7 +96,8 @@ public class CoreController extends Controller
 				}
 				
 				// Controller already exists: Switch to node.
-				else {
+				else {					
+					// Show analysis view.
 					enableView("analyze");
 				}
 			break;
@@ -106,12 +109,23 @@ public class CoreController extends Controller
 					initView("dataview", "/view/SII/SII_Content_Data.fxml");
 					initDataView();
 					
+					// Send reference to controllers to DataViewController.
+					Map<String, Node> dataSubViewNodes = new HashMap<String, Node>(viewNodeMap);
+					dataSubViewNodes.remove("analysis");
+					((DataViewController)controllerMap.get("dataview")).setDataSubViewNodes(dataSubViewNodes);
+
 			        // Show workspace chooser.
-					((DataViewController)controllerMap.get("dataview")).showWorkspaceChooser(viewNodeMap.get("load"), root, scene);
+					((DataViewController)controllerMap.get("dataview")).initWorkspaceChooser(viewNodeMap.get("load"), root, scene);
+					((DataViewController)controllerMap.get("dataview")).showWorkspaceChooser(true);
 				}
 				
 				else {
 					enableView("dataview");
+					
+					// Check if a workspace was already chosen. If not: Show workspace chooser.
+					if (workspace.getDirectory().isEmpty() || workspace.getDirectory() == "") {
+						((DataViewController)controllerMap.get("dataview")).showWorkspaceChooser(true);
+					}
 				}
 			break;
 		}

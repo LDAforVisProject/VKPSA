@@ -197,7 +197,7 @@ public class Topic
 			// @todo Use LDAConfiguration.generateLDAConfiguration() for generation of LDAConfiguration instance instead.
 			
 			// Get start parameter's start positions in configuration line (#0) in dataset.
-			// Add new parameters to be processed here. Has to be in the form of "param1=x|param2=y|blub=z".
+			// Add new parameters to be processed here. Has to be in the form of "param1=x|param2=y|param3=z".
 			paramValueIndexMap.put("k", lines.get(0).indexOf("k="));
 			paramValueIndexMap.put("eta", lines.get(0).indexOf("eta="));
 			paramValueIndexMap.put("alpha", lines.get(0).indexOf("alpha="));

@@ -1,16 +1,19 @@
 package control.dataView;
 
 import java.net.URL;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.controlsfx.control.PopOver;
 
 import control.Controller;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.PopupWindow.AnchorLocation;
+import javafx.stage.WindowEvent;
 
 public class DataViewController extends Controller
 {
@@ -24,10 +27,18 @@ public class DataViewController extends Controller
 	private @FXML AnchorPane generation_anchorpane;
 	
 	private PopOver workspaceChooser_popover;
-	private Node workspaceChooser_owner;
-	private Node workspaceChooser_content;
 	
 	private Scene scene;
+	
+	private Node workspaceChooser_owner;
+	private Node workspaceChooser_content;
+	private Map<String, Node> dataSubViewNodes;
+	
+	// -----------------------------------------------
+	// 				Other attributes.
+	// -----------------------------------------------	
+	
+	private boolean isDataLoaded;
 	
 	// -----------------------------------------------
 	// 				Methods.
@@ -39,28 +50,67 @@ public class DataViewController extends Controller
 	{
 		System.out.println("Initializing SII_DataViewController.");
 		
-		workspaceChooser_popover = null;
+		workspaceChooser_popover 	= null;
+		isDataLoaded				= false;
 	}
 
-	public void showWorkspaceChooser(final Node workspaceChooser_content, final Node owner, final Scene scene)
+	public void initWorkspaceChooser(final Node workspaceChooser_content, final Node owner, final Scene scene)
 	{
-		if(workspaceChooser_popover == null) {
-			this.workspaceChooser_owner		= owner;
-			this.workspaceChooser_content	= workspaceChooser_content;
-			this.scene						= scene;
-			workspaceChooser_popover		= new PopOver(workspaceChooser_content);
-			
+		this.workspaceChooser_owner		= owner;
+		this.workspaceChooser_content	= workspaceChooser_content;
+		this.scene						= scene;
+		workspaceChooser_popover		= new PopOver(workspaceChooser_content);
+		
+		// Add listener on closing event to popover: Show sub data view elements only when data has loaded.
+		workspaceChooser_popover.setOnHiding(new EventHandler<WindowEvent>()
+        {
+            @Override
+            public void handle(WindowEvent window)
+            {
+                if (isDataLoaded) {
+                	toggleSubDataViews();
+                }
+            }
+        });
+	}
+	
+	public void showWorkspaceChooser(boolean disableSubDataViewse)
+	{
+		if (workspaceChooser_popover != null && !workspaceChooser_popover.isShowing()) {
 			workspaceChooser_popover.detach();
 			workspaceChooser_popover.setDetachedTitle("Choose your workspace");
-			workspaceChooser_popover.show(owner);
+			workspaceChooser_popover.show(workspaceChooser_owner);
 			
 			workspaceChooser_popover.setX(scene.getWidth() / 2 - workspaceChooser_content.getLayoutBounds().getWidth() / 4);
 			workspaceChooser_popover.setY(scene.getHeight() / 2 - workspaceChooser_content.getLayoutBounds().getHeight() / 4);
+			
+			if (disableSubDataViewse) {
+				dataSubViewNodes.get("generate").setDisable(true);
+				dataSubViewNodes.get("preprocess").setDisable(true);
+			}
 		}
 	}
 	
-	public void toggleWorkspaceChooserStatus()
+	public void hideWorkspaceChooser(boolean enableSubDataViews)
 	{
+		if (workspaceChooser_popover != null && workspaceChooser_popover.isShowing()) {
+			workspaceChooser_popover.hide();
+			
+			if (enableSubDataViews) {
+				dataSubViewNodes.get("generate").setDisable(false);
+				dataSubViewNodes.get("preprocess").setDisable(false);
+			}
+		}
+	}
+	
+	public void toggleWorkspaceChooserStatus(boolean toggleSubDataViews)
+	{
+		// Toggle subDataView's .enable option, if desired.
+		if (toggleSubDataViews) {
+			toggleSubDataViews();
+		}
+		
+		// Toggle workspace chooser popup.
 		if (workspaceChooser_popover.isShowing()) {
 			workspaceChooser_popover.hide();
 		}
@@ -73,6 +123,12 @@ public class DataViewController extends Controller
 			workspaceChooser_popover.setX(scene.getWidth() / 2 - workspaceChooser_content.getLayoutBounds().getWidth() / 4);
 			workspaceChooser_popover.setY(scene.getHeight() / 2 - workspaceChooser_content.getLayoutBounds().getHeight() / 4);
 		}
+	}
+	
+	private void toggleSubDataViews()
+	{
+		dataSubViewNodes.get("generate").setDisable(!dataSubViewNodes.get("generate").isDisabled());
+		dataSubViewNodes.get("preprocess").setDisable(!dataSubViewNodes.get("preprocess").isDisabled());
 	}
 	
 	public Node getContainer(String viewID)
@@ -97,5 +153,15 @@ public class DataViewController extends Controller
 		}
 		
 		return result;
+	}
+	
+	public void setDataSubViewNodes(Map<String, Node> dataSubViewNodes)
+	{
+		this.dataSubViewNodes = dataSubViewNodes;
+	}
+	
+	public void setDataLoaded(boolean isDataLoaded)
+	{
+		this.isDataLoaded = isDataLoaded;
 	}
 }
