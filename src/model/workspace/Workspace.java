@@ -40,9 +40,13 @@ import model.workspace.tasks.Task_WorkspaceTask;
 // -----------------------------------------------
 
 // @todox Process sampling parameter lists in python script.
-// @todo Integrate python script binding in VKPSA GUI.
+// @todox Integrate python script binding in VKPSA GUI.
+// 		@todo Python script: Get highest index in workspace directory, use that + n for newly created topic files. 
+//							 Alternative: Use timestamp.
+//							 Alternative: Use parameter values -> (Short) hash string?
 // @todo Test data generation.
 // @todo Formulate work items for analysis view / phase.
+// @todo Idea for optimization: Truncate parameter file list / instruct Python script to process only a defined part of it.
 
 /**
  * Encompasses:
@@ -378,6 +382,28 @@ public class Workspace
 			String fileExtension	= filePath.substring(filePath.lastIndexOf(".") + 1, filePath.length());
 			
 			numberOfDatasetsInWS	= "csv".equals(fileExtension) ? numberOfDatasetsInWS + 1 : numberOfDatasetsInWS;
+		}
+		
+		return numberOfDatasetsInWS;
+	}
+	
+	/**
+	 * Returns number of .csv files in this directory modified later than the specified timestamp. 
+	 * Does not check whether this .csv is actually an appropriate file.
+	 * @param minCreationTimestamp
+	 * @return Number of .csv files in this directory modified later than the given timestamp value.
+	 */
+	public int readNumberOfDatasets(long minCreationTimestamp)
+	{
+		numberOfDatasetsInWS = 0;
+		
+		for(File f : new File(directory).listFiles()) {
+			String filePath			= f.getAbsolutePath();
+			String fileExtension	= filePath.substring(filePath.lastIndexOf(".") + 1, filePath.length());
+			
+			// Consider file only if it was modified after the specified timestamp.
+			if (f.lastModified() >= minCreationTimestamp)
+				numberOfDatasetsInWS = "csv".equals(fileExtension) ? numberOfDatasetsInWS + 1 : numberOfDatasetsInWS;
 		}
 		
 		return numberOfDatasetsInWS;

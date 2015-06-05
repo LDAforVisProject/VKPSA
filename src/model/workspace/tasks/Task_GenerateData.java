@@ -1,10 +1,17 @@
 package model.workspace.tasks;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
+import model.LDAConfiguration;
 import model.workspace.Workspace;
 import model.workspace.WorkspaceAction;
 
@@ -25,8 +32,9 @@ public class Task_GenerateData extends Task_WorkspaceTask
 			updateProgress(0, 1);
 			
 			// Get configuration options.
-			Map<String, String> configurationOptions = workspace.getConfigurationOptions();
-
+			Map<String, String> configurationOptions				= workspace.getConfigurationOptions();
+			ArrayList<LDAConfiguration> configurationsToGenerate	= workspace.getConfigurationsToGenerate();
+			
 			/*
 			 * Build Python/LDA script command.
 			 * 
@@ -35,7 +43,7 @@ public class Task_GenerateData extends Task_WorkspaceTask
 			 * Example:
 			 * 		D:\Programme\Python27\python.exe D:\Workspace\LDA\analysis\Nexus.py -p 1 -m 'sample' -i 'D:\Workspace\Scientific Computing\VKPSA\src\data\toGenerate.lda' -o 'D:\Workspace\Scientific Computing\VKPSA\src\data'
 			 */ 
-			
+
 			String python_path	= configurationOptions.get("python_path");
 			String lda_path		= configurationOptions.get("lda_path");
 			// @todo Add pass count as option to interface (?).
@@ -43,34 +51,70 @@ public class Task_GenerateData extends Task_WorkspaceTask
 			String input_path	= Paths.get(workspace.getDirectory(), Workspace.FILENAME_TOGENERATE).toString();
 			String output_path	= workspace.getDirectory();
 			
-			// @todo Idea for optimization: Truncate parameter file list / instruct Python script to process only a defined part of it.
-			// Start multiple threads each processing a part of the parameter file list.
+			// Get current time (before starting the execution of the LDA script).
+			long beforeGeneration = new Date().getTime();
+			
+			/*
+			 * Start multiple threads each processing a part of the parameter file list.
+			 */
 			
 			// Put command in quotation marks to account for space-containing paths.
 			String command = "\"" + python_path + "\" \"" + lda_path + "\" -p " + pass_count + " -m sample -i \"" + input_path + "\" -o \"" + output_path + "\"";
 			System.out.println("command = " + command);
 			
 			// Execute system call with command.
-			// Be careful: Only tested on a Windows 7 64-bit environment.
+			// Be careful: Only tested on a Windows 7 / 64-bit environment.
 			Process process = Runtime.getRuntime().exec(command);
+			
+			// Check every five seconds how many datasets were already generated.
+			Timer uploadCheckerTimer = new Timer(true);
+			uploadCheckerTimer.scheduleAtFixedRate(
+			    new TimerTask() {
+			    	public void run() 
+			    	{ 
+			    		// Get number of newly created datasets up to date.
+			    		int numberOfCreatedDatasets = workspace.readNumberOfDatasets(beforeGeneration);
+			    		// Update progress.
+			    		updateProgress(numberOfCreatedDatasets > 0 ? numberOfCreatedDatasets - 1 : numberOfCreatedDatasets, configurationsToGenerate.size());
+			    	}
+			    }, 0, 5000
+			);
+			
+			// Consume messages from input stream.
+			String line			= null;
+			BufferedReader bri	= new BufferedReader(new InputStreamReader(process.getInputStream()));
+	      	BufferedReader bre	= new BufferedReader(new InputStreamReader(process.getErrorStream()));
+	     
+	      	// Read/consume stdout.
+	      	while ((line = bri.readLine()) != null) {
+	    	  System.out.println(line);
+	      	}
+	      	
+	      	// Read/consume stderr.
+	      	while ((line = bre.readLine()) != null) {
+	    	  System.out.println(line);
+	      	}
+	      	
+	      	// Close readers and streams.
+	      	bri.close();
+	      	bre.close();
+	      	process.getInputStream().close();
+	      	process.getErrorStream().close();
 
-			/**
-			 * BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-	    StringBuilder out = new StringBuilder();
-	    String line;
-	    while ((line = reader.readLine()) != null) {
-	        out.append(line);
-	    }
-			 */
+	      	// Finish only after child process(es) has/have finished.
+	      	//process.waitFor();
 
-			System.out.println("finished");
+			// Clear workspace collection containing parameters to generate.
+			workspace.getConfigurationsToGenerate().clear();
 			
 			// Update task progress.
 			updateProgress(1, 1);
+			
+			System.out.println("finished");
 		}
 		
 		catch (Exception e) {
-			
+			e.printStackTrace();
 		}
 		
 		return null;

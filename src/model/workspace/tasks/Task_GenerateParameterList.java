@@ -39,9 +39,6 @@ public class Task_GenerateParameterList extends Task_WorkspaceTask
 			// Update task progress.
 			updateProgress(1, 1);
 			
-			// Clear workspace collection containing parameters to generate.
-			configurationsToGenerate.clear();
-			
 			// Close file writer.
 			writer.close();	
 		}
