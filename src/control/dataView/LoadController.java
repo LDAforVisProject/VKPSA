@@ -72,14 +72,19 @@ public class LoadController extends DataSubViewController
 		loadData(event);
 	}
 	
+	/**
+	 * Loads file metadata.
+	 * @param event
+	 */
 	@FXML
 	public void loadData(ActionEvent event)
 	{
+		// Change path, reset directory, load everything anew.
 		if ( Files.exists(Paths.get(currentPath)) ) {
 			// Load data from new directory.
 			if (currentPath != workspace.getDirectory()) {
 				// 	Reset workspace.
-				workspace.executeWorkspaceAction(WorkspaceAction.RESET, null, this);
+				workspace.executeWorkspaceAction(WorkspaceAction.SWITCH, null, this);
 				
 				// Set new path.
 				workspace.setDirectory(currentPath);
@@ -115,7 +120,7 @@ public class LoadController extends DataSubViewController
 				// If .dis exists: Load it.
 				if (workspace.containsDISFile()) {
 					// Load distance data.
-					workspace.executeWorkspaceAction(workspaceAction.LOAD_DISTANCES, progressIndicator_load.progressProperty(), this);
+					workspace.executeWorkspaceAction(WorkspaceAction.LOAD_DISTANCES, progressIndicator_load.progressProperty(), this);
 				}
 				
 				// Otherwise: Execute and display integrity check, set summary as tooltip.
@@ -131,7 +136,7 @@ public class LoadController extends DataSubViewController
 				// Once distance data is loaded: Check if .mds file exists. If so: load it.
 				if (workspace.containsMDSFile()) {
 					// Load MDS coordinates.
-					workspace.executeWorkspaceAction(workspaceAction.LOAD_MDS_COORDINATES, progressIndicator_load.progressProperty(), this);					
+					workspace.executeWorkspaceAction(WorkspaceAction.LOAD_MDS_COORDINATES, progressIndicator_load.progressProperty(), this);					
 				}
 				
 				// Otherwise: Execute and display integrity check, set summary as tooltip.
@@ -144,7 +149,7 @@ public class LoadController extends DataSubViewController
 			case LOAD_MDS_COORDINATES:
 				System.out.println("Loaded MDS coordinates.");
 				
-				// Once MDS coordinates are loaded: Execute and display integriy check.
+				// Once MDS coordinates are loaded: Execute and display integrity check.
 				showIntegrityCheckTooltip(displayIntegrityCheck());
 				dataViewController.setDataLoaded(true);
 			break;
@@ -161,7 +166,7 @@ public class LoadController extends DataSubViewController
 		tooltip.setAutoHide(false);
 		tooltip.setWrapText(true);
 		
-        Tooltip.install( shape_integrity, tooltip);
+        Tooltip.install(shape_integrity, tooltip);
 	}
 	
 	private String displayIntegrityCheck()
@@ -220,5 +225,15 @@ public class LoadController extends DataSubViewController
 	public void reset()
 	{
 		currentPath = workspace.getDirectory(); 
+	}
+
+	@Override
+	public void freezeOptionControls()
+	{
+	}
+
+	@Override
+	public void unfreezeOptionControls()
+	{	
 	}
 }

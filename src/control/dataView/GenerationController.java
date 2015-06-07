@@ -11,6 +11,7 @@ import javax.xml.ws.handler.MessageContext.Scope;
 
 import model.LDAConfiguration;
 import model.workspace.WorkspaceAction;
+import model.workspace.tasks.Task_CollectFileMetadata;
 
 import org.controlsfx.control.RangeSlider;
 
@@ -439,6 +440,9 @@ public class GenerationController extends DataSubViewController
 	@FXML
 	private void generateData(ActionEvent e)
 	{
+		
+		dataViewController.freezeOptionControls();
+		
 		// Create LDA configurations out of parameter lists, transfer to workspace.
 		workspace.setConfigurationsToGenerate(LDAConfiguration.generateLDAConfigurations( numberOfDivisions, numberOfDatasetsToGenerate, sampling_combobox.getValue(), parameterValues ));
 		
@@ -455,11 +459,95 @@ public class GenerationController extends DataSubViewController
 				System.out.println("Finished generating the parameter list.");
 
 				// Call Python script and execute data.
+				generate_progressIndicator.progressProperty().unbind();
 				workspace.executeWorkspaceAction(WorkspaceAction.GENERATE_DATA, generate_progressIndicator.progressProperty(), this);
 			break;
 			
 			case GENERATE_DATA:
+				System.out.println("Generated topic data.");
+				
+				// Workaround to keep progress indicator from flipping back to 0%.
+				generate_progressIndicator.progressProperty().unbind();
+				generate_progressIndicator.progressProperty().set(1);
+
+				// Reset workspace data.
+				workspace.executeWorkspaceAction(WorkspaceAction.RESET, null, this);
+				
+				// Collect metadata from raw topic files.
+				workspace.executeWorkspaceAction(WorkspaceAction.COLLECT_FILE_METADATA, generate_progressIndicator.progressProperty(), this);
+			break;
+			
+			// After workspace variables are resetted and file metadata was parsed anew: Preprocess data if desired.
+			case COLLECT_FILE_METADATA:
+				System.out.println("[Post-generation] Collected file metadata.");
+				
+				// If "Include preprocessing" is enabled: Start preprocessing.
+				if (includePreprocessing_checkbox.isSelected()) {
+					// Load raw data.
+					generate_progressIndicator.progressProperty().unbind();
+					workspace.executeWorkspaceAction(WorkspaceAction.LOAD_RAW_DATA, generate_progressIndicator.progressProperty(), this);
+				}
+				
+				// Else: Display warning (workspace is inconsistent). Refresh not necessary, since - apart from the already collected
+				// topic file metadata - no new metadata was generated. 
+				else {
+					System.out.println("### WARNING ### Workspace is inconsistent - data has to be preprocessed. Apply preprocessing manually.");
+				}
+			break;
+			
+			case LOAD_RAW_DATA:
+				System.out.println("[Post-generation] Loaded raw topic data.");
+				
+				// Calculate distances.
+				workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_DISTANCES, dataViewController.getProgressIndicator_distanceCalculation().progressProperty(), this);
+			break;
+			
+			case CALCULATE_DISTANCES:
+				System.out.println("[Post-generation] Calculated distance data.");
+				
+				// Calculate distances.
+				workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_MDS_COORDINATES, dataViewController.getProgressIndicator_calculateMDSCoordinates().progressProperty(), this);
+			break;
+			
+			case CALCULATE_MDS_COORDINATES:
+				System.out.println("[Post-generation] Calculated MDS data.");
 			break;
 		}
+	}
+	
+	@Override
+	public void freezeOptionControls()
+	{
+		includePreprocessing_checkbox.setDisable(true);
+		parameterConfiguration_gridPane.setDisable(true);
+		
+		for (RangeSlider rs : rangeSliders.values()) {
+			rs.setDisable(true);
+		}
+		
+		parameterCoupling_checkbox.setDisable(true);
+		sampling_combobox.setDisable(true);
+		numberOfDatasets_textfield.setDisable(true);
+		numberOfDivisions_textfield.setDisable(true);
+		
+		generate_button.setDisable(true);
+	}
+
+	@Override
+	public void unfreezeOptionControls()
+	{
+		includePreprocessing_checkbox.setDisable(false);
+		parameterConfiguration_gridPane.setDisable(false);
+		
+		for (RangeSlider rs : rangeSliders.values()) {
+			rs.setDisable(false);
+		}
+		
+		parameterCoupling_checkbox.setDisable(false);
+		sampling_combobox.setDisable(false);
+		numberOfDatasets_textfield.setDisable(false);
+		numberOfDivisions_textfield.setDisable(false);
+		
+		generate_button.setDisable(false);
 	}
 }

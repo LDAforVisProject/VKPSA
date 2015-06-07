@@ -81,6 +81,31 @@ public class Task_GenerateData extends Task_WorkspaceTask
 			);
 			
 			// Consume messages from input stream.
+			consumeProcessOutputStreams(process);
+
+			// Cancel timer.
+			uploadCheckerTimer.cancel();
+			
+	      	// Finish only after child process(es) has/have finished.
+	      	//process.waitFor();
+
+			// Clear workspace collection containing parameters to generate.
+			configurationsToGenerate.clear();
+			
+			// Update task progress.
+			updateProgress(1, 1);
+		}
+		
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	private void consumeProcessOutputStreams(Process process)
+	{
+		try {
 			String line			= null;
 			BufferedReader bri	= new BufferedReader(new InputStreamReader(process.getInputStream()));
 	      	BufferedReader bre	= new BufferedReader(new InputStreamReader(process.getErrorStream()));
@@ -100,24 +125,12 @@ public class Task_GenerateData extends Task_WorkspaceTask
 	      	bre.close();
 	      	process.getInputStream().close();
 	      	process.getErrorStream().close();
-
-	      	// Finish only after child process(es) has/have finished.
-	      	//process.waitFor();
-
-			// Clear workspace collection containing parameters to generate.
-			workspace.getConfigurationsToGenerate().clear();
-			
-			// Update task progress.
-			updateProgress(1, 1);
-			
-			System.out.println("finished");
+	      	
 		}
 		
 		catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		return null;
 	}
 
 }

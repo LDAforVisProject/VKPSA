@@ -1,6 +1,7 @@
 package control.dataView;
 
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -11,6 +12,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.PopupWindow.AnchorLocation;
 import javafx.stage.WindowEvent;
@@ -32,7 +34,9 @@ public class DataViewController extends Controller
 	
 	private Node workspaceChooser_owner;
 	private Node workspaceChooser_content;
+	
 	private Map<String, Node> dataSubViewNodes;
+	private Map<String, Controller> dataSubViewControllers;
 	
 	// -----------------------------------------------
 	// 				Other attributes.
@@ -131,6 +135,26 @@ public class DataViewController extends Controller
 		dataSubViewNodes.get("preprocess").setDisable(!dataSubViewNodes.get("preprocess").isDisabled());
 	}
 	
+	public void freezeOptionControls()
+	{
+		for (Controller controller : dataSubViewControllers.values()) {
+			DataSubViewController dsvController = (DataSubViewController)controller;
+			dsvController.freezeOptionControls();
+		}
+	}
+	
+	public void unfreezeOptionControls()
+	{
+		for (Controller controller : dataSubViewControllers.values()) {
+			DataSubViewController dsvController = (DataSubViewController)controller;
+			dsvController.unfreezeOptionControls();
+		}
+	}
+	
+	/*
+	 * From here: Getter and setter.
+	 */
+	
 	public Node getContainer(String viewID)
 	{
 		Node result = null;
@@ -155,13 +179,24 @@ public class DataViewController extends Controller
 		return result;
 	}
 	
-	public void setDataSubViewNodes(Map<String, Node> dataSubViewNodes)
+	public void setDataSubViews(Map<String, Node> dataSubViewNodes, Map<String, Controller> dataSubViewControllers)
 	{
-		this.dataSubViewNodes = dataSubViewNodes;
+		this.dataSubViewNodes		= dataSubViewNodes;
+		this.dataSubViewControllers	= dataSubViewControllers;
 	}
 	
 	public void setDataLoaded(boolean isDataLoaded)
 	{
 		this.isDataLoaded = isDataLoaded;
+	}
+	
+	public ProgressIndicator getProgressIndicator_calculateMDSCoordinates()
+	{
+		return ((PreprocessingController)dataSubViewControllers.get("preprocess")).getProgressIndicator_calculateMDSCoordinates();
+	}
+
+	public ProgressIndicator getProgressIndicator_distanceCalculation()
+	{
+		return ((PreprocessingController)dataSubViewControllers.get("preprocess")).getProgressIndicator_distanceCalculation();
 	}
 }

@@ -138,4 +138,56 @@ public class PreprocessingController extends DataSubViewController
 			break;			
 		}
 	}
+
+	@Override
+	public void freezeOptionControls()
+	{
+		button_calculateDistances.setDisable(true);
+		button_calculateMDSCoordinates.setDisable(true);
+		
+		checkbox_appendToDistanceMatrix.setDisable(true);
+		checkbox_appendToMDSCoordinateMatrix.setDisable(true);
+
+		 checkbox_bhattacharyya.setDisable(true);
+		 checkbox_hellinger.setDisable(true);
+		 checkbox_jensenshannon.setDisable(true);
+		 checkbox_kullbackleibler.setDisable(true);
+		 checkbox_l2.setDisable(true);
+		
+		 checkbox_hausdorff.setDisable(true);
+		 checkbox_avgmin.setDisable(true);
+		 
+		 combobox_scalingAlgorithm.setDisable(true);
+	}
+
+	@Override
+	public void unfreezeOptionControls()
+	{
+		button_calculateDistances.setDisable(false);
+		button_calculateMDSCoordinates.setDisable(false);
+		
+		checkbox_appendToDistanceMatrix.setDisable(false);
+		checkbox_appendToMDSCoordinateMatrix.setDisable(false);
+
+		 checkbox_bhattacharyya.setDisable(false);
+		 checkbox_hellinger.setDisable(false);
+		 checkbox_jensenshannon.setDisable(false);
+		 checkbox_kullbackleibler.setDisable(false);
+		 checkbox_l2.setDisable(false);
+		
+		 checkbox_hausdorff.setDisable(false);
+		 checkbox_avgmin.setDisable(false);
+		 
+		 combobox_scalingAlgorithm.setDisable(false);
+	}
+
+	public ProgressIndicator getProgressIndicator_calculateMDSCoordinates()
+	{
+		return progressIndicator_calculateMDSCoordinates;
+	}
+
+	public ProgressIndicator getProgressIndicator_distanceCalculation()
+	{
+		return progressIndicator_distanceCalculation;
+	}
 }

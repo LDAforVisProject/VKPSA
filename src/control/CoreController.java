@@ -5,6 +5,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import control.dataView.DataSubViewController;
 import control.dataView.DataViewController;
@@ -58,7 +60,23 @@ public class CoreController extends Controller
 		controllerMap	= new HashMap<String, Controller>();
 		
 		// Init workspace.
-		workspace			= new Workspace("");
+		workspace		= new Workspace("");
+		
+		
+//		// Display data view at startup.
+//		Timer displayDataViewTimer = new Timer(true);
+//		displayDataViewTimer.scheduleAtFixedRate(
+//		    new TimerTask() {
+//		    	public void run() 
+//		    	{ 
+//		    		// Wait until CoreController is initialized, then display data view and cancel timer.
+//		    		if (!root.getStyleClass().isEmpty()) {
+//		    			initDataView();
+//		    			cancel();
+//		    		}
+//		    	}
+//		    }, 0, 10
+//		);
 	}
 	
 	public void setScene(Scene scene)
@@ -106,17 +124,7 @@ public class CoreController extends Controller
 				label_title.setText("Provide Data");
 				
 				if (!viewNodeMap.containsKey("dataview")) {
-					initView("dataview", "/view/SII/SII_Content_Data.fxml");
 					initDataView();
-					
-					// Send reference to controllers to DataViewController.
-					Map<String, Node> dataSubViewNodes = new HashMap<String, Node>(viewNodeMap);
-					dataSubViewNodes.remove("analysis");
-					((DataViewController)controllerMap.get("dataview")).setDataSubViewNodes(dataSubViewNodes);
-
-			        // Show workspace chooser.
-					((DataViewController)controllerMap.get("dataview")).initWorkspaceChooser(viewNodeMap.get("load"), root, scene);
-					((DataViewController)controllerMap.get("dataview")).showWorkspaceChooser(true);
 				}
 				
 				else {
@@ -177,6 +185,16 @@ public class CoreController extends Controller
 	 */
 	private void initDataView()
 	{
+		/*
+		 * Init actual data view.
+		 */
+		
+		initView("dataview", "/view/SII/SII_Content_Data.fxml");
+		
+		/*
+		 * Init sub data views.
+		 */
+		
         DataViewController dvController	= (DataViewController)controllerMap.get("dataview");
         String[] viewIDs				= {"load", "preprocess", "generate"};
         String[] fxmlFilePaths			= {"/view/SII/SII_Content_Load.fxml", "/view/SII/SII_Content_Preprocess.fxml", "/view/SII/SII_Content_Generate.fxml"};
@@ -214,6 +232,26 @@ public class CoreController extends Controller
         catch (IOException e) {
 			e.printStackTrace();
 		}
+        
+        /*
+         * Set references between DataViewController and SubDataViewControllers. 
+         */
+        
+        Map<String, Node> dataSubViewNodes				= new HashMap<String, Node>(viewNodeMap);
+		Map<String, Controller> dataSubViewControllers	= new HashMap<String, Controller>(controllerMap);
+		
+		// Remove analysis and data view (management) from cloned collections.
+		dataSubViewNodes.remove("analyze");
+		dataSubViewControllers.remove("analyze");
+		dataSubViewNodes.remove("dataview");
+		dataSubViewControllers.remove("dataview");
+		
+		// Assign data sub views to DataViewController instance.
+		dvController.setDataSubViews(dataSubViewNodes, dataSubViewControllers);
+
+        // Show workspace chooser.
+		dvController.initWorkspaceChooser(viewNodeMap.get("load"), root, scene);
+		dvController.showWorkspaceChooser(true);
 	}
 	
 	private void hideAllViews()

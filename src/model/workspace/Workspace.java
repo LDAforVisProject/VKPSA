@@ -41,7 +41,7 @@ import model.workspace.tasks.Task_WorkspaceTask;
 
 // @todox Process sampling parameter lists in python script.
 // @todox Integrate python script binding in VKPSA GUI.
-// 		@todo Python script: Get highest index in workspace directory, use that + n for newly created topic files. 
+// @todo Python script: Get highest index in workspace directory, use that + n for newly created topic files. 
 //							 Alternative: Use timestamp.
 //							 Alternative: Use parameter values -> (Short) hash string?
 // @todo Test data generation.
@@ -58,7 +58,7 @@ import model.workspace.tasks.Task_WorkspaceTask;
  * @author RM
  * @date 2015-04-14
  */
-public class Workspace
+public class Workspace implements ITaskListener
 {
 	// -----------------------------------------------
 	// 				Path variables
@@ -262,32 +262,22 @@ public class Workspace
 			break;
 			
 			// -----------------------------------------------
-			// 			Other operations
+			// 			Collective operations
 			// -----------------------------------------------
 			
-			case RESET:
+			// -----------------------------------------------
+			// 			Maintainance operations
+			// -----------------------------------------------
+			
+			case SWITCH:
 				// Reset directory path.
-				directory					= "";
-				
-				// Clear containers.
-				datasetMap.clear();
-				ldaConfigurations.clear();
-//				reverseMDSCoordinateLookup.clear();
-				
-				// Clear arrays.
-				distances					= null;
-				mdsCoordinates				= null;
-				
-				// Reset counters.
-				numberOfDatasetsInDISFile	= 0;
-				numberOfDatasetsInMDSFile	= 0;
-				numberOfDatasetsInWS		= 0;
-				
-				// Reset flags.
-				isMetadataLoaded			= false;
-				isRawDataLoaded				= false;
-				isDistanceDataLoaded		= false;
-				isMDSDataLoaded				= false;
+				directory = "";
+				// Reset other data.
+				resetData();
+			break;
+			
+			case RESET:
+				resetData();
 			break;
 			
 			case ALL:
@@ -324,48 +314,45 @@ public class Workspace
 		return task;
 	}
 	
-	/**
-	 * @deprecated
-	 * @param distances
-	 * @param writeToFile
-	 * @param path
-	 * @return
-	 */
-	private double[][] calculateMDSCoordinates(double[][] distances, boolean writeToFile, String path)
+	@Override
+	public void notifyOfTaskCompleted(WorkspaceAction workspaceAction)
 	{
-		// Storage location for MDS coordinates.
-		double[][] output = new double[datasetMap.size()][datasetMap.size()];
-		
-		// Execute MDS on topic distance matrix.
-		output = MDSJ.classicalScaling(distances, 2);
-		System.out.println(Data.format(output));
-		// Write to file.
-		if (writeToFile) {
-			try {
-				PrintWriter writer = new PrintWriter(path, "UTF-8");
-				
-				System.out.println("1: " + output.length);
-				System.out.println("2: " + output[0].length);
-				
-				for (int i = 0; i < output.length; i++) {
-					
-					for (int j = 0; j < output[i].length; j++) {
-						writer.print(output[i][j] + " ");
-					}
-					
-					if (i < output.length - 1)
-						writer.println("");
-				}
-				
-				writer.close();	
-			}
+		switch (workspaceAction) 
+		{
+			case COLLECT_FILE_METADATA:
+				// Load raw data.
+				System.out.println("[Post-generation] Collected metadata.");
+				//workspace.executeWorkspaceAction(WorkspaceAction.LOAD_RAW_DATA, generate_progressIndicator.progressProperty(), this);
+			break;
 			
-			catch (Exception e) {
-				e.printStackTrace();
-			}
+			// After raw data was loaded: Calculate distances.
+			case LOAD_RAW_DATA:
+				//System.out.println("[Post-generation] Loading raw data.");
+			break;
 		}
+	}
+	
+	private void resetData()
+	{
+		// Clear containers.
+		datasetMap.clear();
+		ldaConfigurations.clear();
+//		reverseMDSCoordinateLookup.clear();
 		
-		return output;
+		// Clear arrays.
+		distances					= null;
+		mdsCoordinates				= null;
+		
+		// Reset counters.
+		numberOfDatasetsInDISFile	= 0;
+		numberOfDatasetsInMDSFile	= 0;
+		numberOfDatasetsInWS		= 0;
+		
+		// Reset flags.
+		isMetadataLoaded			= false;
+		isRawDataLoaded				= false;
+		isDistanceDataLoaded		= false;
+		isMDSDataLoaded				= false;
 	}
 	
 	/**

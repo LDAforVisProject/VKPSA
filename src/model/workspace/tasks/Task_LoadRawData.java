@@ -39,7 +39,7 @@ public class Task_LoadRawData extends Task_WorkspaceTask
 		int numberOfDatasets								= 0;
 		
 		// Get number of .csv files in directory (for progress indicators).
-		int csvCount = workspace.getNumberOfDatasetsInWS();
+		int csvCount										= workspace.getNumberOfDatasetsInWS();
 		
 		// Iterate through files.
 		for (String filename : filenames) {
