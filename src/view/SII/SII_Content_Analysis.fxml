@@ -109,7 +109,7 @@
                                                                         <Font name="System Bold" size="12.0" />
                                                                      </font>
                                                                   </Label>
-                                                                  <BarChart layoutX="-173.0" layoutY="-88.0" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="30.0">
+                                                                  <BarChart fx:id="barchart_distances" layoutX="-173.0" layoutY="-88.0" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="30.0">
                                                                     <xAxis>
                                                                       <CategoryAxis side="BOTTOM" />
                                                                     </xAxis>
@@ -120,22 +120,22 @@
                                                                   <Label layoutX="44.0" layoutY="271.0" text="Median" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="44.0" />
                                                                   <Label layoutX="276.0" layoutY="272.0" text="Maximum" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="90.0" />
                                                                   <Label layoutX="276.0" layoutY="254.0" text="Minimum" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="90.0" />
-                                                                  <Label layoutX="135.0" layoutY="253.0" text="Label" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="120.0">
+                                                                  <Label fx:id="label_avg" layoutX="135.0" layoutY="253.0" text="Label" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="120.0">
                                                                      <font>
                                                                         <Font name="System Italic" size="12.0" />
                                                                      </font>
                                                                   </Label>
-                                                                  <Label layoutX="135.0" layoutY="271.0" text="Label" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="120.0">
+                                                                  <Label fx:id="label_median" layoutX="135.0" layoutY="271.0" text="Label" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="120.0">
                                                                      <font>
                                                                         <Font name="System Italic" size="12.0" />
                                                                      </font>
                                                                   </Label>
-                                                                  <Label layoutX="379.0" layoutY="254.0" text="Label" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="30.0">
+                                                                  <Label fx:id="label_max" layoutX="379.0" layoutY="254.0" text="Label" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="30.0">
                                                                      <font>
                                                                         <Font name="System Italic" size="12.0" />
                                                                      </font>
                                                                   </Label>
-                                                                  <Label layoutX="379.0" layoutY="272.0" text="Label" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="30.0">
+                                                                  <Label fx:id="label_min" layoutX="379.0" layoutY="272.0" text="Label" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="30.0">
                                                                      <font>
                                                                         <Font name="System Italic" size="12.0" />
                                                                      </font>

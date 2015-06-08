@@ -524,6 +524,9 @@ public class GenerationController extends DataSubViewController
 				
 				// Data generation and preprocessing finished - unfreeze controls.
 				dataViewController.unfreezeControls();
+				
+				// Check if all data is avaible and analysis view may be used.
+				dataViewController.checkOnDataAvailability();
 			break;
 		}
 	}

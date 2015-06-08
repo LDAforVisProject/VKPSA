@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.apache.commons.collections4.MultiMap;
 
+import control.CoreController;
 import javafx.beans.property.DoubleProperty;
 import javafx.util.Pair;
 import mdsj.Data;

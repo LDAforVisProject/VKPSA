@@ -131,10 +131,16 @@ public class PreprocessingController extends DataSubViewController
 			
 			case CALCULATE_DISTANCES:
 				System.out.println("Finished calculating distances.");
+				
+				// Check if all data is avaible and analysis view may be used.
+				dataViewController.checkOnDataAvailability();
 			break;
 			
 			case CALCULATE_MDS_COORDINATES:
 				System.out.println("Finished calculating MDS coordinates.");
+				
+				// Check if all data is avaible and analysis view may be used.
+				dataViewController.checkOnDataAvailability();
 			break;			
 		}
 	}

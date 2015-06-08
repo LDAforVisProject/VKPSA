@@ -3,14 +3,12 @@ package control.dataView;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Observable;
 import java.util.ResourceBundle;
 
 import model.workspace.WorkspaceAction;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
@@ -149,7 +147,6 @@ public class LoadController extends DataSubViewController
 				// Otherwise: Execute and display integrity check, set summary as tooltip.
 				else {
 					showIntegrityCheckTooltip(displayIntegrityCheck());
-					dataViewController.setDataLoaded(true);
 				}
 			break;
 			
@@ -159,6 +156,9 @@ public class LoadController extends DataSubViewController
 				// Once MDS coordinates are loaded: Execute and display integrity check.
 				showIntegrityCheckTooltip(displayIntegrityCheck());
 				dataViewController.setDataLoaded(true);
+				
+				// Check if all data is available.
+				dataViewController.checkOnDataAvailability();
 			break;
 
 			default:

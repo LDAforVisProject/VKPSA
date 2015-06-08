@@ -46,7 +46,6 @@ public class Task_LoadMDSCoordinates extends Task_WorkspaceTask
 						
 				// Skip configuration line, then process coordinates.
 				for (String line : lines.subList(1, lines.size())) {
-					System.out.println("### " + line);
 					String[] coordinates		= line.split(" ");
 					numberOfMDSCoordinatesInWS	= 0;
 					
@@ -61,8 +60,6 @@ public class Task_LoadMDSCoordinates extends Task_WorkspaceTask
 					
 					for (String coordinate : coordinates) {
 						mdsCoordinates[lineCount][numberOfMDSCoordinatesInWS] = Double.parseDouble(coordinate);
-						
-						System.out.println("coordinate = " + coordinate);
 						
 						processedItems++;
 						numberOfMDSCoordinatesInWS++;

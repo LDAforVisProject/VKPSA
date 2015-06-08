@@ -8,6 +8,7 @@ import java.util.ResourceBundle;
 import org.controlsfx.control.PopOver;
 
 import control.Controller;
+import control.CoreController;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -41,6 +42,8 @@ public class DataViewController extends Controller
 	// -----------------------------------------------
 	// 				Other attributes.
 	// -----------------------------------------------	
+	
+	private CoreController coreController;
 	
 	private boolean isDataLoaded;
 	
@@ -151,6 +154,19 @@ public class DataViewController extends Controller
 		}
 	}
 	
+	public void checkOnDataAvailability()
+	{
+		if (workspace.isMetadataLoaded() && workspace.isDistanceDataLoaded() && workspace.isMDSDataLoaded()) {
+			System.out.println("All data loaded. Enabling analysis view.");
+			coreController.unblockAnalysisView();
+		}
+		
+		else {
+			System.out.println(workspace.isMetadataLoaded() + ", " + workspace.isDistanceDataLoaded() + ", " + workspace.isMDSDataLoaded());
+			coreController.blockAnalysisView();
+		}
+	}
+	
 	/*
 	 * From here: Getter and setter.
 	 */
@@ -185,6 +201,10 @@ public class DataViewController extends Controller
 		this.dataSubViewControllers	= dataSubViewControllers;
 	}
 	
+	/**
+	 * Used to indicate that loading the current state of the workspace has finished.
+	 * @param isDataLoaded
+	 */
 	public void setDataLoaded(boolean isDataLoaded)
 	{
 		this.isDataLoaded = isDataLoaded;
@@ -198,5 +218,10 @@ public class DataViewController extends Controller
 	public ProgressIndicator getProgressIndicator_distanceCalculation()
 	{
 		return ((PreprocessingController)dataSubViewControllers.get("preprocess")).getProgressIndicator_distanceCalculation();
+	}
+	
+	public void setCoreController(CoreController coreController)
+	{
+		this.coreController = coreController;
 	}
 }

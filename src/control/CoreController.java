@@ -62,6 +62,7 @@ public class CoreController extends Controller
 		// Init workspace.
 		workspace		= new Workspace("");
 		
+		blockAnalysisView();
 		
 //		// Display data view at startup.
 //		Timer displayDataViewTimer = new Timer(true);
@@ -190,12 +191,14 @@ public class CoreController extends Controller
 		 */
 		
 		initView("dataview", "/view/SII/SII_Content_Data.fxml");
+		DataViewController dvController	= (DataViewController)controllerMap.get("dataview");
+		// Set reference to CoreController.
+		dvController.setCoreController(this);
 		
 		/*
 		 * Init sub data views.
 		 */
 		
-        DataViewController dvController	= (DataViewController)controllerMap.get("dataview");
         String[] viewIDs				= {"load", "preprocess", "generate"};
         String[] fxmlFilePaths			= {"/view/SII/SII_Content_Load.fxml", "/view/SII/SII_Content_Preprocess.fxml", "/view/SII/SII_Content_Generate.fxml"};
         
@@ -280,6 +283,16 @@ public class CoreController extends Controller
 			viewNodeMap.get("generate").setDisable(false);
 			viewNodeMap.get("generate").setVisible(true);
 		}
+	}
+	
+	public void unblockAnalysisView()
+	{
+		icon_analyze.setDisable(false);
+	}
+	
+	public void blockAnalysisView()
+	{
+		icon_analyze.setDisable(true);
 	}
 	
 	/**
