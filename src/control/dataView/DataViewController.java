@@ -135,7 +135,7 @@ public class DataViewController extends Controller
 		dataSubViewNodes.get("preprocess").setDisable(!dataSubViewNodes.get("preprocess").isDisabled());
 	}
 	
-	public void freezeOptionControls()
+	public void freezeControls()
 	{
 		for (Controller controller : dataSubViewControllers.values()) {
 			DataSubViewController dsvController = (DataSubViewController)controller;
@@ -143,7 +143,7 @@ public class DataViewController extends Controller
 		}
 	}
 	
-	public void unfreezeOptionControls()
+	public void unfreezeControls()
 	{
 		for (Controller controller : dataSubViewControllers.values()) {
 			DataSubViewController dsvController = (DataSubViewController)controller;

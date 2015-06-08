@@ -41,12 +41,16 @@ import model.workspace.tasks.Task_WorkspaceTask;
 
 // @todox Process sampling parameter lists in python script.
 // @todox Integrate python script binding in VKPSA GUI.
-// @todo Python script: Get highest index in workspace directory, use that + n for newly created topic files. 
+// @todox Python script: Get highest index in workspace directory, use that + n for newly created topic files. 
 //							 Alternative: Use timestamp.
 //							 Alternative: Use parameter values -> (Short) hash string?
-// @todo Test data generation.
+// @todo Test data generation - in particular: 
+//			After update Topic parameter parsing in Topic.generateTopics(...) and if 
+//			parameter list generation works as well with different maxima/minima.
 // @todo Formulate work items for analysis view / phase.
 // @todo Idea for optimization: Truncate parameter file list / instruct Python script to process only a defined part of it.
+
+//TODO: Test why MDS returns NaN values.
 
 /**
  * Encompasses:
@@ -439,7 +443,7 @@ public class Workspace implements ITaskListener
 		}
 
 		// Check for integrity of pre-calculated MDS coordinate data.
-		if (isMDSDataLoaded) {
+		if (isIntegrous && isMDSDataLoaded) {
 			if (numberOfDatasetsInWS != numberOfDatasetsInMDSFile) {
 				isIntegrous = false;
 			}
@@ -481,6 +485,7 @@ public class Workspace implements ITaskListener
 		    for (String ldaConfigString : line.split(delimiter)) {
 		    	if (!ldaConfigString.isEmpty()) {
 		    		// Compare with already loaded LDA configuration collection.
+		    		// Read LDA configuration string has to match in (1) content and (2) order.
 		    		if (!LDAConfiguration.generateLDAConfiguration(ldaConfigString).equals(ldaConfigurations.get(i))) {
 		    			return false;
 		    		}

@@ -45,7 +45,8 @@ public class Task_LoadMDSCoordinates extends Task_WorkspaceTask
 				List<String> lines = Files.readAllLines(path, charset);
 						
 				// Skip configuration line, then process coordinates.
-				for (String line : lines.subList(1, lines.size() - 1)) {
+				for (String line : lines.subList(1, lines.size())) {
+					System.out.println("### " + line);
 					String[] coordinates		= line.split(" ");
 					numberOfMDSCoordinatesInWS	= 0;
 					
@@ -60,6 +61,8 @@ public class Task_LoadMDSCoordinates extends Task_WorkspaceTask
 					
 					for (String coordinate : coordinates) {
 						mdsCoordinates[lineCount][numberOfMDSCoordinatesInWS] = Double.parseDouble(coordinate);
+						
+						System.out.println("coordinate = " + coordinate);
 						
 						processedItems++;
 						numberOfMDSCoordinatesInWS++;
@@ -77,9 +80,6 @@ public class Task_LoadMDSCoordinates extends Task_WorkspaceTask
 				e.printStackTrace();
 			}
 			
-			// Update progress.
-			updateProgress(1, 1);
-			
 			// Update number of MDS coordinates in file.
 			workspace.setNumberOfDatasetsInMDSFile(numberOfMDSCoordinatesInWS);
 			
@@ -88,10 +88,16 @@ public class Task_LoadMDSCoordinates extends Task_WorkspaceTask
 			
 			// Signal that MDS data is available.
 			workspace.setMDSDataLoaded(true);
+			
+			// Update progress.
+			updateProgress(1, 1);
 	    }
 	    
 	    // File doesn't exist.
 	    else {
+			// Update progress.
+			updateProgress(1, 1);
+			
 	    	return -1;
 	    }
 	    

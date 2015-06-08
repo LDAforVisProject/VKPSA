@@ -111,10 +111,6 @@ public class GenerationController extends DataSubViewController
 		rangeSliders	= new HashMap<String, RangeSlider>();
 		vBoxes			= new HashMap<String, VBox>();
 		
-		
-		// Parse pre-configured textfield valus.
-		initTextFields();
-		
 		// Remove deprecated UI elements in parameter configuration grid pane.
 		int vboxCount = 0;
 		for (Object child : parameterConfiguration_gridPane.getChildren().toArray()) {
@@ -165,6 +161,9 @@ public class GenerationController extends DataSubViewController
 		// Init range sliders.
 		initRangeSliders();
 		
+		// Init textfields.
+		initTextFields();
+		
 		// Init combobox.
 		initComboBoxes();
 	}
@@ -186,6 +185,13 @@ public class GenerationController extends DataSubViewController
 	 */
 	private void initTextFields()
 	{
+		alpha_min_textfield.setText(String.valueOf(rangeSliders.get("alpha").getLowValue()));
+		alpha_max_textfield.setText(String.valueOf(rangeSliders.get("alpha").getHighValue()));
+		eta_min_textfield.setText(String.valueOf(rangeSliders.get("eta").getLowValue()));
+		eta_max_textfield.setText(String.valueOf(rangeSliders.get("eta").getHighValue()));
+		kappa_min_textfield.setText(String.valueOf(rangeSliders.get("kappa").getLowValue()));
+		kappa_max_textfield.setText(String.valueOf(rangeSliders.get("kappa").getHighValue()));
+		
 		try {
 			numberOfDatasetsToGenerate	= Integer.parseInt(numberOfDatasets_textfield.getText());
 			numberOfDivisions			= Integer.parseInt(numberOfDivisions_textfield.getText());
@@ -211,14 +217,14 @@ public class GenerationController extends DataSubViewController
 			RangeSlider rs = entry.getValue();
 			
 			rs.setMaxWidth(360);
-			rs.setMax(100);
+			rs.setMax(25);
 			rs.setMajorTickUnit(5);
-			rs.setSnapToTicks(false);
+			rs.setMinorTickCount(29);
+			rs.setSnapToTicks(true);
 			rs.setShowTickLabels(true);
 			rs.setShowTickMarks(true);
-			rs.setMajorTickUnit(25);
 			rs.setLowValue(0);
-			rs.setHighValue(100);
+			rs.setHighValue(25);
 			
 			// Get some distance between range sliders and bar charts.
 			rs.setPadding(new Insets(10, 0, 0, 0));
@@ -226,8 +232,10 @@ public class GenerationController extends DataSubViewController
 			addEventHandlerToRangeSlider(rs, entry.getKey());
 		}
 		
-		// Set minima and maxima.
+		// Set variable-specific minima and maxima.
 		rangeSliders.get("kappa").setMin(1);
+		rangeSliders.get("kappa").setMax(50);
+		rangeSliders.get("kappa").setHighValue(50);
 		
 		// Add to respective parents.
 		vBoxes.get("alpha").getChildren().add(rangeSliders.get("alpha"));
@@ -358,7 +366,7 @@ public class GenerationController extends DataSubViewController
 	 */
 	private void generateParameterValues()
 	{
-		/**
+		/*
 		 * Initialize variables for storage of the actual parameter data and prepare the histogram bins aggregating them.  
 		 */
 		
@@ -375,12 +383,12 @@ public class GenerationController extends DataSubViewController
 		parameterBinLists.put("eta", new int[numberOfBins]);
 		parameterBinLists.put("kappa", new int[numberOfBins]);
 		
-		/**
+		/*
 		 * Generate numberOfDivisions values for each parameter.
 		 */
 		
 		// Init random number generator.
-		 Random randomGenerator = new Random();
+		Random randomGenerator	= new Random();
 		// Generated values are allowed to be up to rangeSlider.getHighValue() and as low as rangeSlider.getLowValue().
 		double intervalAlpha 	= rangeSliders.get("alpha").getHighValue() - rangeSliders.get("alpha").getLowValue();
 		double intervalEta		= rangeSliders.get("eta").getHighValue() - rangeSliders.get("eta").getLowValue();
@@ -389,12 +397,11 @@ public class GenerationController extends DataSubViewController
 		// Generate random parameter values.		
 		for (int i = 0; i < numberOfDivisions; i++) {
 			parameterValues.get("alpha").add(rangeSliders.get("alpha").getLowValue() + randomGenerator.nextFloat() * intervalAlpha);
-//			System.out.println(parameterValues.get("alpha").get(parameterValues.get("alpha").size() - 1));
 			parameterValues.get("eta").add(rangeSliders.get("eta").getLowValue() + randomGenerator.nextFloat() * intervalEta);
 			parameterValues.get("kappa").add(rangeSliders.get("kappa").getLowValue() + randomGenerator.nextFloat() * intervalKappa);
 		}
 		
-		/**
+		/*
 		 * Bin data for use in histograms/scented widgets.
 		 */
 		
@@ -410,7 +417,7 @@ public class GenerationController extends DataSubViewController
 			}
 		}
 		
-		/**
+		/*
 		 * Transfer data to scented widgets.
 		 */
 		
@@ -441,7 +448,7 @@ public class GenerationController extends DataSubViewController
 	private void generateData(ActionEvent e)
 	{
 		
-		dataViewController.freezeOptionControls();
+		dataViewController.freezeControls();
 		
 		// Create LDA configurations out of parameter lists, transfer to workspace.
 		workspace.setConfigurationsToGenerate(LDAConfiguration.generateLDAConfigurations( numberOfDivisions, numberOfDatasetsToGenerate, sampling_combobox.getValue(), parameterValues ));
@@ -492,6 +499,9 @@ public class GenerationController extends DataSubViewController
 				// topic file metadata - no new metadata was generated. 
 				else {
 					System.out.println("### WARNING ### Workspace is inconsistent - data has to be preprocessed. Apply preprocessing manually.");
+					
+					// Unfreeeze controls.
+					dataViewController.unfreezeControls();
 				}
 			break;
 			
@@ -511,6 +521,9 @@ public class GenerationController extends DataSubViewController
 			
 			case CALCULATE_MDS_COORDINATES:
 				System.out.println("[Post-generation] Calculated MDS data.");
+				
+				// Data generation and preprocessing finished - unfreeze controls.
+				dataViewController.unfreezeControls();
 			break;
 		}
 	}

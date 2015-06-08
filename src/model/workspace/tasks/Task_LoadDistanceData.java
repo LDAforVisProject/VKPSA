@@ -106,6 +106,9 @@ public class Task_LoadDistanceData extends Task_WorkspaceTask
 	    
 	    // File doesn't exist.
 	    else {
+			// Update progress.
+			updateProgress(1, 1);
+			
 	    	return -1;
 	    }
 	    

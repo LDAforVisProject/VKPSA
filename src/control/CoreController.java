@@ -110,7 +110,7 @@ public class CoreController extends Controller
 					initView("analyze", "/view/SII/SII_Content_Analysis.fxml");
 					
 					// Draw scatterchart.
-					//((AnalysisController)controllerMap.get("analyze")).refreshVisualizations();
+					((AnalysisController)controllerMap.get("analyze")).refreshVisualizations();
 				}
 				
 				// Controller already exists: Switch to node.

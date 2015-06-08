@@ -24,12 +24,20 @@ public class AnalysisController extends Controller
 	{
 		System.out.println("Initializing SII_AnalysisController.");
 		
+		initScatterchart();
+	}
+	
+	private void initScatterchart()
+	{
 		// Init scatterchart.
 		xAxis = scatterchart_global.getXAxis();
         yAxis = scatterchart_global.getYAxis();
         
         xAxis.setAutoRanging(true);
         yAxis.setAutoRanging(true);
+        
+        scatterchart_global.setLegendVisible(false);
+        scatterchart_global.setVerticalGridLinesVisible(true);
 	}
 	
 	public void refreshVisualizations()
@@ -49,6 +57,7 @@ public class AnalysisController extends Controller
         dataSeries.setName("Data");
         
         for (int i = 0; i < coordinates[0].length; i++) {
+        	//System.out.println("y = " + coordinates[1][i]);
         	dataSeries.getData().add(new XYChart.Data<Number, Number>(coordinates[0][i], coordinates[1][i]));
         }
         

@@ -44,14 +44,40 @@ public class Task_CalculateDistances extends Task_WorkspaceTask
 		// Stores number of calculated distances to date.
 		int numberOfCalculatedDistances						= 0;
 		// Total number of distances to calculate.
-		int totalNumberOfDistances							= (n * n + n) / 2;  
+		int totalNumberOfDistances							= (n * n + n) / 2;
+		// Stores the factor needed to get all distances to >= 1 (workaround needed for MDSJ to work correctly).
+		int normalizationFactor								= 0;
 		
 		// Write calculated distances to file.
 		String path = Paths.get(workspace.getDirectory(), Workspace.FILENAME_DISTANCES).toString();
 		try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path), "utf-8"))) 
 		{
-			// Update task progress. .1: Arbitrary portion of progress indicator reserved for file loading.
-			updateProgress(0.1, 1);
+			// Update task progress.
+			updateProgress(0, 1);
+			
+			/*
+			 * Compare all datasets with each other, calculate distances.
+			 */
+
+			for (int i = 0; i < ldaConfigurations.size(); i++) {
+				distances[i][i] = 0;
+				
+				// Calculate other distances.
+				for (int j = i + 1; j < ldaConfigurations.size(); j++) {
+					// Update task progress.
+					updateProgress(numberOfCalculatedDistances, totalNumberOfDistances * 2);
+				
+					// Assume symmetric distance calculations is done in .calculateDatasetDistance().
+					distances[i][j] = (float)datasetMap.get(ldaConfigurations.get(i)).calculateDatasetDistance(datasetMap.get(ldaConfigurations.get(j)), DatasetDistance.HausdorffDistance);
+					distances[j][i] = distances[i][j];
+					
+					int tempNormalizationFactor = 1;
+					for (; distances[i][j] * tempNormalizationFactor < 1; tempNormalizationFactor *= 10);
+					normalizationFactor = tempNormalizationFactor > normalizationFactor ? tempNormalizationFactor : normalizationFactor;
+					
+					numberOfCalculatedDistances++;
+				}
+			}
 			
 			// Write first (configuration) line.
 			writer.write("\t\t\t\t\t\t\t");
@@ -60,42 +86,35 @@ public class Task_CalculateDistances extends Task_WorkspaceTask
 			}
 			writer.write("\n");
 			
-			// Compare all datasets with each other.
+			/*
+			 * Normalize values and write them to file.
+			 */
+			
 			for (int i = 0; i < ldaConfigurations.size(); i++) {
-				distances[i][i] = 0;
-				
+				// Output LDA configuration at line start.
 				String fileOutput = ldaConfigurations.get(i).toString() + "\t\t";
 				
-				// Fill in text file with already calculated distances.
+				// Fill in with already calculated distances.
 				for (int k = 0; k < i + 1; k++) {
-					fileOutput += distances[i][k] + " ";
+					fileOutput += (float)distances[i][k] + " ";
 				}
-				
-				// Calculate other distances.
+
 				for (int j = i + 1; j < ldaConfigurations.size(); j++) {
-					// Update task progress.
-					updateProgress(numberOfCalculatedDistances, totalNumberOfDistances);
-					
-//					System.out.println(i + " to " + j);
-				
-					// Assume symmetric distance calculations is done in .calculateDatasetDistance().
-					distances[i][j] = datasetMap.get(ldaConfigurations.get(i)).calculateDatasetDistance(datasetMap.get(ldaConfigurations.get(j)), DatasetDistance.HausdorffDistance);
-					distances[j][i] = distances[i][j];
+					distances[i][j] *= normalizationFactor;
+					distances[j][i]  = distances[i][j];
 					
 					// Append newly calculated distance.
-					fileOutput += distances[i][j] + " ";
-					
-					numberOfCalculatedDistances++;
+					fileOutput += (float)distances[i][j] + " ";
 				}
-				
+
 				// Start next line in file.
 				if (i < ldaConfigurations.size() - 1)
 					fileOutput += "\n";
-				
+
 				// Write to file.
 				writer.write(fileOutput);
 			}
-	
+			
 			// Update task progress.
 			updateProgress(1, 1);
 			
@@ -105,12 +124,15 @@ public class Task_CalculateDistances extends Task_WorkspaceTask
 			// Notify workspace that distance data is loaded.
 			workspace.setDistanceDataLoaded(true);
 			
+			// Clear raw data.
+			workspace.getDatasetMap().clear();
+			
 			// Close file writer.
 			writer.close();
 		}
 		
 		catch (Exception e) {
-			return -1;
+			e.printStackTrace();
 		}
 		
 		return 1;

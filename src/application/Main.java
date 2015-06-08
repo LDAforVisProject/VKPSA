@@ -1,6 +1,10 @@
 package application;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+
+import mdsj.Data;
+import mdsj.MDSJ;
 
 import org.controlsfx.control.RangeSlider;
 import org.controlsfx.control.SegmentedButton;
@@ -18,7 +22,7 @@ public class Main extends Application
 {
 	@Override
 	public void start(Stage primaryStage)
-	{
+	{		
 		// -----------------------------------------------
 		// 		Actual (raw and (pre-)processed) data
 		// -----------------------------------------------
