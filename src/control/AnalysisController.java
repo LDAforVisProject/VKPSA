@@ -143,11 +143,11 @@ public class AnalysisController extends Controller
 		 */
 		
 		int distanceBinList[] 	= new int[numberOfBins];
-		double binInterval		= max / numberOfBins;
+		double binInterval		= (max - min) / numberOfBins;
 		
 		for (float value : distancesFlattened) {
 			// Increment content of corresponding bin.
-			distanceBinList[(int) ( (value) / binInterval)]++;	
+			distanceBinList[(int) ( (value - min) / binInterval)]++;	
 		}
 		
 		/*
@@ -166,17 +166,20 @@ public class AnalysisController extends Controller
 		//	Clear old data.
 		barchart_distances.getData().clear();
 		//	Add data series.
-		barchart_distances.getData().add(generateDistanceHistogramDataSeries(distanceBinList, numberOfBins));
+		barchart_distances.getData().add(generateDistanceHistogramDataSeries(distanceBinList, numberOfBins, binInterval, min, max));
 		
 		System.out.println("Distance analysis took " + (System.nanoTime() - start) / (1000 * 1000) + " milliseconds.");
 	}
 	
-	private XYChart.Series<String, Integer> generateDistanceHistogramDataSeries(int[] distanceBinList, int numberOfBins)
+	private XYChart.Series<String, Integer> generateDistanceHistogramDataSeries(int[] distanceBinList, int numberOfBins, double binInterval, double min, double max)
 	{
 		final XYChart.Series<String, Integer> data_series = new XYChart.Series<String, Integer>();
 		
 		for (int i = 0; i < numberOfBins; i++) {
-			data_series.getData().add(new XYChart.Data<String, Integer>(String.valueOf(i), distanceBinList[i] ));
+			String categoryDescription	= String.valueOf(min + i * binInterval);
+			categoryDescription			= categoryDescription.length() > 4 ? categoryDescription.substring(0, 4) : categoryDescription;
+			
+			data_series.getData().add(new XYChart.Data<String, Integer>(categoryDescription, distanceBinList[i] ));
 		}
 		
 		return data_series;

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.effect.*?>
 <?import javafx.scene.canvas.*?>
 <?import javafx.scene.chart.*?>
@@ -35,10 +36,147 @@
                                                               <content>
                                                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="445.0" prefWidth="373.0">
                                                                      <children>
-                                                                        <Label layoutX="11.0" layoutY="44.0" text="beta" />
-                                                                        <Label layoutX="11.0" layoutY="14.0" text="alpha" />
-                                                                        <Slider layoutX="116.0" layoutY="15.0" />
-                                                                        <Slider layoutX="116.0" layoutY="46.0" />
+                                                                        <GridPane fx:id="parameterConfiguration_gridPane" hgap="10.0" layoutX="1.0" prefHeight="247.0" prefWidth="338.0" vgap="5.0">
+                                                                           <children>
+                                                                              <Label text="α">
+                                                                                 <font>
+                                                                                    <Font name="System Bold" size="14.0" />
+                                                                                 </font>
+                                                                                 <GridPane.margin>
+                                                                                    <Insets left="5.0" />
+                                                                                 </GridPane.margin>
+                                                                              </Label>
+                                                                              <Label text="η " GridPane.rowIndex="1">
+                                                                                 <font>
+                                                                                    <Font name="System Bold" size="14.0" />
+                                                                                 </font>
+                                                                                 <GridPane.margin>
+                                                                                    <Insets left="5.0" />
+                                                                                 </GridPane.margin>
+                                                                              </Label>
+                                                                              <Label text="κ" GridPane.rowIndex="2">
+                                                                                 <font>
+                                                                                    <Font name="System Bold" size="14.0" />
+                                                                                 </font>
+                                                                                 <GridPane.margin>
+                                                                                    <Insets left="5.0" />
+                                                                                 </GridPane.margin>
+                                                                              </Label>
+                                                                              <TextField fx:id="alpha_max_textfield" maxWidth="35.0" GridPane.columnIndex="3">
+                                                                                 <GridPane.margin>
+                                                                                    <Insets />
+                                                                                 </GridPane.margin>
+                                                                              </TextField>
+                                                                              <TextField fx:id="eta_min_textfield" maxWidth="35.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                                                                 <GridPane.margin>
+                                                                                    <Insets />
+                                                                                 </GridPane.margin>
+                                                                              </TextField>
+                                                                              <TextField fx:id="eta_max_textfield" maxWidth="35.0" GridPane.columnIndex="3" GridPane.rowIndex="1">
+                                                                                 <GridPane.margin>
+                                                                                    <Insets />
+                                                                                 </GridPane.margin>
+                                                                              </TextField>
+                                                                              <TextField fx:id="kappa_min_textfield" maxWidth="35.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                                                                 <GridPane.margin>
+                                                                                    <Insets />
+                                                                                 </GridPane.margin>
+                                                                              </TextField>
+                                                                              <TextField fx:id="kappa_max_textfield" maxWidth="35.0" GridPane.columnIndex="3" GridPane.rowIndex="2">
+                                                                                 <GridPane.margin>
+                                                                                    <Insets />
+                                                                                 </GridPane.margin>
+                                                                              </TextField>
+                                                                              <TextField fx:id="alpha_min_textfield" maxWidth="35.0" prefHeight="25.0" prefWidth="38.0" GridPane.columnIndex="1">
+                                                                                 <GridPane.margin>
+                                                                                    <Insets />
+                                                                                 </GridPane.margin>
+                                                                              </TextField>
+                                                                              <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2">
+                                                                                 <children>
+                                                                                    <BarChart fx:id="alpha_barchart" alternativeRowFillVisible="false" animated="false" barGap="0.0" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="40.0" maxWidth="230.0" minHeight="40.0" minWidth="230.0" prefHeight="40.0" prefWidth="230.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
+                                                                                       <padding>
+                                                                                          <Insets bottom="-20.0" top="-10.0" />
+                                                                                       </padding>
+                                                                                       <xAxis>
+                                                                                          <CategoryAxis endMargin="0.0" gapStartAndEnd="false" side="BOTTOM" startMargin="10.0" tickLabelsVisible="false" tickMarkVisible="false" />
+                                                                                       </xAxis>
+                                                                                       <yAxis>
+                                                                                          <NumberAxis minorTickVisible="false" side="LEFT" tickLabelGap="1.0" tickLength="1.0" upperBound="200.0" />
+                                                                                       </yAxis>
+                                                                                       <VBox.margin>
+                                                                                          <Insets left="-24.0" top="15.0" />
+                                                                                       </VBox.margin>
+                                                                                    </BarChart>
+                                                                                    <Slider maxWidth="37.0" showTickLabels="true" showTickMarks="true">
+                                                                                       <VBox.margin>
+                                                                                          <Insets />
+                                                                                       </VBox.margin>
+                                                                                    </Slider>
+                                                                                 </children>
+                                                                              </VBox>
+                                                                              <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                                                                 <children>
+                                                                                    <BarChart fx:id="eta_barchart" alternativeRowFillVisible="false" animated="false" barGap="0.0" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="40.0" maxWidth="220.0" minHeight="40.0" minWidth="220.0" prefHeight="40.0" prefWidth="220.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
+                                                                                       <padding>
+                                                                                          <Insets bottom="-20.0" top="-10.0" />
+                                                                                       </padding>
+                                                                                       <xAxis>
+                                                                                          <CategoryAxis endMargin="0.0" gapStartAndEnd="false" side="BOTTOM" startMargin="10.0" tickLabelsVisible="false" tickMarkVisible="false" />
+                                                                                       </xAxis>
+                                                                                       <yAxis>
+                                                                                          <NumberAxis minorTickVisible="false" side="LEFT" tickLabelGap="1.0" tickLength="1.0" upperBound="200.0" />
+                                                                                       </yAxis>
+                                                                                       <VBox.margin>
+                                                                                          <Insets left="-24.0" top="15.0" />
+                                                                                       </VBox.margin>
+                                                                                    </BarChart>
+                                                                                    <Slider maxWidth="37.0" showTickLabels="true" showTickMarks="true">
+                                                                                       <VBox.margin>
+                                                                                          <Insets />
+                                                                                       </VBox.margin>
+                                                                                    </Slider>
+                                                                                 </children>
+                                                                              </VBox>
+                                                                              <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                                                                                 <children>
+                                                                                    <BarChart fx:id="kappa_barchart" alternativeRowFillVisible="false" animated="false" barGap="0.0" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="40.0" maxWidth="220.0" minHeight="40.0" minWidth="220.0" prefHeight="40.0" prefWidth="220.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
+                                                                                       <padding>
+                                                                                          <Insets bottom="-20.0" top="-10.0" />
+                                                                                       </padding>
+                                                                                       <xAxis>
+                                                                                          <CategoryAxis endMargin="0.0" gapStartAndEnd="false" side="BOTTOM" startMargin="10.0" tickLabelsVisible="false" tickMarkVisible="false" />
+                                                                                       </xAxis>
+                                                                                       <yAxis>
+                                                                                          <NumberAxis minorTickVisible="false" side="LEFT" tickLabelGap="1.0" tickLength="1.0" upperBound="200.0" />
+                                                                                       </yAxis>
+                                                                                       <VBox.margin>
+                                                                                          <Insets left="-24.0" top="15.0" />
+                                                                                       </VBox.margin>
+                                                                                    </BarChart>
+                                                                                    <Slider maxWidth="37.0" showTickLabels="true" showTickMarks="true">
+                                                                                       <VBox.margin>
+                                                                                          <Insets />
+                                                                                       </VBox.margin>
+                                                                                    </Slider>
+                                                                                 </children>
+                                                                              </VBox>
+                                                                           </children>
+                                                                           <columnConstraints>
+                                                                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="123.0" minWidth="10.0" prefWidth="19.0" />
+                                                                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="290.0" minWidth="10.0" prefWidth="44.0" />
+                                                                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="366.0" minWidth="10.0" prefWidth="204.0" />
+                                                                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="95.0" minWidth="10.0" prefWidth="41.0" />
+                                                                           </columnConstraints>
+                                                                           <padding>
+                                                                              <Insets bottom="20.0" />
+                                                                           </padding>
+                                                                           <rowConstraints>
+                                                                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                           </rowConstraints>
+                                                                        </GridPane>
                                                                      </children>
                                                                   </AnchorPane>
                                                               </content>
