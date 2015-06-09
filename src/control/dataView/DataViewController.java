@@ -224,4 +224,9 @@ public class DataViewController extends Controller
 	{
 		this.coreController = coreController;
 	}
+
+	@Override
+	public void resizeContent(double width, double height)
+	{
+	}
 }

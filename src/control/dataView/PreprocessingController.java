@@ -187,6 +187,12 @@ public class PreprocessingController extends DataSubViewController
 		 combobox_scalingAlgorithm.setDisable(false);
 	}
 
+
+	@Override
+	public void resizeContent(double width, double height)
+	{
+	}
+	
 	public ProgressIndicator getProgressIndicator_calculateMDSCoordinates()
 	{
 		return progressIndicator_calculateMDSCoordinates;

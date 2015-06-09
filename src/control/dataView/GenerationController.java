@@ -1,4 +1,4 @@
- package control.dataView;
+package control.dataView;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -407,7 +407,6 @@ public class GenerationController extends DataSubViewController
 		
 		// Bin data.
 		for (Map.Entry<String, ArrayList<Double>> entry : parameterValues.entrySet()) {
-			// @todo Use .getHighValue() instead of .getMax()? What's more useful?
 			double binInterval = (rangeSliders.get(entry.getKey()).getMax() - rangeSliders.get(entry.getKey()).getMin()) / numberOfBins;
 			
 			// Check every value and assign it to the correct bin.
@@ -565,5 +564,10 @@ public class GenerationController extends DataSubViewController
 		numberOfDivisions_textfield.setDisable(false);
 		
 		generate_button.setDisable(false);
+	}
+
+	@Override
+	public void resizeContent(double width, double height)
+	{
 	}
 }

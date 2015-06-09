@@ -253,4 +253,9 @@ public class LoadController extends DataSubViewController
 	public void unfreezeOptionControls()
 	{	
 	}
+
+	@Override
+	public void resizeContent(double width, double height)
+	{
+	}
 }

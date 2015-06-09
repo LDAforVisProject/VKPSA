@@ -49,6 +49,7 @@ import model.workspace.tasks.Task_WorkspaceTask;
 //			After update Topic parameter parsing in Topic.generateTopics(...) and if 
 //			parameter list generation works as well with different maxima/minima.
 // @todo Formulate work items for analysis view / phase.
+// @todo Add protocol SplitPane to every view (i.e.: Add in core view).
 // @todo Idea for optimization: Truncate parameter file list / instruct Python script to process only a defined part of it.
 
 //TODO: Test why MDS returns NaN values.

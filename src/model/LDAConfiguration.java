@@ -188,6 +188,27 @@ public class LDAConfiguration
 		this.eta = eta;
 	}
 
+	public double getParameter(String key)
+	{
+		double value = Double.MAX_VALUE;
+		
+		switch(key) {
+			case "alpha":
+				value = alpha;
+			break;
+			
+			case "eta":
+				value = eta;
+			break;
+			
+			case "kappa":
+				value = (double)k;
+			break;
+		}
+		
+		return value;
+	}
+	
 	@Override
 	public String toString()
 	{

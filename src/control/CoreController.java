@@ -169,7 +169,7 @@ public class CoreController extends Controller
 			// Set current workspace in analysis controller.
 			controller.setWorkspace(workspace);
 			
-			// Ensure resizability of tab content.
+			// Ensure resizability of content.
 			AnchorPane.setTopAnchor(contentNode, 0.0);
     		AnchorPane.setBottomAnchor(contentNode, 0.0);
     		AnchorPane.setLeftAnchor(contentNode, 0.0);
@@ -313,5 +313,24 @@ public class CoreController extends Controller
 	public void disableActiveCursor(MouseEvent e)
 	{
 		scene.setCursor(Cursor.DEFAULT);
+	}
+	
+	@Override
+	public void resizeContent(double width, double height)
+	{
+		// Adapt width.
+		if (width > 0) {
+			
+		}
+		
+		// Adapt height.
+		if (height > 0) {
+			
+		}
+		
+		// Propagate event to other controllers.
+		for (Controller controller : controllerMap.values()) {
+			controller.resizeContent(width, height);
+		}
 	}
 }
