@@ -32,9 +32,9 @@
                                                 <content>
                                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                                          <children>
-                                                            <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" prefHeight="353.0" prefWidth="376.0" vbarPolicy="ALWAYS" AnchorPane.bottomAnchor="-0.6" AnchorPane.leftAnchor="0.6" AnchorPane.rightAnchor="-0.6" AnchorPane.topAnchor="-0.6">
+                                                            <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" layoutX="19.6" layoutY="19.6" prefHeight="306.0" prefWidth="354.0" vbarPolicy="ALWAYS" AnchorPane.bottomAnchor="37.0" AnchorPane.leftAnchor="-8.7" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-0.6">
                                                               <content>
-                                                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="445.0" prefWidth="373.0">
+                                                                <AnchorPane minHeight="0.0" minWidth="0.0">
                                                                      <children>
                                                                         <GridPane fx:id="parameterConfiguration_gridPane" hgap="10.0" layoutX="1.0" prefHeight="247.0" prefWidth="338.0" vgap="5.0">
                                                                            <children>
@@ -92,9 +92,9 @@
                                                                                     <Insets />
                                                                                  </GridPane.margin>
                                                                               </TextField>
-                                                                              <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2">
+                                                                              <VBox fx:id="vbox_alpha" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2">
                                                                                  <children>
-                                                                                    <BarChart fx:id="alpha_barchart" alternativeRowFillVisible="false" animated="false" barGap="0.0" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="40.0" maxWidth="230.0" minHeight="40.0" minWidth="230.0" prefHeight="40.0" prefWidth="230.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
+                                                                                    <BarChart fx:id="barchart_alpha" alternativeRowFillVisible="false" animated="false" barGap="0.0" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="40.0" maxWidth="230.0" minHeight="40.0" minWidth="230.0" prefHeight="40.0" prefWidth="230.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
                                                                                        <padding>
                                                                                           <Insets bottom="-20.0" top="-10.0" />
                                                                                        </padding>
@@ -108,16 +108,11 @@
                                                                                           <Insets left="-24.0" top="15.0" />
                                                                                        </VBox.margin>
                                                                                     </BarChart>
-                                                                                    <Slider maxWidth="37.0" showTickLabels="true" showTickMarks="true">
-                                                                                       <VBox.margin>
-                                                                                          <Insets />
-                                                                                       </VBox.margin>
-                                                                                    </Slider>
                                                                                  </children>
                                                                               </VBox>
-                                                                              <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                                                              <VBox fx:id="vbox_eta" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
                                                                                  <children>
-                                                                                    <BarChart fx:id="eta_barchart" alternativeRowFillVisible="false" animated="false" barGap="0.0" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="40.0" maxWidth="220.0" minHeight="40.0" minWidth="220.0" prefHeight="40.0" prefWidth="220.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
+                                                                                    <BarChart fx:id="barchart_eta" alternativeRowFillVisible="false" animated="false" barGap="0.0" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="40.0" maxWidth="220.0" minHeight="40.0" minWidth="220.0" prefHeight="40.0" prefWidth="220.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
                                                                                        <padding>
                                                                                           <Insets bottom="-20.0" top="-10.0" />
                                                                                        </padding>
@@ -131,16 +126,11 @@
                                                                                           <Insets left="-24.0" top="15.0" />
                                                                                        </VBox.margin>
                                                                                     </BarChart>
-                                                                                    <Slider maxWidth="37.0" showTickLabels="true" showTickMarks="true">
-                                                                                       <VBox.margin>
-                                                                                          <Insets />
-                                                                                       </VBox.margin>
-                                                                                    </Slider>
                                                                                  </children>
                                                                               </VBox>
-                                                                              <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                                                                              <VBox fx:id="vbox_kappa" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
                                                                                  <children>
-                                                                                    <BarChart fx:id="kappa_barchart" alternativeRowFillVisible="false" animated="false" barGap="0.0" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="40.0" maxWidth="220.0" minHeight="40.0" minWidth="220.0" prefHeight="40.0" prefWidth="220.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
+                                                                                    <BarChart fx:id="barchart_kappa" alternativeRowFillVisible="false" animated="false" barGap="0.0" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="40.0" maxWidth="220.0" minHeight="40.0" minWidth="220.0" prefHeight="40.0" prefWidth="220.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
                                                                                        <padding>
                                                                                           <Insets bottom="-20.0" top="-10.0" />
                                                                                        </padding>
@@ -154,11 +144,6 @@
                                                                                           <Insets left="-24.0" top="15.0" />
                                                                                        </VBox.margin>
                                                                                     </BarChart>
-                                                                                    <Slider maxWidth="37.0" showTickLabels="true" showTickMarks="true">
-                                                                                       <VBox.margin>
-                                                                                          <Insets />
-                                                                                       </VBox.margin>
-                                                                                    </Slider>
                                                                                  </children>
                                                                               </VBox>
                                                                            </children>
@@ -181,6 +166,7 @@
                                                                   </AnchorPane>
                                                               </content>
                                                             </ScrollPane>
+                                                            <CheckBox fx:id="checkbox_parameterCoupling" layoutX="10.0" layoutY="319.0" mnemonicParsing="false" text="Couple parameter values" />
                                                          </children>
                                                       </AnchorPane>
                                                 </content>
@@ -320,9 +306,9 @@
                                                                                     <Font name="System Italic" size="12.0" />
                                                                                  </font>
                                                                               </Label>
-                                                                              <Canvas fx:id="canvas_heatmap" height="172.0" layoutY="37.0" width="218.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0" />
-                                                                              <Label fx:id="label_parameterSpace_distribution_key1" layoutX="134.0" layoutY="220.0" text="Label" AnchorPane.bottomAnchor="0.0" />
-                                                                              <Label fx:id="label_parameterSpace_distribution_key2" layoutX="-6.0" layoutY="113.0" rotate="270.0" text="Label" AnchorPane.leftAnchor="-5.0" />
+                                                                              <Canvas fx:id="canvas_heatmap" height="150.0" layoutX="68.0" layoutY="45.0" width="150.0" AnchorPane.bottomAnchor="47.0" AnchorPane.leftAnchor="68.0" AnchorPane.rightAnchor="49.0" AnchorPane.topAnchor="45.0" />
+                                                                              <NumberAxis fx:id="numberaxis_parameterSpace_xaxis" label="key1" layoutX="67.0" layoutY="196.0" prefHeight="41.0" prefWidth="150.0" side="BOTTOM" tickLength="5.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="67.0" AnchorPane.rightAnchor="50.0" />
+                                                                              <NumberAxis fx:id="numberaxis_parameterSpace_yaxis" label="key2" layoutX="1.0" layoutY="45.0" prefHeight="150.0" prefWidth="67.0" side="LEFT" tickLength="5.0" AnchorPane.bottomAnchor="47.0" AnchorPane.leftAnchor="1.0" AnchorPane.topAnchor="45.0" />
                                                                            </children>
                                                                         </AnchorPane>
                                                                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">

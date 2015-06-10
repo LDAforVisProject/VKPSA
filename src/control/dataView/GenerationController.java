@@ -249,7 +249,9 @@ public class GenerationController extends DataSubViewController
 		rs.addEventHandler(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) 
             {
-            	updateTextFields(rs, parameter);
+            	// Update control values after slider values where changed.
+            	updateControlValues(rs, parameter);
+            	
             	// Re-generate parameter values.
             	generateParameterValues();
             };
@@ -259,44 +261,58 @@ public class GenerationController extends DataSubViewController
 		rs.addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) 
             {
-            	updateTextFields(rs, parameter);
+            	// Update control values after slider values where changed.
+            	updateControlValues(rs, parameter);
             };
         });
 	}
 	
-	private void updateTextFields(RangeSlider rs, String parameter)
+	/**
+	 * Updates control values after slide event ended.
+	 * @param rs
+	 * @param parameter
+	 */
+	private void updateControlValues(RangeSlider rs, String parameter)
 	{
+		Map<String, Double> parameterValues_low		= new HashMap<String, Double>();
+		Map<String, Double> parameterValues_high	= new HashMap<String, Double>();
+		
+		for (String param : rangeSliders.keySet()) {
+			parameterValues_low.put(param, rs.getLowValue() >= rangeSliders.get(param).getMin() ? rs.getLowValue() : rangeSliders.get(param).getMin());
+			parameterValues_high.put(param, rs.getHighValue() <= rangeSliders.get(param).getMax() ? rs.getHighValue() : rangeSliders.get(param).getMax());
+		}
+		
 		if (!parameterCoupling_checkbox.isSelected()) {
         	switch (parameter) 
         	{
         		case "alpha":
-        			alpha_min_textfield.setText(String.valueOf(rs.getLowValue()));
-                	alpha_max_textfield.setText(String.valueOf(rs.getHighValue()));
+        			alpha_min_textfield.setText(String.valueOf(parameterValues_low.get("alpha")));
+                	alpha_max_textfield.setText(String.valueOf(parameterValues_high.get("alpha")));
         		break;
         		
         		case "eta":
-        	       	eta_min_textfield.setText(String.valueOf(rs.getLowValue()));
-                	eta_max_textfield.setText(String.valueOf(rs.getHighValue()));
+        	       	eta_min_textfield.setText(String.valueOf(parameterValues_low.get("eta")));
+                	eta_max_textfield.setText(String.valueOf(parameterValues_high.get("eta")));
             	break;
             		
         		case "kappa":
-        			kappa_min_textfield.setText(String.valueOf(rs.getLowValue()));
-                	kappa_max_textfield.setText(String.valueOf(rs.getHighValue()));
+        			kappa_min_textfield.setText(String.valueOf(parameterValues_low.get("kappa")));
+                	kappa_max_textfield.setText(String.valueOf(parameterValues_high.get("kappa")));
             	break;	
         	}            		
     	}
     	
     	else {
-			alpha_min_textfield.setText(String.valueOf(rs.getLowValue()));
-        	alpha_max_textfield.setText(String.valueOf(rs.getHighValue()));
-		 	eta_min_textfield.setText(String.valueOf(rs.getLowValue()));
-        	eta_max_textfield.setText(String.valueOf(rs.getHighValue()));
-    		kappa_min_textfield.setText(String.valueOf(rs.getLowValue()));
-        	kappa_max_textfield.setText(String.valueOf(rs.getHighValue()));
+			alpha_min_textfield.setText(String.valueOf(parameterValues_low.get(parameter)));
+        	alpha_max_textfield.setText(String.valueOf(parameterValues_high.get(parameter)));
+		 	eta_min_textfield.setText(String.valueOf(parameterValues_low.get(parameter)));
+        	eta_max_textfield.setText(String.valueOf(parameterValues_high.get(parameter)));
+    		kappa_min_textfield.setText(String.valueOf(parameterValues_low.get(parameter)));
+        	kappa_max_textfield.setText(String.valueOf(parameterValues_high.get(parameter)));
         	
         	for (RangeSlider rangeSlider : rangeSliders.values()) {
-        		rangeSlider.setLowValue(rs.getLowValue());
-        		rangeSlider.setHighValue(rs.getHighValue());
+        		rangeSlider.setLowValue(parameterValues_low.get(parameter));
+        		rangeSlider.setHighValue(parameterValues_high.get(parameter));
         	}
     	}
 	}
@@ -411,8 +427,12 @@ public class GenerationController extends DataSubViewController
 			
 			// Check every value and assign it to the correct bin.
 			for (double value : entry.getValue()) {
+				int index_key = (int) ( (value - rangeSliders.get(entry.getKey()).getMin()) / binInterval);
+				// Check if element is highest allowed entry.
+				index_key = index_key < numberOfBins ? index_key : numberOfBins - 1;
+				
 				// Increment content of corresponding bin.
-				parameterBinLists.get(entry.getKey())[(int) ( (value - rangeSliders.get(entry.getKey()).getMin()) / binInterval)]++;	
+				parameterBinLists.get(entry.getKey())[index_key]++;	
 			}
 		}
 		

@@ -3,11 +3,9 @@ package model.workspace;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,11 +17,9 @@ import java.util.Map;
 
 import org.apache.commons.collections4.MultiMap;
 
-import control.CoreController;
+
 import javafx.beans.property.DoubleProperty;
 import javafx.util.Pair;
-import mdsj.Data;
-import mdsj.MDSJ;
 import model.LDAConfiguration;
 import model.workspace.tasks.ITaskListener;
 import model.workspace.tasks.Task_CalculateDistances;
@@ -40,17 +36,19 @@ import model.workspace.tasks.Task_WorkspaceTask;
 // 		ROADMAP / Todos, in sequential order
 // -----------------------------------------------
 
-// @todox Process sampling parameter lists in python script.
-// @todox Integrate python script binding in VKPSA GUI.
-// @todox Python script: Get highest index in workspace directory, use that + n for newly created topic files. 
-//							 Alternative: Use timestamp.
-//							 Alternative: Use parameter values -> (Short) hash string?
+// BACKEND / data view:
 // @todo Test data generation - in particular: 
 //			After update Topic parameter parsing in Topic.generateTopics(...) and if 
 //			parameter list generation works as well with different maxima/minima.
-// @todo Formulate work items for analysis view / phase.
-// @todo Add protocol SplitPane to every view (i.e.: Add in core view).
 // @todo Idea for optimization: Truncate parameter file list / instruct Python script to process only a defined part of it.
+
+// FRONTEND / analysis view:
+// @todo Add histograms to analysis filter slider.
+// @todo Update heatmap after filter application.
+// @todo Add boxplot for quantiles (and average)? Drop labels instead.
+// @todo Enable dataset selection in visualizations.
+// @todo Add protocol SplitPane to every view (i.e.: Add in core view).
+
 
 //TODO: Test why MDS returns NaN values.
 
