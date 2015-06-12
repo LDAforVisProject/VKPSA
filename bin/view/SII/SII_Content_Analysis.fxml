@@ -324,17 +324,17 @@
                                                                         <Label text="Parameters to couple" />
                                                                         <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1">
                                                                            <children>
-                                                                              <CheckBox mnemonicParsing="false" selected="true" text="α">
+                                                                              <CheckBox fx:id="checkbox_ddc_alpha" mnemonicParsing="false" selected="true" text="α">
                                                                                  <VBox.margin>
                                                                                     <Insets top="15.0" />
                                                                                  </VBox.margin>
                                                                               </CheckBox>
-                                                                              <CheckBox mnemonicParsing="false" text="η ">
+                                                                              <CheckBox fx:id="checkbox_ddc_eta" mnemonicParsing="false" text="η ">
                                                                                  <VBox.margin>
                                                                                     <Insets top="5.0" />
                                                                                  </VBox.margin>
                                                                               </CheckBox>
-                                                                              <CheckBox mnemonicParsing="false" text="κ">
+                                                                              <CheckBox fx:id="checkbox_ddc_kappa" mnemonicParsing="false" text="κ">
                                                                                  <VBox.margin>
                                                                                     <Insets top="5.0" />
                                                                                  </VBox.margin>

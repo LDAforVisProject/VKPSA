@@ -524,6 +524,8 @@ public class AnalysisController extends Controller
 	
 	private void refreshDistanceLinechart(ArrayList<LDAConfiguration> ldaConfigurations, double[][] distances)
 	{
+		System.out.println("Refreshing distance linechart.");
+		
 		// Clear data.
 		linechart_distanceCorrelation.getData().clear();
 		
@@ -540,7 +542,7 @@ public class AnalysisController extends Controller
 			coupledParameters.add("kappa");
 		
 		/*
-		 * Determine metadata (step size, thresholds).
+		 * Determine metadata (step size, thresholds for all parameters).
 		 */
 		
 		final int numberOfSteps							= 50;
@@ -551,23 +553,18 @@ public class AnalysisController extends Controller
 		for (LDAConfiguration ldaConfig : ldaConfigurations) {
 			// Examine if there is a new maximum or minimum for each parameter in this LDAConfiguration.
 			for (String param : LDAConfiguration.SUPPORTED_PARAMETERS) {
-				double currMin = thresholds.get(param).getKey();
-				double currMax = thresholds.get(param).getValue();
+				double currMin = thresholds.containsKey(param) ? thresholds.get(param).getKey() : 0;
+				double currMax = thresholds.containsKey(param) ? thresholds.get(param).getValue() : 0;
 				
 				currMin = currMin > ldaConfig.getParameter(param) ? ldaConfig.getParameter(param) : currMin;
 				currMax = currMax < ldaConfig.getParameter(param) ? ldaConfig.getParameter(param) : currMax;
 				
 				// Update thresholds.
 				thresholds.put(param, new Pair<Double, Double>(currMin, currMax));
+				
+				// Update step sizes.
+				stepSizes.put(param, (currMax - currMin) / numberOfSteps);
 			}
-		}
-		
-		// Find step sizes according to respective minima and maxima.
-		for (String param : LDAConfiguration.SUPPORTED_PARAMETERS) {
-			double currMin = thresholds.get(param).getKey();
-			double currMax = thresholds.get(param).getValue();
-			
-			stepSizes.put(param, (currMax - currMin) / numberOfSteps);
 		}
 		
 		/*
@@ -575,46 +572,82 @@ public class AnalysisController extends Controller
 		 */
 		
 		for (int step = 0; step < numberOfSteps; step++) {
-			// Get indices of LDAConfigurations matching the current pattern.
+			// Store indices of LDAConfigurations matching the current pattern.
 			Set<Integer> fixedLDAConfigIndices							= new HashSet<Integer>();
 			Set<Integer> freeLDAConfigIndices							= new HashSet<Integer>();
-			Map<String, Pair<Double, Double>> thresholdsForCurrentStep	= new HashMap<String, Pair<Double, Double>>();
 			
-			// Calculate thresholds for current step.
-			for (String param : LDAConfiguration.SUPPORTED_PARAMETERS) {
-				// Current data point: Minimum for this parameter + #step * step size for this parameter.
-				double point = thresholds.get(param).getKey(); 
-				// Minimum and maximum: Current data point +- 0.5 * step size.
-				double min	= thresholds.get(param).getKey();
-				double max	= thresholds.get(param).getValue();
-				
-				thresholdsForCurrentStep.put(param, new Pair<Double, Double>(min, max));
-			}
+			// Calculate thresholds at current step for each coupled parameter.			
+			Map<String, Pair<Double, Double>> thresholdsForCurrentStep	= calculateThresholdsForStep(step, coupledParameters, stepSizes, thresholds);
 			
 			// Assign each LDAConfiguration to one of two sets for each step / set of parameter values.
 			for (int i = 0; i < ldaConfigurations.size(); i++) {
 				boolean isWithinThresholds = true;
-				
-				for (String param : LDAConfiguration.SUPPORTED_PARAMETERS) {
-					double paramValue = ldaConfigurations.get(i).getParameter(param);
+
+				// Check each of the coupled parameters: Is current LDA configuration w.r.t. to all coupled parameters within the boundaries?
+				for (String param : coupledParameters) {
+					// Get value of current parameter in currently examined LDA configuration.
+					double paramValue	= ldaConfigurations.get(i).getParameter(param);
+					// If one of the selected/coupled parameters of the current LDA configuration exceeds the thresholds of the current step:
+					// Important: .getkey() ~ minimum, .getValue() ~ maximum. 
+					isWithinThresholds	= paramValue >= thresholdsForCurrentStep.get(param).getKey() || paramValue <= thresholdsForCurrentStep.get(param).getValue();
 					
-//					if () {
-//						
-//					}
+					// Stop loop if one of the parameters is not within boundaries.
+					if (!isWithinThresholds)
+						break;
 				}
+				
+				// If all parameters of a LDA configuration fall within the defined boundaries: // Add to set of fixed LDA configurations. 
+				if (isWithinThresholds)
+					fixedLDAConfigIndices.add(i);
+				
+				else
+					freeLDAConfigIndices.add(i);
 			}
+			
+		
+			// Here: Group distances; separated to distances between datasets where fixed parameters fall within the boundaries
+			// of the current step and those between all other datasets.
+			double distanceSumBetweenFixedDatasets = 0;
+			double distanceSumBetweenOtherDatasets = 0;
+			
+			for (int i = 0; i < distances.length; i++) {
+					for (int j = i + 1; j < distances.length; j++) {
+						// Are datasets at both indices i and j fixed datasets? 
+						// Add current distance (i to j) to corresponding sum variable. 
+						if (fixedLDAConfigIndices.contains(i) && fixedLDAConfigIndices.contains(j))
+							distanceSumBetweenFixedDatasets += distances[i][j];
+						
+						else
+							distanceSumBetweenOtherDatasets += distances[i][j];
+					}
+			}
+		}
+	}
+
+	/**
+	 * Auxiliary function calculating the thresholds for a specific step.
+	 * @param coupledParameters
+	 * @param stepSizes
+	 * @param thresholds
+	 * @return
+	 */
+	private Map<String, Pair<Double, Double>> calculateThresholdsForStep(int step, ArrayList<String> coupledParameters, Map<String, Double> stepSizes, Map<String, Pair<Double, Double>> thresholds)
+	{
+		Map<String, Pair<Double, Double>> thresholdsForCurrentStep = new HashMap<String, Pair<Double, Double>>(); 
+		
+		for (String param : coupledParameters) {
+			// Current data point: Minimum for this parameter + #step * step size for this parameter.
+			// @todo Exception here sometimes. Reprocude how? Fix how?
+			double stepSize	= stepSizes.get(param);
+			double point	= thresholds.get(param).getKey() + step * stepSize; 
+			// Minimum and maximum: Current data point +- 0.5 * step size.
+			double min		= point - stepSize / 2;
+			double max		= point + stepSize / 2;
+			
+			thresholdsForCurrentStep.put(param, new Pair<Double, Double>(min, max));
 		}
 		
-		// 	Calculate binning parameters.
-		final int numberOfElements	= ((distances.length - 1) * (distances.length - 1) + (distances.length - 1)) / 2;
-		if (numberOfElements > 0) {
-			for (int i = 0; i < distances.length; i++) {
-				for (int j = i + 1; j < distances.length; j++) {
-					// Sum up distances.
-//					sum += distances[i][j];
-				}
-			}
-		}
+		return thresholdsForCurrentStep;
 	}
 
 	private void refreshParameterHistograms(final int numberOfBins)
