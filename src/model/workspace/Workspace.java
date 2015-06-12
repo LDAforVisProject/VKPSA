@@ -168,8 +168,6 @@ public class Workspace implements ITaskListener
 	 */
 	private boolean isMetadataLoaded;
 	
-	
-	
 	// -----------------------------------------------	
 	// -----------------------------------------------
 	// 					Methods

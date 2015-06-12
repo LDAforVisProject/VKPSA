@@ -16,6 +16,11 @@ public class LDAConfiguration
 	private double eta;
 	
 	/**
+	 * Lists all parametes currently fully or partially supported.
+	 */
+	public static String[] SUPPORTED_PARAMETERS = {"alpha", "eta", "kappa"};
+	
+	/**
 	 * Contains all LDA parameters currently used in a LDA configuration.
 	 */
 	public static final Map<String, Integer> PARAMETER_MAP;
