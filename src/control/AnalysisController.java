@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import mdsj.Data;
 import model.LDAConfiguration;
 
 import org.controlsfx.control.RangeSlider;
@@ -234,6 +233,8 @@ public class AnalysisController extends Controller
 		// Load current distance data from workspace.
 		distances			= workspace.getDistances();
 		
+		refreshParameterHistograms(50);
+		
 		// Draw entire data set.
 		if (!useFilter) {
 			// Refresh visualizations.
@@ -244,8 +245,9 @@ public class AnalysisController extends Controller
 		
 		// Use AnalysisController.selectedIndices to filter out data in desired parameter boundaries.
 		else {
-			double filteredCordinates[][]	= new double[coordinates.length][selectedIndices.size()];
-			double filteredDistances[][]	= new double[selectedIndices.size()][selectedIndices.size()];
+			double filteredCordinates[][]							= new double[coordinates.length][selectedIndices.size()];
+			double filteredDistances[][]							= new double[selectedIndices.size()][selectedIndices.size()];
+			ArrayList<LDAConfiguration> filteredLDAConfigurations	= new ArrayList<LDAConfiguration>(selectedIndices.size());
 			
 			// Copy data corresponding to chosen LDA configurations in new arrays.
 			int count = 0;
@@ -255,11 +257,15 @@ public class AnalysisController extends Controller
 					filteredCordinates[column][count] = coordinates[column][selectedIndex];
 				}
 				
+				// Copy distances.
 				int innerCount = 0;
 				for (int selectedInnerIndex : selectedIndices) {
 					filteredDistances[count][innerCount] = distances[selectedIndex][selectedInnerIndex];
 					innerCount++;
 				}
+				
+				// Copy LDA configurations.
+				filteredLDAConfigurations.add(ldaConfigurations.get(selectedIndex));
 				
 				count++;
 			}
@@ -267,9 +273,60 @@ public class AnalysisController extends Controller
 			// Refresh visualizations.
 			refreshMDSScatterchart(filteredCordinates);
 			refreshDistanceBarchart(filteredDistances);
+			heatmap_parameterspace.update(filteredLDAConfigurations, "alpha", "eta");
 		}
 	}
 	
+	private void refreshParameterHistograms(final int numberOfBins)
+	{
+		// Map storing one bin list for each parameter.
+		Map<String, int[]> parameterBinLists = new HashMap<String, int[]>();
+		parameterBinLists.put("alpha", new int[numberOfBins]);
+		parameterBinLists.put("eta", new int[numberOfBins]);
+		parameterBinLists.put("kappa", new int[numberOfBins]);
+		
+		// Bin data.
+		for (int i = 0; i < ldaConfigurations.size(); i++) {
+			for (String param : rangeSliders.keySet()) {
+				double binInterval	= (rangeSliders.get(param).getMax() - rangeSliders.get(param).getMin()) / numberOfBins;
+				// Calculate index of bin in which to store the current value.
+				int index_key		= (int) ( (ldaConfigurations.get(i).getParameter(param) - rangeSliders.get(param).getMin()) / binInterval);
+				// Check if element is highest allowed entry.
+				index_key = index_key < numberOfBins ? index_key : numberOfBins - 1;
+				
+				// Increment content of corresponding bin.
+				parameterBinLists.get(param)[index_key]++;
+			}
+		}
+
+		/*
+		 * Transfer data to scented widgets.
+		 */
+		
+		// Clear old data.
+		barchart_alpha.getData().clear();
+		barchart_eta.getData().clear();
+		barchart_kappa.getData().clear();
+
+		// Add data series to barcharts.
+		barchart_alpha.getData().add(generateParameterHistogramDataSeries("alpha", parameterBinLists, numberOfBins));
+		barchart_eta.getData().add(generateParameterHistogramDataSeries("eta", parameterBinLists, numberOfBins));
+		barchart_kappa.getData().add(generateParameterHistogramDataSeries("kappa", parameterBinLists, numberOfBins));
+	}
+
+
+	private XYChart.Series<String, Integer> generateParameterHistogramDataSeries(String key, Map<String, int[]> parameterBinLists, final int numberOfBins)
+	{
+		final XYChart.Series<String, Integer> data_series = new XYChart.Series<String, Integer>();
+		
+		for (int i = 0; i < numberOfBins; i++) {
+			int binContent = parameterBinLists.get(key)[i];
+			data_series.getData().add(new XYChart.Data<String, Integer>(String.valueOf(i), binContent ));
+		}
+		
+		return data_series;
+	}
+
 	private void addEventHandlerToRangeSlider(RangeSlider rs, String parameter)
 	{
 		// Add listener to determine position during after release.

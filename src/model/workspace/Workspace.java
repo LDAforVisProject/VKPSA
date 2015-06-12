@@ -49,9 +49,6 @@ import model.workspace.tasks.Task_WorkspaceTask;
 // @todo Enable dataset selection in visualizations.
 // @todo Add protocol SplitPane to every view (i.e.: Add in core view).
 
-
-//TODO: Test why MDS returns NaN values.
-
 /**
  * Encompasses:
  * 	- Name and path of specified directory
