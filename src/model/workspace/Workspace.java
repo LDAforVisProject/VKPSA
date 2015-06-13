@@ -43,10 +43,10 @@ import model.workspace.tasks.Task_WorkspaceTask;
 // @todo Idea for optimization: Truncate parameter file list / instruct Python script to process only a defined part of it.
 
 // FRONTEND / analysis view:
-// @todo Add histograms to analysis filter slider.
-// @todo Update heatmap after filter application.
+// @todox Add histograms to analysis filter slider.
+// @todox Update heatmap after filter application.
 // @todo Add boxplot for quantiles (and average)? Drop labels instead.
-// @todo Enable dataset selection in visualizations.
+// @todox Enable dataset selection in visualizations.
 // @todo Add protocol SplitPane to every view (i.e.: Add in core view).
 
 /**

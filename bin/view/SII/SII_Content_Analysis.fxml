@@ -102,7 +102,7 @@
                                                                                           <CategoryAxis endMargin="0.0" gapStartAndEnd="false" side="BOTTOM" startMargin="10.0" tickLabelsVisible="false" tickMarkVisible="false" />
                                                                                        </xAxis>
                                                                                        <yAxis>
-                                                                                          <NumberAxis minorTickVisible="false" side="LEFT" tickLabelGap="1.0" tickLength="1.0" upperBound="200.0" />
+                                                                                          <NumberAxis side="LEFT" tickLabelGap="1.0" tickLength="1.0" upperBound="200.0" />
                                                                                        </yAxis>
                                                                                        <VBox.margin>
                                                                                           <Insets left="-24.0" top="15.0" />
@@ -120,7 +120,7 @@
                                                                                           <CategoryAxis endMargin="0.0" gapStartAndEnd="false" side="BOTTOM" startMargin="10.0" tickLabelsVisible="false" tickMarkVisible="false" />
                                                                                        </xAxis>
                                                                                        <yAxis>
-                                                                                          <NumberAxis minorTickVisible="false" side="LEFT" tickLabelGap="1.0" tickLength="1.0" upperBound="200.0" />
+                                                                                          <NumberAxis side="LEFT" tickLabelGap="1.0" tickLength="1.0" upperBound="200.0" />
                                                                                        </yAxis>
                                                                                        <VBox.margin>
                                                                                           <Insets left="-24.0" top="15.0" />
@@ -138,7 +138,7 @@
                                                                                           <CategoryAxis endMargin="0.0" gapStartAndEnd="false" side="BOTTOM" startMargin="10.0" tickLabelsVisible="false" tickMarkVisible="false" />
                                                                                        </xAxis>
                                                                                        <yAxis>
-                                                                                          <NumberAxis minorTickVisible="false" side="LEFT" tickLabelGap="1.0" tickLength="1.0" upperBound="200.0" />
+                                                                                          <NumberAxis side="LEFT" tickLabelGap="1.0" tickLength="1.0" upperBound="200.0" />
                                                                                        </yAxis>
                                                                                        <VBox.margin>
                                                                                           <Insets left="-24.0" top="15.0" />
@@ -321,20 +321,20 @@
                                                                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                                     </rowConstraints>
                                                                      <children>
-                                                                        <Label text="Parameters to couple" />
+                                                                        <Label text="Parameters to fixed" />
                                                                         <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1">
                                                                            <children>
-                                                                              <CheckBox fx:id="checkbox_ddc_alpha" mnemonicParsing="false" selected="true" text="α">
+                                                                              <CheckBox fx:id="checkbox_ddc_alpha" mnemonicParsing="false" onAction="#ddcButtonStateChanged" selected="true" text="α">
                                                                                  <VBox.margin>
                                                                                     <Insets top="15.0" />
                                                                                  </VBox.margin>
                                                                               </CheckBox>
-                                                                              <CheckBox fx:id="checkbox_ddc_eta" mnemonicParsing="false" text="η ">
+                                                                              <CheckBox fx:id="checkbox_ddc_eta" mnemonicParsing="false" onAction="#ddcButtonStateChanged" text="η ">
                                                                                  <VBox.margin>
                                                                                     <Insets top="5.0" />
                                                                                  </VBox.margin>
                                                                               </CheckBox>
-                                                                              <CheckBox fx:id="checkbox_ddc_kappa" mnemonicParsing="false" text="κ">
+                                                                              <CheckBox fx:id="checkbox_ddc_kappa" mnemonicParsing="false" onAction="#ddcButtonStateChanged" text="κ">
                                                                                  <VBox.margin>
                                                                                     <Insets top="5.0" />
                                                                                  </VBox.margin>
@@ -383,7 +383,7 @@
                                                                       <NumberAxis side="BOTTOM" />
                                                                     </xAxis>
                                                                     <yAxis>
-                                                                      <NumberAxis side="LEFT" />
+                                                                      <NumberAxis side="LEFT" tickUnit="1.0" />
                                                                     </yAxis>
                                                                   </ScatterChart>
                                                                   <Canvas height="50.0" layoutX="216.0" layoutY="221.0" width="50.0" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="28.0" />
@@ -476,7 +476,7 @@
                                                                                     <Font name="System Bold" size="12.0" />
                                                                                  </font>
                                                                               </Label>
-                                                                              <LineChart fx:id="linechart_distanceCorrelation" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="30.0">
+                                                                              <LineChart fx:id="linechart_distanceCorrelation" createSymbols="false" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="30.0">
                                                                                 <xAxis>
                                                                                   <NumberAxis side="BOTTOM" />
                                                                                 </xAxis>
@@ -484,6 +484,7 @@
                                                                                   <NumberAxis side="LEFT" />
                                                                                 </yAxis>
                                                                               </LineChart>
+                                                                              <VBox fx:id="vbox_ddcHoverInformation" layoutX="52.0" layoutY="42.0" prefHeight="50.0" prefWidth="100.0" AnchorPane.leftAnchor="52.0" AnchorPane.topAnchor="45.0" />
                                                                            </children>
                                                                         </AnchorPane>
                                                                     </items>

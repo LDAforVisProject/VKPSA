@@ -11,7 +11,7 @@ public class LDAConfiguration
 	// 				Parameters
 	// -----------------------------------------------
 	
-	private int k;
+	private int kappa;
 	private double alpha;
 	private double eta;
 	
@@ -41,14 +41,14 @@ public class LDAConfiguration
 	
 	public LDAConfiguration(int k, double alpha, double eta)
 	{
-		this.k		= k;
+		this.kappa		= k;
 		this.alpha	= alpha;
 		this.eta	= eta;
 	}
 	
 	public LDAConfiguration(final LDAConfiguration source)
 	{
-		this.k		= source.k;
+		this.kappa		= source.kappa;
 		this.alpha	= source.alpha;
 		this.eta	= source.eta;		
 	}
@@ -68,7 +68,7 @@ public class LDAConfiguration
 		result	= prime * result + (int) (temp ^ (temp >>> 32));
 		temp	= Double.doubleToLongBits(eta);
 		result	= prime * result + (int) (temp ^ (temp >>> 32));
-		result	= prime * result + k;
+		result	= prime * result + kappa;
 		
 		return result;
 	}
@@ -98,7 +98,7 @@ public class LDAConfiguration
 		if (Double.doubleToLongBits(eta) != Double.doubleToLongBits(other.eta))
 			return false;
 		
-		if (k != other.k)
+		if (kappa != other.kappa)
 			return false;
 		
 		return true;
@@ -163,9 +163,9 @@ public class LDAConfiguration
 	// 				Getter and setter
 	// -----------------------------------------------	
 
-	public int getK()
+	public int getKappa()
 	{
-		return k;
+		return kappa;
 	}
 
 	public double getAlpha()
@@ -178,9 +178,9 @@ public class LDAConfiguration
 		return eta;
 	}
 	
-	public void setK(int k)
+	public void setKappa(int kappa)
 	{
-		this.k = k;
+		this.kappa = kappa;
 	}
 
 	public void setAlpha(double alpha)
@@ -207,7 +207,7 @@ public class LDAConfiguration
 			break;
 			
 			case "kappa":
-				value = (double)k;
+				value = (double)kappa;
 			break;
 		}
 		
@@ -217,6 +217,6 @@ public class LDAConfiguration
 	@Override
 	public String toString()
 	{
-		return "k=" + k + "|alpha=" + alpha + "|eta=" + eta;
+		return "k=" + kappa + "|alpha=" + alpha + "|eta=" + eta;
 	}
 }
