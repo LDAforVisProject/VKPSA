@@ -219,4 +219,33 @@ public class LDAConfiguration
 	{
 		return "k=" + kappa + "|alpha=" + alpha + "|eta=" + eta;
 	}
+	
+	/**
+	 * Returns corresponding symbol for parameter.
+	 * @param key
+	 * @return
+	 */
+	public static String getSymbolForParameter(String key)
+	{
+		String symbol;
+		
+		switch(key) {
+			case "alpha":
+				symbol = "α";
+			break;
+			
+			case "eta":
+				symbol = "η";
+			break;
+			
+			case "kappa":
+				symbol = "κ";
+			break;
+			
+			default:
+				symbol = "?";
+		}
+		
+		return symbol;
+	}
 }

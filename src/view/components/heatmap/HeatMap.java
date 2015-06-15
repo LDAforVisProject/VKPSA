@@ -56,7 +56,7 @@ public class HeatMap
 		yAxis.setForceZeroInRange(false);
 	}
 
-	public void update(final ArrayList<LDAConfiguration> selectedLDAConfigurations, final String key1, final String key2) 
+	public void refresh(final ArrayList<LDAConfiguration> selectedLDAConfigurations, final String key1, final String key2) 
     {
     	this.selectedLDAConfigurations	= selectedLDAConfigurations;
     	this.key1						= key1;
@@ -71,7 +71,7 @@ public class HeatMap
     	draw(binnedData);
     }
     
-    public void update()
+    public void refresh()
     {
     	draw(binnedData);
     }

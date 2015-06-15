@@ -111,7 +111,7 @@ public class CoreController extends Controller
 					initView("analyze", "/view/SII/SII_Content_Analysis.fxml");
 					
 					// Draw visualizations.
-					((AnalysisController)controllerMap.get("analyze")).refreshVisualizations(false);
+					((AnalysisController)controllerMap.get("analyze")).refreshVisualizations(true);
 				}
 				
 				// Controller already exists: Switch to node.

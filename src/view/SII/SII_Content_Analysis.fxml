@@ -295,8 +295,8 @@
                                                                      <children>
                                                                         <Label text="Parameter on x-axis" />
                                                                         <Label text="Parameter on y-axis" GridPane.rowIndex="1" />
-                                                                        <ComboBox prefWidth="150.0" GridPane.columnIndex="1" />
-                                                                        <ComboBox prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                                        <ComboBox fx:id="combobox_parameterSpace_distribution_xAxis" onAction="#updateHeatmap" prefWidth="150.0" GridPane.columnIndex="1" />
+                                                                        <ComboBox fx:id="combobox_parameterSpace_distribution_yAxis" onAction="#updateHeatmap" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                                                      </children>
                                                                   </GridPane>
                                                                   <Separator prefWidth="200.0">

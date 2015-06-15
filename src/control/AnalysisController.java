@@ -31,6 +31,7 @@ import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Accordion;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
@@ -76,6 +77,8 @@ public class AnalysisController extends Controller
 	private @FXML Canvas canvas_heatmap;
 	private @FXML NumberAxis numberaxis_parameterSpace_xaxis;
 	private @FXML NumberAxis numberaxis_parameterSpace_yaxis;
+	private @FXML ComboBox<String> combobox_parameterSpace_distribution_xAxis;
+	private @FXML ComboBox<String> combobox_parameterSpace_distribution_yAxis;
 	private HeatMap heatmap_parameterspace;
 
 	/*
@@ -257,11 +260,25 @@ public class AnalysisController extends Controller
 	
 	private void initHeatmap()
 	{
+		combobox_parameterSpace_distribution_xAxis.getItems().clear();
+		combobox_parameterSpace_distribution_yAxis.getItems().clear();
+		
+		for (String param : LDAConfiguration.SUPPORTED_PARAMETERS) {
+			combobox_parameterSpace_distribution_xAxis.getItems().add(param);
+			combobox_parameterSpace_distribution_yAxis.getItems().add(param);
+		}
+		
+		combobox_parameterSpace_distribution_xAxis.setValue("alpha");
+		combobox_parameterSpace_distribution_yAxis.setValue("eta");
+		
 		heatmap_parameterspace = new HeatMap(canvas_heatmap, numberaxis_parameterSpace_xaxis, numberaxis_parameterSpace_yaxis);
 	}
 	
-	public void refreshVisualizations(boolean useFilter)
+	public void refreshVisualizations(boolean filterData)
 	{
+		// Init comboboxes.
+		
+		
 		// Get LDA configurations. Important: Integrity/consistency checks ensure that
 		// workspace.ldaConfigurations and coordinates/distances are in the same order. 
 		ldaConfigurations 	= workspace.getLDAConfigurations();
@@ -272,86 +289,43 @@ public class AnalysisController extends Controller
 		
 		refreshParameterHistograms(50);
 		
-		// Draw entire data set.
-		if (!useFilter) {
-			// Refresh visualizations.
-			refreshMDSScatterchart(coordinates);
-			refreshDistanceBarchart(distances);
-			refreshDistanceLinechart(workspace.getLDAConfigurations(), distances);
-			heatmap_parameterspace.update(workspace.getLDAConfigurations(), "alpha", "eta");
+		// Draw entire data set. Used as initialization call, executed by Workspace instance.
+		if (filterData) {
+			// Filter data.
+			filterData();
 		}
 		
 		// Use AnalysisController.selectedIndices to filter out data in desired parameter boundaries.
-		else {
-			double filteredCordinates[][]							= new double[coordinates.length][selectedIndices.size()];
-			double filteredDistances[][]							= new double[selectedIndices.size()][selectedIndices.size()];
-			ArrayList<LDAConfiguration> filteredLDAConfigurations	= new ArrayList<LDAConfiguration>(selectedIndices.size());
-			
-			// Copy data corresponding to chosen LDA configurations in new arrays.
-			int count = 0;
-			for (int selectedIndex : selectedIndices) {
-				// Copy MDS coordinates.
-				for (int column = 0; column < coordinates.length; column++) {
-					filteredCordinates[column][count] = coordinates[column][selectedIndex];
-				}
-				
-				// Copy distances.
-				int innerCount = 0;
-				for (int selectedInnerIndex : selectedIndices) {
-					filteredDistances[count][innerCount] = distances[selectedIndex][selectedInnerIndex];
-					innerCount++;
-				}
-				
-				// Copy LDA configurations.
-				filteredLDAConfigurations.add(ldaConfigurations.get(selectedIndex));
-				
-				count++;
-			}
-			
-			// Refresh visualizations.
-			refreshMDSScatterchart(filteredCordinates);
-			refreshDistanceBarchart(filteredDistances);
-			refreshDistanceLinechart(filteredLDAConfigurations, filteredDistances);
-			heatmap_parameterspace.update(filteredLDAConfigurations, "alpha", "eta");
-		}
-	}
-
-	/**
-	 * Gets set of selected distances based on the currently selected indices. 
-	 * @return
-	 */
-	private double[][] getSelectedDistances()
-	{
-		double filteredDistances[][] = new double[selectedIndices.size()][selectedIndices.size()];
+		double filteredCordinates[][]							= new double[coordinates.length][selectedIndices.size()];
+		double filteredDistances[][]							= new double[selectedIndices.size()][selectedIndices.size()];
+		ArrayList<LDAConfiguration> filteredLDAConfigurations	= new ArrayList<LDAConfiguration>(selectedIndices.size());
 		
+		// Copy data corresponding to chosen LDA configurations in new arrays.
 		int count = 0;
 		for (int selectedIndex : selectedIndices) {
+			// Copy MDS coordinates.
+			for (int column = 0; column < coordinates.length; column++) {
+				filteredCordinates[column][count] = coordinates[column][selectedIndex];
+			}
+			
 			// Copy distances.
 			int innerCount = 0;
 			for (int selectedInnerIndex : selectedIndices) {
 				filteredDistances[count][innerCount] = distances[selectedIndex][selectedInnerIndex];
 				innerCount++;
 			}
-		}
-		
-		return filteredDistances;
-	}
-	
-	/**
-	 * Gets set of selected distances based on the currently selected indices. 
-	 * @return
-	 */
-	private ArrayList<LDAConfiguration> getSelectedLDAConfigurations()
-	{
-		ArrayList<LDAConfiguration> filteredLDAConfigurations = new ArrayList<LDAConfiguration>(selectedIndices.size());
-		
-		int count = 0;
-		for (int selectedIndex : selectedIndices) {
+			
 			// Copy LDA configurations.
 			filteredLDAConfigurations.add(ldaConfigurations.get(selectedIndex));
+			
+			count++;
 		}
 		
-		return filteredLDAConfigurations;
+		// Refresh visualizations.
+		refreshMDSScatterchart(filteredCordinates);
+		refreshDistanceBarchart(filteredDistances);
+		refreshDistanceLinechart(filteredLDAConfigurations, filteredDistances);
+		heatmap_parameterspace.refresh(filteredLDAConfigurations, combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue());
 	}
 	
 	private void addEventHandlerToRangeSlider(RangeSlider rs, String parameter)
@@ -363,8 +337,8 @@ public class AnalysisController extends Controller
             	// Update control values after slider values where changed.
             	updateControlValues(rs, parameter);
 
-            	// Filter by values.
-            	filterData();
+            	// Filter by values; refresh visualizations.
+            	refreshVisualizations(true);
             }
         });
 		
@@ -413,9 +387,6 @@ public class AnalysisController extends Controller
 				selectedIndices.remove(i);
 			}
 		}
-		
-		// Update visualizations.
-		refreshVisualizations(true);
 	};
 	
 	/**
@@ -581,13 +552,7 @@ public class AnalysisController extends Controller
 		
 		if (ldaConfigurations.size() > 0) {
 			// Store chart data.
-			final XYChart.Series<Float, Double> fixedDataPoints	= new XYChart.Series<Float, Double>();
-			final XYChart.Series<Float, Double> freeDataPoints	= new XYChart.Series<Float, Double>();
-			final XYChart.Series<Float, Double> diffDataPoints	= new XYChart.Series<Float, Double>();
-			
-			fixedDataPoints.setName("Datasets with fixed parameters");
-			freeDataPoints.setName("Datasets with free parameters");
-			diffDataPoints.setName("Distance differences between fixed/free datasets");
+			Map<String, XYChart.Series<Float, Double>> diffDataPointSeries	= new HashMap<String, XYChart.Series<Float, Double>>();
 			
 			// Get information which parameters are to be coupled.
 			ArrayList<String> coupledParameters = new ArrayList<String>();
@@ -602,6 +567,14 @@ public class AnalysisController extends Controller
 				coupledParameters.add("kappa");
 			
 			
+			// Init data series.
+			for (String param : coupledParameters) {
+				final XYChart.Series<Float, Double> dataSeries = new XYChart.Series<Float, Double>();
+				dataSeries.setName(LDAConfiguration.getSymbolForParameter(param));
+				diffDataPointSeries.put(param, dataSeries);
+			}
+				
+			
 			/*
 			 * Determine metadata (step size, thresholds for all parameters).
 			 */
@@ -611,116 +584,139 @@ public class AnalysisController extends Controller
 			Map<String, Pair<Double, Double>> thresholds	= determineThresholds(ddcNumberOfSteps, stepSizes, ldaConfigurations, coupledParameters);
 			double prevValue								= 0;
 			
+			
 			/*
 			 * Calculate distances for each step.
 			 */
 			
 			for (int step = 0; step <= ddcNumberOfSteps; step++) {
 				// Store indices of LDAConfigurations matching the current pattern.
-				Set<Integer> fixedLDAConfigIndices							= new HashSet<Integer>();
-				Set<Integer> freeLDAConfigIndices							= new HashSet<Integer>();
+				Map<String, Set<Integer>> fixedLDAConfigIndiceSets			= new HashMap<String, Set<Integer>>();
+				Map<String, Set<Integer>> freeLDAConfigIndiceSets			= new HashMap<String, Set<Integer>>();
+				
+				// Init maps of index sets associating a LDA cofiguration with the corresponding collection.
+				for (String param : coupledParameters) {
+					fixedLDAConfigIndiceSets.put(param, new HashSet<Integer>());
+					freeLDAConfigIndiceSets.put(param, new HashSet<Integer>());
+				}
 				
 				// Calculate thresholds at current step for each coupled parameter.			
 				Map<String, Pair<Double, Double>> thresholdsForCurrentStep	= calculateThresholdsForStep(step, coupledParameters, stepSizes, thresholds);
 				
 				// Assign each LDAConfiguration to one of two sets for each step / set of parameter values.
 				for (int i = 0; i < ldaConfigurations.size(); i++) {
-					boolean isWithinThresholds = true;
-					
 					// Check each of the coupled parameters: Is current LDA configuration w.r.t. to all coupled parameters within the boundaries?
 					for (String param : coupledParameters) {
 						// Get value of current parameter in currently examined LDA configuration.
-						double paramValue	= ldaConfigurations.get(i).getParameter(param);
+						double paramValue = ldaConfigurations.get(i).getParameter(param);
 						// If one of the selected/coupled parameters of the current LDA configuration exceeds the thresholds of the current step:
 						// Important: .getkey() ~ minimum, .getValue() ~ maximum. 
-						isWithinThresholds	= paramValue >= thresholdsForCurrentStep.get(param).getKey() && paramValue <= thresholdsForCurrentStep.get(param).getValue();
+						if (paramValue >= thresholdsForCurrentStep.get(param).getKey() && paramValue <= thresholdsForCurrentStep.get(param).getValue()) {
+							fixedLDAConfigIndiceSets.get(param).add(i);
+						}
 						
-						// Stop loop if one of the parameters is not within boundaries.
-						if (!isWithinThresholds)
-							break;
+						else {
+							freeLDAConfigIndiceSets.get(param).add(i);
+						}
 					}
-				
-					// If all parameters of a LDA configuration fall within the defined boundaries: // Add to set of fixed LDA configurations. 
-					if (isWithinThresholds)
-						fixedLDAConfigIndices.add(i);
-					
-					else
-						freeLDAConfigIndices.add(i);
 				}
 				
-			
 				// Group distances; separated to distances between datasets where fixed parameters fall within the boundaries
 				// of the current step and those between all other datasets.
-				Pair<Double, Double> segregatedDistanceValues = averageSegregatedDistances(distances, fixedLDAConfigIndices, freeLDAConfigIndices);
+				Map<String, Pair<Double, Double>> segregatedDistanceValues = averageSegregatedDistances(distances, fixedLDAConfigIndiceSets);
 				
-				// Add tooltip on hover to new data point.
-				// segregatedDistanceValues.getKey(): Datasets with fixed parameters within boundaries, .getValue(): datasets with free parameters.
-				// I.e. a positive value means the fixed parameters induce a (on average) greater distance, a negative value means they induce
-				// a lesser distance.
-				double currValue							= prevValue = segregatedDistanceValues.getKey() - segregatedDistanceValues.getValue();
-				XYChart.Data<Float, Double> diffDataPoint	= new XYChart.Data<Float, Double>((float)step / ddcNumberOfSteps, currValue);
-
 				// Calculate current step values for parameters.
-				Map<String, Double> stepValues	= new HashMap<String, Double>();
-				
-				for (String param : LDAConfiguration.SUPPORTED_PARAMETERS) {
-					stepValues.put(param, thresholds.get(param).getKey() + step * stepSizes.get(param));
+				Map<String, Double> stepValues = new HashMap<String, Double>();
+				for (String stepParam : LDAConfiguration.SUPPORTED_PARAMETERS) {
+					stepValues.put(stepParam, thresholds.get(stepParam).getKey() + step * stepSizes.get(stepParam));
 				}
 				
-				diffDataPoint.setNode(new HoveredThresholdNode(this, prevValue, currValue, stepValues, coupledParameters));
-				
-				// Store prev value.
-				prevValue = currValue;
-				
-				// Add (normalized) data points to data series.
-				fixedDataPoints.getData().add(new XYChart.Data<Float, Double>( (float)step / ddcNumberOfSteps, segregatedDistanceValues.getKey() ));
-				freeDataPoints.getData().add(new XYChart.Data<Float, Double>( (float)step / ddcNumberOfSteps, segregatedDistanceValues.getValue() ));
-				diffDataPoints.getData().add(diffDataPoint);
+				// Add new data point for every parameter's data series.
+				for (String param : coupledParameters) {
+					// Add tooltip on hover to new data point.
+					// segregatedDistanceValues.getKey(): Datasets with fixed parameters within boundaries, .getValue(): datasets with free parameters.
+					// I.e. a positive value means the fixed parameters induce a (on average) greater distance, a negative value means they induce
+					// a lesser distance.
+					double currValue							= prevValue = segregatedDistanceValues.get(param).getKey() - segregatedDistanceValues.get(param).getValue();
+					XYChart.Data<Float, Double> diffDataPoint	= new XYChart.Data<Float, Double>((float)step / ddcNumberOfSteps, currValue);
+
+					// Set hover node.
+					diffDataPoint.setNode(new HoveredThresholdNode(this, prevValue, currValue, stepValues, coupledParameters));
+					
+					// Store prev value.
+					prevValue = currValue;
+					
+					// Add (normalized) data points to data series.
+					diffDataPointSeries.get(param).getData().add(diffDataPoint);
+				}
+
 			}
 			
 			// Add data series to chart.
-//			linechart_distanceCorrelation.getData().add(fixedDataPoints);
-//			linechart_distanceCorrelation.getData().add(freeDataPoints);
-			linechart_distanceCorrelation.getData().add(diffDataPoints);
+			for (String param : coupledParameters) {
+				linechart_distanceCorrelation.getData().add(diffDataPointSeries.get(param));
+			}
 		}
 	}
 	
 	/**
-	 * Examines distances and calculates two sums: One all specified fixed datasets and one for all other.s
+	 * Examines distances and calculates two sums: One all specified fixed datasets and one for all other.
+	 * Does this seperately for each configured fixed parameter.
 	 * @param distances
 	 * @param fixedLDAConfigIndices
-	 * @param freeLDAConfigIndices
-	 * @return Pair containing the sum for (1) all fixed and (2) all other datasets.
+	 * @return Map of pairs containing the sum for (1) all fixed and (2) all other datasets.
 	 */
-	private Pair<Double, Double> averageSegregatedDistances(double[][] distances, Set<Integer> fixedLDAConfigIndices, Set<Integer> freeLDAConfigIndices)
+	private Map<String, Pair<Double, Double>> averageSegregatedDistances(double[][] distances, Map<String, Set<Integer>> fixedLDAConfigIndiceSets)
 	{
-		double distanceSumBetweenFixedDatasets	= 0;
-		double distanceSumBetweenOtherDatasets 	= 0;
-		int fixedDistancesCount					= 0;
-		int otherDistancesCount					= 0;
+		Map<String, Double> fixedDistancesSums		= new HashMap<String, Double>();
+		Map<String, Double> otherDistancesSums		= new HashMap<String, Double>();
+		Map<String, Integer> fixedDistancesCounts	= new HashMap<String, Integer>();
+		Map<String, Integer> otherDistancesCounts	= new HashMap<String, Integer>();
 		
+		// Init collections storing distance counts.
+		for (String param : fixedLDAConfigIndiceSets.keySet()) {
+			fixedDistancesCounts.put(param, 0);
+			otherDistancesCounts.put(param, 0);
+			fixedDistancesSums.put(param, 0.0);
+			otherDistancesSums.put(param, 0.0);
+		}
+		
+		// Sum up distances.
 		for (int i = 0; i < distances.length; i++) {
 			for (int j = i + 1; j < distances.length; j++) {
 				// Are datasets at both indices i and j fixed datasets? 
-				// Add current distance (i to j) to corresponding sum variable. 
-				if (fixedLDAConfigIndices.contains(i) && fixedLDAConfigIndices.contains(j)) {
-					distanceSumBetweenFixedDatasets += distances[i][j];
-					fixedDistancesCount++;
-				}
-				
-				else {
-					distanceSumBetweenOtherDatasets += distances[i][j];
-					otherDistancesCount++;
+				// Add current distance (i to j) to corresponding sum variable.
+				for (String param : fixedLDAConfigIndiceSets.keySet()) {
+					if (fixedLDAConfigIndiceSets.get(param).contains(i) && fixedLDAConfigIndiceSets.get(param).contains(j)) {
+						// Add current distance to fixed distances sum for this parameter.
+						fixedDistancesSums.put(param, fixedDistancesSums.get(param) + distances[i][j]);
+						// Increase count of fixed distances for this parameter by 1.
+						fixedDistancesCounts.put(param, fixedDistancesCounts.get(param) + 1);
+					}
+					
+					else {
+						// Add current distance to other distances sum for this parameter.
+						otherDistancesSums.put(param, otherDistancesSums.get(param) + distances[i][j]);
+						// Increase count of other distances for this parameter by 1.
+						otherDistancesCounts.put(param, otherDistancesCounts.get(param) + 1);
+					}
 				}
 			}
 		}
 		
 		// Use "common" distance value as default if there are no fixed datasets in the current range.
 		// otherDistancesCount should never be 0 with n > 0.
-		double normalizedOtherDistanceAverage = otherDistancesCount > 0 ? distanceSumBetweenOtherDatasets / otherDistancesCount : -1;
-		double normalizedFixedDistanceAverage = fixedDistancesCount > 0 ? distanceSumBetweenFixedDatasets / fixedDistancesCount : normalizedOtherDistanceAverage;
+		Map<String, Pair<Double, Double>> normalizedDistanceAverages = new HashMap<String, Pair<Double, Double>>();
 		
-		return new Pair<Double, Double>(normalizedFixedDistanceAverage, normalizedOtherDistanceAverage);
+		for (String param : fixedLDAConfigIndiceSets.keySet()) {
+			double normalizedOtherDistanceAverage = otherDistancesCounts.get(param) > 0 ? otherDistancesSums.get(param) / otherDistancesCounts.get(param) : -1;
+			double normalizedFixedDistanceAverage = fixedDistancesCounts.get(param) > 0 ? fixedDistancesSums.get(param) / fixedDistancesCounts.get(param) : normalizedOtherDistanceAverage;
+			
+			normalizedDistanceAverages.put(param, new Pair<Double, Double>(normalizedFixedDistanceAverage, normalizedOtherDistanceAverage));
+		}
+		
+		
+		return normalizedDistanceAverages;
 	}
 	
 	/**
@@ -884,13 +880,13 @@ public class AnalysisController extends Controller
 				// Adapt width.
 				if (width > 0) {	
 					canvas_heatmap.setWidth(width - 59 - 57);
-					heatmap_parameterspace.update();
+					heatmap_parameterspace.refresh();
 				}
 				
 				// Adapt height.
 				if (height > 0) {
 					canvas_heatmap.setHeight(height - 45 - 45);
-					heatmap_parameterspace.update();
+					heatmap_parameterspace.refresh();
 				}
 			break;
 		}
@@ -899,8 +895,43 @@ public class AnalysisController extends Controller
 	@FXML
 	public void ddcButtonStateChanged(ActionEvent e)
 	{
+		double filteredDistances[][]							= new double[selectedIndices.size()][selectedIndices.size()];
+		ArrayList<LDAConfiguration> filteredLDAConfigurations	= new ArrayList<LDAConfiguration>(selectedIndices.size());
+		
+		// Copy data corresponding to chosen LDA configurations in new arrays.
+		int count = 0;
+		for (int selectedIndex : selectedIndices) {
+			// Copy distances.
+			int innerCount = 0;
+			for (int selectedInnerIndex : selectedIndices) {
+				filteredDistances[count][innerCount] = distances[selectedIndex][selectedInnerIndex];
+				innerCount++;
+			}
+			
+			// Copy LDA configurations.
+			filteredLDAConfigurations.add(ldaConfigurations.get(selectedIndex));
+			
+			count++;
+		}
+		
+		
 		// Refresh line chart.
-		refreshDistanceLinechart(getSelectedLDAConfigurations(), getSelectedDistances());
+		refreshDistanceLinechart(filteredLDAConfigurations, filteredDistances);
+	}
+	
+	@FXML
+	public void updateHeatmap(ActionEvent e)
+	{
+		ArrayList<LDAConfiguration> filteredLDAConfigurations	= new ArrayList<LDAConfiguration>(selectedIndices.size());
+		
+		// Copy data corresponding to chosen LDA configurations in new arrays.
+		for (int selectedIndex : selectedIndices) {
+			// Copy LDA configurations.
+			filteredLDAConfigurations.add(ldaConfigurations.get(selectedIndex));
+		}
+		
+		if (heatmap_parameterspace != null && combobox_parameterSpace_distribution_xAxis != null && combobox_parameterSpace_distribution_yAxis != null)
+			heatmap_parameterspace.refresh(filteredLDAConfigurations, combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue());
 	}
 	
 	public void updateLinechartInfo(boolean show, ArrayList<Label> labels)
