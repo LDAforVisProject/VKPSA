@@ -26,6 +26,10 @@ public class HeatMap
 	private NumberAxis yAxis;
 	
 	/**
+	 * References to all LDA configurations in current workspace.
+	 */
+	private ArrayList<LDAConfiguration> allLDAConfigurations;
+	/**
 	 * Store reference to selected LDAConfigurations.
 	 * These are examined, binned and then plotted. 
 	 */
@@ -56,8 +60,11 @@ public class HeatMap
 		yAxis.setForceZeroInRange(false);
 	}
 
-	public void refresh(final ArrayList<LDAConfiguration> selectedLDAConfigurations, final String key1, final String key2) 
+	public void refresh(final ArrayList<LDAConfiguration> allLDAConfigurations, final ArrayList<LDAConfiguration> selectedLDAConfigurations, final String key1, final String key2, boolean relativeViewMode) 
     {
+		// If in relative view mode: allLDAConfigurations -> selectedLDAConfigurations.
+		System.out.println("relView = " + relativeViewMode);
+		this.allLDAConfigurations		= relativeViewMode ? selectedLDAConfigurations : allLDAConfigurations;
     	this.selectedLDAConfigurations	= selectedLDAConfigurations;
     	this.key1						= key1;
     	this.key2						= key2;
@@ -65,6 +72,10 @@ public class HeatMap
     	// Set label text.
     	xAxis.setLabel(key1);
     	yAxis.setLabel(key2);
+    	
+    	// Adapt axis options.
+    	xAxis.setAnimated(false);
+    	yAxis.setAnimated(false);
     	
     	// Bin LDA configuration parameter frequency data and draw it.
     	binnedData = examineLDAConfigurations();
@@ -90,7 +101,7 @@ public class HeatMap
 		double max_key2	= Double.MIN_VALUE;
 		double min_key2	= Double.MAX_VALUE;
 		
-		for (LDAConfiguration ldaConfig : selectedLDAConfigurations) {
+		for (LDAConfiguration ldaConfig : allLDAConfigurations) {
 			max_key1 = max_key1 >= ldaConfig.getParameter(key1) ? max_key1 : ldaConfig.getParameter(key1);
 			max_key2 = max_key2 >= ldaConfig.getParameter(key2) ? max_key2 : ldaConfig.getParameter(key2);
 			
@@ -100,7 +111,8 @@ public class HeatMap
 		
 		// 2. Bin data based on found minima and maxima.
 		
-		final int numberOfBins	= (int) Math.sqrt(selectedLDAConfigurations.size());
+		final int numberOfBins	= (int) Math.sqrt(allLDAConfigurations.size());
+		System.out.println("numberOB = " + numberOfBins);
 		int[][] binMatrix		= new int[numberOfBins][numberOfBins];
 		double binInterval_key1	= (max_key1 - min_key1) / numberOfBins;
 		double binInterval_key2	= (max_key2 - min_key2) / numberOfBins;
@@ -167,7 +179,7 @@ public class HeatMap
 				gc.setFill(cellColor);
 				
 				// Draw cell.
-				gc.fillRect(cellWidth * i, cellHeight * j, cellWidth, cellHeight);
+				gc.fillRect(cellWidth * i, cellHeight * (binMatrix.length - 1 - j), cellWidth, cellHeight);
 			}	
 		}
     }

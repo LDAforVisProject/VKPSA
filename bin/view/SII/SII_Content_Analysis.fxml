@@ -14,7 +14,7 @@
 
 <AnchorPane maxHeight="694.0" maxWidth="1366.0" prefHeight="694.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.AnalysisController">
    <children>
-      <SplitPane dividerPositions="0.9374130737134909" prefHeight="694.0" prefWidth="1366.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <SplitPane dividerPositions="0.9772727272727273" prefHeight="694.0" prefWidth="1366.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="900.0" prefWidth="100.0">
                <children>
@@ -365,7 +365,7 @@
                                     </AnchorPane>
                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                                        <children>
-                                          <SplitPane dividerPositions="0.4386839481555334" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                          <SplitPane dividerPositions="0.4038876889848812" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <items>
                                               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                                                    <children>
@@ -378,7 +378,7 @@
                                                                         <Font name="System Bold" size="12.0" />
                                                                      </font>
                                                                   </Label>
-                                                                  <ScatterChart fx:id="scatterchart_global" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="30.0">
+                                                                  <ScatterChart fx:id="scatterchart_global" animated="false" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="30.0">
                                                                     <xAxis>
                                                                       <NumberAxis side="BOTTOM" />
                                                                     </xAxis>
@@ -391,7 +391,7 @@
                                                             </AnchorPane>
                                                           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                                                                <children>
-                                                                  <Label layoutX="7.0" layoutY="4.0" text="Distance Evaluation">
+                                                                  <Label layoutX="7.0" layoutY="4.0" text="Distance Evaluation" AnchorPane.topAnchor="7.0">
                                                                      <font>
                                                                         <Font name="System Bold" size="12.0" />
                                                                      </font>
@@ -428,6 +428,11 @@
                                                                      </font>
                                                                   </Label>
                                                                   <Label layoutX="44.0" layoutY="253.0" text="Average" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="44.0" />
+                                                                  <ToggleButton fx:id="button_relativeView_distEval" layoutX="268.0" layoutY="3.0" mnemonicParsing="false" onAction="#changeVisualizationViewMode" text="Relative view" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                                                     <font>
+                                                                        <Font size="10.0" />
+                                                                     </font>
+                                                                  </ToggleButton>
                                                                </children>
                                                             </AnchorPane>
                                                         </items>
@@ -455,11 +460,11 @@
                                                             </AnchorPane>
                                                           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                                                                <children>
-                                                                  <SplitPane dividerPositions="0.5494978479196556" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                  <SplitPane dividerPositions="0.48256880733944957" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                     <items>
                                                                       <AnchorPane fx:id="anchorpane_parameterSpace_distribution" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0">
                                                                            <children>
-                                                                              <Label layoutX="12.0" layoutY="5.0" text="Parameter Space | Distribution" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                                                              <Label layoutX="12.0" layoutY="5.0" text="Parameter | Distribution" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="7.0">
                                                                                  <font>
                                                                                     <Font name="System Bold" size="12.0" />
                                                                                  </font>
@@ -467,11 +472,16 @@
                                                                               <Canvas fx:id="canvas_heatmap" height="150.0" layoutX="68.0" layoutY="45.0" width="150.0" AnchorPane.bottomAnchor="47.0" AnchorPane.leftAnchor="68.0" AnchorPane.rightAnchor="49.0" AnchorPane.topAnchor="45.0" />
                                                                               <NumberAxis fx:id="numberaxis_parameterSpace_xaxis" label="key1" layoutX="67.0" layoutY="196.0" prefHeight="41.0" prefWidth="150.0" side="BOTTOM" tickLength="5.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="67.0" AnchorPane.rightAnchor="50.0" />
                                                                               <NumberAxis fx:id="numberaxis_parameterSpace_yaxis" label="key2" layoutX="1.0" layoutY="45.0" prefHeight="150.0" prefWidth="67.0" side="LEFT" tickLength="5.0" AnchorPane.bottomAnchor="47.0" AnchorPane.leftAnchor="1.0" AnchorPane.topAnchor="45.0" />
+                                                                              <ToggleButton fx:id="button_relativeView_paramDist" layoutX="183.0" layoutY="2.0" mnemonicParsing="false" onAction="#changeVisualizationViewMode" text="Relative view" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                                                                 <font>
+                                                                                    <Font size="10.0" />
+                                                                                 </font>
+                                                                              </ToggleButton>
                                                                            </children>
                                                                         </AnchorPane>
                                                                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                                                                            <children>
-                                                                              <Label layoutX="14.0" layoutY="5.0" text="Parameter Space | Distance Correlation" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                                                              <Label layoutX="14.0" layoutY="5.0" text="Parameter | Distance Correlation" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="7.0">
                                                                                  <font>
                                                                                     <Font name="System Bold" size="12.0" />
                                                                                  </font>
@@ -485,6 +495,11 @@
                                                                                 </yAxis>
                                                                               </LineChart>
                                                                               <VBox fx:id="vbox_ddcHoverInformation" layoutX="52.0" layoutY="42.0" prefHeight="50.0" prefWidth="100.0" AnchorPane.leftAnchor="52.0" AnchorPane.topAnchor="45.0" />
+                                                                              <ToggleButton fx:id="button_relativeView_paramDC" layoutX="194.0" layoutY="2.0" mnemonicParsing="false" text="Relative view" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                                                                 <font>
+                                                                                    <Font size="10.0" />
+                                                                                 </font>
+                                                                              </ToggleButton>
                                                                            </children>
                                                                         </AnchorPane>
                                                                     </items>
@@ -542,7 +557,7 @@
                   </SplitPane>
                </children>
             </AnchorPane>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="900.0" prefWidth="100.0">
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="692.0" prefWidth="54.0">
                <children>
                   <TextArea layoutX="-1.0" layoutY="14.0" prefHeight="200.0" prefWidth="87.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0" />
                   <Label layoutX="8.0" layoutY="14.0" text="Protocol" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0" />

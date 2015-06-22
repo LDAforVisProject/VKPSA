@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -25,17 +26,21 @@ import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.chart.Axis;
 import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
+import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Accordion;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
@@ -56,8 +61,8 @@ public class AnalysisController extends Controller
 	 */
 	
 	private @FXML ScatterChart<Number, Number> scatterchart_global;
-	private Axis<Number> scatterchart_xAxis;
-	private Axis<Number> scatterchart_yAxis;
+	private NumberAxis scatterchart_xAxis;
+	private NumberAxis scatterchart_yAxis;
 	
 	/*
 	 * Distances barchart. 
@@ -69,6 +74,14 @@ public class AnalysisController extends Controller
 	private @FXML Label label_max;
 	private @FXML Label label_avg;
 	private @FXML Label label_median;
+	
+	/*
+	 * Toggle buttons indicating view mode.
+	 */
+	
+	private @FXML ToggleButton button_relativeView_distEval;
+	private @FXML ToggleButton button_relativeView_paramDist;
+	private @FXML ToggleButton button_relativeView_paramDC;
 	
 	/*
 	 * Parameter Space - Distribution.
@@ -119,13 +132,69 @@ public class AnalysisController extends Controller
 	// 				Other data
 	// -----------------------------------------------
 	
+	/**
+	 * MDS coordinates of all datasets in workspace / currently loaded.
+	 */
 	private double[][] coordinates;
+	/**
+	 * Distances of all datasets in workspace / currently loaded.
+	 */
 	private double[][] distances;
-	
+	/**
+	 * LDA configurations all datasets in workspace / currently loaded.
+	 */
 	private ArrayList<LDAConfiguration> ldaConfigurations;
-	private Set<Integer> selectedIndices;
 	
+	/**
+	 * Set of all datasets matching the currently defined thresholds.
+	 */
+	private Set<Integer> filteredIndices;
+	
+	/**
+	 * Map storing all selected MDS chart points as values; their respective indices as keys.
+	 */
+	private Map<Integer, XYChart.Data<Number, Number>> selectedMDSPoints;
+	
+	/**
+	 * Number of steps in dataset distance correlation linechart.
+	 */
 	private int ddcNumberOfSteps;
+	
+	/**
+	 * Stores filterd coordinates.
+	 */
+	private double filteredCoordinates[][];
+	/**
+	 * Stores filtered distances.
+	 */
+	private double filteredDistances[][];
+	/**
+	 * List of LDA filtered configurations.
+	 */
+	private ArrayList<LDAConfiguration> filteredLDAConfigurations;
+	
+	/**
+	 * Global coordinate extrema on x axis (absolute; not filter- or selection-specific).
+	 */
+	private Pair<Double, Double> globalCoordinateExtrema_X;
+	/**
+	 * Global coordinate extrema on y axis (absolute; not filter- or selection-specific).
+	 */
+	private Pair<Double, Double> globalCoordinateExtrema_Y;
+	/**
+	 * Global distance extrema on x axis (absolute; not filter- or selection-specific).
+	 */
+	private Pair<Double, Double> globalDistanceExtrema;
+	/**
+	 * Flag indicating whether or not the global extrema were already identified.
+	 */
+	private boolean globalExtremaIdentified;
+	/**
+	 * Holds information about what's the highest number of distances associated with one bin in the 
+	 * current environment (in the distance histogram).
+	 */
+	private int distanceBinCountMaximum;
+	private boolean distanceBinCountMaximumDetermined;
 	
 	// -----------------------------------------------
 	// -----------------------------------------------
@@ -139,7 +208,16 @@ public class AnalysisController extends Controller
 		System.out.println("Initializing SII_AnalysisController.");
 	
 		// Init collection of selected indices.
-		selectedIndices = new HashSet<Integer>();
+		filteredIndices						= new LinkedHashSet<Integer>();
+		// Init collection of selected data points in the MDS scatterchart.
+		selectedMDSPoints					= new HashMap<Integer, XYChart.Data<Number, Number>>();
+
+		// Init pairs holding global extrema information.
+		globalCoordinateExtrema_X			= new Pair<Double, Double>(Double.MAX_VALUE, Double.MIN_VALUE);
+		globalCoordinateExtrema_Y			= new Pair<Double, Double>(Double.MAX_VALUE, Double.MIN_VALUE);
+		globalExtremaIdentified				= false;
+		distanceBinCountMaximum				= 0;
+		distanceBinCountMaximumDetermined	= false;
 		
 		// Init GUI elements.
 		initUIElements();
@@ -241,13 +319,17 @@ public class AnalysisController extends Controller
 	private void initScatterchart()
 	{
 		// Init scatterchart.
-		scatterchart_xAxis = scatterchart_global.getXAxis();
-        scatterchart_yAxis = scatterchart_global.getYAxis();
+		scatterchart_xAxis = (NumberAxis) scatterchart_global.getXAxis();
+        scatterchart_yAxis = (NumberAxis) scatterchart_global.getYAxis();
         
-        scatterchart_xAxis.setAutoRanging(true);
-        scatterchart_yAxis.setAutoRanging(true);
-        
-        scatterchart_global.setLegendVisible(false);
+        // Disable auto ranging.
+    	scatterchart_xAxis.setAutoRanging(false);
+		scatterchart_yAxis.setAutoRanging(false);
+		
+		// Use minimum and maximum to create range.
+		scatterchart_xAxis.setForceZeroInRange(false);
+		scatterchart_yAxis.setForceZeroInRange(false);
+		
         scatterchart_global.setVerticalGridLinesVisible(true);
 	}
 	
@@ -256,6 +338,10 @@ public class AnalysisController extends Controller
 		barchart_distances.setLegendVisible(false);
 		barchart_distances.setAnimated(false);
 		barchart_distances.setBarGap(0);
+		
+		// Disable auto-ranging (absolute view is default).
+		barchart_distances.getXAxis().setAutoRanging(true);
+		barchart_distances.getYAxis().setAutoRanging(false);
 	}
 	
 	private void initHeatmap()
@@ -276,9 +362,6 @@ public class AnalysisController extends Controller
 	
 	public void refreshVisualizations(boolean filterData)
 	{
-		// Init comboboxes.
-		
-		
 		// Get LDA configurations. Important: Integrity/consistency checks ensure that
 		// workspace.ldaConfigurations and coordinates/distances are in the same order. 
 		ldaConfigurations 	= workspace.getLDAConfigurations();
@@ -295,22 +378,27 @@ public class AnalysisController extends Controller
 			filterData();
 		}
 		
-		// Use AnalysisController.selectedIndices to filter out data in desired parameter boundaries.
-		double filteredCordinates[][]							= new double[coordinates.length][selectedIndices.size()];
-		double filteredDistances[][]							= new double[selectedIndices.size()][selectedIndices.size()];
-		ArrayList<LDAConfiguration> filteredLDAConfigurations	= new ArrayList<LDAConfiguration>(selectedIndices.size());
+		// If not done already: Discover global extrema.
+		if (!globalExtremaIdentified) {
+			identifyGlobalExtrema(coordinates, distances);
+		}
+		
+		// Use AnalysisController.filteredIndices to filter out data in desired parameter boundaries.
+		filteredCoordinates			= new double[coordinates.length][filteredIndices.size()];
+		filteredDistances			= new double[filteredIndices.size()][filteredIndices.size()];
+		filteredLDAConfigurations	= new ArrayList<LDAConfiguration>(filteredIndices.size());
 		
 		// Copy data corresponding to chosen LDA configurations in new arrays.
 		int count = 0;
-		for (int selectedIndex : selectedIndices) {
+		for (int selectedIndex : filteredIndices) {
 			// Copy MDS coordinates.
 			for (int column = 0; column < coordinates.length; column++) {
-				filteredCordinates[column][count] = coordinates[column][selectedIndex];
+				filteredCoordinates[column][count] = coordinates[column][selectedIndex];
 			}
 			
 			// Copy distances.
 			int innerCount = 0;
-			for (int selectedInnerIndex : selectedIndices) {
+			for (int selectedInnerIndex : filteredIndices) {
 				filteredDistances[count][innerCount] = distances[selectedIndex][selectedInnerIndex];
 				innerCount++;
 			}
@@ -322,10 +410,72 @@ public class AnalysisController extends Controller
 		}
 		
 		// Refresh visualizations.
-		refreshMDSScatterchart(filteredCordinates);
+		refreshMDSScatterchart(filteredCoordinates, filteredIndices);
 		refreshDistanceBarchart(filteredDistances);
 		refreshDistanceLinechart(filteredLDAConfigurations, filteredDistances);
-		heatmap_parameterspace.refresh(filteredLDAConfigurations, combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue());
+		heatmap_parameterspace.refresh(ldaConfigurations, filteredLDAConfigurations, combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), button_relativeView_paramDist.isSelected());
+	}
+	
+	/**
+	 * Updates x- and y-range of the MDS scatterchart.
+	 * @param coordinates
+	 */
+	public void updateMDSScatterchartRanges()
+	{
+		// Else: Absolute view - set ranges manually.
+		double diffX = globalCoordinateExtrema_X.getValue() - globalCoordinateExtrema_X.getKey(); 
+		double diffY = globalCoordinateExtrema_Y.getValue() - globalCoordinateExtrema_Y.getKey();
+		
+	 	// Set axis label values.
+		scatterchart_xAxis.setLowerBound(globalCoordinateExtrema_X.getKey() - diffX / 10);
+		scatterchart_xAxis.setUpperBound(globalCoordinateExtrema_X.getValue() + diffX / 10);
+		scatterchart_yAxis.setLowerBound(globalCoordinateExtrema_Y.getKey() - diffY / 10);
+		scatterchart_yAxis.setUpperBound(globalCoordinateExtrema_Y.getValue() + diffY / 10);
+    	
+    	// Adjust tick width.
+    	final int numberOfTicks = ldaConfigurations.size();
+    	scatterchart_xAxis.setTickUnit( diffX / numberOfTicks);
+    	scatterchart_yAxis.setTickUnit( diffY / numberOfTicks);
+    	scatterchart_xAxis.setMinorTickCount(4);
+    	scatterchart_yAxis.setMinorTickCount(4);
+	}
+	
+	private void identifyGlobalExtrema(double coordinates[][], double distances[][])
+	{
+		double minX = Double.MAX_VALUE;
+		double maxX = Double.MIN_VALUE;
+		double minY = Double.MAX_VALUE;
+		double maxY = Double.MIN_VALUE;
+		
+		// Identify global coordinate extrema.
+		for (int i = 0; i < coordinates[0].length; i++) {
+			// Search for minima.
+			minX = coordinates[0][i] < minX ? coordinates[0][i] : minX;
+			minY = coordinates[1][i] < minY ? coordinates[1][i] : minY;
+			
+			// Search for maxima.
+			maxX = coordinates[0][i] > maxX ? coordinates[0][i] : maxX;
+			maxY = coordinates[1][i] > maxY ? coordinates[1][i] : maxY;			
+		}
+		
+		globalCoordinateExtrema_X = new Pair<Double, Double>(minX, maxX);
+		globalCoordinateExtrema_Y = new Pair<Double, Double>(minY, maxY);
+		
+		// Identify global distance extrema.
+		minX = Double.MAX_VALUE;
+		maxX = Double.MIN_VALUE;
+		
+		for (int i = 0; i < distances.length; i++) {
+			for (int j = i + 1; j < distances[i].length; j++) {
+				minX = distances[i][j] < minX ? distances[i][j] : minX;
+				maxX = distances[i][j] > maxX ? distances[i][j] : maxX;				
+			}
+		}
+		
+		globalDistanceExtrema = new Pair<Double, Double>(minX, maxX);
+		
+		// Set flag.
+		globalExtremaIdentified = true;
 	}
 	
 	private void addEventHandlerToRangeSlider(RangeSlider rs, String parameter)
@@ -379,12 +529,12 @@ public class AnalysisController extends Controller
 			}
 			
 			// If in boundaries and not contained in selection: Add.
-			if (fitsBoundaries && !selectedIndices.contains(i)) {
-				selectedIndices.add(i);
+			if (fitsBoundaries && !filteredIndices.contains(i)) {
+				filteredIndices.add(i);
 			}
 			// Else if not in boundaries and contained in selection: Remove.
-			else if (!fitsBoundaries && selectedIndices.contains(i)) {
-				selectedIndices.remove(i);
+			else if (!fitsBoundaries && filteredIndices.contains(i)) {
+				filteredIndices.remove(i);
 			}
 		}
 	};
@@ -441,28 +591,97 @@ public class AnalysisController extends Controller
 	
 	/**
 	 * Refresh scatterchart with data from MDS coordinates. 
+	 * @param coordinates
+	 * @param filteredIndices 
 	 */
-	private void refreshMDSScatterchart(double coordinates[][])
+	private void refreshMDSScatterchart(double coordinates[][], Set<Integer> filteredIndices)
 	{			
 		// Clear scatterchart.
 		scatterchart_global.getData().clear();
 		
-        final Series<Number, Number> dataSeries = new XYChart.Series<>();
-        dataSeries.setName("Data");
+        final Series<Number, Number> dataSeries			= new XYChart.Series<>();
+        final Series<Number, Number> selectedDataSeries	= new XYChart.Series<>();
         
-        for (int i = 0; i < coordinates[0].length; i++) {
-        	dataSeries.getData().add(new XYChart.Data<Number, Number>(coordinates[0][i], coordinates[1][i]));
+        dataSeries.setName("Data");
+        selectedDataSeries.setName("Selected Data");
+        
+        // Add filtered points to scatterchart.
+        int count = 0;
+        for (int index : filteredIndices) {
+        	// Add point only if it's not part of the set of manually selected indices.
+        	if (!selectedMDSPoints.containsKey(index)) {
+	        	XYChart.Data<Number, Number> dataPoint = new XYChart.Data<Number, Number>(coordinates[0][count], coordinates[1][count]);
+	        	dataPoint.setExtraValue(index);
+	        	dataSeries.getData().add(dataPoint);
+        	}
+        	
+        	count++;
+        }
+        
+        // Add selected points to scatterchart.
+        for (Map.Entry<Integer, XYChart.Data<Number, Number>> selectedPoint : selectedMDSPoints.entrySet()) {
+        	XYChart.Data<Number, Number> dataPoint = new XYChart.Data<Number, Number>(selectedPoint.getValue().getXValue(), selectedPoint.getValue().getYValue());
+        	dataPoint.setExtraValue(selectedPoint.getValue().getExtraValue());
+        	selectedDataSeries.getData().add(dataPoint);	
         }
         
         // Add data in scatterchart.
+        scatterchart_global.getData().add(0, selectedDataSeries);
         scatterchart_global.getData().add(dataSeries);
+        
+        // Add mouse listeners.
+        addMouseListenersToMDSScatterchart();
+        
+        // Update scatterchart ranges.
+        updateMDSScatterchartRanges();
+	}
+	
+	private void addMouseListenersToMDSScatterchart()
+	{
+		// Add listeners to all series of non-selected data points.
+		for (int i = 1; i < scatterchart_global.getData().size(); i++) {
+	        // Add mouse event listeners to points in this data series.
+	        for (XYChart.Data<Number, Number> dataPoint : scatterchart_global.getData().get(i).getData()) {
+	        	dataPoint.getNode().setOnMouseClicked(new EventHandler<MouseEvent>()
+				{
+				    @Override
+				    public void handle(MouseEvent mouseEvent)
+				    {       
+				    	if (mouseEvent.isControlDown()) {
+					    	// Remember which points were selected. 
+					    	if (!selectedMDSPoints.containsKey(dataPoint.getExtraValue())) {
+					    		selectedMDSPoints.put((int)dataPoint.getExtraValue(), dataPoint);
+					    		// Refresh scatterchart.
+					    		refreshMDSScatterchart(filteredCoordinates, filteredIndices);
+					    	}
+				    	}
+//				    	@todo: Next: 	- Highlighting in other charts (if highlighting is enabled)
+//				    					- Selection via mouse rectangle
+				    }
+				});
+	        }
+		}
+		
+		// Add mouse listeners for selected data points.
+        for (XYChart.Data<Number, Number> dataPoint : scatterchart_global.getData().get(0).getData()) {
+        	dataPoint.getNode().setOnMouseClicked(new EventHandler<MouseEvent>()
+			{
+			    @Override
+			    public void handle(MouseEvent mouseEvent)
+			    {       
+			    	if (mouseEvent.isControlDown()) {
+				    	// Remember which points were selected.
+			    		selectedMDSPoints.remove(dataPoint.getExtraValue());
+			    		// Refresh scatterchart.
+			    		refreshMDSScatterchart(filteredCoordinates, filteredIndices);
+			    	}
+			    }
+			});
+        }
 	}
 	
 	private void refreshDistanceBarchart(double distances[][])
 	{
-		// Clear bar chart.
-		barchart_distances.getData().clear();
-		
 		// Calculate binning parameters.
 		final int numberOfBins		= 50;
 		final int numberOfElements	= ((distances.length - 1) * (distances.length - 1) + (distances.length - 1)) / 2;
@@ -494,16 +713,17 @@ public class AnalysisController extends Controller
 			// Sort array.
 			Arrays.sort(distancesFlattened);
 			
-			// Get maximum and minimum.
-			min = distancesFlattened[0];
-			max = distancesFlattened[distancesFlattened.length - 1];
-			
 			// Calculate median.
 			if (distancesFlattened.length % 2 == 0)
 			    median = (distancesFlattened[distancesFlattened.length / 2] + distancesFlattened[distancesFlattened.length / 2 - 1]) / 2;
 			else
 			    median = distancesFlattened[distancesFlattened.length / 2];
 			
+			// Determine extrema.
+			// 	Depending on whether absolute or relative mode is enabled: Use global or current extrema.  
+			min = button_relativeView_distEval.isSelected() ? distancesFlattened[0] : globalDistanceExtrema.getKey().floatValue();
+			max = button_relativeView_distEval.isSelected() ? distancesFlattened[distancesFlattened.length - 1] : globalDistanceExtrema.getValue().floatValue();
+
 			/*
 			 * Bin data.
 			 */
@@ -517,6 +737,17 @@ public class AnalysisController extends Controller
 				
 				// Increment content of corresponding bin.
 				distanceBinList[index_key]++;	
+			}
+			
+			// If in absolute mode for the first time (important: The first draw always happens in absolute
+			// view mode!): Get maximal count of distances associated with one bin.
+			if (!distanceBinCountMaximumDetermined && !button_relativeView_distEval.isSelected()) {
+				distanceBinCountMaximum = 0;
+				for (int binCount : distanceBinList) {
+					distanceBinCountMaximum = binCount > distanceBinCountMaximum ? binCount : distanceBinCountMaximum;
+				}
+				
+				distanceBinCountMaximumDetermined = true;
 			}
 			
 			/*
@@ -534,6 +765,13 @@ public class AnalysisController extends Controller
 			barchart_distances.getData().clear();
 			//	Add data series.
 			barchart_distances.getData().add(generateDistanceHistogramDataSeries(distanceBinList, numberOfBins, binInterval, min, max));
+			
+			// Set y-axis range, if in absolute mode.
+			if (!button_relativeView_distEval.isSelected()) {
+				ValueAxis<Integer> yAxis = (ValueAxis<Integer>) barchart_distances.getYAxis();
+				yAxis.setLowerBound(0);
+				yAxis.setUpperBound(distanceBinCountMaximum * 1.1);
+			}
 		}
 		
 		else {
@@ -842,12 +1080,12 @@ public class AnalysisController extends Controller
 	 */
 	private XYChart.Series<String, Integer> generateDistanceHistogramDataSeries(int[] distanceBinList, int numberOfBins, double binInterval, double min, double max)
 	{
-		final XYChart.Series<String, Integer> data_series = new XYChart.Series<String, Integer>();
-		Map<String, Integer> categoryCounts = new HashMap<String, Integer>();
+		final XYChart.Series<String, Integer> data_series	= new XYChart.Series<String, Integer>();
+		Map<String, Integer> categoryCounts					= new HashMap<String, Integer>();
 		
 		for (int i = 0; i < numberOfBins; i++) {
 			String categoryDescription	= String.valueOf(min + i * binInterval);
-			categoryDescription			= categoryDescription.length() > 4 ? categoryDescription.substring(0, 4) : categoryDescription;
+			categoryDescription			= categoryDescription.length() > 5 ? categoryDescription.substring(0, 5) : categoryDescription;
 			int value					= distanceBinList[i];
 			
 			// Bin again by category name, if that's necessary.
@@ -895,15 +1133,15 @@ public class AnalysisController extends Controller
 	@FXML
 	public void ddcButtonStateChanged(ActionEvent e)
 	{
-		double filteredDistances[][]							= new double[selectedIndices.size()][selectedIndices.size()];
-		ArrayList<LDAConfiguration> filteredLDAConfigurations	= new ArrayList<LDAConfiguration>(selectedIndices.size());
+		double filteredDistances[][]							= new double[filteredIndices.size()][filteredIndices.size()];
+		ArrayList<LDAConfiguration> filteredLDAConfigurations	= new ArrayList<LDAConfiguration>(filteredIndices.size());
 		
 		// Copy data corresponding to chosen LDA configurations in new arrays.
 		int count = 0;
-		for (int selectedIndex : selectedIndices) {
+		for (int selectedIndex : filteredIndices) {
 			// Copy distances.
 			int innerCount = 0;
-			for (int selectedInnerIndex : selectedIndices) {
+			for (int selectedInnerIndex : filteredIndices) {
 				filteredDistances[count][innerCount] = distances[selectedIndex][selectedInnerIndex];
 				innerCount++;
 			}
@@ -922,16 +1160,16 @@ public class AnalysisController extends Controller
 	@FXML
 	public void updateHeatmap(ActionEvent e)
 	{
-		ArrayList<LDAConfiguration> filteredLDAConfigurations	= new ArrayList<LDAConfiguration>(selectedIndices.size());
+		ArrayList<LDAConfiguration> filteredLDAConfigurations = new ArrayList<LDAConfiguration>(filteredIndices.size());
 		
 		// Copy data corresponding to chosen LDA configurations in new arrays.
-		for (int selectedIndex : selectedIndices) {
+		for (int selectedIndex : filteredIndices) {
 			// Copy LDA configurations.
 			filteredLDAConfigurations.add(ldaConfigurations.get(selectedIndex));
 		}
 		
 		if (heatmap_parameterspace != null && combobox_parameterSpace_distribution_xAxis != null && combobox_parameterSpace_distribution_yAxis != null)
-			heatmap_parameterspace.refresh(filteredLDAConfigurations, combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue());
+			heatmap_parameterspace.refresh(ldaConfigurations, filteredLDAConfigurations, combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), button_relativeView_paramDist.isSelected());
 	}
 	
 	public void updateLinechartInfo(boolean show, ArrayList<Label> labels)
@@ -944,6 +1182,26 @@ public class AnalysisController extends Controller
 		
 		else {
 			vbox_ddcHoverInformation.setVisible(false);
+		}
+	}
+	
+	@FXML
+	public void changeVisualizationViewMode(ActionEvent e)
+	{
+		System.out.println("changing view mode - " + ((Node)e.getSource()).getId());
+		Node source = (Node) e.getSource();
+		
+		switch (source.getId()) {
+			case "button_relativeView_distEval":
+				// Toggle auto-ranging.
+				barchart_distances.getYAxis().setAutoRanging(button_relativeView_distEval.isSelected());
+				// Refresh chart.
+				refreshDistanceBarchart(filteredDistances);
+			break;
+
+			case "button_relativeView_paramDist":
+				updateHeatmap(e);
+			break;
 		}
 	}
 }
