@@ -25,45 +25,51 @@ public class HoveredThresholdNode extends StackPane
 	
 	public HoveredThresholdNode(AnalysisController analysisController, double priorValue, double value, Map<String, Double> stepValues, ArrayList<String> coupledParameters)
 	{
-		setPrefSize(5, 5);
-		
 		this.stepValues				= stepValues;
 		this.coupledParameters		= coupledParameters;
 		
-		setOnMouseEntered(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent mouseEvent)
-			{
-				VBox vbox_lables = new VBox();
-				ArrayList<Label> labels = createDataThresholdLabels(priorValue, value);
-				vbox_lables.getChildren().addAll(labels);
-				vbox_lables.getStyleClass().addAll("chart-line-symbol");
-				
-				analysisController.updateLinechartInfo(true, labels);
-				
-				HoveredThresholdNode target = (HoveredThresholdNode)mouseEvent.getSource();
-				target.setScaleX(2.5);
-				target.setScaleY(2.5);
-				
-				setCursor(Cursor.NONE);
-				toFront();
-			}
-		});
+		if (value == -Double.MAX_VALUE) {
+			setPrefSize(0, 0);
+		}
 		
-		setOnMouseExited(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent mouseEvent)
-			{
-				analysisController.updateLinechartInfo(false, null);
-				getChildren().clear();
-				
-				HoveredThresholdNode target = (HoveredThresholdNode)mouseEvent.getSource();
-				target.setScaleX(1);
-				target.setScaleY(1);
-				
-				setCursor(Cursor.DEFAULT);
-			}
-		});
+		else {
+			setPrefSize(7, 7);
+			
+			setOnMouseEntered(new EventHandler<MouseEvent>() {
+				@Override
+				public void handle(MouseEvent mouseEvent)
+				{
+					VBox vbox_lables = new VBox();
+					ArrayList<Label> labels = createDataThresholdLabels(priorValue, value);
+					vbox_lables.getChildren().addAll(labels);
+					vbox_lables.getStyleClass().addAll("chart-line-symbol");
+					
+					analysisController.updateLinechartInfo(true, labels);
+					
+					HoveredThresholdNode target = (HoveredThresholdNode)mouseEvent.getSource();
+					target.setScaleX(2.25);
+					target.setScaleY(2.25);
+					
+					setCursor(Cursor.NONE);
+					toFront();
+				}
+			});
+			
+			setOnMouseExited(new EventHandler<MouseEvent>() {
+				@Override
+				public void handle(MouseEvent mouseEvent)
+				{
+					analysisController.updateLinechartInfo(false, null);
+					getChildren().clear();
+					
+					HoveredThresholdNode target = (HoveredThresholdNode)mouseEvent.getSource();
+					target.setScaleX(1);
+					target.setScaleY(1);
+					
+					setCursor(Cursor.DEFAULT);
+				}
+			});
+		}
 	}
 
 

@@ -510,14 +510,14 @@
                                                                               </Label>
                                                                               <LineChart fx:id="linechart_distanceCorrelation" createSymbols="false" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="30.0">
                                                                                 <xAxis>
-                                                                                  <NumberAxis side="BOTTOM" />
+                                                                                  <NumberAxis fx:id="numberAxis_distanceCorrelation_xAxis" side="BOTTOM" />
                                                                                 </xAxis>
                                                                                 <yAxis>
-                                                                                  <NumberAxis side="LEFT" />
+                                                                                  <NumberAxis fx:id="numberAxis_distanceCorrelation_yAxis" side="LEFT" />
                                                                                 </yAxis>
                                                                               </LineChart>
                                                                               <VBox fx:id="vbox_ddcHoverInformation" layoutX="52.0" layoutY="42.0" prefHeight="50.0" prefWidth="100.0" AnchorPane.leftAnchor="52.0" AnchorPane.topAnchor="45.0" />
-                                                                              <ToggleButton fx:id="button_relativeView_paramDC" layoutX="194.0" layoutY="2.0" mnemonicParsing="false" text="Relative view" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                                                              <ToggleButton fx:id="button_relativeView_paramDC" layoutX="194.0" layoutY="2.0" mnemonicParsing="false" onAction="#changeVisualizationViewMode" text="Relative view" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
                                                                                  <font>
                                                                                     <Font size="10.0" />
                                                                                  </font>

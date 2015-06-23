@@ -15,6 +15,7 @@ import model.LDAConfiguration;
 import org.controlsfx.control.RangeSlider;
 
 import view.components.HoveredThresholdNode;
+import view.components.RubberBandSelection;
 import view.components.heatmap.HeatMap;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -44,6 +45,7 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.util.Pair;
 
@@ -103,6 +105,8 @@ public class AnalysisController extends Controller
 	 */
 	
 	private @FXML LineChart<Float, Double> linechart_distanceCorrelation;
+	private @FXML NumberAxis numberAxis_distanceCorrelation_xAxis;
+	private @FXML NumberAxis numberAxis_distanceCorrelation_yAxis;
 	
 	private @FXML CheckBox checkbox_ddc_alpha;
 	private @FXML CheckBox checkbox_ddc_kappa;
@@ -164,6 +168,10 @@ public class AnalysisController extends Controller
 	 */
 	private int ddcNumberOfSteps;
 	
+	/*
+	 * Collections holding metadata of filtered or selected datasets. 
+	 */
+	
 	/**
 	 * Stores filterd coordinates.
 	 */
@@ -176,6 +184,10 @@ public class AnalysisController extends Controller
 	 * List of LDA filtered configurations.
 	 */
 	private ArrayList<LDAConfiguration> filteredLDAConfigurations;
+	
+	/*
+	 * Information on global extrema.
+	 */
 	
 	/**
 	 * Global coordinate extrema on x axis (absolute; not filter- or selection-specific).
@@ -202,6 +214,16 @@ public class AnalysisController extends Controller
 	 * Indicates wheteher or not the maximal count of distances in a bin was yet determined.
 	 */
 	private boolean distanceBinCountMaximumDetermined;
+	/**
+	 * Holds information about what's the highest value associated with a parameter in 
+	 * current environment (in the distance line/distance correlation chart).
+	 */
+	private Pair<Double, Double> dcValueExtrema;
+	/**
+	 * Indicates wheteher or not the maximal value in the distance line chart was yet determined.
+	 */
+	private boolean dcValueMaximumDetermined;
+	
 	
 	// -----------------------------------------------
 	// -----------------------------------------------
@@ -225,6 +247,8 @@ public class AnalysisController extends Controller
 		globalExtremaIdentified				= false;
 		distanceBinCountMaximum				= 0;
 		distanceBinCountMaximumDetermined	= false;
+		dcValueMaximumDetermined			= false;
+		dcValueExtrema						= new Pair<Double, Double>(Double.MAX_VALUE, Double.MIN_VALUE);
 		
 		// Init GUI elements.
 		initUIElements();
@@ -273,6 +297,8 @@ public class AnalysisController extends Controller
 		
 		vbox_ddcHoverInformation.setVisible(false);
 		vbox_ddcHoverInformation.getStyleClass().addAll("chart-line-symbol");
+		
+		resetDDCAxisOptions();
 	}
 
 	private void initRangeSliders()
@@ -338,6 +364,19 @@ public class AnalysisController extends Controller
 		scatterchart_yAxis.setForceZeroInRange(false);
 		
         scatterchart_global.setVerticalGridLinesVisible(true);
+        
+        // @todo For selection of MDS points:
+        //			- Store reference to instance of RubberBandSelection.
+        //			- Add key listener -> If ctrl is pressed, enable single point mode (disable rubberband listeners). If shift is pressed, enable group mode (rubberband selection).
+        //			- Map rubberband are coordinates to MDS chart.
+        //			- Map MDS chart coordinates to datapoints.
+        //			- Add datapoints to selection (selectedMDSPoints).
+        // @todo After that: Create working version of parallel tag cloud visualization.
+        // @todo After that: Introduce highlighting of selection of MDS datapoints in other charts (and vice versa).
+        
+        
+        // Add rubberband selection tool.
+        //new RubberBandSelection((Pane)scatterchart_global.getParent());
 	}
 	
 	private void initDistanceBarchart()
@@ -685,8 +724,6 @@ public class AnalysisController extends Controller
 					    		refreshMDSScatterchart(filteredCoordinates, filteredIndices);
 					    	}
 				    	}
-//				    	@todo: Next: 	- Highlighting in other charts (if highlighting is enabled)
-//				    					- Selection via mouse rectangle
 				    }
 				});
 	        }
@@ -769,17 +806,6 @@ public class AnalysisController extends Controller
 				distanceBinList[index_key]++;	
 			}
 			
-			// If in absolute mode for the first time (important: The first draw always happens in absolute
-			// view mode!): Get maximal count of distances associated with one bin.
-			if (!distanceBinCountMaximumDetermined && !button_relativeView_distEval.isSelected()) {
-				distanceBinCountMaximum = 0;
-				for (int binCount : distanceBinList) {
-					distanceBinCountMaximum = binCount > distanceBinCountMaximum ? binCount : distanceBinCountMaximum;
-				}
-				
-				distanceBinCountMaximumDetermined = true;
-			}
-			
 			/*
 			 * Update UI. 
 			 */
@@ -798,6 +824,17 @@ public class AnalysisController extends Controller
 			
 			// Set y-axis range, if in absolute mode.
 			if (!button_relativeView_distEval.isSelected()) {
+				// If in absolute mode for the first time (important: The first draw always happens in absolute
+				// view mode!): Get maximal count of distances associated with one bin.
+				if (!distanceBinCountMaximumDetermined) {
+					distanceBinCountMaximum = 0;
+					for (int binCount : distanceBinList) {
+						distanceBinCountMaximum = binCount > distanceBinCountMaximum ? binCount : distanceBinCountMaximum;
+					}
+					
+					distanceBinCountMaximumDetermined = true;
+				}
+				
 				ValueAxis<Integer> yAxis = (ValueAxis<Integer>) barchart_distances.getYAxis();
 				yAxis.setLowerBound(0);
 				yAxis.setUpperBound(distanceBinCountMaximum * 1.1);
@@ -849,7 +886,8 @@ public class AnalysisController extends Controller
 			
 			ddcNumberOfSteps								= distances.length;
 			Map<String, Double> stepSizes					= new HashMap<String, Double>();
-			Map<String, Pair<Double, Double>> thresholds	= determineThresholds(ddcNumberOfSteps, stepSizes, ldaConfigurations, coupledParameters);
+			// Depending on whether relative view is enabled: Use entire loaded dataset or only filtered/selected componenents.
+			Map<String, Pair<Double, Double>> thresholds	= determineThresholds(ddcNumberOfSteps, stepSizes, button_relativeView_paramDC.isSelected() ? ldaConfigurations : this.ldaConfigurations, coupledParameters);
 			double prevValue								= 0;
 			
 			
@@ -858,40 +896,17 @@ public class AnalysisController extends Controller
 			 */
 			
 			for (int step = 0; step <= ddcNumberOfSteps; step++) {
-				// Store indices of LDAConfigurations matching the current pattern.
-				Map<String, Set<Integer>> fixedLDAConfigIndiceSets			= new HashMap<String, Set<Integer>>();
-				Map<String, Set<Integer>> freeLDAConfigIndiceSets			= new HashMap<String, Set<Integer>>();
-				
-				// Init maps of index sets associating a LDA cofiguration with the corresponding collection.
-				for (String param : coupledParameters) {
-					fixedLDAConfigIndiceSets.put(param, new HashSet<Integer>());
-					freeLDAConfigIndiceSets.put(param, new HashSet<Integer>());
-				}
-				
 				// Calculate thresholds at current step for each coupled parameter.			
 				Map<String, Pair<Double, Double>> thresholdsForCurrentStep	= calculateThresholdsForStep(step, coupledParameters, stepSizes, thresholds);
 				
 				// Assign each LDAConfiguration to one of two sets for each step / set of parameter values.
-				for (int i = 0; i < ldaConfigurations.size(); i++) {
-					// Check each of the coupled parameters: Is current LDA configuration w.r.t. to all coupled parameters within the boundaries?
-					for (String param : coupledParameters) {
-						// Get value of current parameter in currently examined LDA configuration.
-						double paramValue = ldaConfigurations.get(i).getParameter(param);
-						// If one of the selected/coupled parameters of the current LDA configuration exceeds the thresholds of the current step:
-						// Important: .getkey() ~ minimum, .getValue() ~ maximum. 
-						if (paramValue >= thresholdsForCurrentStep.get(param).getKey() && paramValue <= thresholdsForCurrentStep.get(param).getValue()) {
-							fixedLDAConfigIndiceSets.get(param).add(i);
-						}
-						
-						else {
-							freeLDAConfigIndiceSets.get(param).add(i);
-						}
-					}
-				}
+				Pair<Map<String, Set<Integer>>, Map<String, Set<Integer>>> ldaConfigurationSets = segregateLDAConfigurations(ldaConfigurations, coupledParameters, thresholdsForCurrentStep);
+				Map<String, Set<Integer>> fixedLDAConfigIndiceSets								= ldaConfigurationSets.getKey();
+				Map<String, Set<Integer>> freeLDAConfigIndiceSets								= ldaConfigurationSets.getValue();
 				
 				// Group distances; separated to distances between datasets where fixed parameters fall within the boundaries
 				// of the current step and those between all other datasets.
-				Map<String, Pair<Double, Double>> segregatedDistanceValues = averageSegregatedDistances(distances, fixedLDAConfigIndiceSets);
+				Map<String, Pair<Double, Double>> segregatedDistanceValues	= averageSegregatedDistances(distances, fixedLDAConfigIndiceSets);
 				
 				// Calculate current step values for parameters.
 				Map<String, Double> stepValues = new HashMap<String, Double>();
@@ -905,8 +920,12 @@ public class AnalysisController extends Controller
 					// segregatedDistanceValues.getKey(): Datasets with fixed parameters within boundaries, .getValue(): datasets with free parameters.
 					// I.e. a positive value means the fixed parameters induce a (on average) greater distance, a negative value means they induce
 					// a lesser distance.
-					double currValue							= prevValue = segregatedDistanceValues.get(param).getKey() - segregatedDistanceValues.get(param).getValue();
-					XYChart.Data<Float, Double> diffDataPoint	= new XYChart.Data<Float, Double>((float)step / ddcNumberOfSteps, currValue);
+					double currValue							= segregatedDistanceValues.get(param).getKey() - segregatedDistanceValues.get(param).getValue();
+					// If there were either no fixed (within boundaries) or/nor free (not within boundaries) for current step and parameter:
+					// Don't plot point, since it wouldn't contain any sensible information.  
+					double currCheckedValue						= (segregatedDistanceValues.get(param).getKey() == -Double.MAX_VALUE || segregatedDistanceValues.get(param).getValue() == -Double.MAX_VALUE) ? 0 : currValue;
+					// If fixedDatasetsDistances == -Double.MAX_VALUE: No datasets in boundaries for this parameter and step. Use 0 as actual value, mark as non-existent.
+					XYChart.Data<Float, Double> diffDataPoint	= new XYChart.Data<Float, Double>((float)step / ddcNumberOfSteps, currCheckedValue);
 
 					// Set hover node.
 					diffDataPoint.setNode(new HoveredThresholdNode(this, prevValue, currValue, stepValues, coupledParameters));
@@ -924,7 +943,81 @@ public class AnalysisController extends Controller
 			for (String param : coupledParameters) {
 				linechart_distanceCorrelation.getData().add(diffDataPointSeries.get(param));
 			}
+			
+			// Set y-axis range, if in absolute mode.
+			if (!button_relativeView_paramDC.isSelected()) {
+				// If in absolute mode for the first time (important: The first draw always happens in absolute
+				// view mode!): Get maxima and minima.
+				if (!dcValueMaximumDetermined) {
+					double max = dcValueExtrema.getValue();
+					double min = dcValueExtrema.getKey();
+					
+					// Seek for extrema.
+					for (String param : coupledParameters) {
+						for (XYChart.Data<Float, Double> dataPoint : diffDataPointSeries.get(param).getData()) {
+							max = dataPoint.getYValue() > max ? dataPoint.getYValue() : max;
+							min = dataPoint.getYValue() < min ? dataPoint.getYValue() : min;
+						}
+					}
+					
+					// Remember minimum and maximum.
+					dcValueExtrema				= new Pair<Double, Double>(min, max);
+					// Set flag.
+					dcValueMaximumDetermined	= true;
+				}
+				
+				// Set y-axis range.
+				numberAxis_distanceCorrelation_yAxis.setLowerBound(dcValueExtrema.getKey() * 1.2);
+				numberAxis_distanceCorrelation_yAxis.setUpperBound(dcValueExtrema.getValue() * 1.2);
+				// Configure tick options.
+		    	final int numberOfTicks = 5;
+		    	double diff				= dcValueExtrema.getValue() * 1.2 - dcValueExtrema.getKey() * 1.2;
+		    	numberAxis_distanceCorrelation_yAxis.setTickUnit( diff / numberOfTicks);
+		    	numberAxis_distanceCorrelation_yAxis.setMinorTickCount(4);
+			}
+			
 		}
+	}
+	
+	/**
+	 * Segregates currently filtered/selected LDA configurations based on if they pass the boundaries
+	 * for the current step. 
+	 * @param ldaConfigurations
+	 * @param coupledParameters
+	 * @param thresholdsForCurrentStep
+	 * @return A pair of two maps (each one containing parameter/set pairs); the first one for configurations
+	 * fitting the boundaries (fixed indices), the second one those which do not (free indices). 
+	 */
+	private Pair<Map<String, Set<Integer>>, Map<String, Set<Integer>>> segregateLDAConfigurations(final ArrayList<LDAConfiguration> ldaConfigurations, final ArrayList<String> coupledParameters, final Map<String, Pair<Double, Double>> thresholdsForCurrentStep)
+	{
+		Map<String, Set<Integer>> fixedLDAConfigIndiceSets	= new HashMap<String, Set<Integer>>();
+		Map<String, Set<Integer>> freeLDAConfigIndiceSets	= new HashMap<String, Set<Integer>>();
+		
+		// Init sets.
+		for (String param : coupledParameters) {
+			fixedLDAConfigIndiceSets.put(param, new HashSet<Integer>());
+			freeLDAConfigIndiceSets.put(param, new HashSet<Integer>());
+		}
+		
+		// Assign LDA configurations to sets.
+		for (int i = 0; i < ldaConfigurations.size(); i++) {
+			// Check each of the coupled parameters: Is current LDA configuration w.r.t. to all coupled parameters within the boundaries?
+			for (String param : coupledParameters) {
+				// Get value of current parameter in currently examined LDA configuration.
+				double paramValue = ldaConfigurations.get(i).getParameter(param);
+				// If one of the selected/coupled parameters of the current LDA configuration exceeds the thresholds of the current step:
+				// Important: .getkey() ~ minimum, .getValue() ~ maximum. 
+				if (paramValue >= thresholdsForCurrentStep.get(param).getKey() && paramValue <= thresholdsForCurrentStep.get(param).getValue()) {
+					fixedLDAConfigIndiceSets.get(param).add(i);
+				}
+				
+				else {
+					freeLDAConfigIndiceSets.get(param).add(i);
+				}
+			}
+		}
+		
+		return new Pair<Map<String, Set<Integer>>, Map<String, Set<Integer>>>(fixedLDAConfigIndiceSets, freeLDAConfigIndiceSets);
 	}
 	
 	/**
@@ -977,8 +1070,9 @@ public class AnalysisController extends Controller
 		Map<String, Pair<Double, Double>> normalizedDistanceAverages = new HashMap<String, Pair<Double, Double>>();
 		
 		for (String param : fixedLDAConfigIndiceSets.keySet()) {
-			double normalizedOtherDistanceAverage = otherDistancesCounts.get(param) > 0 ? otherDistancesSums.get(param) / otherDistancesCounts.get(param) : -1;
-			double normalizedFixedDistanceAverage = fixedDistancesCounts.get(param) > 0 ? fixedDistancesSums.get(param) / fixedDistancesCounts.get(param) : normalizedOtherDistanceAverage;
+			double normalizedOtherDistanceAverage = otherDistancesCounts.get(param) > 0 ? otherDistancesSums.get(param) / otherDistancesCounts.get(param) : -Double.MAX_VALUE;
+			// If no fixed datasets for this parameter and step: Use -Double.MAX_VALUE to indicate that.
+			double normalizedFixedDistanceAverage = fixedDistancesCounts.get(param) > 0 ? fixedDistancesSums.get(param) / fixedDistancesCounts.get(param) : -Double.MAX_VALUE;
 			
 			normalizedDistanceAverages.put(param, new Pair<Double, Double>(normalizedFixedDistanceAverage, normalizedOtherDistanceAverage));
 		}
@@ -1231,6 +1325,19 @@ public class AnalysisController extends Controller
 			case "button_relativeView_paramDist":
 				updateHeatmap(e);
 			break;
+			
+			case "button_relativeView_paramDC":
+				// Toggle auto-ranging.
+				linechart_distanceCorrelation.getYAxis().setAutoRanging(button_relativeView_paramDC.isSelected());
+				linechart_distanceCorrelation.getXAxis().setAutoRanging(button_relativeView_paramDC.isSelected());
+				
+				// If in absolute mode: Manually set axis range options.
+				if (!button_relativeView_paramDC.isSelected())
+					resetDDCAxisOptions();
+				
+				// Refresh chart.
+				refreshDistanceLinechart(filteredLDAConfigurations, filteredDistances);
+			break;
 		}
 	}
 	
@@ -1239,5 +1346,24 @@ public class AnalysisController extends Controller
 	{
 		slider_parameterSpace_distribution_granularity.setDisable(checkbox_parameterSpace_distribution_dynAdjustment.isSelected());
 		heatmap_parameterspace.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
+	}
+	
+	/**
+	 * Default view mode is absolute - disable auto-ranging on axes, configure ticks.
+	 */
+	private void resetDDCAxisOptions()
+	{
+		// Disable auto-ranging.
+		numberAxis_distanceCorrelation_yAxis.setAutoRanging(false);
+		numberAxis_distanceCorrelation_xAxis.setAutoRanging(false);
+	
+		// Set upper and lower bound for x axis.
+		numberAxis_distanceCorrelation_xAxis.setLowerBound(-0.1);
+		numberAxis_distanceCorrelation_xAxis.setUpperBound(1.1);
+		
+    	// Adjust tick width.
+    	final int numberOfTicks = 5;
+    	numberAxis_distanceCorrelation_xAxis.setTickUnit( 1.2 / numberOfTicks);
+    	numberAxis_distanceCorrelation_xAxis.setMinorTickCount(4);
 	}
 }

@@ -37,17 +37,15 @@ import model.workspace.tasks.Task_WorkspaceTask;
 // -----------------------------------------------
 
 // BACKEND / data view:
-// @todo Test data generation - in particular: 
-//			After update Topic parameter parsing in Topic.generateTopics(...) and if 
-//			parameter list generation works as well with different maxima/minima.
 // @todo Idea for optimization: Truncate parameter file list / instruct Python script to process only a defined part of it.
+// @todo Change file-based system to SQLite.
 
 // FRONTEND / analysis view:
-// @todox Add histograms to analysis filter slider.
-// @todox Update heatmap after filter application.
 // @todo Add boxplot for quantiles (and average)? Drop labels instead.
-// @todox Enable dataset selection in visualizations.
 // @todo Add protocol SplitPane to every view (i.e.: Add in core view).
+// @todo Local scope view.
+// @todo Refactor AnalysisController: Move each chart to a separate component class (common interface structure?)
+//		 for easier maintainability and readability.
 
 /**
  * Encompasses:
