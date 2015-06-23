@@ -1,5 +1,6 @@
 package view.components.heatmap;
 
+import java.awt.Adjustable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +38,16 @@ public class HeatMap
 	private String key1;
 	private String key2;
 	
+	/**
+	 * Indicates if granularity is to be adjusted dynamically.
+	 */
+	private boolean adjustGranularityDynamically;
+	/**
+	 * Granularity (number of squares/elements on on axis) of heatmap.
+	 * Only used when adjustGranularityDynamically == false.
+	 */
+	private int granularity;
+	
 	/*
 	 * Binned data.
 	 */
@@ -44,10 +55,15 @@ public class HeatMap
 	
 	public HeatMap(Canvas canvas, NumberAxis xAxis, NumberAxis yAxis)
     {
-		this.canvas		= canvas;
-		this.xAxis		= xAxis;
-		this.yAxis		= yAxis;
+		this.canvas							= canvas;
+		this.xAxis							= xAxis;
+		this.yAxis							= yAxis;
 		
+		// Init granularity settings.
+		this.adjustGranularityDynamically	= true;
+		this.granularity					= -1;
+		
+		// Init axis settings.
 		initAxes();
     }
 	
@@ -63,7 +79,6 @@ public class HeatMap
 	public void refresh(final ArrayList<LDAConfiguration> allLDAConfigurations, final ArrayList<LDAConfiguration> selectedLDAConfigurations, final String key1, final String key2, boolean relativeViewMode) 
     {
 		// If in relative view mode: allLDAConfigurations -> selectedLDAConfigurations.
-		System.out.println("relView = " + relativeViewMode);
 		this.allLDAConfigurations		= relativeViewMode ? selectedLDAConfigurations : allLDAConfigurations;
     	this.selectedLDAConfigurations	= selectedLDAConfigurations;
     	this.key1						= key1;
@@ -79,11 +94,17 @@ public class HeatMap
     	
     	// Bin LDA configuration parameter frequency data and draw it.
     	binnedData = examineLDAConfigurations();
+    	
+    	// Draw heatmap.
     	draw(binnedData);
     }
     
-    public void refresh()
+    public void refresh(boolean reexamineLDAConfigurations)
     {
+    	// Re-examine LDA configurations, if desired (e.g. after changing the granularity settings).
+    	if (reexamineLDAConfigurations)
+    		binnedData = examineLDAConfigurations();
+    	
     	draw(binnedData);
     }
     
@@ -111,8 +132,7 @@ public class HeatMap
 		
 		// 2. Bin data based on found minima and maxima.
 		
-		final int numberOfBins	= (int) Math.sqrt(allLDAConfigurations.size());
-		System.out.println("numberOB = " + numberOfBins);
+		final int numberOfBins	= adjustGranularityDynamically ? (int) Math.sqrt(allLDAConfigurations.size()) : granularity;
 		int[][] binMatrix		= new int[numberOfBins][numberOfBins];
 		double binInterval_key1	= (max_key1 - min_key1) / numberOfBins;
 		double binInterval_key2	= (max_key2 - min_key2) / numberOfBins;
@@ -182,5 +202,14 @@ public class HeatMap
 				gc.fillRect(cellWidth * i, cellHeight * (binMatrix.length - 1 - j), cellWidth, cellHeight);
 			}	
 		}
+    }
+    
+    public void setGranularityInformation(boolean adjustGranularityDynamically, int granularity, boolean update)
+    {
+    	this.adjustGranularityDynamically	= adjustGranularityDynamically;
+    	this.granularity					= granularity;
+    	
+    	if (update)
+    		this.refresh(true);
     }
 }

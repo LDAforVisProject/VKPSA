@@ -38,6 +38,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
@@ -93,6 +94,9 @@ public class AnalysisController extends Controller
 	private @FXML ComboBox<String> combobox_parameterSpace_distribution_xAxis;
 	private @FXML ComboBox<String> combobox_parameterSpace_distribution_yAxis;
 	private HeatMap heatmap_parameterspace;
+	
+	private @FXML Slider slider_parameterSpace_distribution_granularity;
+	private @FXML CheckBox checkbox_parameterSpace_distribution_dynAdjustment;
 
 	/*
 	 * Parameter Space - Distance correlation.
@@ -194,6 +198,9 @@ public class AnalysisController extends Controller
 	 * current environment (in the distance histogram).
 	 */
 	private int distanceBinCountMaximum;
+	/**
+	 * Indicates wheteher or not the maximal count of distances in a bin was yet determined.
+	 */
 	private boolean distanceBinCountMaximumDetermined;
 	
 	// -----------------------------------------------
@@ -349,15 +356,38 @@ public class AnalysisController extends Controller
 		combobox_parameterSpace_distribution_xAxis.getItems().clear();
 		combobox_parameterSpace_distribution_yAxis.getItems().clear();
 		
+		// Add supported parameters to axis comboboxes. 
 		for (String param : LDAConfiguration.SUPPORTED_PARAMETERS) {
 			combobox_parameterSpace_distribution_xAxis.getItems().add(param);
 			combobox_parameterSpace_distribution_yAxis.getItems().add(param);
 		}
 		
+		// Set default axes.
 		combobox_parameterSpace_distribution_xAxis.setValue("alpha");
 		combobox_parameterSpace_distribution_yAxis.setValue("eta");
 		
+		// Init heatmap.
 		heatmap_parameterspace = new HeatMap(canvas_heatmap, numberaxis_parameterSpace_xaxis, numberaxis_parameterSpace_yaxis);
+		
+		/*
+		 * Init option controls.
+		 */
+		
+		// Add listener to determine position during after release.
+		slider_parameterSpace_distribution_granularity.addEventHandler(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent event) 
+            {
+            	heatmap_parameterspace.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
+            }
+        });
+		
+		// Add listener to determine position during mouse drag.
+		slider_parameterSpace_distribution_granularity.addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent event) 
+            {
+            	heatmap_parameterspace.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
+            };
+        });
 	}
 	
 	public void refreshVisualizations(boolean filterData)
@@ -1118,13 +1148,13 @@ public class AnalysisController extends Controller
 				// Adapt width.
 				if (width > 0) {	
 					canvas_heatmap.setWidth(width - 59 - 57);
-					heatmap_parameterspace.refresh();
+					heatmap_parameterspace.refresh(false);
 				}
 				
 				// Adapt height.
 				if (height > 0) {
 					canvas_heatmap.setHeight(height - 45 - 45);
-					heatmap_parameterspace.refresh();
+					heatmap_parameterspace.refresh(false);
 				}
 			break;
 		}
@@ -1188,7 +1218,6 @@ public class AnalysisController extends Controller
 	@FXML
 	public void changeVisualizationViewMode(ActionEvent e)
 	{
-		System.out.println("changing view mode - " + ((Node)e.getSource()).getId());
 		Node source = (Node) e.getSource();
 		
 		switch (source.getId()) {
@@ -1203,5 +1232,12 @@ public class AnalysisController extends Controller
 				updateHeatmap(e);
 			break;
 		}
+	}
+	
+	@FXML
+	public void changeParameterDistributionGranularityMode(ActionEvent e)
+	{
+		slider_parameterSpace_distribution_granularity.setDisable(checkbox_parameterSpace_distribution_dynAdjustment.isSelected());
+		heatmap_parameterspace.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
 	}
 }
