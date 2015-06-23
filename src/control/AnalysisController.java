@@ -373,7 +373,7 @@ public class AnalysisController extends Controller
         //			- Add datapoints to selection (selectedMDSPoints).
         // @todo After that: Create working version of parallel tag cloud visualization.
         // @todo After that: Introduce highlighting of selection of MDS datapoints in other charts (and vice versa).
-        
+        // @todo After that: Switch to SQLite (instead of a file-based system).
         
         // Add rubberband selection tool.
         //new RubberBandSelection((Pane)scatterchart_global.getParent());
