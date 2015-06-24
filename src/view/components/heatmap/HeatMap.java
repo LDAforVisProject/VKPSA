@@ -1,14 +1,13 @@
 package view.components.heatmap;
 
-import java.awt.Adjustable;
 import java.util.ArrayList;
-import java.util.List;
 
+import control.AnalysisController;
 import view.components.ColorScale;
+import view.components.VisualizationComponent;
 import model.LDAConfiguration;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.chart.Axis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.paint.Color;
 
@@ -16,7 +15,7 @@ import javafx.scene.paint.Color;
  * Implements a Canvas-based heatmap.
  * Adapted from http://stackoverflow.com/questions/25214538/draw-a-smooth-color-scale-and-assign-specific-values-to-it.
  */
-public class HeatMap 
+public class HeatMap extends VisualizationComponent
 {
 	/*
 	 * UI elements.
@@ -53,8 +52,10 @@ public class HeatMap
 	 */
 	private BinnedOccurenceEntity binnedData;
 	
-	public HeatMap(Canvas canvas, NumberAxis xAxis, NumberAxis yAxis)
+	public HeatMap(AnalysisController analysisController, Canvas canvas, NumberAxis xAxis, NumberAxis yAxis)
     {
+		super(analysisController);
+		
 		this.canvas							= canvas;
 		this.xAxis							= xAxis;
 		this.yAxis							= yAxis;
@@ -212,4 +213,10 @@ public class HeatMap
     	if (update)
     		this.refresh(true);
     }
+
+	@Override
+	public void changeViewMode(double[][] coordinates)
+	{
+		
+	}
 }

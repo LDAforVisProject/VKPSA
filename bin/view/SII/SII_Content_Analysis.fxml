@@ -423,7 +423,7 @@
                                                                       <CategoryAxis side="BOTTOM" />
                                                                     </xAxis>
                                                                     <yAxis>
-                                                                      <NumberAxis side="LEFT" />
+                                                                      <NumberAxis fx:id="numberaxis_distanceEvaluation_yaxis" side="LEFT" />
                                                                     </yAxis>
                                                                   </BarChart>
                                                                   <Label layoutX="44.0" layoutY="271.0" text="Median" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="44.0" />
