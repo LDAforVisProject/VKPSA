@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane maxHeight="694.0" maxWidth="1366.0" prefHeight="694.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.AnalysisController">
+<AnchorPane maxHeight="694.0" maxWidth="1366.0" prefHeight="694.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.analysisView.AnalysisController">
    <children>
       <SplitPane dividerPositions="0.9772727272727273" prefHeight="694.0" prefWidth="1366.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
@@ -465,15 +465,14 @@
                                                    <children>
                                                       <SplitPane dividerPositions="0.5" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                         <items>
-                                                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                                                          <AnchorPane fx:id="anchorpane_localScope" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                                                                <children>
-                                                                  <WebView layoutX="104.0" layoutY="-7.0" prefHeight="-1.0" prefWidth="-1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
                                                                   <Label layoutX="10.0" layoutY="5.0" text="Local Scope" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0">
                                                                      <font>
                                                                         <Font name="System Bold" size="12.0" />
                                                                      </font>
                                                                   </Label>
-                                                                  <Label layoutX="221.0" layoutY="6.0" text="Parallel Text Blocks" AnchorPane.rightAnchor="10.0">
+                                                                  <Label fx:id="label_visType" layoutX="221.0" layoutY="6.0" text="Parallel Text Blocks" AnchorPane.rightAnchor="10.0">
                                                                      <font>
                                                                         <Font name="System Italic" size="12.0" />
                                                                      </font>

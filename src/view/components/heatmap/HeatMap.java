@@ -1,8 +1,9 @@
 package view.components.heatmap;
 
 import java.util.ArrayList;
+import java.util.Set;
 
-import control.AnalysisController;
+import control.analysisView.AnalysisController;
 import view.components.ColorScale;
 import view.components.VisualizationComponent;
 import model.LDAConfiguration;
@@ -215,7 +216,7 @@ public class HeatMap extends VisualizationComponent
     }
 
 	@Override
-	public void changeViewMode(double[][] coordinates)
+	public void changeViewMode(double[][] data, Set<Integer> selectedIndices)
 	{
 		
 	}

@@ -135,6 +135,14 @@ public class LDAConfiguration
 									);
 	}
 	
+	/**
+	 * Combines already generated values to new LDAConfiguration instances, dependend on the chosen sampling mode.
+	 * @param numberOfDivisions
+	 * @param numberOfDatasetsToGenerate
+	 * @param samplingMode
+	 * @param parameterValueLists
+	 * @return
+	 */
 	public static ArrayList<LDAConfiguration> generateLDAConfigurations(int numberOfDivisions, int numberOfDatasetsToGenerate, String samplingMode, Map<String, ArrayList<Double>> parameterValueLists)
 	{
 		ArrayList<LDAConfiguration> configList = new ArrayList<LDAConfiguration>();

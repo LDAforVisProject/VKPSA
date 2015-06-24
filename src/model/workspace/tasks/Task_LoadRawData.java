@@ -16,7 +16,7 @@ import model.workspace.WorkspaceAction;
 /**
  * Loads datasets from specified directory.
  */
-public class Task_LoadRawData extends Task_WorkspaceTask
+public class Task_LoadRawData extends WorkspaceTask
 {
 
 	public Task_LoadRawData(Workspace workspace, WorkspaceAction workspaceAction)

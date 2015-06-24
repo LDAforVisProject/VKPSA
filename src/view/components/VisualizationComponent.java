@@ -1,6 +1,8 @@
 package view.components;
 
-import control.AnalysisController;
+import java.util.Set;
+
+import control.analysisView.AnalysisController;
 
 /**
  * Base class for visualization components.
@@ -16,5 +18,5 @@ public abstract class VisualizationComponent
 		this.analysisController	= analysisController;
 	}
 	
-	public abstract void changeViewMode(double[][] data);
+	public abstract void changeViewMode(double[][] data, Set<Integer> selectedIndices);
 }

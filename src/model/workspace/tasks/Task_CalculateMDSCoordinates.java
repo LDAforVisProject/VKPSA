@@ -18,7 +18,7 @@ import model.workspace.WorkspaceAction;
  * @author RM
  *
  */
-public class Task_CalculateMDSCoordinates extends Task_WorkspaceTask
+public class Task_CalculateMDSCoordinates extends WorkspaceTask
 {
 
 	public Task_CalculateMDSCoordinates(Workspace workspace, WorkspaceAction workspaceAction)

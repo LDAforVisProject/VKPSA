@@ -8,6 +8,7 @@ import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import control.analysisView.AnalysisController;
 import control.dataView.DataSubViewController;
 import control.dataView.DataViewController;
 import model.workspace.Workspace;
@@ -110,7 +111,8 @@ public class CoreController extends Controller
 				if (!viewNodeMap.containsKey("analyze")) {
 					initView("analyze", "/view/SII/SII_Content_Analysis.fxml");
 					
-					// Draw visualizations.
+					// Set scene and draw visualizations.
+					((AnalysisController)controllerMap.get("analyze")).setScene(scene);;
 					((AnalysisController)controllerMap.get("analyze")).refreshVisualizations(true);
 				}
 				

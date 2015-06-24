@@ -1,8 +1,8 @@
-package control;
+package control.analysisView;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -14,30 +14,28 @@ import model.LDAConfiguration;
 
 import org.controlsfx.control.RangeSlider;
 
+import control.Controller;
 import view.components.DistancesBarchart;
 import view.components.HoveredThresholdNode;
+import view.components.LocalScopeInstance;
 import view.components.MDSScatterchart;
-import view.components.RubberBandSelection;
 import view.components.heatmap.HeatMap;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.chart.Axis;
 import javafx.scene.chart.BarChart;
-import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
-import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Accordion;
-import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.CheckBox;
@@ -47,7 +45,6 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.util.Pair;
 
@@ -56,6 +53,12 @@ public class AnalysisController extends Controller
 	// -----------------------------------------------
 	// 				UI elements
 	// -----------------------------------------------
+	
+	private Scene scene;
+	
+	/*
+	 * Anchor pane for options.
+	 */
 	
 	private @FXML AnchorPane anchorpane_parameterSpace_distribution;
 	private @FXML Accordion accordion_options;
@@ -68,8 +71,6 @@ public class AnalysisController extends Controller
 	private MDSScatterchart mdsScatterchart;
 	
 	private @FXML ScatterChart<Number, Number> scatterchart_global;
-	private NumberAxis scatterchart_xAxis;
-	private NumberAxis scatterchart_yAxis;
 	
 	/*
 	 * Distances barchart. 
@@ -121,6 +122,16 @@ public class AnalysisController extends Controller
 	private @FXML CheckBox checkbox_ddc_eta;
 	
 	private @FXML VBox vbox_ddcHoverInformation;
+	
+	/*
+	 * Local scope.
+	 */
+	
+	// At the moment: Only one local scope instance supported (parallel tag clouds).
+	private LocalScopeInstance localScopeInstance;
+	
+	private @FXML AnchorPane anchorpane_localScope;
+	private @FXML Label label_visType;
 	
 	/*
 	 * Filter controls.
@@ -243,6 +254,10 @@ public class AnalysisController extends Controller
 	
 	private void addResizeListeners()
 	{
+		/*
+		 * Add resize listeners for parameter space anchor pane.
+		 */
+		
 		anchorpane_parameterSpace_distribution.widthProperty().addListener(new ChangeListener<Number>() {
 		    @Override 
 		    public void changed(ObservableValue<? extends Number> observableValue, Number oldWidth, Number newWidth)
@@ -258,6 +273,26 @@ public class AnalysisController extends Controller
 		    	resizeElement(anchorpane_parameterSpace_distribution, 0, newHeight.doubleValue());
 		    }
 		});
+		
+		/*
+		 * Add resize listeners for local scope anchor pane.
+		 */
+		
+		anchorpane_localScope.widthProperty().addListener(new ChangeListener<Number>() {
+		    @Override 
+		    public void changed(ObservableValue<? extends Number> observableValue, Number oldWidth, Number newWidth)
+		    {
+		        resizeElement(anchorpane_localScope, newWidth.doubleValue(), 0);
+		    }
+		});
+		
+		anchorpane_localScope.heightProperty().addListener(new ChangeListener<Number>() {
+		    @Override 
+		    public void changed(ObservableValue<? extends Number> observableValue, Number oldHeight, Number newHeight) 
+		    {
+		    	resizeElement(anchorpane_localScope, 0, newHeight.doubleValue());
+		    }
+		});
 	}
 	
 	/**
@@ -271,6 +306,16 @@ public class AnalysisController extends Controller
 		initDistanceBarchart();
 		initDDCLineChart();
 		initHeatmap();
+		initLocalScopeView();
+	}
+	
+	private void initLocalScopeView()
+	{
+		String fxmlPath = "/view/SII/localScope/SII_Content_Analysis_LocalScope_ParallelTagCloud.fxml";
+		
+		// Create new instance of local scope.
+		localScopeInstance = new LocalScopeInstance(this, workspace, anchorpane_localScope, label_visType);
+		localScopeInstance.load(fxmlPath);
 	}
 	
 	private void initDDCLineChart()
@@ -402,10 +447,14 @@ public class AnalysisController extends Controller
 		
 		// If not done already: Discover global extrema.
 		if (!globalExtremaIdentified) {
+			// Identify global extrema.
 			distancesBarchart.identifyGlobalExtrema(distances);
 			mdsScatterchart.identifyGlobalExtrema(coordinates);
 
-			// Set flag.
+			// Add keyboard listener in order to enable selection.
+			mdsScatterchart.addKeyListener(scene);
+			
+			// Mark global extrema as found.
 			globalExtremaIdentified = true;
 		}
 		
@@ -437,7 +486,7 @@ public class AnalysisController extends Controller
 		
 		// Refresh visualizations.
 		mdsScatterchart.refresh(filteredCoordinates, filteredIndices);
-		distancesBarchart.refresh(filteredDistances);
+		distancesBarchart.refresh(filteredDistances, mdsScatterchart.getSelectedIndices());
 		refreshDistanceLinechart(filteredLDAConfigurations, filteredDistances);
 		heatmap_parameterspace.refresh(ldaConfigurations, filteredLDAConfigurations, combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), button_relativeView_paramDist.isSelected());
 	}
@@ -907,7 +956,6 @@ public class AnalysisController extends Controller
 	{
 		switch (node.getId()) {
 			case "anchorpane_parameterSpace_distribution":
-				
 				// Adapt width.
 				if (width > 0) {	
 					canvas_heatmap.setWidth(width - 59 - 57);
@@ -919,6 +967,11 @@ public class AnalysisController extends Controller
 					canvas_heatmap.setHeight(height - 45 - 45);
 					heatmap_parameterspace.refresh(false);
 				}
+			break;
+			
+			// Resize local scope element.
+			case "anchorpane_localScope":	
+				localScopeInstance.resize(width, height);
 			break;
 		}
 	}
@@ -985,7 +1038,7 @@ public class AnalysisController extends Controller
 		
 		switch (source.getId()) {
 			case "button_relativeView_distEval":
-				distancesBarchart.changeViewMode(filteredDistances);
+				distancesBarchart.changeViewMode(filteredDistances, mdsScatterchart.getSelectedIndices());
 			break;
 
 			case "button_relativeView_paramDist":
@@ -1036,6 +1089,16 @@ public class AnalysisController extends Controller
 	public ArrayList<LDAConfiguration> getLDAConfigurations()
 	{
 		return ldaConfigurations;
+	}
+
+	public Scene getScene()
+	{
+		return scene;
+	}
+
+	public void setScene(Scene scene)
+	{
+		this.scene = scene;
 	}
 	
 //	public double[][] getFilteredCoordinates()

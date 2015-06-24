@@ -15,7 +15,7 @@ import model.LDAConfiguration;
 import model.workspace.Workspace;
 import model.workspace.WorkspaceAction;
 
-public class Task_GenerateData extends Task_WorkspaceTask
+public class Task_GenerateData extends WorkspaceTask
 {
 	public Task_GenerateData(Workspace workspace, WorkspaceAction workspaceAction)
 	{

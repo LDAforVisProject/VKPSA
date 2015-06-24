@@ -8,13 +8,13 @@ import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 
-public abstract class Task_WorkspaceTask extends Task<Integer>
+public abstract class WorkspaceTask extends Task<Integer>
 {
 	protected Workspace workspace;
 	protected WorkspaceAction workspaceAction;
 	protected ArrayList<ITaskListener> listeners;
 	
-	public Task_WorkspaceTask(Workspace workspace, WorkspaceAction workspaceAction)
+	public WorkspaceTask(Workspace workspace, WorkspaceAction workspaceAction)
 	{
 		this.workspace			= workspace;
 		this.workspaceAction	= workspaceAction;

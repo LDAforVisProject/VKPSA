@@ -1,19 +1,32 @@
 package view.components;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import javafx.event.EventHandler;
+import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Pair;
-import control.AnalysisController;
+import javafx.scene.layout.Pane;
+import control.analysisView.AnalysisController;
+import view.components.rubberbandselection.ISelectableComponent;
+import view.components.rubberbandselection.RubberBandSelection;
 
-public class MDSScatterchart extends VisualizationComponent
+enum SelectionMode
+{
+	SINGULAR, GROUP
+};
+
+public class MDSScatterchart extends VisualizationComponent implements ISelectableComponent
 {
 	/*
 	 * GUI elements.
@@ -23,9 +36,14 @@ public class MDSScatterchart extends VisualizationComponent
 	private NumberAxis scatterchart_xAxis;
 	private NumberAxis scatterchart_yAxis;
 	
+	private RubberBandSelection rubberbandSelection;
+	
 	/*
 	 * Other data.
 	 */
+	
+	private SelectionMode selectionMode;
+	private boolean isCtrlDown;
 	
 	/**
 	 * Map storing all selected MDS chart points as values; their respective indices as keys.
@@ -41,6 +59,15 @@ public class MDSScatterchart extends VisualizationComponent
 	 */
 	private Pair<Double, Double> globalCoordinateExtrema_Y;
 	
+	/**
+	 * Reference to this workspace's coordinate collection.
+	 */
+	private double coordinates[][];
+	/**
+	 * Reference to this workspace's collection of filtered indices.
+	 */
+	private Set<Integer> indices;
+	
 	
 	public MDSScatterchart(AnalysisController analysisController, ScatterChart<Number, Number> scatterchart)
 	{
@@ -53,6 +80,7 @@ public class MDSScatterchart extends VisualizationComponent
 		globalCoordinateExtrema_X	= new Pair<Double, Double>(Double.MAX_VALUE, Double.MIN_VALUE);
 		globalCoordinateExtrema_Y	= new Pair<Double, Double>(Double.MAX_VALUE, Double.MIN_VALUE);
 		
+		// Init scatterchart.
 		initScatterchart();
 	}
 
@@ -72,18 +100,50 @@ public class MDSScatterchart extends VisualizationComponent
 		
         scatterchart.setVerticalGridLinesVisible(true);
         
-        // @todo For selection of MDS points:
-        //			- Store reference to instance of RubberBandSelection.
-        //			- Add key listener -> If ctrl is pressed, enable single point mode (disable rubberband listeners). If shift is pressed, enable group mode (rubberband selection).
-        //			- Map rubberband are coordinates to MDS chart.
-        //			- Map MDS chart coordinates to datapoints.
-        //			- Add datapoints to selection (selectedMDSPoints).
-        // @todo After that: Create working version of parallel tag cloud visualization.
-        // @todo After that: Introduce highlighting of selection of MDS datapoints in other charts (and vice versa).
-        // @todo After that: Switch to SQLite (instead of a file-based system).
-        
         // Add rubberband selection tool.
-        //new RubberBandSelection((Pane)scatterchart_global.getParent());
+        rubberbandSelection = new RubberBandSelection((Pane) scatterchart.getParent(), this);
+	}
+	
+	public void addKeyListener(Scene scene)
+	{
+		selectionMode	= SelectionMode.GROUP;
+		isCtrlDown		= false;
+		
+		// Ensure that CAPS LOCK is off.
+		//Toolkit.getDefaultToolkit().setLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK, false);
+		
+        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            public void handle(KeyEvent ke) 
+            {
+                if (ke.getCode() == KeyCode.CAPS) {
+            		// Switch selection mode.
+            		if (selectionMode == SelectionMode.GROUP) {
+            			selectionMode = SelectionMode.SINGULAR;
+            			
+            			// Disable rubber band selection listener.
+            			rubberbandSelection.disable();
+            		}
+            		
+            		else {
+            			selectionMode = SelectionMode.GROUP;
+            			
+            			// Enable rubber band selection listener.
+            			rubberbandSelection.enable();
+            		}
+            	}
+            	
+            	// Remember if CTRL is down.
+            	isCtrlDown = ke.isControlDown();
+            }
+        });
+        
+        scene.setOnKeyReleased(new EventHandler<KeyEvent>() {
+            public void handle(KeyEvent ke) 
+            {
+            	// Remember if CTRL is down.
+            	isCtrlDown = ke.isControlDown();
+            }
+        });
 	}
 	
 	public void identifyGlobalExtrema(double[][] coordinates)
@@ -111,10 +171,14 @@ public class MDSScatterchart extends VisualizationComponent
 	/**
 	 * Refresh scatterchart with data from MDS coordinates. 
 	 * @param coordinates
-	 * @param filteredIndices 
+	 * @param indices 
 	 */
-	public void refresh(double coordinates[][], Set<Integer> filteredIndices)
-	{			
+	public void refresh(double coordinates[][], Set<Integer> indices)
+	{	
+		// Store references to data collection.
+		this.coordinates	= coordinates;
+		this.indices		= indices;
+		
 		// Clear scatterchart.
 		scatterchart.getData().clear();
 		
@@ -126,7 +190,7 @@ public class MDSScatterchart extends VisualizationComponent
         
         // Add filtered points to scatterchart.
         int count = 0;
-        for (int index : filteredIndices) {
+        for (int index : indices) {
         	// Add point only if it's not part of the set of manually selected indices.
         	if (!selectedMDSPoints.containsKey(index)) {
 	        	XYChart.Data<Number, Number> dataPoint = new XYChart.Data<Number, Number>(coordinates[0][count], coordinates[1][count]);
@@ -134,14 +198,14 @@ public class MDSScatterchart extends VisualizationComponent
 	        	dataSeries.getData().add(dataPoint);
         	}
         	
+        	else {
+        		XYChart.Data<Number, Number> selectedPoint = selectedMDSPoints.get(index);
+        		XYChart.Data<Number, Number> dataPoint = new XYChart.Data<Number, Number>(selectedPoint.getXValue(), selectedPoint.getYValue());
+	        	dataPoint.setExtraValue(selectedPoint.getExtraValue());
+	        	selectedDataSeries.getData().add(dataPoint);
+        	}
+        	
         	count++;
-        }
-        
-        // Add selected points to scatterchart.
-        for (Map.Entry<Integer, XYChart.Data<Number, Number>> selectedPoint : selectedMDSPoints.entrySet()) {
-        	XYChart.Data<Number, Number> dataPoint = new XYChart.Data<Number, Number>(selectedPoint.getValue().getXValue(), selectedPoint.getValue().getYValue());
-        	dataPoint.setExtraValue(selectedPoint.getValue().getExtraValue());
-        	selectedDataSeries.getData().add(dataPoint);	
         }
         
         // Add data in scatterchart.
@@ -149,7 +213,7 @@ public class MDSScatterchart extends VisualizationComponent
         scatterchart.getData().add(dataSeries);
         
         // Add mouse listeners.
-        addMouseListenersToMDSScatterchart(coordinates, filteredIndices);
+        addMouseListenersToMDSScatterchart(this.coordinates, this.indices);
         
         // Update scatterchart ranges.
         updateMDSScatterchartRanges();
@@ -169,10 +233,12 @@ public class MDSScatterchart extends VisualizationComponent
 				    @Override
 				    public void handle(MouseEvent mouseEvent)
 				    {       
-				    	if (mouseEvent.isControlDown()) {
-					    	// Remember which points were selected. 
+				    	// If control is not down: Add to selection.
+				    	if (!mouseEvent.isControlDown()) {
 					    	if (!selectedMDSPoints.containsKey(dataPoint.getExtraValue())) {
+					    		// Add to map of selected data points.
 					    		selectedMDSPoints.put((int)dataPoint.getExtraValue(), dataPoint);
+					    		
 					    		// Refresh scatterchart.
 					    		refresh(coordinates, filteredIndices);
 					    	}
@@ -189,15 +255,71 @@ public class MDSScatterchart extends VisualizationComponent
 			    @Override
 			    public void handle(MouseEvent mouseEvent)
 			    {       
+			    	// If control is down: Remove from selection.
 			    	if (mouseEvent.isControlDown()) {
-				    	// Remember which points were selected.
+				    	// Remove from set of selected data points.
 			    		selectedMDSPoints.remove(dataPoint.getExtraValue());
+			    		
 			    		// Refresh scatterchart.
 			    		refresh(coordinates, filteredIndices);
 			    	}
 			    }
 			});
         }
+	}
+	
+	@Override
+	public void processSelectionManipulationRequest(double minX, double minY, double maxX, double maxY)
+	{
+		// If control is not down: Ignore selected points, add all non-selected in chosen area.
+		if (!isCtrlDown) {
+			for (int i = 1; i < scatterchart.getData().size(); i++) {
+				// Get data series.
+				XYChart.Series<Number, Number> dataSeries = scatterchart.getData().get(i);
+				// Iterate over all data points.
+				for (XYChart.Data<Number, Number> datapoint : dataSeries.getData()) {
+					Node datapointNode			= datapoint.getNode();
+					boolean nodeXWithinBounds	= datapointNode.getLayoutX() <= maxX && datapointNode.getLayoutX() >= minX;
+					boolean nodeYWithinBounds	= datapointNode.getLayoutY() <= maxY && datapointNode.getLayoutY() >= minY;
+					
+					// Point was selected - add to sets of selected indices and selected points.
+					if (nodeXWithinBounds && nodeYWithinBounds) {
+						selectedMDSPoints.put((int)datapoint.getExtraValue(), datapoint);
+					}
+				}
+			}
+			
+    		// Refresh scatterchart.
+    		refresh(coordinates, indices);
+		}
+		
+		// Else if control is down: Remove selected points in chose area from selection (in data series 0).
+		else {
+			// Get data series.
+			XYChart.Series<Number, Number> dataSeries = scatterchart.getData().get(0);
+			// Iterate over all data points.
+			for (XYChart.Data<Number, Number> datapoint : dataSeries.getData()) {
+				Node datapointNode			= datapoint.getNode();
+				boolean nodeXWithinBounds	= datapointNode.getLayoutX() <= maxX && datapointNode.getLayoutX() >= minX;
+				boolean nodeYWithinBounds	= datapointNode.getLayoutY() <= maxY && datapointNode.getLayoutY() >= minY;
+				
+				// Point was deselected - remove from of selected points and selected indices.
+				if (nodeXWithinBounds && nodeYWithinBounds) {
+					if (selectedMDSPoints.containsKey((int)datapoint.getExtraValue())) {
+			    		selectedMDSPoints.remove((int)datapoint.getExtraValue());
+					}
+				}
+			}
+			
+    		// Refresh scatterchart.
+    		refresh(coordinates, indices);
+		}
+	}
+	
+	@Override
+	public Pair<Integer, Integer> provideOffsets()
+	{
+		return new Pair<Integer, Integer>(55, 44);
 	}
 	
 	/**
@@ -225,9 +347,18 @@ public class MDSScatterchart extends VisualizationComponent
 	}
 	
 	@Override
-	public void changeViewMode(double[][] coordinates)
+	public void changeViewMode(double[][] coordinates, Set<Integer> selectedIndices)
 	{
 		
 	}
-
+	
+	/**
+	 * Get set of selected indices.
+	 * @return
+	 */
+	public Set<Integer> getSelectedIndices()
+	{
+		return selectedMDSPoints.keySet();
+		
+	}
 }

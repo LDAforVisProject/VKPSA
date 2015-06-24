@@ -3,7 +3,7 @@ package view.components;
 import java.util.ArrayList;
 import java.util.Map;
 
-import control.AnalysisController;
+import control.analysisView.AnalysisController;
 import model.LDAConfiguration;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;

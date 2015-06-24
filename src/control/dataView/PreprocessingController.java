@@ -5,7 +5,7 @@ import java.util.ResourceBundle;
 
 import model.workspace.WorkspaceAction;
 import model.workspace.tasks.Task_LoadRawData;
-import model.workspace.tasks.Task_WorkspaceTask;
+import model.workspace.tasks.WorkspaceTask;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;

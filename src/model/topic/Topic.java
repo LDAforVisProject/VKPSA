@@ -181,55 +181,23 @@ public class Topic
 		// i denotes number of rows in csv (up to number of features).
 		int i					= 0;
 		
-		// Store indices of parameter value locations.
-		Map<String, Integer> paramValueIndexMap	= new HashMap<String, Integer>();
-		// Store parameter values.
-		Map<String, Double> paramValueMap		= new HashMap<String, Double>();
-		
 		// Select path and charset.
 	    Path path				= Paths.get(directory, filename);
 	    Charset charset			= Charset.forName("UTF-8");
 
+	    // Store line containing metadata (the LDA configuration string).
+	    String ldaConfigString	= "";
+	    
 	    // Load and process file.
 	    try {
-			List<String> lines = Files.readAllLines(path, charset);
-
-			// @todo Use LDAConfiguration.generateLDAConfiguration() for generation of LDAConfiguration instance instead.
-			
-			// Get start parameter's start positions in configuration line (#0) in dataset.
-			// Add new parameters to be processed here. Has to be in the form of "param1=x|param2=y|param3=z".
-			paramValueIndexMap.put("k", lines.get(0).indexOf("k="));
-			paramValueIndexMap.put("eta", lines.get(0).indexOf("eta="));
-			paramValueIndexMap.put("alpha", lines.get(0).indexOf("alpha="));
-			
-			// Check if all parameters are available.
-			for (String key : paramValueIndexMap.keySet()) {
-				if (paramValueIndexMap.get(key) < 0) {
-					throw new Exception("### ERROR ### No metadata found in dataset " + filename + "; @" + key);
-				}
-			}
+			List<String> lines 	= Files.readAllLines(path, charset);
+			ldaConfigString		= new String(lines.get(0));
 			
 			// ----------------------------------------------------------------
 			// Read parameter values first, then keyword/probability pairs.
 			// ----------------------------------------------------------------
+			
 			if (topicKeywordAlignment == TopicKeywordAlignment.HORIZONTAL) {
-				// Length for respectively the identifier ("k", "alpha", ...) and the value ("33.4", "0.5", "20", ...).
-				int substringLength = -1;
-				int valueLength		= -1;
-				int startIndex		= -1;
-				int valueIndex		= -1;
-				
-				// Read parameter values.
-				for (String key : paramValueIndexMap.keySet()) {
-					substringLength = key.length();
-					startIndex		= paramValueIndexMap.get(key);
-					valueIndex		= startIndex + substringLength + 1;
-					valueLength		= lines.get(0).indexOf("|", startIndex) > -1 ? lines.get(0).indexOf("|", startIndex) - valueIndex : lines.get(0).length() - valueIndex;
-					
-//					System.out.println("key = " + key + ", startIndex = " + startIndex + ", valueIndex = " + valueIndex + ", next | = " + lines.get(0).indexOf("|", startIndex) + ", valueLength = " + valueLength);
-					paramValueMap.put(key, Double.parseDouble(lines.get(0).substring(valueIndex, valueIndex + valueLength)));
-				}
-				
 				// Read keyword/probability pairs.
 				for (String line : lines.subList(1, lines.size())) {
 					topics.add(new Topic(i++));
@@ -249,13 +217,9 @@ public class Topic
 	    catch (IOException e) {
 	      System.out.println(e);
 	    }
-         
-	    // Create LDA configuration.
-	    LDAConfiguration ldaConfiguration = new LDAConfiguration( 	paramValueMap.get("k").intValue(), 
-	    															paramValueMap.get("alpha"),
-	    															paramValueMap.get("eta"));
+        
 //        System.out.println("@" + filename + "; LDAConfiguration: k = " + ldaConfiguration.getK() + ", alpha = " + ldaConfiguration.getAlpha() + ", eta = " + ldaConfiguration.getEta());
 	    
-        return new Pair<LDAConfiguration, ArrayList<Topic>>(ldaConfiguration, topics);
+        return new Pair<LDAConfiguration, ArrayList<Topic>>(LDAConfiguration.generateLDAConfiguration(ldaConfigString), topics);
 	}
 }

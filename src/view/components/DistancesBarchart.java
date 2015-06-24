@@ -3,6 +3,7 @@ package view.components;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
@@ -12,7 +13,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.util.Pair;
-import control.AnalysisController;
+import control.analysisView.AnalysisController;
 
 public class DistancesBarchart extends VisualizationComponent
 {
@@ -97,8 +98,16 @@ public class DistancesBarchart extends VisualizationComponent
 		globalDistanceExtrema = new Pair<Double, Double>(minX, maxX);
 	}
 	
-	public void refresh(double distances[][])
+	public void refresh(double distances[][], Set<Integer> selectedIndices)
 	{
+		// @todo NEXT:	Highlighting across charts, beginning with distance chart (how (if?) to do with other charts? -> Button switch?)
+		//				At least with barchart easy enough: Two runs, with with all available data, one only considering the selected indices
+		//				-> two data series. _Reasonable?_
+		// @todo After that: Write data into SQLite database, load data in frontend via SQLite driver.
+		
+		//	Clear old barchart data.
+		barchart.getData().clear();
+		
 		// Calculate binning parameters.
 		final int numberOfBins		= 50;
 		final int numberOfElements	= ((distances.length - 1) * (distances.length - 1) + (distances.length - 1)) / 2;
@@ -167,8 +176,6 @@ public class DistancesBarchart extends VisualizationComponent
 			label_max.setText(String.valueOf(max));
 			
 			// Update barchart.
-			//	Clear old data.
-			barchart.getData().clear();
 			//	Add data series.
 			barchart.getData().add(generateDistanceHistogramDataSeries(distanceBinList, numberOfBins, binInterval, min, max));
 			
@@ -238,7 +245,7 @@ public class DistancesBarchart extends VisualizationComponent
 	}
 	
 	@Override
-	public void changeViewMode(double[][] distances)
+	public void changeViewMode(double[][] distances, Set<Integer> selectedIndices)
 	{
 		// Toggle auto-ranging.
 		barchart.getYAxis().setAutoRanging(button_relativeView_distEval.isSelected());
@@ -248,7 +255,7 @@ public class DistancesBarchart extends VisualizationComponent
 			adjustYAxisTickWidth();
 		
 		// Refresh chart.
-		refresh(distances);
+		refresh(distances, selectedIndices);
 	}
 	
 	/**

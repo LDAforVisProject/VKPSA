@@ -18,6 +18,7 @@ import java.util.Map;
 import org.apache.commons.collections4.MultiMap;
 
 
+
 import javafx.beans.property.DoubleProperty;
 import javafx.util.Pair;
 import model.LDAConfiguration;
@@ -30,7 +31,8 @@ import model.workspace.tasks.Task_GenerateParameterList;
 import model.workspace.tasks.Task_LoadDistanceData;
 import model.workspace.tasks.Task_LoadMDSCoordinates;
 import model.workspace.tasks.Task_LoadRawData;
-import model.workspace.tasks.Task_WorkspaceTask;
+import model.workspace.tasks.Task_LoadSpecificDatasets;
+import model.workspace.tasks.WorkspaceTask;
 
 // -----------------------------------------------
 // 		ROADMAP / Todos, in sequential order
@@ -41,9 +43,13 @@ import model.workspace.tasks.Task_WorkspaceTask;
 // @todo Change file-based system to SQLite.
 
 // FRONTEND / analysis view:
+
+// @todo Create working version of parallel tag cloud visualization.
+// @todo After that: Introduce highlighting of selection of MDS datapoints in other charts (and vice versa).
+// @todo Discuss if and to what extend (only visual encoding of each cluster or full-fledged support throughout
+//		 the entire analysis view?) clustering should be supported.
 // @todo Add boxplot for quantiles (and average)? Drop labels instead.
 // @todo Add protocol SplitPane to every view (i.e.: Add in core view).
-// @todo Local scope view.
 // @todo Refactor AnalysisController: Move each chart to a separate component class (common interface structure?)
 //		 for easier maintainability and readability.
 
@@ -115,11 +121,6 @@ public class Workspace implements ITaskListener
 	 * Holds all LDA configurations found in workspace.
 	 */
 	private ArrayList<LDAConfiguration> ldaConfigurations;
-	/**
-	 * Contains all LDA configurations (alias datasets) that
-	 * are assigned this MDS / global scatterplot coordinate.
-	 */
-	private MultiMap<Pair<Double, Double>, LDAConfiguration> reverseMDSCoordinateLookup;
 	
 	/**
 	 * Number of MDS coordinates in in this workspace's .mds file. Used to check workspace integrity.
@@ -166,6 +167,7 @@ public class Workspace implements ITaskListener
 	 */
 	private boolean isMetadataLoaded;
 	
+	
 	// -----------------------------------------------	
 	// -----------------------------------------------
 	// 					Methods
@@ -180,8 +182,6 @@ public class Workspace implements ITaskListener
 		this.ldaConfigurations			= new ArrayList<LDAConfiguration>();
 		this.configurationsToGenerate	= new ArrayList<LDAConfiguration>();
 		this.configurationOptions		= new HashMap<String, String>();
-		
-//		this.reverseMDSCoordinateLookup = new MultiMap<Pair<Double, Double>, LDAConfiguration>();
 		
 		// Set initial values for various flags.
 		
@@ -202,9 +202,9 @@ public class Workspace implements ITaskListener
 	 * @param listener IThreadCompleteListener to be notified when thread has finished. 
 	 * @return Task processing the request.
 	 */
-	public Task_WorkspaceTask executeWorkspaceAction(WorkspaceAction workspaceAction, DoubleProperty progressProperty, ITaskListener listener)
+	public WorkspaceTask executeWorkspaceAction(WorkspaceAction workspaceAction, DoubleProperty progressProperty, ITaskListener listener)
 	{
-		Task_WorkspaceTask task	= null;
+		WorkspaceTask task	= null;
 		
 		switch (workspaceAction) {
 			// -----------------------------------------------
@@ -236,6 +236,12 @@ public class Workspace implements ITaskListener
 				// Load MDS coordinates from file.
 				isMDSDataLoaded 		= false;
 				task					= new Task_LoadMDSCoordinates(this, WorkspaceAction.LOAD_MDS_COORDINATES);
+			break;
+			
+			case LOAD_SPECIFIC_DATASETS:
+				// Plan: Queue instruction in frontend to backend.
+				// Execute data reading task in workspace.
+				task					= new Task_LoadSpecificDatasets(this, WorkspaceAction.LOAD_SPECIFIC_DATASETS);
 			break;
 			
 			// -----------------------------------------------
@@ -275,20 +281,6 @@ public class Workspace implements ITaskListener
 			
 			case RESET:
 				resetData();
-			break;
-			
-			case ALL:
-				/*
-				// Load datasets.
-				System.out.println("Loading");
-				numberOfDatasets	= loadDatasets();
-				// Calculate distances.
-				System.out.println("Distances");
-				distances			= calculateDistances(numberOfDatasets, false);
-				// Calculate MDS coordinates.
-				System.out.println("MDSCoordinates");
-				mdsCoordinates		= calculateMDSCoordinates(distances, true, directory + "\\" + FILENAME_MDSCOORDINATES);
-				*/
 			break;
 			
 			case NONE:

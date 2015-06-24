@@ -1,5 +1,6 @@
 package control.dataView;
 
+import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -41,6 +42,10 @@ public class LoadController extends DataSubViewController
 		
 		// Init file chooser.
 		directoryChooser = new DirectoryChooser();
+
+		// Set default directory, if specified.
+		directoryChooser.setInitialDirectory(new File("D:\\Workspace\\Scientific Computing\\VKPSA\\src\\data"));	
+		
 		directoryChooser.setTitle("Choose Workspace");
 		
 		// Set progress value.

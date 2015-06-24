@@ -22,7 +22,7 @@ import model.workspace.WorkspaceAction;
  * @author RM
  *
  */
-public class Task_CalculateDistances extends Task_WorkspaceTask
+public class Task_CalculateDistances extends WorkspaceTask
 {
 
 	public Task_CalculateDistances(Workspace workspace, WorkspaceAction workspaceAction)
@@ -72,7 +72,7 @@ public class Task_CalculateDistances extends Task_WorkspaceTask
 					distances[j][i] = distances[i][j];
 					
 					int tempNormalizationFactor = 1;
-					for (; distances[i][j] * tempNormalizationFactor < 1; tempNormalizationFactor *= 10);
+					for (; distances[i][j] * tempNormalizationFactor < 10; tempNormalizationFactor *= 10);
 					normalizationFactor = tempNormalizationFactor > normalizationFactor ? tempNormalizationFactor : normalizationFactor;
 					
 					numberOfCalculatedDistances++;

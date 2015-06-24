@@ -1,4 +1,4 @@
-package view.components;
+package view.components.rubberbandselection;
 
 import javax.xml.soap.Node;
 
@@ -8,6 +8,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeLineCap;
+import javafx.util.Pair;
 
 
 /**
@@ -17,21 +18,25 @@ import javafx.scene.shape.StrokeLineCap;
  */
 public class RubberBandSelection 
 {
-	private final DragContext dragContext;
-    private Rectangle rect;
-    private Pane pane;
+	protected final DragContext dragContext;
+    protected Rectangle rect;
+    protected Pane pane;
 
-    private EventHandler<MouseEvent> test;
+    protected EventHandler<MouseEvent> test;
     
-    private EventHandler<MouseEvent> onMousePressedEventHandler;
-    private EventHandler<MouseEvent> onMouseReleasedEventHandler;
-    private EventHandler<MouseEvent> onMouseDraggedEventHandler;
+    protected EventHandler<MouseEvent> onMousePressedEventHandler;
+    protected EventHandler<MouseEvent> onMouseReleasedEventHandler;
+    protected EventHandler<MouseEvent> onMouseDraggedEventHandler;
     
-    public RubberBandSelection(Pane pane) 
+    // Selectable component as listener.
+    ISelectableComponent listener;
+    
+    public RubberBandSelection(Pane pane, ISelectableComponent listener) 
     {
     	this.dragContext	= new DragContext();
         this.pane			= pane;
-
+        this.listener		= listener;
+        
         rect 				= new Rectangle( 0,0,0,0);
         rect.setStroke(Color.BLUE);
         rect.setStrokeWidth(1);
@@ -46,8 +51,8 @@ public class RubberBandSelection
         pane.addEventHandler(MouseEvent.MOUSE_DRAGGED, onMouseDraggedEventHandler);
         pane.addEventHandler(MouseEvent.MOUSE_RELEASED, onMouseReleasedEventHandler);
     }
-
-    public void enable()
+    
+	public void enable()
     {
 	    pane.addEventHandler(MouseEvent.MOUSE_PRESSED, onMousePressedEventHandler);
 	    pane.addEventHandler(MouseEvent.MOUSE_DRAGGED, onMouseDraggedEventHandler);
@@ -61,7 +66,7 @@ public class RubberBandSelection
     	pane.removeEventHandler(MouseEvent.MOUSE_RELEASED, onMouseReleasedEventHandler);
     }
     
-    private void initEventHandler()
+    protected void initEventHandler()
     {
     	onMousePressedEventHandler = new EventHandler<MouseEvent>() 
 	    {
@@ -77,6 +82,9 @@ public class RubberBandSelection
 	            rect.setHeight(0);
 	
 	            pane.getChildren().add( rect);
+	            
+	            // Translate coordinates.
+	            translateToVisualization(dragContext.mouseAnchorX, dragContext.mouseAnchorY, dragContext.mouseAnchorX, dragContext.mouseAnchorY);
 	        }
 	    };
 	
@@ -102,7 +110,7 @@ public class RubberBandSelection
 	        {
 	        	double sceneX = event.getX();
 	            double sceneY = event.getY();
-	
+	            
 	            double offsetX = sceneX - dragContext.mouseAnchorX;
 	            double offsetY = sceneY - dragContext.mouseAnchorY;
 	
@@ -120,15 +128,51 @@ public class RubberBandSelection
 	                rect.setY( sceneY);
 	                rect.setHeight(dragContext.mouseAnchorY - rect.getY());
 	            }
-	
+	            
+	            // Translate coordinates.
+	            translateToVisualization(sceneX, sceneY, dragContext.mouseAnchorX, dragContext.mouseAnchorY);
 	        }
 	    };
     }
 
-    private final class DragContext 
+    protected final class DragContext 
     {
         public double mouseAnchorX;
         public double mouseAnchorY;
     }
 
+	protected void translateToVisualization(double endX, double endY, double startX, double startY)
+	{
+		Pair<Integer, Integer> offset	= listener.provideOffsets();
+		final int offsetX				= offset.getKey();
+		final int offsetY				= offset.getValue();
+		
+		double maxX = 0;
+		double minX = 0;
+		double maxY = 0;
+		double minY = 0;
+		
+		if (endX >= startX) {
+			maxX = endX - offsetX;
+			minX = startX - offsetX;
+		}
+		
+		else {
+			minX = endX - offsetX;
+			maxX = startX - offsetX;
+		}
+		
+		if (endY >= startY) {
+			maxY = endY - offsetY;
+			minY = startY - offsetY;
+		}
+		
+		else {
+			minY = endY - offsetY;
+			maxY = startY - offsetY;
+		}
+		
+		// Pass selection information to listener. 
+		listener.processSelectionManipulationRequest(minX, minY, maxX, maxY);
+	}
 }

@@ -20,7 +20,7 @@ import model.workspace.Dataset;
 import model.workspace.Workspace;
 import model.workspace.WorkspaceAction;
 
-public class Task_LoadDistanceData extends Task_WorkspaceTask
+public class Task_LoadDistanceData extends WorkspaceTask
 {
 	public Task_LoadDistanceData(Workspace workspace, WorkspaceAction workspaceAction)
 	{
@@ -31,7 +31,7 @@ public class Task_LoadDistanceData extends Task_WorkspaceTask
 	protected Integer call() throws Exception
 	{
 		// Assume integrity check was executed and LDA configurations are consistent with data in file.
-		final ArrayList<LDAConfiguration> ldaConfigurations	= workspace.getLDAConfigurations();
+		
 		int n												= -1;
 		double distances[][]								= null;
 		

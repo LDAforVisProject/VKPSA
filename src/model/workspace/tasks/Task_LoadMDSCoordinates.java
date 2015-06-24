@@ -13,7 +13,7 @@ import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 
-public class Task_LoadMDSCoordinates extends Task_WorkspaceTask
+public class Task_LoadMDSCoordinates extends WorkspaceTask
 {
 	public Task_LoadMDSCoordinates(Workspace workspace, WorkspaceAction workspaceAction)
 	{
