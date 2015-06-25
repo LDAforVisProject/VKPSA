@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import database.DBManagement;
 import javafx.util.Pair;
 import model.LDAConfiguration;
 import model.topic.Topic;
@@ -32,6 +33,11 @@ public class Task_LoadRawData extends WorkspaceTask
 	@Override
 	protected Integer call() throws Exception
 	{
+		// Open connection to database.
+		DBManagement db										= new DBManagement(workspace.getDirectory() + "\\" + Workspace.DBNAME);
+		// Get all keyword/probability pairs for each topic in each dataset/LDA configuration.
+		db.loadRawData();
+		
 		Map<LDAConfiguration, Dataset> datasetMap			= new HashMap<LDAConfiguration, Dataset>();
 		final ArrayList<LDAConfiguration> ldaConfigurations	= workspace.getLDAConfigurations();
 		
@@ -41,6 +47,8 @@ public class Task_LoadRawData extends WorkspaceTask
 		// Get number of .csv files in directory (for progress indicators).
 		int csvCount										= workspace.getNumberOfDatasetsInWS();
 		
+		db.closeConnection();
+		/*
 		// Iterate through files.
 		for (String filename : filenames) {
 			// If .csv: Process next file.
@@ -66,6 +74,7 @@ public class Task_LoadRawData extends WorkspaceTask
 				e.printStackTrace();
 			}
 		}
+		*/
 		
 		// Update workspace variables.
 		workspace.setDatasetMap(datasetMap);

@@ -76,19 +76,23 @@ public class Workspace implements ITaskListener
 	/**
 	 * Name of file containing already calculated MDS coordinates.
 	 */
-	public static final String FILENAME_DISTANCES = "workspace.dis";	 
+	public static final String FILENAME_DISTANCES		= "workspace.dis";	 
 	/**
 	 * Name of file containing already calculated MDS coordinates.
 	 */
-	public static final String FILENAME_MDSCOORDINATES = "workspace.mds";
+	public static final String FILENAME_MDSCOORDINATES	= "workspace.mds";
 	/**
 	 * Name of file containing parameters that have yet to be calculated.
 	 */
-	public static final String FILENAME_TOGENERATE = "toGenerate.lda";
+	public static final String FILENAME_TOGENERATE		= "toGenerate.lda";
 	/**
 	 * Name of file containing diverse options (preferences, paths to executables etc.).
 	 */
-	public static final String FILENAME_CONFIGURATION = "workspace.opt";
+	public static final String FILENAME_CONFIGURATION	= "workspace.opt";
+	/**
+	 * Name of file database.
+	 */
+	public static final String DBNAME					= "workspace.db";
 	
 	// -----------------------------------------------
 	// 		Variables storing configuration data
@@ -192,6 +196,10 @@ public class Workspace implements ITaskListener
 		isRawDataLoaded					= false;
 		isDistanceDataLoaded			= false;
 		isMDSDataLoaded					= false;
+		
+		// For testing purposes:
+		this.directory = "D:\\Workspace\\Scientific Computing\\VKPSA\\src\\data";
+		new Thread(new Task_LoadRawData(this, WorkspaceAction.LOAD_RAW_DATA)).start();
 	}
 	
 	/**

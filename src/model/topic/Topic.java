@@ -167,12 +167,14 @@ public class Topic
 	
 	/**
 	 * Reads one file / dataset and generates a list topics from it.
+	 * Deprecated, now that SQLite is used for data management.
 	 * @param directory
 	 * @param filename
 	 * @param topicKeywordAlignment
 	 * @return Pair of (1) the LDA configuration of this file and (2) all topics
 	 * (with the corresponding probability) contained in this file.
-	 * @throws Exception 
+	 * @throws Exception
+	 * @deprecated
 	 */
 	public static Pair<LDAConfiguration, ArrayList<Topic>> generateTopicsFromFile(String directory, String filename, TopicKeywordAlignment topicKeywordAlignment) throws Exception
 	{

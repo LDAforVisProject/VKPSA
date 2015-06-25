@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 
 import mdsj.Data;
 import mdsj.MDSJ;
+import model.workspace.tasks.Task_LoadRawData;
 
 import org.controlsfx.control.RangeSlider;
 import org.controlsfx.control.SegmentedButton;
@@ -17,12 +18,17 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import control.CoreController;
+import database.DBManagement;
 
 public class Main extends Application
 {
 	@Override
 	public void start(Stage primaryStage)
 	{		
+//		DBManagement dbm = new DBManagement("D:\\Workspace\\Scientific Computing\\VKPSA\\src\\data\\workspace.db");
+//		dbm.copyKeywordsInDB();
+		
+		if (true) {
 		// -----------------------------------------------
 		// 		Actual (raw and (pre-)processed) data
 		// -----------------------------------------------
@@ -90,6 +96,7 @@ public class Main extends Application
 		
 		catch(Exception e) {
 			e.printStackTrace();
+		}
 		}
 	}
 
