@@ -216,7 +216,7 @@ public class HeatMap extends VisualizationComponent
     }
 
 	@Override
-	public void changeViewMode(double[][] data, Set<Integer> selectedIndices)
+	public void changeViewMode()
 	{
 		
 	}

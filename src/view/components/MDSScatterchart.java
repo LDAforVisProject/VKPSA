@@ -241,6 +241,8 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 					    		
 					    		// Refresh scatterchart.
 					    		refresh(coordinates, filteredIndices);
+					    		// Refresh other charts.
+					    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet());
 					    	}
 				    	}
 				    }
@@ -262,6 +264,8 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 			    		
 			    		// Refresh scatterchart.
 			    		refresh(coordinates, filteredIndices);
+			    		// Refresh other charts.
+			    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet());
 			    	}
 			    }
 			});
@@ -291,6 +295,8 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 			
     		// Refresh scatterchart.
     		refresh(coordinates, indices);
+    		// Refresh other charts.
+    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet());
 		}
 		
 		// Else if control is down: Remove selected points in chose area from selection (in data series 0).
@@ -313,6 +319,8 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 			
     		// Refresh scatterchart.
     		refresh(coordinates, indices);
+    		// Refresh other charts.
+    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet());
 		}
 	}
 	
@@ -339,7 +347,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 		scatterchart_yAxis.setUpperBound(globalCoordinateExtrema_Y.getValue() + diffY / 10);
     	
     	// Adjust tick width.
-    	final int numberOfTicks = analysisController.getLDAConfigurations().size();
+    	final int numberOfTicks = 10;
     	scatterchart_xAxis.setTickUnit( diffX / numberOfTicks);
     	scatterchart_yAxis.setTickUnit( diffY / numberOfTicks);
     	scatterchart_xAxis.setMinorTickCount(4);
@@ -347,7 +355,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	}
 	
 	@Override
-	public void changeViewMode(double[][] coordinates, Set<Integer> selectedIndices)
+	public void changeViewMode()
 	{
 		
 	}
@@ -359,6 +367,5 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	public Set<Integer> getSelectedIndices()
 	{
 		return selectedMDSPoints.keySet();
-		
 	}
 }

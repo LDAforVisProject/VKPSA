@@ -81,8 +81,6 @@ public class AnalysisController extends Controller
 	private @FXML BarChart<String, Integer> barchart_distances;
 	private @FXML NumberAxis numberaxis_distanceEvaluation_yaxis;
 	
-	private @FXML Label label_min;
-	private @FXML Label label_max;
 	private @FXML Label label_avg;
 	private @FXML Label label_median;
 	
@@ -191,6 +189,8 @@ public class AnalysisController extends Controller
 	 * Collections holding metadata of filtered or selected datasets. 
 	 */
 	
+	// Filtered data.
+	
 	/**
 	 * Stores filterd coordinates.
 	 */
@@ -203,6 +203,13 @@ public class AnalysisController extends Controller
 	 * List of LDA filtered configurations.
 	 */
 	private ArrayList<LDAConfiguration> filteredLDAConfigurations;
+	
+	// Selected data.
+	
+	/**
+	 * Stores filtered and selecte distances.
+	 */
+	private double selectedFilteredDistances[][];
 	
 	/*
 	 * Information on global extrema.
@@ -384,8 +391,8 @@ public class AnalysisController extends Controller
 	
 	private void initDistanceBarchart()
 	{
-		distancesBarchart = new DistancesBarchart(	this, barchart_distances, numberaxis_distanceEvaluation_yaxis, label_min, 
-													label_max, label_avg, label_median, button_relativeView_distEval);
+		distancesBarchart = new DistancesBarchart(	this, barchart_distances, numberaxis_distanceEvaluation_yaxis, 
+													label_avg, label_median, button_relativeView_distEval);
 	}
 	
 	private void initHeatmap()
@@ -427,6 +434,10 @@ public class AnalysisController extends Controller
         });
 	}
 	
+	/**
+	 * Refreshes all visualizations (e.g. after a filter was manipulated).
+	 * @param filterData
+	 */
 	public void refreshVisualizations(boolean filterData)
 	{
 		// Get LDA configurations. Important: Integrity/consistency checks ensure that
@@ -465,30 +476,79 @@ public class AnalysisController extends Controller
 		
 		// Copy data corresponding to chosen LDA configurations in new arrays.
 		int count = 0;
-		for (int selectedIndex : filteredIndices) {
+		for (int filteredIndex : filteredIndices) {
 			// Copy MDS coordinates.
 			for (int column = 0; column < coordinates.length; column++) {
-				filteredCoordinates[column][count] = coordinates[column][selectedIndex];
+				filteredCoordinates[column][count] = coordinates[column][filteredIndex];
 			}
 			
 			// Copy distances.
 			int innerCount = 0;
-			for (int selectedInnerIndex : filteredIndices) {
-				filteredDistances[count][innerCount] = distances[selectedIndex][selectedInnerIndex];
+			for (int filteredInnerIndex : filteredIndices) {
+				filteredDistances[count][innerCount] = distances[filteredIndex][filteredInnerIndex];
 				innerCount++;
 			}
 			
 			// Copy LDA configurations.
-			filteredLDAConfigurations.add(ldaConfigurations.get(selectedIndex));
+			filteredLDAConfigurations.add(ldaConfigurations.get(filteredIndex));
 			
 			count++;
 		}
 		
+		// Update set of filtered and selected values.
+		selectedFilteredDistances	= createFilteredSelectedDistanceMatrix(filteredIndices, mdsScatterchart.getSelectedIndices());
+		
 		// Refresh visualizations.
 		mdsScatterchart.refresh(filteredCoordinates, filteredIndices);
-		distancesBarchart.refresh(filteredDistances, mdsScatterchart.getSelectedIndices());
+		distancesBarchart.refresh(filteredDistances, selectedFilteredDistances);
 		refreshDistanceLinechart(filteredLDAConfigurations, filteredDistances);
 		heatmap_parameterspace.refresh(ldaConfigurations, filteredLDAConfigurations, combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), button_relativeView_paramDist.isSelected());
+	}
+	
+	/**
+	 * Refreshes visualization after data in global MDS scatterchart was selected. 
+	 * @param selectedIndices
+	 */
+	public void refreshVisualizationsAfterGlobalSelection(Set<Integer> selectedIndices)
+	{
+		// Determine selected and filtered distances.
+		selectedFilteredDistances = createFilteredSelectedDistanceMatrix(filteredIndices, selectedIndices);
+		
+		// Refresh visualizations.
+		distancesBarchart.refresh(filteredDistances, selectedFilteredDistances);
+	}
+	
+	/**
+	 * Creates distance matrix out of sets of filtered and selected indices. 
+	 * @param filteredIndices
+	 * @param selectedIndices
+	 * @return
+	 */
+	private double[][] createFilteredSelectedDistanceMatrix(Set<Integer> filteredIndices, Set<Integer> selectedIndices)
+	{
+		// 	1. Find set of indices of filtered and selected datasets.
+		Set<Integer> filteredSelectedIndices = new HashSet<Integer>(selectedIndices.size());
+		
+		for (int selectedIndex : selectedIndices) {
+			if (filteredIndices.contains(selectedIndex)) {
+				filteredSelectedIndices.add(selectedIndex);
+			}
+		}
+		
+		// 2. Copy actual distance data in array.
+		double[][] filteredSelectedDistances = new double[filteredSelectedIndices.size()][filteredSelectedIndices.size()];
+		int count = 0;
+		for (int index : filteredSelectedIndices) {
+			int innerCount = 0;
+			for (int innerIndex : filteredSelectedIndices) {
+				filteredSelectedDistances[count][innerCount] = distances[index][innerIndex];
+				innerCount++;
+			}
+			
+			count++;
+		}
+		
+		return filteredSelectedDistances;
 	}
 	
 	private void addEventHandlerToRangeSlider(RangeSlider rs, String parameter)
@@ -1038,7 +1098,7 @@ public class AnalysisController extends Controller
 		
 		switch (source.getId()) {
 			case "button_relativeView_distEval":
-				distancesBarchart.changeViewMode(filteredDistances, mdsScatterchart.getSelectedIndices());
+				distancesBarchart.changeViewMode();
 			break;
 
 			case "button_relativeView_paramDist":

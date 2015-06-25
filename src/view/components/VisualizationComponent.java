@@ -18,5 +18,5 @@ public abstract class VisualizationComponent
 		this.analysisController	= analysisController;
 	}
 	
-	public abstract void changeViewMode(double[][] data, Set<Integer> selectedIndices);
+	public abstract void changeViewMode();
 }

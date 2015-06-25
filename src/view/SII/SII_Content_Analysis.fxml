@@ -18,11 +18,11 @@
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="900.0" prefWidth="100.0">
                <children>
-                  <SplitPane dividerPositions="0.7305122494432071" orientation="VERTICAL" prefHeight="850.0" prefWidth="1440.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <SplitPane dividerPositions="0.77" orientation="VERTICAL" prefHeight="850.0" prefWidth="1440.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <items>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                            <children>
-                              <SplitPane dividerPositions="0.29797979797979796" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              <SplitPane dividerPositions="0.298" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <items>
                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                                        <children>
@@ -426,30 +426,33 @@
                                                                       <NumberAxis fx:id="numberaxis_distanceEvaluation_yaxis" side="LEFT" />
                                                                     </yAxis>
                                                                   </BarChart>
-                                                                  <Label layoutX="44.0" layoutY="271.0" text="Median" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="44.0" />
-                                                                  <Label layoutX="276.0" layoutY="272.0" text="Maximum" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="90.0" />
-                                                                  <Label layoutX="276.0" layoutY="254.0" text="Minimum" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="90.0" />
-                                                                  <Label fx:id="label_avg" layoutX="135.0" layoutY="253.0" text="Label" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="120.0">
-                                                                     <font>
-                                                                        <Font name="System Italic" size="12.0" />
-                                                                     </font>
-                                                                  </Label>
-                                                                  <Label fx:id="label_median" layoutX="135.0" layoutY="271.0" text="Label" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="120.0">
-                                                                     <font>
-                                                                        <Font name="System Italic" size="12.0" />
-                                                                     </font>
-                                                                  </Label>
-                                                                  <Label fx:id="label_max" layoutX="379.0" layoutY="254.0" text="Label" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="30.0">
-                                                                     <font>
-                                                                        <Font name="System Italic" size="12.0" />
-                                                                     </font>
-                                                                  </Label>
-                                                                  <Label fx:id="label_min" layoutX="379.0" layoutY="272.0" text="Label" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="30.0">
-                                                                     <font>
-                                                                        <Font name="System Italic" size="12.0" />
-                                                                     </font>
-                                                                  </Label>
-                                                                  <Label layoutX="44.0" layoutY="253.0" text="Average" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="44.0" />
+                                                                  <GridPane layoutX="7.0" layoutY="217.0" prefHeight="41.0" prefWidth="71.0">
+                                                                     <columnConstraints>
+                                                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="106.0" minWidth="10.0" prefWidth="36.0" />
+                                                                     </columnConstraints>
+                                                                     <rowConstraints>
+                                                                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                     </rowConstraints>
+                                                                     <children>
+                                                                        <Label fx:id="label_median" layoutX="82.0" layoutY="215.0" text="Label" AnchorPane.bottomAnchor="12.0" AnchorPane.leftAnchor="82.0" GridPane.rowIndex="1">
+                                                                           <font>
+                                                                              <Font name="System Italic" size="12.0" />
+                                                                           </font>
+                                                                           <GridPane.margin>
+                                                                              <Insets />
+                                                                           </GridPane.margin>
+                                                                        </Label>
+                                                                        <Label fx:id="label_avg" layoutX="82.0" layoutY="195.0" prefHeight="18.0" prefWidth="63.0" text="Label" AnchorPane.bottomAnchor="32.0" AnchorPane.leftAnchor="82.0">
+                                                                           <font>
+                                                                              <Font name="System Italic" size="12.0" />
+                                                                           </font>
+                                                                           <GridPane.margin>
+                                                                              <Insets />
+                                                                           </GridPane.margin>
+                                                                        </Label>
+                                                                     </children>
+                                                                  </GridPane>
                                                                   <ToggleButton fx:id="button_relativeView_distEval" layoutX="268.0" layoutY="3.0" mnemonicParsing="false" onAction="#changeVisualizationViewMode" text="Relative view" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
                                                                      <font>
                                                                         <Font size="10.0" />
@@ -539,7 +542,7 @@
                               </SplitPane>
                            </children>
                         </AnchorPane>
-                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="139.0" prefWidth="1328.0">
                            <children>
                             <AnchorPane minHeight="212.0" minWidth="300.0" prefHeight="212.0" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <children>
@@ -559,16 +562,16 @@
                                           <Image url="@icons/cog.png" />
                                        </image>
                                     </ImageView>
-                                    <TextField layoutX="46.0" layoutY="63.0" prefHeight="25.0" prefWidth="243.0" text="Search Term" />
-                                    <ImageView fitHeight="15.0" fitWidth="15.0" layoutX="20.0" layoutY="66.0" pickOnBounds="true" preserveRatio="true">
+                                    <TextField layoutX="42.0" layoutY="46.0" prefHeight="25.0" prefWidth="243.0" text="Search Term" />
+                                    <ImageView fitHeight="15.0" fitWidth="15.0" layoutX="16.0" layoutY="49.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
                                           <Image url="@icons/490px-Magnifying_glass_icon.svg.png" />
                                        </image>
                                     </ImageView>
-                                    <Label layoutX="19.0" layoutY="107.0" text="Scope" />
-                                    <Label layoutX="19.0" layoutY="141.0" text="Type" />
-                                    <ComboBox layoutX="146.0" layoutY="102.0" prefHeight="25.0" prefWidth="140.0" />
-                                    <ComboBox layoutX="146.0" layoutY="137.0" prefHeight="25.0" prefWidth="140.0" />
+                                    <Label layoutX="15.0" layoutY="90.0" text="Scope" />
+                                    <Label layoutX="15.0" layoutY="124.0" text="Type" />
+                                    <ComboBox layoutX="142.0" layoutY="85.0" prefHeight="25.0" prefWidth="140.0" />
+                                    <ComboBox layoutX="142.0" layoutY="120.0" prefHeight="25.0" prefWidth="140.0" />
                                  </children>
                               </AnchorPane>
                               <ScrollPane hbarPolicy="ALWAYS" layoutX="300.0" layoutY="6.0" vbarPolicy="NEVER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
