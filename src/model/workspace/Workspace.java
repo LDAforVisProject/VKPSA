@@ -19,13 +19,16 @@ import org.apache.commons.collections4.MultiMap;
 
 
 
+
+
+import database.DBManagement;
 import javafx.beans.property.DoubleProperty;
 import javafx.util.Pair;
 import model.LDAConfiguration;
 import model.workspace.tasks.ITaskListener;
 import model.workspace.tasks.Task_CalculateDistances;
 import model.workspace.tasks.Task_CalculateMDSCoordinates;
-import model.workspace.tasks.Task_CollectFileMetadata;
+import model.workspace.tasks.Task_CollectMetadata;
 import model.workspace.tasks.Task_GenerateData;
 import model.workspace.tasks.Task_GenerateParameterList;
 import model.workspace.tasks.Task_LoadDistanceData;
@@ -171,6 +174,11 @@ public class Workspace implements ITaskListener
 	 */
 	private boolean isMetadataLoaded;
 	
+	// -----------------------------------------------
+	// 		Database
+	// -----------------------------------------------	
+	
+	private DBManagement db;
 	
 	// -----------------------------------------------	
 	// -----------------------------------------------
@@ -198,8 +206,8 @@ public class Workspace implements ITaskListener
 		isMDSDataLoaded					= false;
 		
 		// For testing purposes:
-		this.directory = "D:\\Workspace\\Scientific Computing\\VKPSA\\src\\data";
-		new Thread(new Task_LoadRawData(this, WorkspaceAction.LOAD_RAW_DATA)).start();
+//		this.directory = "D:\\Workspace\\Scientific Computing\\VKPSA\\src\\data";
+//		new Thread(new Task_CollectMetadata(this, WorkspaceAction.COLLECT_METADATA)).start();
 	}
 	
 	/**
@@ -219,14 +227,14 @@ public class Workspace implements ITaskListener
 			// 				Loading operations
 			// -----------------------------------------------
 			
-			case COLLECT_FILE_METADATA:
+			case COLLECT_METADATA:
 				isMetadataLoaded		= false;
 				isRawDataLoaded			= false;
 				isDistanceDataLoaded	= false;
 				isMDSDataLoaded			= false;
 				
 				// Collect metadata from raw topic files.
-				task					= new Task_CollectFileMetadata(this, WorkspaceAction.COLLECT_FILE_METADATA);
+				task					= new Task_CollectMetadata(this, WorkspaceAction.COLLECT_METADATA);
 			break;
 			
 			case LOAD_RAW_DATA:
@@ -316,7 +324,7 @@ public class Workspace implements ITaskListener
 	{
 		switch (workspaceAction) 
 		{
-			case COLLECT_FILE_METADATA:
+			case COLLECT_METADATA:
 				// Load raw data.
 				System.out.println("[Post-generation] Collected metadata.");
 				//workspace.executeWorkspaceAction(WorkspaceAction.LOAD_RAW_DATA, generate_progressIndicator.progressProperty(), this);
@@ -334,7 +342,6 @@ public class Workspace implements ITaskListener
 		// Clear containers.
 		datasetMap.clear();
 		ldaConfigurations.clear();
-//		reverseMDSCoordinateLookup.clear();
 		
 		// Clear arrays.
 		distances					= null;
@@ -359,14 +366,16 @@ public class Workspace implements ITaskListener
 	 */
 	public int readNumberOfDatasets()
 	{
-		numberOfDatasetsInWS = 0;
+		// Open connection to database.
+		numberOfDatasetsInWS = db.readNumberOfLDAConfigurations();
 		
-		for(File f : new File(directory).listFiles()) {
-			String filePath			= f.getAbsolutePath();
-			String fileExtension	= filePath.substring(filePath.lastIndexOf(".") + 1, filePath.length());
-			
-			numberOfDatasetsInWS	= "csv".equals(fileExtension) ? numberOfDatasetsInWS + 1 : numberOfDatasetsInWS;
-		}
+		// File-based:
+//		for(File f : new File(directory).listFiles()) {
+//			String filePath			= f.getAbsolutePath();
+//			String fileExtension	= filePath.substring(filePath.lastIndexOf(".") + 1, filePath.length());
+//			
+//			numberOfDatasetsInWS	= "csv".equals(fileExtension) ? numberOfDatasetsInWS + 1 : numberOfDatasetsInWS;
+//		}
 		
 		return numberOfDatasetsInWS;
 	}
@@ -541,6 +550,13 @@ public class Workspace implements ITaskListener
 	public void setDirectory(String directory)
 	{
 		this.directory = directory;
+		
+		// @todo Check for directory switches (necessary?).
+		if (db == null) {
+			String dbPath	= directory + "\\" + Workspace.DBNAME;
+			db				= new DBManagement(dbPath);
+			System.out.println("Successfully initiated database at " + dbPath + ".");
+		}
 		
 		// Parse configuration file in directory.
 		parseConfigurationFile();

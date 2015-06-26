@@ -27,6 +27,10 @@ public class Task_GenerateData extends WorkspaceTask
 	{
 		System.out.println("Generating data.");
 		
+		// @todo NEXT: 	Update progress information in this task correctly (try piping again?).
+		//				Then: Generate fresh data (~ 50 datasets).
+		//				Then: Implement working version of tag cloud local scope visualization.
+		
 		try {
 			// Init task progress.
 			updateProgress(0, 1);
@@ -60,7 +64,7 @@ public class Task_GenerateData extends WorkspaceTask
 			
 			// Put command in quotation marks to account for space-containing paths.
 			String command = "\"" + python_path + "\" \"" + lda_path + "\" -p " + pass_count + " -m sample -i \"" + input_path + "\" -o \"" + output_path + "\"";
-			System.out.println("command = " + command);
+			System.out.println("Executing LDA with command\n\t" + command);
 			
 			// Execute system call with command.
 			// Be careful: Only tested on a Windows 7 / 64-bit environment.

@@ -11,7 +11,7 @@ import javax.xml.ws.handler.MessageContext.Scope;
 
 import model.LDAConfiguration;
 import model.workspace.WorkspaceAction;
-import model.workspace.tasks.Task_CollectFileMetadata;
+import model.workspace.tasks.Task_CollectMetadata;
 
 import org.controlsfx.control.RangeSlider;
 
@@ -500,11 +500,11 @@ public class GenerationController extends DataSubViewController
 				workspace.executeWorkspaceAction(WorkspaceAction.RESET, null, this);
 				
 				// Collect metadata from raw topic files.
-				workspace.executeWorkspaceAction(WorkspaceAction.COLLECT_FILE_METADATA, generate_progressIndicator.progressProperty(), this);
+				workspace.executeWorkspaceAction(WorkspaceAction.COLLECT_METADATA, generate_progressIndicator.progressProperty(), this);
 			break;
 			
 			// After workspace variables are resetted and file metadata was parsed anew: Preprocess data if desired.
-			case COLLECT_FILE_METADATA:
+			case COLLECT_METADATA:
 				System.out.println("[Post-generation] Collected file metadata.");
 				
 				// If "Include preprocessing" is enabled: Start preprocessing.

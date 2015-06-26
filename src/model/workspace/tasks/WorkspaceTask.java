@@ -42,4 +42,9 @@ public abstract class WorkspaceTask extends Task<Integer>
 	{
 		listeners.remove(listener);
 	}
+	
+	public void updateTaskProgress(long workDone, long max)
+	{
+		updateProgress(workDone, max);
+	}
 }

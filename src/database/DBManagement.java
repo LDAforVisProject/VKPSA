@@ -6,21 +6,32 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
+import javafx.concurrent.Task;
 import javafx.util.Pair;
 import model.LDAConfiguration;
 import model.topic.Topic;
 import model.topic.TopicKeywordAlignment;
+import model.workspace.Dataset;
+import model.workspace.tasks.Task_LoadRawData;
+import model.workspace.tasks.WorkspaceTask;
 
 public class DBManagement
 {
 	private String dbPath;
 	private Connection db;
 	
+	/**
+	 * Is supposed to be equal for all LDA configurations and topics.
+	 */
+	private int numberOfKeywordsPerTopic;
+	
 	public DBManagement(String dbPath)
 	{
 		this.dbPath = dbPath;
-		System.out.println("path = " + dbPath);
+		
 		initConnection();
 	}
 	
@@ -36,7 +47,8 @@ public class DBManagement
 	      System.exit(0);
 	    }
 	    
-	    System.out.println("Opened database successfully");
+	    // Get number of keywords.
+	    readNumberOfKeywords(false);
 	}
 	
 	/**
@@ -74,8 +86,6 @@ public class DBManagement
 			
 			// Re-enable auto-commit.
 			db.setAutoCommit(true);
-			
-			System.out.println("finished");
 		} 
 		
 		catch (Exception e) {
@@ -98,43 +108,224 @@ public class DBManagement
 		}
 	}
 	
-	public void loadRawData()
+	/**
+	 * Reads and returns a list of all LDA configurations in this database.
+	 * @param task
+	 * @return
+	 */
+	public ArrayList<LDAConfiguration> loadLDAConfigurations(WorkspaceTask task)
 	{
-		System.out.println("on it");
-		String insertString = 	"select lda.alpha, lda.kappa, lda.eta, topicID, keyword, probability from keywordInTopic kit " +
+		// Init auxiliary variables.
+		int count			= 0;
+		ResultSet rs		= null;
+		int numberOfResults	= readNumberOfLDAConfigurations();
+		
+		// Init primary collection.
+		ArrayList<LDAConfiguration> ldaConfigurations = new ArrayList<LDAConfiguration>(numberOfResults);
+		
+		// Define query.
+		String query 		= 	"select * from ldaConfigurations lda " +
+								"order by lda.ldaConfigurationID";
+		
+		try {
+			
+			
+			// Prepare statement for selection of raw data and fetch results.
+			PreparedStatement stmt	= db.prepareStatement(query);
+			rs						= stmt.executeQuery();
+			
+			// As long as row is not the last one: Process it.
+			while (rs.next()) {
+				ldaConfigurations.add(new LDAConfiguration(rs.getInt("kappa"), rs.getDouble("alpha"), rs.getDouble("eta")));
+				
+				// Update task progress.
+				task.updateTaskProgress(count++, numberOfResults);
+			}
+		}
+		
+		catch (SQLException e) {
+			System.out.println("ERROR: count = " + count);
+			e.printStackTrace();
+		}
+		
+		return ldaConfigurations;
+	}
+	
+	public Map<LDAConfiguration, Dataset> loadRawData(WorkspaceTask task)
+	{
+		// Init auxiliary variables.
+		int count			= 0;
+		ResultSet rs		= null;
+		int numberOfResults	= readNumberOfKeywordInTopicDatasets();
+		System.out.println("number of results = " + numberOfResults);
+		// Init primary collection.
+		Map<LDAConfiguration, Dataset> datasetMap = new HashMap<LDAConfiguration, Dataset>();
+		
+		// Define query.
+		String query 		=	"select lda.ldaConfigurationID, lda.alpha, lda.kappa, lda.eta, topicID, keyword, probability from keywordInTopic kit " +
 								"join keywords kw on kw.keywordID = kit.keywordID " +
 								"join ldaConfigurations lda on lda.ldaConfigurationID = kit.ldaConfigurationID " +
 								"order by lda.ldaConfigurationID, topicID";
 		
 		try {
-			System.out.println("on it 2");
-			// Prepare statement.
-			PreparedStatement stmt	= db.prepareStatement(insertString);
-			// Fetch results.
-			ResultSet rs			= stmt.executeQuery();
-
+			// Store all created topics for each dataset/LDA configuration in here.
+			Map<LDAConfiguration, ArrayList<Topic>> ldaConfigTopics	= new HashMap<LDAConfiguration, ArrayList<Topic>>();
+			Map<String, Double> keywordProbabilityMap				= new HashMap<String, Double>(numberOfKeywordsPerTopic);
+			
+			// Prepare statement for selection of raw data and fetch results.
+			PreparedStatement stmt	= db.prepareStatement(query);
+			rs						= stmt.executeQuery();
+			
 			/*
 			 * Create collection of datasets over collection of topics over collection of keyword/probability pairs.
 			 */
 			
-			// Get values of first line.
-			LDAConfiguration currentLDAConfig = new LDAConfiguration(rs.getInt("kappa"), rs.getDouble("alpha"), rs.getDouble("eta"));
-			rs.next();
+			// Init reference values.
+			LDAConfiguration currLDAConfig 	= new LDAConfiguration(rs.getInt("kappa"), rs.getDouble("alpha"), rs.getDouble("eta"));//new LDAConfiguration(-1, 0, 0);
+			int currTopicID					= rs.getInt("topicID"); //-1;
 			
+			// Init collection for topics per LDA configuration.
+			ldaConfigTopics.put(new LDAConfiguration(currLDAConfig), new ArrayList<Topic>());
+			
+			// As long as row is not the last one: Process it.
 			while (rs.next()) {
-				double alpha 		= rs.getDouble("alpha");
-				int kappa			= rs.getInt("kappa");
-				double eta 			= rs.getDouble("eta");
-				int topicID 		= rs.getInt("topicID");
-		        String keyword		= rs.getString("keyword");
-		        double probability	= rs.getDouble("probability");
+				LDAConfiguration ldaConfig 	= new LDAConfiguration(rs.getInt("kappa"), rs.getDouble("alpha"), rs.getDouble("eta"));
+				int topicID 				= rs.getInt("topicID");
+		      
+				// Current row contains first entry of new LDA configuration.
+				if (!ldaConfig.equals(currLDAConfig)) {
+//		        	System.out.println("### LDA_CONFIG = " + currLDAConfigID + ", TOPICID = " + currTopicID);
+//		        	System.out.println("\tat count = " + count);
+		        	
+		        	// 1. Create new topic out of collected keyword/probability pairs.
+		        	ldaConfigTopics.get(currLDAConfig).add(new Topic(currTopicID, keywordProbabilityMap));
+		        	
+		        	// 2. Create new dataset out of collected topics.
+		        	datasetMap.put( currLDAConfig, new Dataset(new LDAConfiguration(ldaConfig), ldaConfigTopics.get(currLDAConfig)));
+		        	
+		        	// Update currLDAConfig.
+		        	currLDAConfig.copy(ldaConfig);
+		        	
+		        	// Clear topic collection.
+		        	ldaConfigTopics.put(new LDAConfiguration(currLDAConfig), new ArrayList<Topic>());
+		        }
+		        
+				// Current row contains first entry of new topic.
+		        if (topicID != currTopicID) {
+//		        	System.out.println("\tOld: " + currLDAConfigID + "; TOPICID = " + currTopicID);
+//		        	System.out.println("\tNew: " + rs.getInt("ldaConfigurationID") + "; TOPICID = " + topicID);
+
+		        	// Create new topic out of collected keyword/probability pairs.
+		        	ldaConfigTopics.get(currLDAConfig).add(new Topic(currTopicID, keywordProbabilityMap));
+		        	
+		        	// Update currTopicID.
+		        	currTopicID = topicID;
+		        }
+		        
+		        // Add keyword/probability pair to hash map.
+				keywordProbabilityMap.put(rs.getString("keyword"), rs.getDouble("probability"));
+
+				// Update task progress.
+				task.updateTaskProgress(count++, numberOfResults);
 			}
+			
+			// For last dataset: Flush data, create last dataset.
+        	// 	1. Create new topic out of collected keyword/probability pairs.
+        	ldaConfigTopics.get(currLDAConfig).add(new Topic(currTopicID, keywordProbabilityMap));
+        	// 	2. Create new dataset out of collected topics.
+        	Dataset test = new Dataset(currLDAConfig, ldaConfigTopics.get(currLDAConfig));
+        	datasetMap.put( currLDAConfig, test );
+        	
+			System.out.println(count + " rows.");
+		}
+		
+		catch (SQLException e) {
+			System.out.println("ERROR: count = " + count);
+			e.printStackTrace();
+		}
+		
+		return datasetMap;
+	}
+	
+	public int readNumberOfLDAConfigurations()
+	{
+		String query = 	"select count(*) resCount from ldaConfigurations";
+		
+		try {
+			// Parse statement.
+			PreparedStatement stmt	= db.prepareStatement(query);
+			
+			// Fetch results.
+			ResultSet rs			= stmt.executeQuery();
+			
+			// Return result.
+			return rs.getInt("resCount");
 		}
 		
 		catch (SQLException e) {
 			e.printStackTrace();
 		}
 		
-		System.out.println("finished with raw data load");
+		return -1;
+	}
+	
+	private int readNumberOfKeywordInTopicDatasets()
+	{
+		String query = 	"select count(*) as resCount from keywordInTopic kit " +
+						"join keywords kw on kw.keywordID = kit.keywordID " +
+						"join ldaConfigurations lda on lda.ldaConfigurationID = kit.ldaConfigurationID " +
+						"order by lda.ldaConfigurationID, topicID";
+		
+		try {
+			// Parse statement.
+			PreparedStatement stmt	= db.prepareStatement(query);
+			
+			// Fetch results.
+			ResultSet rs			= stmt.executeQuery();
+			
+			// Return result.
+			return rs.getInt("resCount");
+		}
+		
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return -1;
+	}
+	
+	private void readNumberOfKeywords(boolean useDedicatedTable)
+	{
+		try {
+			if (useDedicatedTable) {
+				// Get number of keywords.
+				PreparedStatement numKeywordsStmt	= db.prepareStatement("select count(*) as numKeywords from keywords");
+				ResultSet rs						= numKeywordsStmt.executeQuery();
+				numberOfKeywordsPerTopic			= rs.getInt("numKeywords");
+			}
+			
+			else {
+				// Complete request:
+//				select lda.alpha, lda.kappa, lda.eta, topicID, count(*) from keywordInTopic kit
+//				join ldaConfigurations lda on lda.ldaConfigurationID = kit.ldaConfigurationID
+//				group by lda.alpha, lda.kappa, lda.eta, topicID
+//				order by lda.ldaConfigurationID, topicID;
+				
+				// Simplified request:
+				String stmtString					= 	"select count(*) as actualKWCount from keywordInTopic kit " +
+														"join ldaConfigurations lda on lda.ldaConfigurationID = kit.ldaConfigurationID " +
+														"group by lda.ldaConfigurationID, topicID " +
+														"order by lda.ldaConfigurationID, topicID";
+				
+				PreparedStatement numKeywordsStmt	= db.prepareStatement(stmtString);
+				ResultSet rs						= numKeywordsStmt.executeQuery();
+				// Grab first result (they should all amount to the same number).
+				numberOfKeywordsPerTopic			= rs.getInt("actualKWCount");
+			}
+		} 
+		
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 }

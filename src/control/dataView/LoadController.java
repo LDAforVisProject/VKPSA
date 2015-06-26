@@ -100,7 +100,7 @@ public class LoadController extends DataSubViewController
 				workspace.setDirectory(currentPath);
 				
 				// Collect file metadata. Execute other actions once file metadata reading is complete.
-				workspace.executeWorkspaceAction(WorkspaceAction.COLLECT_FILE_METADATA, progressIndicator_load.progressProperty(), this);
+				workspace.executeWorkspaceAction(WorkspaceAction.COLLECT_METADATA, progressIndicator_load.progressProperty(), this);
 			}
 			
 			// Specified is current directory.
@@ -124,7 +124,7 @@ public class LoadController extends DataSubViewController
 	public void notifyOfTaskCompleted(final WorkspaceAction workspaceAction)
 	{
 		switch (workspaceAction) {
-			case COLLECT_FILE_METADATA:
+			case COLLECT_METADATA:
 				System.out.println("Collected file metadata.");
 				
 				// If .dis exists: Load it.

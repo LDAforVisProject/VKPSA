@@ -35,11 +35,38 @@ public class Task_LoadRawData extends WorkspaceTask
 	{
 		// Open connection to database.
 		DBManagement db										= new DBManagement(workspace.getDirectory() + "\\" + Workspace.DBNAME);
-		// Get all keyword/probability pairs for each topic in each dataset/LDA configuration.
-		db.loadRawData();
 		
-		Map<LDAConfiguration, Dataset> datasetMap			= new HashMap<LDAConfiguration, Dataset>();
+		// Collection of datasets including lists of topics where each topic includes a complete 
+		// dictionary containing words and their probabilities for the respective words for this topic.
+		// Get all keyword/probability pairs for each topic in each dataset/LDA configuration.
+		Map<LDAConfiguration, Dataset> datasetMap			= db.loadRawData(this);;
+		
+		// Close DB connection.
+		db.closeConnection();
+		
+		// Update task progress.
+		updateProgress(1,  1);
+		
+		// Update workspace variables.
+		workspace.setDatasetMap(datasetMap);
+		
+		// Tell workspace that raw topic data was loaded.
+		workspace.setRawDataLoaded(true);
+		
+		return datasetMap.size();
+	}
+}
+
+
+// File-based version:
+/*
+ 	
+ 		Map<LDAConfiguration, Dataset> datasetMap			= new HashMap<LDAConfiguration, Dataset>();
 		final ArrayList<LDAConfiguration> ldaConfigurations	= workspace.getLDAConfigurations();
+
+		// Get all keyword/probability pairs for each topic in each dataset/LDA configuration.
+		db.loadRawData(datasetMap);
+
 		
 		final String[] filenames							= new File(workspace.getDirectory()).list();
 		int numberOfDatasets								= 0;
@@ -48,7 +75,7 @@ public class Task_LoadRawData extends WorkspaceTask
 		int csvCount										= workspace.getNumberOfDatasetsInWS();
 		
 		db.closeConnection();
-		/*
+		
 		// Iterate through files.
 		for (String filename : filenames) {
 			// If .csv: Process next file.
@@ -74,7 +101,7 @@ public class Task_LoadRawData extends WorkspaceTask
 				e.printStackTrace();
 			}
 		}
-		*/
+		
 		
 		// Update workspace variables.
 		workspace.setDatasetMap(datasetMap);
@@ -83,5 +110,6 @@ public class Task_LoadRawData extends WorkspaceTask
 		workspace.setRawDataLoaded(true);
 		
 		return numberOfDatasets;
-	}
-}
+ 
+ 
+*/

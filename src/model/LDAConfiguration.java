@@ -39,16 +39,23 @@ public class LDAConfiguration
 	// -----------------------------------------------
 	// -----------------------------------------------	
 	
-	public LDAConfiguration(int k, double alpha, double eta)
+	public LDAConfiguration(int kappa, double alpha, double eta)
 	{
-		this.kappa		= k;
+		this.kappa	= kappa;
 		this.alpha	= alpha;
 		this.eta	= eta;
 	}
 	
 	public LDAConfiguration(final LDAConfiguration source)
 	{
-		this.kappa		= source.kappa;
+		this.kappa	= source.kappa;
+		this.alpha	= source.alpha;
+		this.eta	= source.eta;		
+	}
+	
+	public void copy(final LDAConfiguration source)
+	{
+		this.kappa	= source.kappa;
 		this.alpha	= source.alpha;
 		this.eta	= source.eta;		
 	}

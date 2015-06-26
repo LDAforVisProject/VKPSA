@@ -27,6 +27,18 @@ public class Topic
 		this.keywordProbabilityMap	= new HashMap<String, Double>(4056);
 	}
 	
+	public Topic(int topicNumber, int numberOfKeywords)
+	{
+		this.topicNumber			= topicNumber;
+		this.keywordProbabilityMap	= new HashMap<String, Double>(numberOfKeywords);
+	}
+	
+	public Topic(int topicNumber, Map<String, Double> keywordProbabilityMap)
+	{
+		this.topicNumber			= topicNumber;
+		this.keywordProbabilityMap	= new HashMap<String, Double>(keywordProbabilityMap);
+	}
+	
 	public Topic(Topic source)
 	{
 		this.topicNumber			= source.topicNumber;
@@ -158,6 +170,11 @@ public class Topic
         
         // Calculate and return final results
         return 0.5 * (tempSum_P + tempSum_Q);
+	}
+	
+	public void setKeywordProbabilityMap(HashMap<String, Double> keywordProbabilityMap2)
+	{
+		this.keywordProbabilityMap = keywordProbabilityMap2;
 	}
 	
 	public Map<String, Double> getKeywordProbabilityMap()

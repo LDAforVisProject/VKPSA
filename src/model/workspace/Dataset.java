@@ -57,7 +57,8 @@ public class Dataset
 	public Dataset(final LDAConfiguration parametrization, final ArrayList<Topic> topics)
 	{
 		this.parametrization	= parametrization;
-		this.topics				= new ArrayList<Topic>(topics);
+//		this.topics				= new ArrayList<Topic>(topics);
+		this.topics				= topics;
 	}
 	
 	// -----------------------------------------------

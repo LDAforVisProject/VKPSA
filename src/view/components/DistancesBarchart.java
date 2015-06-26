@@ -134,11 +134,6 @@ public class DistancesBarchart extends VisualizationComponent
 		this.filteredDistances			= filteredDistances;
 		this.selectedFilteredDistances	= selectedFilteredDistances;
 		
-		// @todo NEXT:	Highlighting across charts, beginning with distance chart (how (if?) to do with other charts? -> Button switch?)
-		//				At least with barchart easy enough: Two runs, with with all available data, one only considering the selected indices
-		//				-> two data series. _Reasonable?_
-		// @todo After that: Write data into SQLite database, load data in frontend via SQLite driver.
-		
 		//	Clear old barchart data.
 		barchart.getData().clear();
 		
