@@ -40,7 +40,7 @@
                               <Insets left="10.0" />
                            </GridPane.margin>
                         </Label>
-                        <CheckBox fx:id="checkbox_appendToDistanceMatrix" mnemonicParsing="false" GridPane.columnIndex="1">
+                        <CheckBox fx:id="checkbox_appendToDistanceMatrix" disable="true" mnemonicParsing="false" GridPane.columnIndex="1">
                            <GridPane.margin>
                               <Insets left="10.0" />
                            </GridPane.margin>
@@ -55,27 +55,27 @@
                         </Label>
                         <VBox prefHeight="97.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                            <children>
-                              <CheckBox fx:id="checkbox_hellinger" mnemonicParsing="false" prefHeight="17.0" prefWidth="72.0" text="Hellinger">
+                              <CheckBox fx:id="checkbox_hellinger" disable="true" mnemonicParsing="false" prefHeight="17.0" prefWidth="72.0" text="Hellinger">
                                  <VBox.margin>
                                     <Insets bottom="5.0" top="10.0" />
                                  </VBox.margin>
                               </CheckBox>
-                              <CheckBox fx:id="checkbox_bhattacharyya" mnemonicParsing="false" text="Bhattacharyya">
+                              <CheckBox fx:id="checkbox_bhattacharyya" disable="true" mnemonicParsing="false" selected="true" text="Bhattacharyya">
                                  <padding>
                                     <Insets bottom="5.0" />
                                  </padding>
                               </CheckBox>
-                              <CheckBox fx:id="checkbox_kullbackleibler" mnemonicParsing="false" text="Kullback-Leibler">
+                              <CheckBox fx:id="checkbox_kullbackleibler" disable="true" mnemonicParsing="false" text="Kullback-Leibler">
                                  <padding>
                                     <Insets bottom="5.0" />
                                  </padding>
                               </CheckBox>
-                              <CheckBox fx:id="checkbox_jensenshannon" mnemonicParsing="false" text="Jenssen-Shannon">
+                              <CheckBox fx:id="checkbox_jensenshannon" disable="true" mnemonicParsing="false" text="Jenssen-Shannon">
                                  <padding>
                                     <Insets bottom="5.0" />
                                  </padding>
                               </CheckBox>
-                              <CheckBox fx:id="checkbox_l2" mnemonicParsing="false" text="L2" />
+                              <CheckBox fx:id="checkbox_l2" disable="true" mnemonicParsing="false" text="L2" />
                            </children>
                            <opaqueInsets>
                               <Insets />
@@ -97,12 +97,12 @@
                         </Label>
                         <VBox maxHeight="50.0" prefHeight="56.0" prefWidth="207.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                            <children>
-                              <CheckBox fx:id="checkbox_hausdorff" mnemonicParsing="false" prefHeight="7.0" prefWidth="131.0" text="Hausdorff (max-min)">
+                              <CheckBox fx:id="checkbox_hausdorff" disable="true" mnemonicParsing="false" prefHeight="7.0" prefWidth="131.0" selected="true" text="Hausdorff (max-min)">
                                  <VBox.margin>
                                     <Insets bottom="5.0" />
                                  </VBox.margin>
                               </CheckBox>
-                              <CheckBox fx:id="checkbox_avgmin" mnemonicParsing="false" text="avg-min" />
+                              <CheckBox fx:id="checkbox_avgmin" disable="true" mnemonicParsing="false" text="avg-min" />
                            </children>
                            <GridPane.margin>
                               <Insets left="10.0" />
@@ -147,7 +147,7 @@
                               <Insets left="10.0" />
                            </padding>
                         </Label>
-                        <CheckBox fx:id="checkbox_appendToMDSCoordinateMatrix" mnemonicParsing="false" GridPane.columnIndex="1">
+                        <CheckBox fx:id="checkbox_appendToMDSCoordinateMatrix" disable="true" mnemonicParsing="false" GridPane.columnIndex="1">
                            <GridPane.margin>
                               <Insets left="10.0" />
                            </GridPane.margin>
@@ -160,7 +160,7 @@
                               <Insets left="10.0" />
                            </padding>
                         </Label>
-                        <ComboBox fx:id="combobox_scalingAlgorithm" prefWidth="150.0" promptText="Classical Scaling" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                        <ComboBox fx:id="combobox_scalingAlgorithm" disable="true" prefWidth="150.0" promptText="Classical Scaling" GridPane.columnIndex="1" GridPane.rowIndex="1">
                            <GridPane.margin>
                               <Insets left="10.0" />
                            </GridPane.margin>

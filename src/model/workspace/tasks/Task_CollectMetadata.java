@@ -1,12 +1,5 @@
 package model.workspace.tasks;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import database.DBManagement;
@@ -25,48 +18,11 @@ public class Task_CollectMetadata extends WorkspaceTask
 	protected Integer call() throws Exception
 	{
 		// Open connection to database.
-		DBManagement db									= new DBManagement(workspace.getDirectory() + "\\" + Workspace.DBNAME);
-
-		// Collected LDA configurations.
+		DBManagement db									= workspace.getDatabaseManagement();
+		
+		// Collect LDA configurations.
 		ArrayList<LDAConfiguration> ldaConfigurations	= db.loadLDAConfigurations(this);
-
-		// Close DB connection.
-		db.closeConnection();
-		
-		System.out.println("done");
-
 				
-		
-		// Iterate through files.
-//		for (String filename : filenames) {
-//			// If .csv: Process next file.
-//			try {
-//				if (filename.endsWith(".csv")) {
-//					numberOfDatasets++;
-//					
-//					// Open file reader.
-//					InputStream fis			= new FileInputStream(Paths.get(workspace.getDirectory(), filename).toString());
-//				    InputStreamReader isr	= new InputStreamReader(fis, Charset.forName("UTF-8"));
-//				    BufferedReader reader	= new BufferedReader(isr);
-//				    
-//					// Read first line in dataset (contains metadata).
-//					ldaConfigurations.add(LDAConfiguration.generateLDAConfiguration(reader.readLine()));
-//					
-//					// Close reader.
-//					reader.close();
-//				}
-//			}
-//			
-//			catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//		
-//			// Update task progress.
-//			updateProgress(count, filenames.length);
-//			
-//			count++;
-//		}
-		
 		// Update task progress.
 		updateProgress(1, 1);
 		

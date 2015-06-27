@@ -174,10 +174,10 @@
                   <Label text="Generate only non-available data" />
                   <Label text="Append to working directory" GridPane.rowIndex="1" />
                   <Label text="Number of divisions  for each parameter" GridPane.rowIndex="2" />
-                  <CheckBox mnemonicParsing="false" GridPane.columnIndex="1" />
-                  <CheckBox mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <CheckBox disable="true" mnemonicParsing="false" GridPane.columnIndex="1" />
+                  <CheckBox disable="true" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                   <Label text="Sampling method" GridPane.rowIndex="4" />
-                  <ComboBox fx:id="sampling_combobox" prefWidth="150.0" promptText="Random" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                  <ComboBox fx:id="sampling_combobox" disable="true" prefWidth="150.0" promptText="Random" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                   <TextField fx:id="numberOfDivisions_textfield" maxWidth="50.0" minWidth="40.0" onAction="#updateNumberOfDivisions" prefHeight="25.0" prefWidth="50.0" text="1000" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                   <Label text="Number of datasets" GridPane.rowIndex="3" />
                   <TextField fx:id="numberOfDatasets_textfield" editable="false" maxWidth="50.0" onAction="#updateNumberOfDatasets" prefHeight="25.0" text="1000" GridPane.columnIndex="1" GridPane.rowIndex="3" />

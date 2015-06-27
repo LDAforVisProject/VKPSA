@@ -1,15 +1,9 @@
 package model.workspace.tasks;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 import database.DBManagement;
-import javafx.util.Pair;
 import model.LDAConfiguration;
-import model.topic.Topic;
-import model.topic.TopicKeywordAlignment;
 import model.workspace.Dataset;
 import model.workspace.Workspace;
 import model.workspace.WorkspaceAction;
@@ -34,15 +28,15 @@ public class Task_LoadRawData extends WorkspaceTask
 	protected Integer call() throws Exception
 	{
 		// Open connection to database.
-		DBManagement db										= new DBManagement(workspace.getDirectory() + "\\" + Workspace.DBNAME);
+		DBManagement db										= workspace.getDatabaseManagement();
+
+		// Update task progress.
+		updateProgress(0,  1);
 		
 		// Collection of datasets including lists of topics where each topic includes a complete 
 		// dictionary containing words and their probabilities for the respective words for this topic.
 		// Get all keyword/probability pairs for each topic in each dataset/LDA configuration.
 		Map<LDAConfiguration, Dataset> datasetMap			= db.loadRawData(this);;
-		
-		// Close DB connection.
-		db.closeConnection();
 		
 		// Update task progress.
 		updateProgress(1,  1);

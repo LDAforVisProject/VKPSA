@@ -11,6 +11,7 @@ public class LDAConfiguration
 	// 				Parameters
 	// -----------------------------------------------
 	
+	private int configurationID;
 	private int kappa;
 	private double alpha;
 	private double eta;
@@ -39,25 +40,28 @@ public class LDAConfiguration
 	// -----------------------------------------------
 	// -----------------------------------------------	
 	
-	public LDAConfiguration(int kappa, double alpha, double eta)
+	public LDAConfiguration(int configurationID, int kappa, double alpha, double eta)
 	{
-		this.kappa	= kappa;
-		this.alpha	= alpha;
-		this.eta	= eta;
+		this.configurationID 	= configurationID;
+		this.kappa				= kappa;
+		this.alpha				= alpha;
+		this.eta				= eta;
 	}
 	
 	public LDAConfiguration(final LDAConfiguration source)
 	{
-		this.kappa	= source.kappa;
-		this.alpha	= source.alpha;
-		this.eta	= source.eta;		
+		this.configurationID	= source.configurationID;
+		this.kappa				= source.kappa;
+		this.alpha				= source.alpha;
+		this.eta				= source.eta;		
 	}
 	
 	public void copy(final LDAConfiguration source)
 	{
-		this.kappa	= source.kappa;
-		this.alpha	= source.alpha;
-		this.eta	= source.eta;		
+		this.configurationID	= source.configurationID;
+		this.kappa				= source.kappa;
+		this.alpha				= source.alpha;
+		this.eta				= source.eta;		
 	}
 	
 	/**
@@ -136,7 +140,8 @@ public class LDAConfiguration
 		}
 		
 		// Return newly created LDA configuration.
-		return new LDAConfiguration( 	paramValueMap.get("k").intValue(), 
+		return new LDAConfiguration( 	-1,
+										paramValueMap.get("k").intValue(), 
 										paramValueMap.get("alpha"),
 										paramValueMap.get("eta")
 									);
@@ -163,7 +168,7 @@ public class LDAConfiguration
 					double alpha	= parameterValueLists.get("alpha").get(i);
 					double eta		= parameterValueLists.get("eta").get(i);
 					
-					configList.add(new LDAConfiguration(kappa, alpha, eta)); 
+					configList.add(new LDAConfiguration(-1, kappa, alpha, eta)); 
 				}
 			break;
 			
@@ -262,5 +267,10 @@ public class LDAConfiguration
 		}
 		
 		return symbol;
+	}
+
+	public int getConfigurationID()
+	{
+		return configurationID;
 	}
 }

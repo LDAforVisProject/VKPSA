@@ -2,15 +2,15 @@ package model.workspace.tasks;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import database.DBManagement;
 import model.LDAConfiguration;
 import model.workspace.Workspace;
 import model.workspace.WorkspaceAction;
@@ -26,10 +26,6 @@ public class Task_GenerateData extends WorkspaceTask
 	protected Integer call() throws Exception
 	{
 		System.out.println("Generating data.");
-		
-		// @todo NEXT: 	Update progress information in this task correctly (try piping again?).
-		//				Then: Generate fresh data (~ 50 datasets).
-		//				Then: Implement working version of tag cloud local scope visualization.
 		
 		try {
 			// Init task progress.
@@ -62,6 +58,9 @@ public class Task_GenerateData extends WorkspaceTask
 			 * Start multiple threads each processing a part of the parameter file list.
 			 */
 			
+			// Close DB connection before Python script is using it.
+			workspace.closeDB();
+			
 			// Put command in quotation marks to account for space-containing paths.
 			String command = "\"" + python_path + "\" \"" + lda_path + "\" -p " + pass_count + " -m sample -i \"" + input_path + "\" -o \"" + output_path + "\"";
 			System.out.println("Executing LDA with command\n\t" + command);
@@ -71,30 +70,33 @@ public class Task_GenerateData extends WorkspaceTask
 			Process process = Runtime.getRuntime().exec(command);
 			
 			// Check every five seconds how many datasets were already generated.
-			Timer uploadCheckerTimer = new Timer(true);
-			uploadCheckerTimer.scheduleAtFixedRate(
-			    new TimerTask() {
-			    	public void run() 
-			    	{ 
-			    		// Get number of newly created datasets up to date.
-			    		int numberOfCreatedDatasets = workspace.readNumberOfDatasets(beforeGeneration);
-			    		// Update progress.
-			    		updateProgress(numberOfCreatedDatasets > 0 ? numberOfCreatedDatasets - 1 : numberOfCreatedDatasets, configurationsToGenerate.size());
-			    	}
-			    }, 0, 5000
-			);
+//			Timer uploadCheckerTimer = new Timer(true);
+//			uploadCheckerTimer.scheduleAtFixedRate(
+//			    new TimerTask() {
+//			    	public void run() 
+//			    	{ 
+//			    		// Get number of newly created datasets up to date.
+//			    		int numberOfCreatedDatasets = workspace.readNumberOfDatasets(beforeGeneration);
+//			    		// Update progress.
+//			    		updateProgress(numberOfCreatedDatasets > 0 ? numberOfCreatedDatasets - 1 : numberOfCreatedDatasets, configurationsToGenerate.size());
+//			    	}
+//			    }, 0, 5000
+//			);
 			
 			// Consume messages from input stream.
-			consumeProcessOutputStreams(process);
+			consumeProcessOutputStreams(process, configurationsToGenerate.size());
 
 			// Cancel timer.
-			uploadCheckerTimer.cancel();
+//			uploadCheckerTimer.cancel();
 			
 	      	// Finish only after child process(es) has/have finished.
 	      	//process.waitFor();
 
 			// Clear workspace collection containing parameters to generate.
 			configurationsToGenerate.clear();
+			
+			// Reopen database.
+			workspace.reopenDB();
 			
 			// Update task progress.
 			updateProgress(1, 1);
@@ -107,8 +109,17 @@ public class Task_GenerateData extends WorkspaceTask
 		return null;
 	}
 	
-	private void consumeProcessOutputStreams(Process process)
+	/**
+	 * Consumes lines outputted by the LDA Python script. Each line represents  
+	 * one finished (e.g. generated and written in database) dataset.
+	 * @param process
+	 * @param numberOfDatasetsToGenerate
+	 */
+	private void consumeProcessOutputStreams(Process process, int numberOfDatasetsToGenerate)
 	{
+		// Count lines output
+		int messageCount = 0;
+		
 		try {
 			String line			= null;
 			BufferedReader bri	= new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -116,12 +127,16 @@ public class Task_GenerateData extends WorkspaceTask
 	     
 	      	// Read/consume stdout.
 	      	while ((line = bri.readLine()) != null) {
-	    	  System.out.println(line);
+	      		System.out.println(line);
 	      	}
 	      	
 	      	// Read/consume stderr.
+	      	
 	      	while ((line = bre.readLine()) != null) {
-	    	  System.out.println(line);
+	      		System.out.println(line);
+	      		
+	      		// Update progress.
+	      		updateProgress(messageCount++, numberOfDatasetsToGenerate);
 	      	}
 	      	
 	      	// Close readers and streams.

@@ -43,10 +43,12 @@ import model.workspace.tasks.WorkspaceTask;
 
 // BACKEND / data view:
 // @todo Idea for optimization: Truncate parameter file list / instruct Python script to process only a defined part of it.
-// @todo Change file-based system to SQLite.
+// @todox Change file-based system to SQLite.
 
 // FRONTEND / analysis view:
 
+// @todo Test if strange behaviour of distance barchart is due to messed up MDS coordinates/distance association
+//		 or if there is another problem.
 // @todo Create working version of parallel tag cloud visualization.
 // @todo After that: Introduce highlighting of selection of MDS datapoints in other charts (and vice versa).
 // @todo Discuss if and to what extend (only visual encoding of each cluster or full-fledged support throughout
@@ -204,10 +206,6 @@ public class Workspace implements ITaskListener
 		isRawDataLoaded					= false;
 		isDistanceDataLoaded			= false;
 		isMDSDataLoaded					= false;
-		
-		// For testing purposes:
-//		this.directory = "D:\\Workspace\\Scientific Computing\\VKPSA\\src\\data";
-//		new Thread(new Task_CollectMetadata(this, WorkspaceAction.COLLECT_METADATA)).start();
 	}
 	
 	/**
@@ -538,6 +536,22 @@ public class Workspace implements ITaskListener
 		}
 	}
 	
+	public void closeDB()
+	{
+		System.out.println("Closing database.");
+		
+		if (db != null) {
+			db.close();
+		}
+	}
+	
+	public void reopenDB()
+	{
+		if (db != null) {
+			db.reopen();
+		}
+	}
+	
 	// ------------------------------
 	// From here: Getter and setter.
 	// ------------------------------
@@ -556,6 +570,10 @@ public class Workspace implements ITaskListener
 			String dbPath	= directory + "\\" + Workspace.DBNAME;
 			db				= new DBManagement(dbPath);
 			System.out.println("Successfully initiated database at " + dbPath + ".");
+		}
+		
+		else {
+			System.out.println("### ERROR ### Directory switch currently not supported.");
 		}
 		
 		// Parse configuration file in directory.
@@ -725,5 +743,10 @@ public class Workspace implements ITaskListener
 	public Map<String, String> getConfigurationOptions()
 	{
 		return configurationOptions;
+	}
+
+	public DBManagement getDatabaseManagement()
+	{
+		return db;
 	}
 }

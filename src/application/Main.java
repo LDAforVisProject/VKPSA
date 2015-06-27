@@ -24,11 +24,7 @@ public class Main extends Application
 {
 	@Override
 	public void start(Stage primaryStage)
-	{		
-//		DBManagement dbm = new DBManagement("D:\\Workspace\\Scientific Computing\\VKPSA\\src\\data\\workspace.db");
-//		dbm.copyKeywordsInDB();
-		
-		if (true) {
+	{	
 		// -----------------------------------------------
 		// 		Actual (raw and (pre-)processed) data
 		// -----------------------------------------------
@@ -96,7 +92,6 @@ public class Main extends Application
 		
 		catch(Exception e) {
 			e.printStackTrace();
-		}
 		}
 	}
 

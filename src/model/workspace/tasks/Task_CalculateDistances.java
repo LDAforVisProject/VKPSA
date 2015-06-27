@@ -65,7 +65,7 @@ public class Task_CalculateDistances extends WorkspaceTask
 				// Calculate other distances.
 				for (int j = i + 1; j < ldaConfigurations.size(); j++) {
 					// Update task progress.
-					updateProgress(numberOfCalculatedDistances, totalNumberOfDistances * 2);
+					updateProgress(numberOfCalculatedDistances, totalNumberOfDistances);
 				
 					// Assume symmetric distance calculations is done in .calculateDatasetDistance().
 					distances[i][j] = (float)datasetMap.get(ldaConfigurations.get(i)).calculateDatasetDistance(datasetMap.get(ldaConfigurations.get(j)), DatasetDistance.HausdorffDistance);

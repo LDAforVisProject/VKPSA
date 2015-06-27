@@ -50,13 +50,13 @@ public class Dataset
 	
 	public Dataset(final LDAConfiguration parametrization)
 	{
-		this.parametrization	= parametrization;
+		this.parametrization	= new LDAConfiguration(parametrization);
 		this.topics				= new ArrayList<Topic>();
 	}
 	
 	public Dataset(final LDAConfiguration parametrization, final ArrayList<Topic> topics)
 	{
-		this.parametrization	= parametrization;
+		this.parametrization	= new LDAConfiguration(parametrization);
 //		this.topics				= new ArrayList<Topic>(topics);
 		this.topics				= topics;
 	}
@@ -103,8 +103,6 @@ public class Dataset
 	 */
 	private double calculateMinimalDatasetDistance(final Dataset dataset)
 	{
-//		System.out.println("Calculating dataset distance");
-		
 		double minDistance	= Double.MAX_VALUE;
 		Topic currentTopic	= null;
 		
@@ -136,8 +134,6 @@ public class Dataset
 	 */
 	private double calculateHausdorffDatasetDistance(final Dataset dataset)
 	{
-//		System.out.println("Calculating dataset distance");
-		
 		double minDistance		= Double.MAX_VALUE;
 		double maxMinDistance	= 0;
 		Topic currentTopic		= null;

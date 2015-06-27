@@ -93,14 +93,31 @@ public class DBManagement
 		}
 		
 		finally {
-			closeConnection();
+			close();
 		}
 	}
 
-	public void closeConnection()
+	public void reopen()
 	{
 		try {
-			db.close();
+			if (db != null && !db.isClosed()) {
+				db.close();
+			}
+			
+			db = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
+		}
+		
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void close()
+	{
+		try {
+			if (db != null && !db.isClosed()) {
+				db.close();
+			}
 		} 
 		
 		catch (SQLException e) {
@@ -136,7 +153,7 @@ public class DBManagement
 			
 			// As long as row is not the last one: Process it.
 			while (rs.next()) {
-				ldaConfigurations.add(new LDAConfiguration(rs.getInt("kappa"), rs.getDouble("alpha"), rs.getDouble("eta")));
+				ldaConfigurations.add(new LDAConfiguration(rs.getInt("ldaConfigurationID"), rs.getInt("kappa"), rs.getDouble("alpha"), rs.getDouble("eta")));
 				
 				// Update task progress.
 				task.updateTaskProgress(count++, numberOfResults);
@@ -144,7 +161,7 @@ public class DBManagement
 		}
 		
 		catch (SQLException e) {
-			System.out.println("ERROR: count = " + count);
+			System.out.println("### ERROR ### count = " + count);
 			e.printStackTrace();
 		}
 		
@@ -153,6 +170,17 @@ public class DBManagement
 	
 	public Map<LDAConfiguration, Dataset> loadRawData(WorkspaceTask task)
 	{
+		// Check if number of keywords was determined correctly. If not, try again.
+		if (numberOfKeywordsPerTopic < 0) {
+			readNumberOfKeywords(false);
+			
+			// If failing again: No data available, return.
+			if (numberOfKeywordsPerTopic < 0) {
+				System.out.println("### WARNING ### No keyword/topic associations in database. Returning empty collection.");
+				return new HashMap<LDAConfiguration, Dataset>();
+			}
+		}
+		
 		// Init auxiliary variables.
 		int count			= 0;
 		ResultSet rs		= null;
@@ -181,7 +209,7 @@ public class DBManagement
 			 */
 			
 			// Init reference values.
-			LDAConfiguration currLDAConfig 	= new LDAConfiguration(rs.getInt("kappa"), rs.getDouble("alpha"), rs.getDouble("eta"));//new LDAConfiguration(-1, 0, 0);
+			LDAConfiguration currLDAConfig 	= new LDAConfiguration(rs.getInt("ldaConfigurationID"), rs.getInt("kappa"), rs.getDouble("alpha"), rs.getDouble("eta"));//new LDAConfiguration(-1, 0, 0);
 			int currTopicID					= rs.getInt("topicID"); //-1;
 			
 			// Init collection for topics per LDA configuration.
@@ -189,8 +217,8 @@ public class DBManagement
 			
 			// As long as row is not the last one: Process it.
 			while (rs.next()) {
-				LDAConfiguration ldaConfig 	= new LDAConfiguration(rs.getInt("kappa"), rs.getDouble("alpha"), rs.getDouble("eta"));
-				int topicID 				= rs.getInt("topicID");
+				final LDAConfiguration ldaConfig 	= new LDAConfiguration(rs.getInt("ldaConfigurationID"), rs.getInt("kappa"), rs.getDouble("alpha"), rs.getDouble("eta"));
+				int topicID 						= rs.getInt("topicID");
 		      
 				// Current row contains first entry of new LDA configuration.
 				if (!ldaConfig.equals(currLDAConfig)) {
@@ -201,13 +229,13 @@ public class DBManagement
 		        	ldaConfigTopics.get(currLDAConfig).add(new Topic(currTopicID, keywordProbabilityMap));
 		        	
 		        	// 2. Create new dataset out of collected topics.
-		        	datasetMap.put( currLDAConfig, new Dataset(new LDAConfiguration(ldaConfig), ldaConfigTopics.get(currLDAConfig)));
+		        	datasetMap.put( new LDAConfiguration(currLDAConfig), new Dataset(new LDAConfiguration(ldaConfig), ldaConfigTopics.get(currLDAConfig)));
 		        	
 		        	// Update currLDAConfig.
 		        	currLDAConfig.copy(ldaConfig);
 		        	
 		        	// Clear topic collection.
-		        	ldaConfigTopics.put(new LDAConfiguration(currLDAConfig), new ArrayList<Topic>());
+		        	ldaConfigTopics.put(ldaConfig, new ArrayList<Topic>());
 		        }
 		        
 				// Current row contains first entry of new topic.
@@ -240,7 +268,7 @@ public class DBManagement
 		}
 		
 		catch (SQLException e) {
-			System.out.println("ERROR: count = " + count);
+			System.out.println("### ERROR ### count = " + count);
 			e.printStackTrace();
 		}
 		
@@ -320,12 +348,20 @@ public class DBManagement
 				PreparedStatement numKeywordsStmt	= db.prepareStatement(stmtString);
 				ResultSet rs						= numKeywordsStmt.executeQuery();
 				// Grab first result (they should all amount to the same number).
-				numberOfKeywordsPerTopic			= rs.getInt("actualKWCount");
+				numberOfKeywordsPerTopic			= rs.next() ? rs.getInt("actualKWCount") : -1; 
 			}
 		} 
 		
 		catch (SQLException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public void getLimitedKITData(ArrayList<LDAConfiguration> ldaConfigurations)
+	{
+		for (LDAConfiguration ldaConfig : ldaConfigurations) {
+			System.out.println(ldaConfig.getConfigurationID());
+			// 1. Get ID for this configuration.
 		}
 	}
 }
