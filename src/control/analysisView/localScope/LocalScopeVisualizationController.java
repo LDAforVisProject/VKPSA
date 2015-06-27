@@ -7,8 +7,6 @@ import java.util.ResourceBundle;
 import view.components.LocalScopeInstance;
 import model.LDAConfiguration;
 import model.workspace.Workspace;
-import javafx.fxml.FXML;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import control.Controller;
@@ -29,7 +27,6 @@ public abstract class LocalScopeVisualizationController extends Controller
 	 * Visualization type.
 	 */
 	protected LocalScopeVisualizationType visualizationType;
-	
 	/**
 	 * Reference to containing instance of local scope.
 	 */
@@ -39,6 +36,15 @@ public abstract class LocalScopeVisualizationController extends Controller
 	 * Reference to workspace.
 	 */
 	protected Workspace workspace;
+	
+	/**
+	 * Maximal number of topics to use in this visualization.
+	 */
+	protected int maxNumberOfTopics;
+	/**
+	 * Maximal number of keywords to use in this visualization.
+	 */
+	protected int maxNumberOfKeywords;
 	
 	
 	@Override
@@ -57,8 +63,10 @@ public abstract class LocalScopeVisualizationController extends Controller
 
 	/**
 	 * Redraw visualization.
+	 * @param maxNumberOfKeywords 
+	 * @param maxNumberOfTopics 
 	 */
-	public abstract void refresh(ArrayList<LDAConfiguration> selectedFilteredLDAConfigurations);
+	public abstract void refresh(ArrayList<LDAConfiguration> selectedFilteredLDAConfigurations, int maxNumberOfTopics, int maxNumberOfKeywords, boolean updateData);
 
 	/**
 	 * Resize visualization.

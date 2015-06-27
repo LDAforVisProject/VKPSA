@@ -357,11 +357,92 @@ public class DBManagement
 		}
 	}
 	
-	public void getLimitedKITData(ArrayList<LDAConfiguration> ldaConfigurations)
+	public ArrayList<ArrayList<Pair<String, Double>>> getLimitedKITData(LDAConfiguration ldaConfiguration, int maxNumberOfTopics, int maxNumberOfKeywords)
 	{
-		for (LDAConfiguration ldaConfig : ldaConfigurations) {
-			System.out.println(ldaConfig.getConfigurationID());
-			// 1. Get ID for this configuration.
+		ArrayList<ArrayList<Pair<String, Double>>> data = null;
+		
+		// Get number of topics for this LDA configuration.
+		String query = 	"select count(*) topicCount from topics t " + 
+						"join ldaConfigurations lda on t.ldaConfigurationID = lda.ldaConfigurationID " +
+						"where lda.ldaConfigurationID = " + ldaConfiguration.getConfigurationID() + ";";
+						
+		System.out.println(ldaConfiguration.getConfigurationID());
+
+		try {
+			/*
+			 * 1. Get number of topics for this LDA configuration.
+			 */
+			
+			PreparedStatement numKeywordsStmt	= db.prepareStatement(query);
+			ResultSet rs						= numKeywordsStmt.executeQuery();
+			int numberOfTopics					= rs.getInt("topicCount");
+			
+			// Determine used number of topics.
+			numberOfTopics = numberOfTopics <= maxNumberOfTopics ? numberOfTopics : maxNumberOfTopics;
+			
+			/*
+			 * 2. Init collections.
+			 */
+			
+			// Init collection holding data.
+			data = new ArrayList<ArrayList<Pair<String, Double>>>(numberOfTopics);
+			for (int i = 0; i < numberOfTopics; i++) {
+				// Add list of keyword/probability pairs for this topic to collection for all topics.
+				data.add(new ArrayList<Pair<String, Double>>(maxNumberOfKeywords));
+			}
+			
+			System.out.println("noT = " + data.size());
+			
+			
+			// Init collection for checks if collection is complete.
+			ArrayList<Integer> topicKeywordCount = new ArrayList<Integer>(numberOfTopics);
+			for (int i = 0; i < numberOfTopics; i++) {
+				topicKeywordCount.add(0);
+			}
+			
+			int totalNumberOfKeywords = numberOfTopics * maxNumberOfKeywords;
+			
+			/*
+			 * 3. Get data for all topics.
+			 */
+			
+			query = "select lda.ldaConfigurationID, lda.alpha, lda.kappa, lda.eta, topicID, keyword, probability from keywordInTopic kit " +
+					"join keywords kw on kw.keywordID = kit.keywordID " +
+					"join ldaConfigurations lda on lda.ldaConfigurationID = kit.ldaConfigurationID " +
+					"where " +
+					"	lda.ldaConfigurationID = " + ldaConfiguration.getConfigurationID() + " and " +
+					"	topicID between 0 and " + (numberOfTopics - 1) + " " + 
+					"order by probability desc, topicID";
+			
+			PreparedStatement topicKeywordDataStmt	= db.prepareStatement(query);
+			rs										= topicKeywordDataStmt.executeQuery();
+			
+			boolean allRelevantRowsProcessed 	= false;
+			int processedRowCount				= 0;
+			while (rs.next() && !allRelevantRowsProcessed) {
+				int topicID = rs.getInt("topicID");
+				
+				// Check if numberOfKeywords most relevant keywords for this topic have already been stored. 
+				int topicKeywordCountForTopic = topicKeywordCount.get(topicID); 
+				if (topicKeywordCountForTopic < maxNumberOfKeywords) {
+					// Get data from row and add it to list.
+					Pair<String, Double> keywordProbabilityPair = new Pair<String, Double>(rs.getString("keyword"), rs.getDouble("probability"));
+					data.get(topicID).add(keywordProbabilityPair);
+					
+					// Increment counter.
+					topicKeywordCount.set(topicID, topicKeywordCountForTopic + 1);
+					processedRowCount++;
+					
+					// Check if all relevant data rows were processed.
+					allRelevantRowsProcessed = processedRowCount == totalNumberOfKeywords;
+				}
+			}
 		}
+		
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return data;
 	}
 }

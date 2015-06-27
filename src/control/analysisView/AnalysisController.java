@@ -496,7 +496,7 @@ public class AnalysisController extends Controller
 	 * Refreshes visualization after data in global MDS scatterchart was selected. 
 	 * @param selectedIndices
 	 */
-	public void refreshVisualizationsAfterGlobalSelection(Set<Integer> selectedIndices)
+	public void refreshVisualizationsAfterGlobalSelection(Set<Integer> selectedIndices, boolean includeLocalScope)
 	{
 		// Update set of filtered and selected indices.
 		selectedFilteredIndices				= createSelectedFilteredIndices(filteredIndices, selectedIndices);
@@ -507,6 +507,12 @@ public class AnalysisController extends Controller
 				
 		// Refresh other (than MDSScatterchart) visualizations.
 		distancesBarchart.refresh(filteredDistances, selectedFilteredDistances);
+		if (includeLocalScope)
+			localScopeInstance.refresh(selectedFilteredLDAConfigurations);
+	}
+	
+	public void refreshLocalScopeAfterGlobalSelection()
+	{
 		localScopeInstance.refresh(selectedFilteredLDAConfigurations);
 	}
 	

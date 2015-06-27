@@ -35,6 +35,8 @@ public class LocalScopeInstance extends VisualizationComponent
 	// Options.
 	private Slider slider_localScope_numTopicsToUse;
 	private TextField textfield_localScope_numTopicsToUse;
+	private Slider slider_localScope_numKeywordsToUse;
+	private TextField textfield_localScope_numKeywordsToUse;
 	
 	/*
 	 * Other data.
@@ -43,6 +45,11 @@ public class LocalScopeInstance extends VisualizationComponent
 	private LocalScopeVisualizationController controller;
 
 	private Workspace workspace;
+	
+	/**
+	 * Collection storing all LDA configurations relevant for this local scope. 
+	 */
+	private ArrayList<LDAConfiguration> selectedFilteredLDAConfigurations;
 	
 	// -----------------------------------------------
 	// 		Methods.
@@ -59,33 +66,69 @@ public class LocalScopeInstance extends VisualizationComponent
 		this.label_visType							= label_visType;
 		this.slider_localScope_numTopicsToUse		= slider_localScope_numTopicsToUse;
 		this.textfield_localScope_numTopicsToUse	= textfield_localScope_numTopicsToUse;
+		this.slider_localScope_numKeywordsToUse		= slider_localScope_numKeywordsToUse;
+		this.textfield_localScope_numKeywordsToUse	= textfield_localScope_numKeywordsToUse;
 		
 		initControlListener();
 	}
 	
 	private void initControlListener()
 	{
-		// Add listener to determine position during after release.
-		slider_localScope_numTopicsToUse.addEventHandler(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
-            public void handle(MouseEvent event) 
-            {
-            	textfield_localScope_numTopicsToUse.setText(String.valueOf(slider_localScope_numTopicsToUse.getValue()));
-            	System.out.println(slider_localScope_numTopicsToUse.getValue());
-
-            	// Get data
-            	
-            	// Filter by values; refresh visualizations.
-//            	controller.
-            }
-        });
+		/*
+		 * Declare event handler for slider changes.
+		 */
 		
-		// Add listener to determine position during mouse drag.
-		slider_localScope_numTopicsToUse.addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
+		// @todo NEXT: Why the sudden value jumps with these sliders?
+		//		 After that: Finish first version of Parallel Tag Clouds.
+		EventHandler<MouseEvent> numTopicsHandler = new EventHandler<MouseEvent>()
+		{
             public void handle(MouseEvent event) 
             {
-            	textfield_localScope_numTopicsToUse.setText(String.valueOf(slider_localScope_numTopicsToUse.getValue()));
-            };
-        });
+            	// Round value.
+            	int roundedNumberOfTopics = (int) Math.round(slider_localScope_numTopicsToUse.getValue());
+            	// Update values.
+//            	slider_localScope_numTopicsToUse.setValue(roundedNumberOfTopics);
+            	// Update number in textfield.
+            	textfield_localScope_numTopicsToUse.setText(String.valueOf(roundedNumberOfTopics));
+            	
+            	// Update visualization.
+            	if (event.getEventType() == MouseEvent.MOUSE_RELEASED && selectedFilteredLDAConfigurations != null)
+            		controller.refresh(selectedFilteredLDAConfigurations, roundedNumberOfTopics, (int) Math.round(slider_localScope_numKeywordsToUse.getValue()), true);
+            }
+		};
+		
+		EventHandler<MouseEvent> numKeywordsHandler = new EventHandler<MouseEvent>()
+		{
+            public void handle(MouseEvent event) 
+            {
+            	// Round value.
+            	int roundedNumberOfKeywords = (int) Math.round(slider_localScope_numKeywordsToUse.getValue());
+            	// Update values.
+//            	slider_localScope_numKeywordsToUse.setValue(roundedNumberOfKeywords);
+            	// Update number in textfield.
+            	textfield_localScope_numKeywordsToUse.setText(String.valueOf(roundedNumberOfKeywords));
+            	
+            	// Update visualization.
+            	if (event.getEventType() == MouseEvent.MOUSE_RELEASED && selectedFilteredLDAConfigurations != null)
+            		controller.refresh(selectedFilteredLDAConfigurations, (int) Math.round(slider_localScope_numTopicsToUse.getValue()), roundedNumberOfKeywords, true);
+            }
+		};		
+		
+		/*
+		 * Add event handler to slider.
+		 */
+		
+		// Slider for number of topics:
+		// 	Add listener to determine position during after release.
+		slider_localScope_numTopicsToUse.addEventHandler(MouseEvent.MOUSE_RELEASED, numTopicsHandler);
+		// 	Add listener to determine position during mouse drag.
+		slider_localScope_numTopicsToUse.addEventHandler(MouseEvent.MOUSE_DRAGGED, numTopicsHandler);
+		
+		// Slider for number of words:
+		// 	Add listener to determine position during after release.
+		slider_localScope_numKeywordsToUse.addEventHandler(MouseEvent.MOUSE_RELEASED, numKeywordsHandler);
+		// 	Add listener to determine position during mouse drag.
+		slider_localScope_numKeywordsToUse.addEventHandler(MouseEvent.MOUSE_DRAGGED, numKeywordsHandler);
 	}
 
 	public void load(String fxmlPath)
@@ -127,8 +170,11 @@ public class LocalScopeInstance extends VisualizationComponent
 	{
 		System.out.println("\n### REFRESHING LOCAL SCOPE - " + selectedFilteredLDAConfigurations.size());
 		
+		// Update reference.
+		this.selectedFilteredLDAConfigurations = selectedFilteredLDAConfigurations;
+		
 		// Refresh visualization.
-		controller.refresh(selectedFilteredLDAConfigurations);
+		controller.refresh(selectedFilteredLDAConfigurations, (int)slider_localScope_numTopicsToUse.getValue(), (int)slider_localScope_numKeywordsToUse.getValue(), true);
 	}
 
 	public void resize(double width, double height)

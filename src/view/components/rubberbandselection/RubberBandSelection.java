@@ -100,6 +100,9 @@ public class RubberBandSelection
 	            rect.setHeight(0);
 	
 	            pane.getChildren().remove( rect);
+	            
+	            // Translate coordinates.
+	            signalEndOfSelection();
 	        }
 	    };
 	
@@ -174,5 +177,10 @@ public class RubberBandSelection
 		
 		// Pass selection information to listener. 
 		listener.processSelectionManipulationRequest(minX, minY, maxX, maxY);
+	}
+	
+	private void signalEndOfSelection()
+	{
+		listener.processEndOfSelectionManipulation();
 	}
 }

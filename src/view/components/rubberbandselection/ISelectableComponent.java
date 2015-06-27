@@ -17,4 +17,8 @@ public interface ISelectableComponent
 	 * @return
 	 */
 	public Pair<Integer, Integer> provideOffsets();
+	/**
+	 * Signals end of selection manipulation.
+	 */
+	public void processEndOfSelectionManipulation();
 }

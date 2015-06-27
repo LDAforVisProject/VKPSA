@@ -242,7 +242,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 					    		// Refresh scatterchart.
 					    		refresh(coordinates, filteredIndices);
 					    		// Refresh other charts.
-					    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet());
+					    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet(), false);
 					    	}
 				    	}
 				    }
@@ -265,7 +265,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 			    		// Refresh scatterchart.
 			    		refresh(coordinates, filteredIndices);
 			    		// Refresh other charts.
-			    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet());
+			    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet(), false);
 			    	}
 			    }
 			});
@@ -296,7 +296,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
     		// Refresh scatterchart.
     		refresh(coordinates, indices);
     		// Refresh other charts.
-    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet());
+    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet(), false);
 		}
 		
 		// Else if control is down: Remove selected points in chose area from selection (in data series 0).
@@ -320,8 +320,15 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
     		// Refresh scatterchart.
     		refresh(coordinates, indices);
     		// Refresh other charts.
-    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet());
+    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet(), false);
 		}
+	}
+	
+	@Override
+	public void processEndOfSelectionManipulation()
+	{
+		// Update local scope.
+		analysisController.refreshLocalScopeAfterGlobalSelection();
 	}
 	
 	@Override

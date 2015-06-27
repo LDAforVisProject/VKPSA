@@ -11,65 +11,108 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.util.Pair;
 
 public class ParallelTagCloudsController extends LocalScopeVisualizationController
 {
+	/**
+	 * Canvas used to paint connections between words.
+	 */
 	protected @FXML Canvas canvas;
 	private ArrayList<VBox> tagCloudContainer;
 	
+	/**
+	 * Since it's reasonable to display only one dataset at once - given the available
+	 * space - currentIndex stores the index of the LDA configuration data currently 
+	 * displayed in this local scope. 
+	 */
+	private int currentIndex;
+	/**
+	 * Collection containing all LDA configurations to display.
+	 */
 	private ArrayList<LDAConfiguration> selectedFilteredLDAConfigurations;
+	/**
+	 * List (for this LDA configuration) of lists (of topics) of keyword/probability pairs.
+	 * To be adapted for multiple LDA configurations (? - how?. 
+	 */
+	private ArrayList<ArrayList<Pair<String, Double>>> data;
 	
 	public void initialize(URL arg0, ResourceBundle arg1)
 	{
 		System.out.println("Initializing SII_ParallelTagCloudsController.");
 		
 		// Set visualization type.
-		this.visualizationType = LocalScopeVisualizationType.PARALLEL_TAG_CLOUDS;
+		this.visualizationType	= LocalScopeVisualizationType.PARALLEL_TAG_CLOUDS;
+		
+		// Set inital index value.
+		currentIndex			= 0;
 	}
 
 	@Override
-	public void refresh(ArrayList<LDAConfiguration> selectedFilteredLDAConfigurations)
+	public void refresh(ArrayList<LDAConfiguration> selectedFilteredLDAConfigurations, int maxNumberOfTopics, int maxNumberOfKeywords, boolean updateData)
 	{
 		// Reset visualization.
 		clear();
+	
+		System.out.println("maxTopics = " + maxNumberOfTopics + ", maxKeywords = " + maxNumberOfKeywords);
+		
+		// Update settings.
+		this.maxNumberOfTopics		= maxNumberOfTopics;
+		this.maxNumberOfKeywords	= maxNumberOfKeywords;
 		
 		// Update reference to data collections.
 		this.selectedFilteredLDAConfigurations = selectedFilteredLDAConfigurations;
 		
 		// Update data. This type of visualization is reasonable for one LDA configuration
-		// at the same time only, therefore we use only the first selected LDAConfiguration.
-//		workspace.getDatabaseManagement().getLimitedKITData(ldaConfigurations);
-		// @todo NEXT: Get limited KIT data for all topics in one (first) LDA configuration,
-		// 		 visualize it using one cloud for each topic (use control values for number
-		//		 of topics and keywords to use).
+		// at the same time only, therefore we use only one selected LDAConfiguration.
+		
+		if (selectedFilteredLDAConfigurations.size() > 0)  {
+			// Get list (for this LDA configuration) of lists (of topics) of keyword/probability pairs.
+			if (updateData)
+				data = workspace.getDatabaseManagement().getLimitedKITData(selectedFilteredLDAConfigurations.get(currentIndex), maxNumberOfTopics, maxNumberOfKeywords);
+			
+//			int topicID = 0;
+//			for (ArrayList<Pair<String, Double>> topicList : data) {
+//				System.out.println(topicID++ + " - .size = " + topicList.size());
+//				
+//				for (Pair<String, Double> keywordPair : topicList) {
+//					System.out.println("\t" + keywordPair.getKey() + " -> " + keywordPair.getValue());
+//				}
+//			}
+//			
+		    // Init tag cloud container.
+		    double intervalX	= canvas.getWidth() / data.size();
+		    tagCloudContainer	= new ArrayList<VBox>(data.size());
+		    
+		    System.out.println("data.size = " + data.size());
+		    
+		    // Iterate over all topics; create cloud for each one.
+			for (int i = 0; i < data.size(); i++) {
+				ArrayList<Pair<String, Double>> topicKeywordProbabilityPairs = data.get(i);
+				
+				VBox vbox = new VBox();
+				vbox.setLayoutX(canvas.getLayoutX() + i * intervalX + 10);
+				vbox.setLayoutY(canvas.getLayoutY() + 55);
+				tagCloudContainer.add(vbox);
+				
+				// Init labels to container.
+				for (int j = 0; j < topicKeywordProbabilityPairs.size(); j++) {
+					Label label = new Label();
+					label.setText(topicKeywordProbabilityPairs.get(j).getKey());
+					vbox.getChildren().add(label);
+				}
+				
+				anchorPane.getChildren().add(vbox);
+			}
+		}
 		
 		GraphicsContext gc = canvas.getGraphicsContext2D();
-		
-		gc.setFill(Color.GREEN);
-	    gc.setStroke(Color.BLUE);
-	    gc.fillRect(5, 5, canvas.getWidth() - 10, canvas.getHeight() - 10);
+//		
+//		gc.setFill(Color.GREEN);
+//	    gc.setStroke(Color.BLUE);
+//	    gc.fillRect(5, 5, canvas.getWidth() - 10, canvas.getHeight() - 10);
 	    
-	    // Init tag cloud container.
-	    double intervalX					= canvas.getWidth() / selectedFilteredLDAConfigurations.size();
-	    tagCloudContainer					= new ArrayList<VBox>(selectedFilteredLDAConfigurations.size());
-	    
-		for (int i = 0; i < selectedFilteredLDAConfigurations.size(); i++) {
-			LDAConfiguration lda = selectedFilteredLDAConfigurations.get(i); 
-			
-			VBox vbox = new VBox();
-			vbox.setLayoutX(canvas.getLayoutX() + i * intervalX);
-			vbox.setLayoutY(canvas.getLayoutY() + 5);
-			tagCloudContainer.add(vbox);
-			
-			// Init labels to container.
-			for (int j = 0; j < 10; j++) {
-				Label label = new Label();
-				label.setText("test #" + j);
-				vbox.getChildren().add(label);
-			}
-			
-			anchorPane.getChildren().add(vbox);
-		}
+
 		
 	}
 
@@ -78,13 +121,13 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 	{
 		if (width > 0) {
 			canvas.setWidth(width);
-			refresh(selectedFilteredLDAConfigurations);
+			refresh(selectedFilteredLDAConfigurations, maxNumberOfTopics, maxNumberOfKeywords, false);
 		}
 		
 		// Adapt height.
 		if (height > 0) {
 			canvas.setHeight(height - 35);
-			refresh(selectedFilteredLDAConfigurations);
+			refresh(selectedFilteredLDAConfigurations, maxNumberOfTopics, maxNumberOfKeywords, false);
 		}
 	}
 

@@ -21,3 +21,15 @@ select count(*) as numKeywords from keywords;
 delete from keywordInTopic;
 delete from topics;
 delete from ldaConfigurations;
+
+select lda.ldaConfigurationID, lda.alpha, lda.kappa, lda.eta, topicID, keyword, probability from keywordInTopic kit
+join keywords kw on kw.keywordID = kit.keywordID
+join ldaConfigurations lda on lda.ldaConfigurationID = kit.ldaConfigurationID
+where 
+    lda.ldaConfigurationID = 151
+order by probability, topicID
+LIMIT 10;
+
+ 
+select * from ldaConfigurations
+where ldaConfigurationID = 151
