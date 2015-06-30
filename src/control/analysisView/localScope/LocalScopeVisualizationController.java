@@ -38,13 +38,21 @@ public abstract class LocalScopeVisualizationController extends Controller
 	protected Workspace workspace;
 	
 	/**
-	 * Maximal number of topics to use in this visualization.
+	 * Maximal number of topics made possible to select in the GUI.
 	 */
 	protected int maxNumberOfTopics;
 	/**
 	 * Maximal number of keywords to use in this visualization.
 	 */
+	protected int numberOfTopics;
+	/**
+	 * Maximal number of keywords made possible to select in the GUI.
+	 */
 	protected int maxNumberOfKeywords;
+	/**
+	 * Maximal number of keywords to use in this visualization.
+	 */
+	protected int numberOfKeywords;
 	
 	
 	@Override
@@ -66,7 +74,7 @@ public abstract class LocalScopeVisualizationController extends Controller
 	 * @param maxNumberOfKeywords 
 	 * @param maxNumberOfTopics 
 	 */
-	public abstract void refresh(ArrayList<LDAConfiguration> selectedFilteredLDAConfigurations, int maxNumberOfTopics, int maxNumberOfKeywords, boolean updateData);
+	public abstract void refresh(ArrayList<LDAConfiguration> selectedFilteredLDAConfigurations, int maxNumberOfTopics, int numberOfTopics, int maxNumberOfKeywords, int numberOfKeywords, boolean updateData);
 
 	/**
 	 * Resize visualization.
@@ -104,5 +112,5 @@ public abstract class LocalScopeVisualizationController extends Controller
 	
 	protected abstract void updateData();
 	
-	public abstract void clear();
+	public abstract void reset(int maxNumberOfTopics, int numberOfTopics, int maxNumberOfKeywords, int numberOfKeywords);
 }

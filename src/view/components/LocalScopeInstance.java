@@ -69,6 +69,11 @@ public class LocalScopeInstance extends VisualizationComponent
 		this.slider_localScope_numKeywordsToUse		= slider_localScope_numKeywordsToUse;
 		this.textfield_localScope_numKeywordsToUse	= textfield_localScope_numKeywordsToUse;
 		
+		// Deactive snap-to-tick functionality in sliders.
+		slider_localScope_numTopicsToUse.setSnapToTicks(false);
+		slider_localScope_numKeywordsToUse.setSnapToTicks(false);
+		
+		// Set up control listeners.
 		initControlListener();
 	}
 	
@@ -78,8 +83,6 @@ public class LocalScopeInstance extends VisualizationComponent
 		 * Declare event handler for slider changes.
 		 */
 		
-		// @todo NEXT: Why the sudden value jumps with these sliders?
-		//		 After that: Finish first version of Parallel Tag Clouds.
 		EventHandler<MouseEvent> numTopicsHandler = new EventHandler<MouseEvent>()
 		{
             public void handle(MouseEvent event) 
@@ -93,7 +96,7 @@ public class LocalScopeInstance extends VisualizationComponent
             	
             	// Update visualization.
             	if (event.getEventType() == MouseEvent.MOUSE_RELEASED && selectedFilteredLDAConfigurations != null)
-            		controller.refresh(selectedFilteredLDAConfigurations, roundedNumberOfTopics, (int) Math.round(slider_localScope_numKeywordsToUse.getValue()), true);
+            		controller.refresh(selectedFilteredLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), roundedNumberOfTopics, (int)slider_localScope_numKeywordsToUse.getMax(), (int) Math.round(slider_localScope_numKeywordsToUse.getValue()), false);
             }
 		};
 		
@@ -110,7 +113,7 @@ public class LocalScopeInstance extends VisualizationComponent
             	
             	// Update visualization.
             	if (event.getEventType() == MouseEvent.MOUSE_RELEASED && selectedFilteredLDAConfigurations != null)
-            		controller.refresh(selectedFilteredLDAConfigurations, (int) Math.round(slider_localScope_numTopicsToUse.getValue()), roundedNumberOfKeywords, true);
+            		controller.refresh(selectedFilteredLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), (int) Math.round(slider_localScope_numTopicsToUse.getValue()), (int)slider_localScope_numKeywordsToUse.getMax(), roundedNumberOfKeywords, false);
             }
 		};		
 		
@@ -175,7 +178,7 @@ public class LocalScopeInstance extends VisualizationComponent
 		this.selectedFilteredLDAConfigurations = selectedFilteredLDAConfigurations;
 		
 		// Refresh visualization.
-		controller.refresh(selectedFilteredLDAConfigurations, (int)slider_localScope_numTopicsToUse.getValue(), (int)slider_localScope_numKeywordsToUse.getValue(), true);
+		controller.refresh(selectedFilteredLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), (int)slider_localScope_numTopicsToUse.getValue(), (int)slider_localScope_numKeywordsToUse.getMax(), (int)slider_localScope_numKeywordsToUse.getValue(), true);
 	}
 
 	public void resize(double width, double height)

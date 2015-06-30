@@ -391,9 +391,6 @@ public class DBManagement
 				data.add(new ArrayList<Pair<String, Double>>(maxNumberOfKeywords));
 			}
 			
-			System.out.println("noT = " + data.size());
-			
-			
 			// Init collection for checks if collection is complete.
 			ArrayList<Integer> topicKeywordCount = new ArrayList<Integer>(numberOfTopics);
 			for (int i = 0; i < numberOfTopics; i++) {
@@ -427,7 +424,7 @@ public class DBManagement
 				if (topicKeywordCountForTopic < maxNumberOfKeywords) {
 					// Get data from row and add it to list.
 					//Pair<String, Double> keywordProbabilityPair = new Pair<String, Double>(rs.getString("keyword"), rs.getDouble("probability"));
-					Pair<String, Double> keywordProbabilityPair = new Pair<String, Double>(rs.getString("keyword"), Math.random());
+					Pair<String, Double> keywordProbabilityPair = new Pair<String, Double>(rs.getString("keyword"), Math.sqrt(Math.random()));
 					data.get(topicID).add(keywordProbabilityPair);
 					
 					// Increment counter.

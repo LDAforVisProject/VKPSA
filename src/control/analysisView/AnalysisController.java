@@ -786,8 +786,7 @@ public class AnalysisController extends Controller
 				// Assign each LDAConfiguration to one of two sets for each step / set of parameter values.
 				Pair<Map<String, Set<Integer>>, Map<String, Set<Integer>>> ldaConfigurationSets = segregateLDAConfigurations(ldaConfigurations, coupledParameters, thresholdsForCurrentStep);
 				Map<String, Set<Integer>> fixedLDAConfigIndiceSets								= ldaConfigurationSets.getKey();
-//				Map<String, Set<Integer>> freeLDAConfigIndiceSets								= ldaConfigurationSets.getValue();
-				
+
 				// Group distances; separated to distances between datasets where fixed parameters fall within the boundaries
 				// of the current step and those between all other datasets.
 				Map<String, Pair<Double, Double>> segregatedDistanceValues	= averageSegregatedDistances(distances, fixedLDAConfigIndiceSets);
