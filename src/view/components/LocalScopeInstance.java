@@ -149,10 +149,11 @@ public class LocalScopeInstance extends VisualizationComponent
 			anchorpane_localScope.getChildren().add(contentNode);
 			
 			// Ensure resizability of content.
-			AnchorPane.setTopAnchor(contentNode, 35.0);
-    		AnchorPane.setBottomAnchor(contentNode, 0.0);
-    		AnchorPane.setLeftAnchor(contentNode, 0.0);
-    		AnchorPane.setRightAnchor(contentNode, 0.0);
+			
+			AnchorPane.setTopAnchor(contentNode, 40.0);
+    		AnchorPane.setBottomAnchor(contentNode, 5.0);
+    		AnchorPane.setLeftAnchor(contentNode, 5.0);
+    		AnchorPane.setRightAnchor(contentNode, 5.0);
     		
     		// Set visualization type labe.
     		controller.updateLabelWithVisualizationType(label_visType);

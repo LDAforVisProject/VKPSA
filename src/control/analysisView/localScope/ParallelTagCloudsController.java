@@ -5,21 +5,37 @@ import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 import model.LDAConfiguration;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.fxml.FXML;
+import javafx.geometry.Bounds;
+import javafx.scene.Group;
+import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.util.Pair;
 
 public class ParallelTagCloudsController extends LocalScopeVisualizationController
 {
+	/*
+	 * GUI elements.
+	 */
+	
 	/**
 	 * Canvas used to paint connections between words.
 	 */
 	protected @FXML Canvas canvas;
 	private ArrayList<VBox> tagCloudContainer;
+	
+	private double defaultFontSize;
+	
+	/*
+	 * Other data.
+	 */
 	
 	/**
 	 * Since it's reasonable to display only one dataset at once - given the available
@@ -54,7 +70,7 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 		// Reset visualization.
 		clear();
 	
-		System.out.println("maxTopics = " + maxNumberOfTopics + ", maxKeywords = " + maxNumberOfKeywords);
+		System.out.println("\nmaxTopics = " + maxNumberOfTopics + ", maxKeywords = " + maxNumberOfKeywords);
 		
 		// Update settings.
 		this.maxNumberOfTopics		= maxNumberOfTopics;
@@ -63,26 +79,22 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 		// Update reference to data collections.
 		this.selectedFilteredLDAConfigurations = selectedFilteredLDAConfigurations;
 		
-		// Update data. This type of visualization is reasonable for one LDA configuration
+		// This type of visualization is reasonable for one LDA configuration
 		// at the same time only, therefore we use only one selected LDAConfiguration.
-		
 		if (selectedFilteredLDAConfigurations.size() > 0)  {
 			// Get list (for this LDA configuration) of lists (of topics) of keyword/probability pairs.
 			if (updateData)
 				data = workspace.getDatabaseManagement().getLimitedKITData(selectedFilteredLDAConfigurations.get(currentIndex), maxNumberOfTopics, maxNumberOfKeywords);
 			
-//			int topicID = 0;
-//			for (ArrayList<Pair<String, Double>> topicList : data) {
-//				System.out.println(topicID++ + " - .size = " + topicList.size());
-//				
-//				for (Pair<String, Double> keywordPair : topicList) {
-//					System.out.println("\t" + keywordPair.getKey() + " -> " + keywordPair.getValue());
-//				}
-//			}
-//			
+			/*
+			 * Create tag clouds, fill them with data.
+			 */
+			
 		    // Init tag cloud container.
-		    double intervalX	= canvas.getWidth() / data.size();
-		    tagCloudContainer	= new ArrayList<VBox>(data.size());
+		    double intervalX					= canvas.getWidth() / data.size();
+		    // Probability sums for each topic.
+		    ArrayList<Double> probabilitySums	= new ArrayList<Double>(data.size());
+		    tagCloudContainer					= new ArrayList<VBox>(data.size());
 		    
 		    System.out.println("data.size = " + data.size());
 		    
@@ -96,21 +108,77 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 				tagCloudContainer.add(vbox);
 				
 				// Init labels to container.
+				double probabilitySum = 0;
 				for (int j = 0; j < topicKeywordProbabilityPairs.size(); j++) {
 					Label label = new Label();
 					label.setText(topicKeywordProbabilityPairs.get(j).getKey());
 					vbox.getChildren().add(label);
+					
+					// Update probability sums.
+					probabilitySum += topicKeywordProbabilityPairs.get(j).getValue();
 				}
 				
+				// Set probability sum for this topic.
+				probabilitySums.add(probabilitySum);
+				System.out.println("probSum = " + probabilitySum);
+				// Add tag clouds to parent.
 				anchorPane.getChildren().add(vbox);
+			}
+			
+			/*
+			 * Adjust tag font sizes. 
+			 */
+
+			if (anchorPane != null && data.size() > 0) {
+				anchorPane.applyCss();
+				anchorPane.layout();
+				
+				// Determine ratio of current tag-cloud height to available (canvas) height.
+				
+				// Get first tag cloud (covering the first topic), determine how much room we have to spare.
+				VBox firstTagCloud	= tagCloudContainer.get(0);
+				double ratio		= canvas.getHeight() / (firstTagCloud.getLayoutBounds().getHeight() * 1.2);
+				// Get first label, extract current font size.
+				double oldFontsize	= ((Label)firstTagCloud.getChildren().get(0)).getFont().getSize();
+				
+				// Calculate new number of "font size units" that may be spent so that the vertical axis
+				// is filled entirely.
+				defaultFontSize				= oldFontsize * ratio;
+				double fontSizeUnitsTotal 	= defaultFontSize * maxNumberOfKeywords;
+				
+				// Set new font size
+				for (int i = 0; i < tagCloudContainer.size(); i++) {
+					// Get tag cloud.
+					VBox child														= tagCloudContainer.get(i);
+					// Get keyword/probability pairs for this tag cloud.
+					ArrayList<Pair<String, Double>> topicKeywordProbabilityPairs	= data.get(i);
+					// Get probability sum for this topic/tag cloud.
+					double currProbabilitySum										= probabilitySums.get(i);
+					
+					// Iterate over all labels, calculate the appropriate size.
+					int tagInCloudNumber = 0;
+					for (Node node_label : child.getChildren()) {
+						Label label 		= (Label)node_label;
+						double probability	= topicKeywordProbabilityPairs.get(tagInCloudNumber++).getValue();
+						
+						System.out.println( "\tag #" + tagInCloudNumber + ": prob = " + probability / currProbabilitySum );
+						Font newFont		= new Font(fontSizeUnitsTotal * (probability / currProbabilitySum));
+						//Font newFont		= new Font(defaultFontSize);
+						
+						// Update used font.
+						label.setFont(newFont);
+					}
+				}
+				
+				System.out.println("ratio = " + ratio);
 			}
 		}
 		
 		GraphicsContext gc = canvas.getGraphicsContext2D();
-//		
+		
 //		gc.setFill(Color.GREEN);
 //	    gc.setStroke(Color.BLUE);
-//	    gc.fillRect(5, 5, canvas.getWidth() - 10, canvas.getHeight() - 10);
+//	    gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 	    
 
 		
@@ -119,14 +187,15 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 	@Override
 	public void resize(double width, double height)
 	{
+		System.out.println(width + " / " + height);
 		if (width > 0) {
-			canvas.setWidth(width);
+			canvas.setWidth(width - 5 - 5);
 			refresh(selectedFilteredLDAConfigurations, maxNumberOfTopics, maxNumberOfKeywords, false);
 		}
 		
 		// Adapt height.
 		if (height > 0) {
-			canvas.setHeight(height - 35);
+			canvas.setHeight(height - 40 - 5);
 			refresh(selectedFilteredLDAConfigurations, maxNumberOfTopics, maxNumberOfKeywords, false);
 		}
 	}

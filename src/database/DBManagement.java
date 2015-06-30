@@ -426,7 +426,8 @@ public class DBManagement
 				int topicKeywordCountForTopic = topicKeywordCount.get(topicID); 
 				if (topicKeywordCountForTopic < maxNumberOfKeywords) {
 					// Get data from row and add it to list.
-					Pair<String, Double> keywordProbabilityPair = new Pair<String, Double>(rs.getString("keyword"), rs.getDouble("probability"));
+					//Pair<String, Double> keywordProbabilityPair = new Pair<String, Double>(rs.getString("keyword"), rs.getDouble("probability"));
+					Pair<String, Double> keywordProbabilityPair = new Pair<String, Double>(rs.getString("keyword"), Math.random());
 					data.get(topicID).add(keywordProbabilityPair);
 					
 					// Increment counter.

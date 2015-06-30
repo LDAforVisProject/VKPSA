@@ -1,5 +1,10 @@
 package application;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -28,7 +33,7 @@ public class Main extends Application
 		// -----------------------------------------------
 		// 		Actual (raw and (pre-)processed) data
 		// -----------------------------------------------
-	
+		
 		int n						= 10000;
 		int numberOfTopics			= 20;
 		int numberOfKeywords		= 7000;
@@ -70,7 +75,6 @@ public class Main extends Application
 		// -----------------------------------------------
 		// 					Run VKPSA
 		// -----------------------------------------------
-		
 		try {
 			// Load core .fxml file. 
 			FXMLLoader fxmlLoader			= new FXMLLoader();
