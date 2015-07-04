@@ -49,6 +49,17 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	private boolean isCtrlDown;
 	
 	/**
+	 * Flips when selection was changed. Refresh of visualizations is only
+	 * triggered if this is true.
+	 */
+	private boolean changeInSelectionDetected;
+	/**
+	 * Flips when selection was changed. Local scope visualization refresh is
+	 * only triggered if this is true.
+	 */
+	private boolean changeInSelectionDetected_localScope;
+	
+	/**
 	 * Map storing all selected MDS chart points as values; their respective indices as keys.
 	 */
 	private Map<Integer, XYChart.Data<Number, Number>> selectedMDSPoints;
@@ -76,12 +87,16 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	{
 		super(analysisController);
 		
-		this.scatterchart			= scatterchart;
+		this.scatterchart						= scatterchart;
 		
 		// Init collection of selected data points in the MDS scatterchart.
-		selectedMDSPoints			= new HashMap<Integer, XYChart.Data<Number, Number>>();
-		globalCoordinateExtrema_X	= new Pair<Double, Double>(Double.MAX_VALUE, Double.MIN_VALUE);
-		globalCoordinateExtrema_Y	= new Pair<Double, Double>(Double.MAX_VALUE, Double.MIN_VALUE);
+		selectedMDSPoints						= new HashMap<Integer, XYChart.Data<Number, Number>>();
+		globalCoordinateExtrema_X				= new Pair<Double, Double>(Double.MAX_VALUE, Double.MIN_VALUE);
+		globalCoordinateExtrema_Y				= new Pair<Double, Double>(Double.MAX_VALUE, Double.MIN_VALUE);
+		
+		// Init flags.
+		changeInSelectionDetected				= false;
+		changeInSelectionDetected_localScope	= false;
 		
 		// Init scatterchart.
 		initScatterchart();
@@ -291,15 +306,28 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 					
 					// Point was selected - add to sets of selected indices and selected points.
 					if (nodeXWithinBounds && nodeYWithinBounds) {
-						selectedMDSPoints.put((int)datapoint.getExtraValue(), datapoint);
+						if (!selectedMDSPoints.containsKey((int)datapoint.getExtraValue())) {
+							// Set dirty flags.
+							changeInSelectionDetected				= true;
+							changeInSelectionDetected_localScope	= true;
+							
+							// Update collection of selected points.
+							selectedMDSPoints.put((int)datapoint.getExtraValue(), datapoint);
+						}
 					}
 				}
 			}
 			
-    		// Refresh scatterchart.
-    		refresh(coordinates, indices);
-    		// Refresh other charts.
-    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet(), false);
+			if (changeInSelectionDetected) {
+				System.out.println("refresh");
+	    		// Refresh scatterchart.
+	    		refresh(coordinates, indices);
+	    		// Refresh other charts.
+	    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet(), false);
+	    		
+	    		// Reset flag.
+	    		changeInSelectionDetected = false;
+			}
 		}
 		
 		// Else if control is down: Remove selected points in chose area from selection (in data series 0).
@@ -315,15 +343,25 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 				// Point was deselected - remove from of selected points and selected indices.
 				if (nodeXWithinBounds && nodeYWithinBounds) {
 					if (selectedMDSPoints.containsKey((int)datapoint.getExtraValue())) {
-			    		selectedMDSPoints.remove((int)datapoint.getExtraValue());
+						// Set dirty flags.
+						changeInSelectionDetected				= true;
+						changeInSelectionDetected_localScope	= true;
+						
+						// Update collection of selected points.
+						selectedMDSPoints.remove((int)datapoint.getExtraValue());
 					}
 				}
 			}
 			
-    		// Refresh scatterchart.
-    		refresh(coordinates, indices);
-    		// Refresh other charts.
-    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet(), false);
+			if (changeInSelectionDetected) {
+	    		// Refresh scatterchart.
+	    		refresh(coordinates, indices);
+	    		// Refresh other charts.
+	    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet(), false);
+	    		
+	    		// Reset flag.
+	    		changeInSelectionDetected = false;
+			}
 		}
 	}
 	
@@ -331,7 +369,12 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	public void processEndOfSelectionManipulation()
 	{
 		// Update local scope.
-		analysisController.refreshLocalScopeAfterGlobalSelection();
+		if (changeInSelectionDetected_localScope) {
+			// Refresh local scope visualization.
+			analysisController.refreshLocalScopeAfterGlobalSelection();
+			// Reset dirty flag.
+			changeInSelectionDetected_localScope = false;
+		}
 	}
 	
 	@Override

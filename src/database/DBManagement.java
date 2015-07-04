@@ -357,7 +357,7 @@ public class DBManagement
 		}
 	}
 	
-	public ArrayList<ArrayList<Pair<String, Double>>> getLimitedKITData(LDAConfiguration ldaConfiguration, int maxNumberOfTopics, int maxNumberOfKeywords)
+	public ArrayList<ArrayList<Pair<String, Double>>> getKITData(LDAConfiguration ldaConfiguration, int maxNumberOfKeywords)
 	{
 		ArrayList<ArrayList<Pair<String, Double>>> data = null;
 		
@@ -376,9 +376,6 @@ public class DBManagement
 			PreparedStatement numKeywordsStmt	= db.prepareStatement(query);
 			ResultSet rs						= numKeywordsStmt.executeQuery();
 			int numberOfTopics					= rs.getInt("topicCount");
-			
-			// Determine used number of topics.
-			numberOfTopics = numberOfTopics <= maxNumberOfTopics ? numberOfTopics : maxNumberOfTopics;
 			
 			/*
 			 * 2. Init collections.

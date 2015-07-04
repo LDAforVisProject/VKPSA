@@ -47,8 +47,6 @@ import model.workspace.tasks.WorkspaceTask;
 
 // FRONTEND / analysis view:
 
-// @todo Test if strange behaviour of distance barchart is due to messed up MDS coordinates/distance association
-//		 or if there is another problem.
 // @todo Create working version of parallel tag cloud visualization.
 // @todo After that: Introduce highlighting of selection of MDS datapoints in other charts (and vice versa).
 // @todo Discuss if and to what extend (only visual encoding of each cluster or full-fledged support throughout

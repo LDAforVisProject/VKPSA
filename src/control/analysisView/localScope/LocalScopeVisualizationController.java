@@ -112,5 +112,5 @@ public abstract class LocalScopeVisualizationController extends Controller
 	
 	protected abstract void updateData();
 	
-	public abstract void reset(int maxNumberOfTopics, int numberOfTopics, int maxNumberOfKeywords, int numberOfKeywords);
+	public abstract void reset(ArrayList<LDAConfiguration> selectedFilteredLDAConfigurations, int maxNumberOfTopics, int numberOfTopics, int maxNumberOfKeywords, int numberOfKeywords);
 }

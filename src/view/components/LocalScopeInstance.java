@@ -89,8 +89,6 @@ public class LocalScopeInstance extends VisualizationComponent
             {
             	// Round value.
             	int roundedNumberOfTopics = (int) Math.round(slider_localScope_numTopicsToUse.getValue());
-            	// Update values.
-//            	slider_localScope_numTopicsToUse.setValue(roundedNumberOfTopics);
             	// Update number in textfield.
             	textfield_localScope_numTopicsToUse.setText(String.valueOf(roundedNumberOfTopics));
             	
@@ -106,8 +104,6 @@ public class LocalScopeInstance extends VisualizationComponent
             {
             	// Round value.
             	int roundedNumberOfKeywords = (int) Math.round(slider_localScope_numKeywordsToUse.getValue());
-            	// Update values.
-//            	slider_localScope_numKeywordsToUse.setValue(roundedNumberOfKeywords);
             	// Update number in textfield.
             	textfield_localScope_numKeywordsToUse.setText(String.valueOf(roundedNumberOfKeywords));
             	
@@ -152,7 +148,6 @@ public class LocalScopeInstance extends VisualizationComponent
 			anchorpane_localScope.getChildren().add(contentNode);
 			
 			// Ensure resizability of content.
-			
 			AnchorPane.setTopAnchor(contentNode, 40.0);
     		AnchorPane.setBottomAnchor(contentNode, 5.0);
     		AnchorPane.setLeftAnchor(contentNode, 5.0);
@@ -172,8 +167,6 @@ public class LocalScopeInstance extends VisualizationComponent
 	
 	public void refresh(ArrayList<LDAConfiguration> selectedFilteredLDAConfigurations)
 	{
-		System.out.println("\n### REFRESHING LOCAL SCOPE - " + selectedFilteredLDAConfigurations.size());
-		
 		// Update reference.
 		this.selectedFilteredLDAConfigurations = selectedFilteredLDAConfigurations;
 		
@@ -192,11 +185,28 @@ public class LocalScopeInstance extends VisualizationComponent
 		
 	}
 	
+	/**
+	 * Sets reference to instance of Workspace.
+	 * @param workspace
+	 */
 	public void setWorkspace(Workspace workspace)
 	{
 		this.workspace = workspace;
 		
 		// Pass reference on to controller.
 		controller.setWorkspace(workspace);
+	}
+	
+	/**
+	 * Updates possible maximum of number of topics to select.
+	 * Called from instance of LocalScopeVisualizationController, after
+	 * a new dataset was selected/loaded.
+	 * @param maxNumberOfTopics
+	 */
+	public void setNumberOfTopicsMaximum(int maxNumberOfTopics)
+	{
+		slider_localScope_numTopicsToUse.setMax(maxNumberOfTopics);
+		slider_localScope_numTopicsToUse.setMajorTickUnit(maxNumberOfTopics / 5 >= 1 ? maxNumberOfTopics / 5 : 1);
+		slider_localScope_numTopicsToUse.setMinorTickCount(4);
 	}
 }

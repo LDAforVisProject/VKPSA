@@ -39,6 +39,10 @@ public class DistancesBarchart extends VisualizationComponent
 	 */
 	private Pair<Double, Double> globalDistanceExtrema;
 	/**
+	 * Filtered distance extrema on x axis (filter-; but not selection-specific).
+	 */
+	private Pair<Double, Double> filteredDistanceExtrema;
+	/**
 	 * Holds information about what's the highest number of distances associated with one bin in the 
 	 * current environment (in the distance histogram).
 	 */
@@ -71,6 +75,7 @@ public class DistancesBarchart extends VisualizationComponent
 		this.button_relativeView_distEval			= button_relativeView_distEval;
 		
 		globalDistanceExtrema				= new Pair<Double, Double>(null, null);
+		filteredDistanceExtrema				= new Pair<Double, Double>(null, null);
 		distanceBinCountMaximum				= 0;
 		distanceBinCountMaximumDetermined	= false;
 		
@@ -115,7 +120,11 @@ public class DistancesBarchart extends VisualizationComponent
 
 	public void identifyGlobalExtrema(double[][] distances)
 	{
-		// Identify global distance extrema.
+		globalDistanceExtrema = identifyExtrema(distances);
+	}
+	
+	private Pair<Double, Double> identifyExtrema(double[][] distances)
+	{
 		double minX				= Double.MAX_VALUE;
 		double maxX 			= Double.MIN_VALUE;
 		
@@ -126,10 +135,16 @@ public class DistancesBarchart extends VisualizationComponent
 			}
 		}
 		
-		globalDistanceExtrema = new Pair<Double, Double>(minX, maxX);
+		return new Pair<Double, Double>(minX, maxX);
 	}
 	
-	public void refresh(double filteredDistances[][], double[][] selectedFilteredDistances)
+	/**
+	 * Refreshes visualization.
+	 * @param filteredDistances
+	 * @param selectedFilteredDistances
+	 * @param haveFilterSettingsChanged Determines if filter settings may have been changed since the last call.
+	 */
+	public void refresh(double filteredDistances[][], double[][] selectedFilteredDistances, boolean haveFilterSettingsChanged)
 	{
 		this.filteredDistances			= filteredDistances;
 		this.selectedFilteredDistances	= selectedFilteredDistances;
@@ -137,8 +152,11 @@ public class DistancesBarchart extends VisualizationComponent
 		//	Clear old barchart data.
 		barchart.getData().clear();
 		
-		
 		if (filteredDistances != null) {
+			// If filter settings may have been changed: Refresh filtered extrema.
+			if (haveFilterSettingsChanged)
+				filteredDistanceExtrema = identifyExtrema(filteredDistances);
+			
 			// Calculate binning parameters.
 			final int numberOfBins		= 50;
 			final int numberOfElements	= ((filteredDistances.length - 1) * (filteredDistances.length - 1) + (filteredDistances.length - 1)) / 2;
@@ -163,20 +181,11 @@ public class DistancesBarchart extends VisualizationComponent
 				
 				// Set y-axis range, if in absolute mode.
 				if (!button_relativeView_distEval.isSelected()) {
-					// If in absolute mode for the first time (important: The first draw always happens in absolute
-					// view mode!): Get maximal count of distances associated with one bin.
-					if (!distanceBinCountMaximumDetermined) {
-						distanceBinCountMaximum = 0;
-						for (int binCount : distanceBinList) {
-							distanceBinCountMaximum = binCount > distanceBinCountMaximum ? binCount : distanceBinCountMaximum;
-						}
-						
-						distanceBinCountMaximumDetermined = true;
-					}
+					// Adjust x-axis.
+					adjustXAxisRange(distanceBinList);
 					
-//					ValueAxis<Integer> yAxis = (ValueAxis<Integer>) barchart.getYAxis();
-					numberaxis_distanceEvaluation_yaxis.setLowerBound(0);
-					numberaxis_distanceEvaluation_yaxis.setUpperBound(distanceBinCountMaximum * 1.1);
+					// Adjust y-axis.
+					adjustYAxisRange();
 				}
 			}
 			
@@ -191,7 +200,7 @@ public class DistancesBarchart extends VisualizationComponent
 			// Update text info.
 			label_avg.setText("λ: -");
 			label_median.setText("η: -");
-		}
+		}	
 	}
 	
 	private void addEmptyDataSeries(String name)
@@ -248,8 +257,8 @@ public class DistancesBarchart extends VisualizationComponent
 		
 		// Determine extrema.
 		// 	Depending on whether absolute or relative mode is enabled: Use global or current extrema.  
-		min = button_relativeView_distEval.isSelected() ? distancesFlattened[0] : globalDistanceExtrema.getKey().floatValue();
-		max = button_relativeView_distEval.isSelected() ? distancesFlattened[distancesFlattened.length - 1] : globalDistanceExtrema.getValue().floatValue();
+		min = button_relativeView_distEval.isSelected() ? filteredDistanceExtrema.getKey().floatValue() : globalDistanceExtrema.getKey().floatValue();
+		max = button_relativeView_distEval.isSelected() ? filteredDistanceExtrema.getValue().floatValue() : globalDistanceExtrema.getValue().floatValue();
 
 		/*
 		 * Bin data.
@@ -326,18 +335,35 @@ public class DistancesBarchart extends VisualizationComponent
 		// Toggle auto-ranging.
 		barchart.getYAxis().setAutoRanging(button_relativeView_distEval.isSelected());
 		
-		// If in absolute mode: Manually set axis range options.
-		if (!button_relativeView_distEval.isSelected())
-			adjustYAxisTickWidth();
+		if (button_relativeView_distEval.isSelected()) {
+			filteredDistanceExtrema = identifyExtrema(filteredDistances);
+		}
 		
 		// Refresh chart.
-		refresh(filteredDistances, selectedFilteredDistances);
+		refresh(filteredDistances, selectedFilteredDistances, false);
+	}
+	
+	private void adjustXAxisRange(int[] distanceBinList)
+	{
+		// If in absolute mode for the first time (important: The first draw always happens in absolute
+		// view mode!): Get maximal count of distances associated with one bin.
+		if (!distanceBinCountMaximumDetermined) {
+			distanceBinCountMaximum = 0;
+			for (int binCount : distanceBinList) {
+				distanceBinCountMaximum = binCount > distanceBinCountMaximum ? binCount : distanceBinCountMaximum;
+			}
+			
+			distanceBinCountMaximumDetermined = true;
+		}
+		
+		numberaxis_distanceEvaluation_yaxis.setLowerBound(0);
+		numberaxis_distanceEvaluation_yaxis.setUpperBound(distanceBinCountMaximum * 1.1);
 	}
 	
 	/**
 	 * Default view mode is absolute - disable auto-ranging on axes, configure ticks.
 	 */
-	private void adjustYAxisTickWidth()
+	private void adjustYAxisRange()
 	{
     	// Adjust tick width.
     	final int numberOfTicks = 5;

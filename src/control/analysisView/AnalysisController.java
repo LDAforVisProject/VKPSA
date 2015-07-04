@@ -486,7 +486,7 @@ public class AnalysisController extends Controller
 		// Refresh visualizations.
 		refreshParameterHistograms(50);
 		mdsScatterchart.refresh(filteredCoordinates, filteredIndices);
-		distancesBarchart.refresh(filteredDistances, selectedFilteredDistances);
+		distancesBarchart.refresh(filteredDistances, selectedFilteredDistances, true);
 		refreshDistanceLinechart(filteredLDAConfigurations, filteredDistances);
 		heatmap_parameterspace.refresh(ldaConfigurations, filteredLDAConfigurations, combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), button_relativeView_paramDist.isSelected());
 		localScopeInstance.refresh(selectedFilteredLDAConfigurations);
@@ -506,7 +506,7 @@ public class AnalysisController extends Controller
 		selectedFilteredLDAConfigurations	= createFilteredSelectedLDAConfigurations(selectedFilteredIndices);
 				
 		// Refresh other (than MDSScatterchart) visualizations.
-		distancesBarchart.refresh(filteredDistances, selectedFilteredDistances);
+		distancesBarchart.refresh(filteredDistances, selectedFilteredDistances, true);
 		if (includeLocalScope)
 			localScopeInstance.refresh(selectedFilteredLDAConfigurations);
 	}
