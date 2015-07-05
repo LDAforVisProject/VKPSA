@@ -9,6 +9,7 @@ import java.util.ResourceBundle;
 import view.components.ColorScale;
 import model.LDAConfiguration;
 import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
@@ -18,6 +19,7 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
@@ -43,6 +45,11 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 	 * designated for the local scope visualization.
 	 */
 	private double defaultFontSize;
+	
+	/**
+	 * Keyword that is currently hovered over.
+	 */
+	private String selectedKeyword;
 	
 	/*
 	 * Other data.
@@ -93,10 +100,11 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 		// Init collections.
 		keywordProbabilitySumsOverTopics	= new HashMap<String, Double>();
 		
-		// Set inital values.
+		// Set inital scalar values.
 		currentIndex						= 0;
 		keywordProbabilitySumOverTopicsMax	= 0;
 		keywordProbabilitySumOverTopicsMin	= Double.MAX_VALUE;
+		selectedKeyword						= "";
 	}
 
 	@Override
@@ -158,6 +166,17 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 	    double intervalX					= canvas.getWidth() / numberOfTopics;
 	    tagCloudContainer					= new ArrayList<VBox>(numberOfTopics);
 	    
+		// For exit from local scope instance: Reset selected label.
+		anchorPane.addEventHandler(MouseEvent.MOUSE_EXITED_TARGET, new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent event) 
+            {
+            	selectedKeyword = "";
+            	
+            	// Update visualizations.
+            	drawBridges();
+            }
+        });
+		
 	    // Iterate over all topics; create cloud for each one.
 		for (int i = 0; i < numberOfTopics; i++) {
 			ArrayList<Pair<String, Double>> topicKeywordProbabilityPairs = data.get(i);
@@ -173,6 +192,25 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 				String keyword		= topicKeywordProbabilityPairs.get(j).getKey();
 				double probability	= topicKeywordProbabilityPairs.get(j).getValue();
 				Label label 		= new Label();
+				
+				/*
+				 * Add event listener.
+				 */
+				
+				// For entry into label:
+				label.addEventHandler(MouseEvent.MOUSE_ENTERED, new EventHandler<MouseEvent>() {
+		            public void handle(MouseEvent event) 
+		            {
+		            	Label label = (Label)event.getSource();
+		            	
+		            	if (!selectedKeyword.equals(label.getText())) {
+			            	selectedKeyword	= label.getText();
+
+			            	// Update visualizations.
+			            	drawBridges();
+		            	}
+		            }
+		        });
 				
 				//label.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 				label.setText(keyword);
@@ -278,6 +316,11 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 		}
 	}
 	
+	private void drawBridges()
+	{
+		drawBridges(this.data, this.numberOfTopics, this.numberOfKeywords);
+	}
+	
 	/**
 	 * Draws connection between tag clouds.
 	 * @param data
@@ -344,13 +387,20 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 						
 						// Line width is proportional to the difference in probability between these two topics.
 						gc.setLineWidth(defaultLineWidth * Math.pow(proportion, 2));
+						
 						// Line color is dependent on the overall importance of this keyword.
 						final int colorExponent					= 3;
-						double adjustedKeywordProbailityValue 	= Math.pow(keywordProbabilitySumsOverTopics.get(keyword), colorExponent);
-						gc.setStroke(ColorScale.getColorForValue(	adjustedKeywordProbailityValue, 
-																	Math.pow(keywordProbabilitySumOverTopicsMin, colorExponent), 
-																	Math.pow(keywordProbabilitySumOverTopicsMax, colorExponent), 
-																	Color.YELLOW, Color.RED));
+						double adjustedKeywordProbabilityValue 	= Math.pow(keywordProbabilitySumsOverTopics.get(keyword), colorExponent);
+						Color color								= ColorScale.getColorForValue(	adjustedKeywordProbabilityValue, 
+																								Math.pow(keywordProbabilitySumOverTopicsMin, colorExponent), 
+																								Math.pow(keywordProbabilitySumOverTopicsMax, colorExponent), 
+																								Color.YELLOW, Color.RED);
+						// Adapt colors if a keyword is currently selected.
+						if (!selectedKeyword.equals("")) {
+							color = keyword.equals(selectedKeyword) ? color : Color.WHITE;	
+						}
+						 
+						gc.setStroke(color);
 						
 						// Draw line.
 						gc.strokeLine(currBridgeX, currBridgeY, nextBridgeX, nextBridgeY);
