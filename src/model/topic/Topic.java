@@ -92,9 +92,7 @@ public class Topic
 
 	public double calculateL2Distance(Topic topicToCompare)
 	{
-		// System.out.println("Calculating L2 distance/norm. Using topics #" + topicNumber + " and #" + topicToCompare.topicNumber + ".");
-		
-	    double result = 0;
+		double result = 0;
 	    // Assume all words are present in self._keywordProbabilityMap as well as topicToCompare._keywordProbabilityMap.
 		for (Map.Entry<String, Double> item : keywordProbabilityMap.entrySet()) { 
 			double diff	=  item.getValue() - topicToCompare.keywordProbabilityMap.get(item.getKey());
@@ -106,9 +104,6 @@ public class Topic
 
 	public double calculateHellingerDistance(Topic topicToCompare)
 	{
-		// System.out.println("Calculating Hellinger distance/norm. Using topics #" + topicNumber + " and #" + topicToCompare.topicNumber + ".");
-		
-		
 		double result = 0;
         // Assume all words are present in self._keywordProbabilityMap as well as objectToCompare._keywordProbabilityMap.
 		for (Map.Entry<String, Double> item : keywordProbabilityMap.entrySet()) { 
@@ -121,8 +116,6 @@ public class Topic
 
 	public double calculateBhattacharyyaDistance(Topic topicToCompare)
 	{
-		// System.out.println("Calculating Bhattacharyya distance/norm. Using topics #" + topicNumber + " and #" + topicToCompare.topicNumber + ".");
-		
 		double result = 0;
         // Assume all words are present in self._keywordProbabilityMap as well as objectToCompare._keywordProbabilityMap.
 		for (Map.Entry<String, Double> item : keywordProbabilityMap.entrySet()) {
@@ -133,9 +126,7 @@ public class Topic
 	}
 
 	public double calculateKullbackLeiblerDistance(Topic topicToCompare)
-	{
-		// System.out.println("Calculating Kullback-Leibler distance/norm. Using topics #" + topicNumber + " and #" + topicToCompare.topicNumber + ".");
-		
+	{	
 		double result = 0;
 
 		// Assume all words are present in self._keywordProbabilityMap as well as objectToCompare._keywordProbabilityMap.
@@ -149,9 +140,7 @@ public class Topic
 
 	public double calculateJensenShannonDivergence(Topic topicToCompare)
 	{
-		// System.out.println("Calculating Jensen-Shannon distance/norm. Using topics #" + topicNumber + " and #" + topicToCompare.topicNumber + ".");
-		
-        double tempSum_P = 0;
+		double tempSum_P = 0;
         double tempSum_Q = 0;
         
         // Assume all words are present in self._keywordProbabilityMap as well as objectToCompare._keywordProbabilityMap.

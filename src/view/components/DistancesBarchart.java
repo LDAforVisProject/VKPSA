@@ -63,8 +63,8 @@ public class DistancesBarchart extends VisualizationComponent
 	
 	
 	public DistancesBarchart(	AnalysisController analysisController, BarChart<String, Integer> barchart_distances, 
-								NumberAxis numberaxis_distanceEvaluation_yaxis, Label label_avg, Label label_median, 
-								ToggleButton button_relativeView_distEval)
+								NumberAxis numberaxis_distanceEvaluation_yaxis, Label label_avg, 
+								Label label_median, ToggleButton button_relativeView_distEval)
 	{
 		super(analysisController);
 
@@ -182,7 +182,7 @@ public class DistancesBarchart extends VisualizationComponent
 				// Set y-axis range, if in absolute mode.
 				if (!button_relativeView_distEval.isSelected()) {
 					// Adjust x-axis.
-					adjustXAxisRange(distanceBinList);
+					findDistanceBinCountMaximum(distanceBinList);
 					
 					// Adjust y-axis.
 					adjustYAxisRange();
@@ -302,7 +302,7 @@ public class DistancesBarchart extends VisualizationComponent
 	private XYChart.Series<String, Integer> generateDistanceHistogramDataSeries(String name, int[] distanceBinList, int numberOfBins, double binInterval, double min, double max)
 	{
 		final XYChart.Series<String, Integer> data_series	= new XYChart.Series<String, Integer>();
-		Map<String, Integer> categoryCounts					= new HashMap<String, Integer>();
+		//Map<String, Integer> categoryCounts					= new HashMap<String, Integer>();
 		
 		// Set name.
 		data_series.setName(name);
@@ -313,7 +313,12 @@ public class DistancesBarchart extends VisualizationComponent
 			categoryDescription			= categoryDescription.length() > 5 ? categoryDescription.substring(0, 5) : categoryDescription;
 			int value					= distanceBinList[i];
 			
+			// Avoid category clash by adding "invisible" characters.
+			for (int x = 0; x < i; x++)
+				categoryDescription += (char)29;
+			
 			// Bin again by category name, if that's necessary.
+			/*
 			if (!categoryCounts.containsKey(categoryDescription)) {
 				categoryCounts.put(categoryDescription, value);
 			}
@@ -322,7 +327,7 @@ public class DistancesBarchart extends VisualizationComponent
 				value += categoryCounts.get(categoryDescription);
 				categoryCounts.put(categoryDescription, value);
 			}
-			
+			*/
 			data_series.getData().add(new XYChart.Data<String, Integer>(categoryDescription, value));
 		}
 		
@@ -343,7 +348,7 @@ public class DistancesBarchart extends VisualizationComponent
 		refresh(filteredDistances, selectedFilteredDistances, false);
 	}
 	
-	private void adjustXAxisRange(int[] distanceBinList)
+	private void findDistanceBinCountMaximum(int[] distanceBinList)
 	{
 		// If in absolute mode for the first time (important: The first draw always happens in absolute
 		// view mode!): Get maximal count of distances associated with one bin.
@@ -355,9 +360,6 @@ public class DistancesBarchart extends VisualizationComponent
 			
 			distanceBinCountMaximumDetermined = true;
 		}
-		
-		numberaxis_distanceEvaluation_yaxis.setLowerBound(0);
-		numberaxis_distanceEvaluation_yaxis.setUpperBound(distanceBinCountMaximum * 1.1);
 	}
 	
 	/**
@@ -365,6 +367,9 @@ public class DistancesBarchart extends VisualizationComponent
 	 */
 	private void adjustYAxisRange()
 	{
+		numberaxis_distanceEvaluation_yaxis.setLowerBound(0);
+		numberaxis_distanceEvaluation_yaxis.setUpperBound(distanceBinCountMaximum * 1.1);
+		
     	// Adjust tick width.
     	final int numberOfTicks = 5;
     	numberaxis_distanceEvaluation_yaxis.setTickUnit( (float)distanceBinCountMaximum / numberOfTicks);

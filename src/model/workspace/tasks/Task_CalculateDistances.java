@@ -72,7 +72,7 @@ public class Task_CalculateDistances extends WorkspaceTask
 					distances[j][i] = distances[i][j];
 					
 					int tempNormalizationFactor = 1;
-					for (; distances[i][j] * tempNormalizationFactor < 10; tempNormalizationFactor *= 10);
+					//for (; distances[i][j] * tempNormalizationFactor < 100; tempNormalizationFactor *= 10);
 					normalizationFactor = tempNormalizationFactor > normalizationFactor ? tempNormalizationFactor : normalizationFactor;
 					
 					numberOfCalculatedDistances++;

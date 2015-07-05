@@ -33,17 +33,20 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
+import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Pair;
 
@@ -139,15 +142,20 @@ public class AnalysisController extends Controller
 	 * Filter controls.
 	 */
 	
-	@FXML private BarChart<String, Integer> barchart_alpha;
-	@FXML private BarChart<String, Integer> barchart_eta;
-	@FXML private BarChart<String, Integer> barchart_kappa;
+	private @FXML ScrollPane scrollpane_filter;
+	private @FXML GridPane gridpane_parameterConfiguration;
+	
+	private Map<String, BarChart<String, Integer>> barchartsForFilterControls;
+	private @FXML BarChart<String, Integer> barchart_alpha;
+	private @FXML BarChart<String, Integer> barchart_eta;
+	private @FXML BarChart<String, Integer> barchart_kappa;
 	
 	private Map<String, RangeSlider> rangeSliders;
 	private @FXML VBox vbox_alpha;
 	private @FXML VBox vbox_eta;
 	private @FXML VBox vbox_kappa;
 	
+	private Map<String, Pair<TextField, TextField>> textfieldsForFilterControls;
 	private @FXML TextField alpha_min_textfield;
 	private @FXML TextField alpha_max_textfield;
 	private @FXML TextField eta_min_textfield;
@@ -173,11 +181,6 @@ public class AnalysisController extends Controller
 	 * LDA configurations all datasets in workspace / currently loaded.
 	 */
 	private ArrayList<LDAConfiguration> ldaConfigurations;
-	
-	/**
-	 * Map storing all selected MDS chart points as values; their respective indices as keys.
-	 */
-	private Map<Integer, XYChart.Data<Number, Number>> selectedMDSPoints;
 	
 	/**
 	 * Number of steps in dataset distance correlation linechart.
@@ -256,8 +259,6 @@ public class AnalysisController extends Controller
 		// Init collection of filtered/selected indices.
 		filteredIndices						= new LinkedHashSet<Integer>();
 		selectedFilteredIndices				= new LinkedHashSet<Integer>();
-		// Init collection of filtered/selected data points in the MDS scatterchart.
-		selectedMDSPoints					= new HashMap<Integer, XYChart.Data<Number, Number>>();
 
 		// Init pairs holding global extrema information.
 		globalExtremaIdentified				= false;
@@ -321,7 +322,7 @@ public class AnalysisController extends Controller
 	 */
 	private void initUIElements() 
 	{
-		initRangeSliders();
+		initFilterControls();
 		initMDSScatterchart();
 		initDistanceBarchart();
 		initDDCLineChart();
@@ -352,14 +353,31 @@ public class AnalysisController extends Controller
 		resetDDCAxisOptions();
 	}
 
-	private void initRangeSliders()
+	private void initFilterControls()
 	{
-		rangeSliders	= new HashMap<String, RangeSlider>();
-	
+		scrollpane_filter.setContent(gridpane_parameterConfiguration);
+		
+		// Init collections.
+		rangeSliders				= new HashMap<String, RangeSlider>();
+		textfieldsForFilterControls	= new HashMap<String, Pair<TextField, TextField>>();
+		barchartsForFilterControls	= new HashMap<String, BarChart<String, Integer>>();
+		
+		// Add range sliders to collection.
 		rangeSliders.put("alpha", new RangeSlider());
 		rangeSliders.put("eta", new RangeSlider());
 		rangeSliders.put("kappa", new RangeSlider());
 		
+		// Add textfields to collection.
+		textfieldsForFilterControls.put("alpha", new Pair<TextField, TextField>(alpha_min_textfield, alpha_max_textfield));
+		textfieldsForFilterControls.put("eta", new Pair<TextField, TextField>(eta_min_textfield, eta_max_textfield));
+		textfieldsForFilterControls.put("kappa", new Pair<TextField, TextField>(kappa_min_textfield, kappa_max_textfield));
+		
+		// Add barcharts to collections.
+		barchartsForFilterControls.put("alpha", barchart_alpha);
+		barchartsForFilterControls.put("eta", barchart_eta);
+		barchartsForFilterControls.put("kappa", barchart_kappa);
+		
+		// Init range slider.
 		for (Map.Entry<String, RangeSlider> entry : rangeSliders.entrySet()) {
 			RangeSlider rs = entry.getValue();
 			
@@ -376,8 +394,11 @@ public class AnalysisController extends Controller
 			rs.setHighValue(100);
 			
 			// Get some distance between range sliders and bar charts.
-			rs.setPadding(new Insets(10, 0, 0, 0));
+			rs.setPadding(new Insets(5, 0, 0, 4));
 			
+			// Add event handler - trigger update of visualizations (and the
+			// data preconditioning necessary for that) if filter settings
+			// are changed.
 			addEventHandlerToRangeSlider(rs, entry.getKey());
 		}
 		
@@ -387,17 +408,20 @@ public class AnalysisController extends Controller
 		rangeSliders.get("kappa").setHighValue(50);
 		
 		// Adapt textfield values.
-		alpha_min_textfield.setText(String.valueOf(rangeSliders.get("alpha").getMin()));
-    	alpha_max_textfield.setText(String.valueOf(rangeSliders.get("alpha").getMax()));
-	 	eta_min_textfield.setText(String.valueOf(rangeSliders.get("eta").getMin()));
-    	eta_max_textfield.setText(String.valueOf(rangeSliders.get("eta").getMax()));
-		kappa_min_textfield.setText(String.valueOf(rangeSliders.get("kappa").getMin()));
-    	kappa_max_textfield.setText(String.valueOf(rangeSliders.get("kappa").getMax()));
+		for (Map.Entry<String, Pair<TextField, TextField>> entry : textfieldsForFilterControls.entrySet()) {
+			entry.getValue().getKey().setText( String.valueOf(rangeSliders.get(entry.getKey()).getMin()) );
+			entry.getValue().getValue().setText( String.valueOf(rangeSliders.get(entry.getKey()).getMax()) );
+		}
 		
 		// Add range slider to GUI.
 		vbox_alpha.getChildren().add(rangeSliders.get("alpha"));
 		vbox_eta.getChildren().add(rangeSliders.get("eta"));
 		vbox_kappa.getChildren().add(rangeSliders.get("kappa"));
+		
+		// Set gridpane's height.
+		final int prefRowHeight = 100;
+		gridpane_parameterConfiguration.setPrefHeight(LDAConfiguration.SUPPORTED_PARAMETERS.length * prefRowHeight);
+		gridpane_parameterConfiguration.setMinHeight(LDAConfiguration.SUPPORTED_PARAMETERS.length * prefRowHeight);
 	}
 
 	private void initMDSScatterchart()
@@ -464,7 +488,7 @@ public class AnalysisController extends Controller
 		// Load current distance data from workspace.
 		distances			= workspace.getDistances();
 		
-		// If not done already: Discover global extrema.
+		// If not done already: Discover global extrema, adapt components.
 		if (!globalExtremaIdentified) {
 			// Identify global extrema.
 			distancesBarchart.identifyGlobalExtrema(distances);
@@ -475,6 +499,9 @@ public class AnalysisController extends Controller
 			
 			// Mark global extrema as found.
 			globalExtremaIdentified = true;
+			
+			// Adapt controls to new data.
+			adjustControlExtrema();
 		}
 		
 		// Draw entire data set. Used as initialization call, executed by Workspace instance.
@@ -1217,6 +1244,60 @@ public class AnalysisController extends Controller
     	numberAxis_distanceCorrelation_xAxis.setMinorTickCount(4);
 	}
 	
+
+	private Map<String, Pair<Double, Double>> identifyLDAParameterExtrema(ArrayList<LDAConfiguration> ldaConfigurations)
+	{
+		Map<String, Pair<Double, Double>> parameterExtrema = new HashMap<String, Pair<Double, Double>>(LDAConfiguration.SUPPORTED_PARAMETERS.length);
+		
+		// Init parameter extrema collection.
+		for (String param : LDAConfiguration.SUPPORTED_PARAMETERS) {
+			parameterExtrema.put(param, new Pair<Double, Double>(Double.MAX_VALUE, Double.MIN_VALUE));
+		}
+		
+		// Search for extrema in all LDA configurations.
+		for (LDAConfiguration ldaConfig : ldaConfigurations) {
+			// For all supported parameters:
+			for (String param : LDAConfiguration.SUPPORTED_PARAMETERS) {
+				double value	= ldaConfig.getParameter(param);
+				double min		= value < parameterExtrema.get(param).getKey()		? value : parameterExtrema.get(param).getKey();
+				double max 		= value > parameterExtrema.get(param).getValue() 	? value : parameterExtrema.get(param).getValue();
+				
+				parameterExtrema.put(param, new Pair<Double, Double>(min, max));
+			}
+		}
+		
+		return parameterExtrema;
+	}
+	
+	/**
+	 * Adjusts minimal and maximal control values so that they fit the loaded data set.
+	 */
+	private void adjustControlExtrema()
+	{
+		Map<String, Pair<Double, Double>> ldaParameterExtrema = identifyLDAParameterExtrema(ldaConfigurations);
+		
+		// Update values of range slider. 
+		for (Map.Entry<String, RangeSlider> rs : rangeSliders.entrySet()) {
+			String param	= rs.getKey();
+			double min		= ldaParameterExtrema.get(param).getKey();
+			double max		= ldaParameterExtrema.get(param).getValue();
+			
+			// Set range slider values.
+			rs.getValue().setMin(min);
+			rs.getValue().setMax(max);
+			
+			// Set range slider's textfield values.
+			textfieldsForFilterControls.get(param).getKey().setText(String.valueOf(min));
+			textfieldsForFilterControls.get(param).getValue().setText(String.valueOf(max));
+			
+			// Adapt barchart axis.
+			ValueAxis<Integer> yAxis = (ValueAxis<Integer>) barchartsForFilterControls.get(param).getYAxis();
+			yAxis.setMinorTickVisible(false);
+			
+			
+		}
+	}
+	
 	public ArrayList<LDAConfiguration> getLDAConfigurations()
 	{
 		return ldaConfigurations;
@@ -1240,14 +1321,4 @@ public class AnalysisController extends Controller
 		// Pass reference on to instance of local scope component.
 		localScopeInstance.setWorkspace(workspace);
 	}
-	
-//	public double[][] getFilteredCoordinates()
-//	{
-//		return filteredCoordinates;
-//	}
-//	
-//	public double[][] getFilteredDistances()
-//	{
-//		return filteredDistances;
-//	}
 }

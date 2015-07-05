@@ -319,7 +319,6 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 			}
 			
 			if (changeInSelectionDetected) {
-				System.out.println("refresh");
 	    		// Refresh scatterchart.
 	    		refresh(coordinates, indices);
 	    		// Refresh other charts.

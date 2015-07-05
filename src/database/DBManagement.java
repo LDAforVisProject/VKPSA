@@ -185,7 +185,7 @@ public class DBManagement
 		int count			= 0;
 		ResultSet rs		= null;
 		int numberOfResults	= readNumberOfKeywordInTopicDatasets();
-		System.out.println("number of results = " + numberOfResults);
+		
 		// Init primary collection.
 		Map<LDAConfiguration, Dataset> datasetMap = new HashMap<LDAConfiguration, Dataset>();
 		
@@ -222,9 +222,6 @@ public class DBManagement
 		      
 				// Current row contains first entry of new LDA configuration.
 				if (!ldaConfig.equals(currLDAConfig)) {
-//		        	System.out.println("### LDA_CONFIG = " + currLDAConfigID + ", TOPICID = " + currTopicID);
-//		        	System.out.println("\tat count = " + count);
-		        	
 		        	// 1. Create new topic out of collected keyword/probability pairs.
 		        	ldaConfigTopics.get(currLDAConfig).add(new Topic(currTopicID, keywordProbabilityMap));
 		        	
@@ -240,9 +237,6 @@ public class DBManagement
 		        
 				// Current row contains first entry of new topic.
 		        if (topicID != currTopicID) {
-//		        	System.out.println("\tOld: " + currLDAConfigID + "; TOPICID = " + currTopicID);
-//		        	System.out.println("\tNew: " + rs.getInt("ldaConfigurationID") + "; TOPICID = " + topicID);
-
 		        	// Create new topic out of collected keyword/probability pairs.
 		        	ldaConfigTopics.get(currLDAConfig).add(new Topic(currTopicID, keywordProbabilityMap));
 		        	
@@ -365,8 +359,6 @@ public class DBManagement
 		String query = 	"select count(*) topicCount from topics t " + 
 						"join ldaConfigurations lda on t.ldaConfigurationID = lda.ldaConfigurationID " +
 						"where lda.ldaConfigurationID = " + ldaConfiguration.getConfigurationID() + ";";
-						
-		System.out.println(ldaConfiguration.getConfigurationID());
 
 		try {
 			/*

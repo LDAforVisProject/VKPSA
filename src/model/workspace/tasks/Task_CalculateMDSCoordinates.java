@@ -34,7 +34,7 @@ public class Task_CalculateMDSCoordinates extends WorkspaceTask
 		final double[][] distances							= workspace.getDistances();
 		
 		// Apply MDS on topic distance matrix.
-		double[][] output									= MDSJ.classicalScaling(distances);
+		double[][] output									= MDSJ.classicalScaling(distances, 2);
 		
 //		System.out.println(Data.format(distances));
 //		System.out.println("------");
