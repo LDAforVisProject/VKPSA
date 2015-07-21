@@ -399,11 +399,11 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 		scatterchart_yAxis.setUpperBound(globalCoordinateExtrema_Y.getValue() + diffY / 10);
     	
     	// Adjust tick width.
-    	final int numberOfTicks = 10;
+    	final int numberOfTicks = 4;
     	scatterchart_xAxis.setTickUnit( diffX / numberOfTicks);
     	scatterchart_yAxis.setTickUnit( diffY / numberOfTicks);
-    	scatterchart_xAxis.setMinorTickCount(4);
-    	scatterchart_yAxis.setMinorTickCount(4);
+    	scatterchart_xAxis.setMinorTickCount(2);
+    	scatterchart_yAxis.setMinorTickCount(2);
 	}
 	
 	@Override

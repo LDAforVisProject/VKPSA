@@ -69,20 +69,6 @@ public class Task_GenerateData extends WorkspaceTask
 			// Be careful: Only tested on a Windows 7 / 64-bit environment.
 			Process process = Runtime.getRuntime().exec(command);
 			
-			// Check every five seconds how many datasets were already generated.
-//			Timer uploadCheckerTimer = new Timer(true);
-//			uploadCheckerTimer.scheduleAtFixedRate(
-//			    new TimerTask() {
-//			    	public void run() 
-//			    	{ 
-//			    		// Get number of newly created datasets up to date.
-//			    		int numberOfCreatedDatasets = workspace.readNumberOfDatasets(beforeGeneration);
-//			    		// Update progress.
-//			    		updateProgress(numberOfCreatedDatasets > 0 ? numberOfCreatedDatasets - 1 : numberOfCreatedDatasets, configurationsToGenerate.size());
-//			    	}
-//			    }, 0, 5000
-//			);
-			
 			// Consume messages from input stream.
 			consumeProcessOutputStreams(process, configurationsToGenerate.size());
 
@@ -126,17 +112,16 @@ public class Task_GenerateData extends WorkspaceTask
 	      	BufferedReader bre	= new BufferedReader(new InputStreamReader(process.getErrorStream()));
 	     
 	      	// Read/consume stdout.
-	      	while ((line = bri.readLine()) != null) {
-	      		System.out.println(line);
-	      	}
+//	      	while ((line = bri.readLine()) != null) {
+//	      		System.out.println(line);
+//	      	}
 	      	
 	      	// Read/consume stderr.
-	      	
 	      	while ((line = bre.readLine()) != null) {
 	      		System.out.println(line);
 	      		
 	      		// Update progress.
-	      		updateProgress(messageCount++, numberOfDatasetsToGenerate);
+	      		updateProgress(++messageCount, numberOfDatasetsToGenerate);
 	      	}
 	      	
 	      	// Close readers and streams.

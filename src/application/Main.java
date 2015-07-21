@@ -1,19 +1,10 @@
 package application;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
+import mdsj.ClassicalScaling;
 import mdsj.Data;
 import mdsj.MDSJ;
-import model.workspace.tasks.Task_LoadRawData;
-
-import org.controlsfx.control.RangeSlider;
-import org.controlsfx.control.SegmentedButton;
 
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
@@ -23,7 +14,6 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import control.CoreController;
-import database.DBManagement;
 
 public class Main extends Application
 {

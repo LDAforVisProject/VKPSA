@@ -5,11 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
@@ -29,6 +31,8 @@ public class DistancesBarchart extends VisualizationComponent
 	private Label label_median;
 	
 	private ToggleButton button_relativeView_distEval;
+	
+	private CheckBox checkbox_useLogarithmicScaling;
 	
 	/*
 	 * Other data.
@@ -64,7 +68,7 @@ public class DistancesBarchart extends VisualizationComponent
 	
 	public DistancesBarchart(	AnalysisController analysisController, BarChart<String, Integer> barchart_distances, 
 								NumberAxis numberaxis_distanceEvaluation_yaxis, Label label_avg, 
-								Label label_median, ToggleButton button_relativeView_distEval)
+								Label label_median, ToggleButton button_relativeView_distEval, CheckBox checkbox_useLogarithmicScaling)
 	{
 		super(analysisController);
 
@@ -73,6 +77,7 @@ public class DistancesBarchart extends VisualizationComponent
 		this.label_avg								= label_avg;
 		this.label_median							= label_median;
 		this.button_relativeView_distEval			= button_relativeView_distEval;
+		this.checkbox_useLogarithmicScaling			= checkbox_useLogarithmicScaling;
 		
 		globalDistanceExtrema				= new Pair<Double, Double>(null, null);
 		filteredDistanceExtrema				= new Pair<Double, Double>(null, null);
@@ -131,7 +136,7 @@ public class DistancesBarchart extends VisualizationComponent
 		for (int i = 0; i < distances.length; i++) {
 			for (int j = i + 1; j < distances[i].length; j++) {
 				minX = distances[i][j] < minX ? distances[i][j] : minX;
-				maxX = distances[i][j] > maxX ? distances[i][j] : maxX;				
+				maxX = distances[i][j] > maxX ? distances[i][j] : maxX;
 			}
 		}
 		
@@ -158,7 +163,7 @@ public class DistancesBarchart extends VisualizationComponent
 				filteredDistanceExtrema = identifyExtrema(filteredDistances);
 			
 			// Calculate binning parameters.
-			final int numberOfBins		= 50;
+			final int numberOfBins		= 25;
 			final int numberOfElements	= ((filteredDistances.length - 1) * (filteredDistances.length - 1) + (filteredDistances.length - 1)) / 2;
 			
 			if (numberOfElements > 0) {
@@ -168,16 +173,20 @@ public class DistancesBarchart extends VisualizationComponent
 					if (numberOfSelectedElements > 0)
 						addDataSeries("Selected", selectedFilteredDistances, numberOfBins, numberOfSelectedElements, false);
 					
+					// Add empty data series so it shows up in the legend.
 					else
 						addEmptyDataSeries("Selected");
 				}
-				
+				// Add empty data series so it shows up in the legend.				
 				else {
 					addEmptyDataSeries("Selected");
 				}
 				
 				// Add all filtered distances to chart.
 				int[] distanceBinList = addDataSeries("Filtered", filteredDistances, numberOfBins, numberOfElements, true);
+				
+				for (int i = 0; i < distanceBinList.length; i++)
+					System.out.println(distanceBinList[i]);
 				
 				// Set y-axis range, if in absolute mode.
 				if (!button_relativeView_distEval.isSelected()) {
@@ -232,13 +241,12 @@ public class DistancesBarchart extends VisualizationComponent
 		float median	= 0;
 		int flatCounter	= 0;
 		
-		// Examine distance data.
+		// Examine distance data, copy values in one-dimensional array.		
 		for (int i = 0; i < distances.length; i++) {
-			for (int j = i + 1; j < distances.length; j++) {
+			for (int j = i + 1; j < distances.length; j++) { 
 				// Sum up distances.
 				sum += distances[i][j];
-				
-				// Copy values in one-dimensional array.
+				// Flatten matrix.
 				distancesFlattened[flatCounter++] = (float)distances[i][j];
 			}
 		}
@@ -259,7 +267,7 @@ public class DistancesBarchart extends VisualizationComponent
 		// 	Depending on whether absolute or relative mode is enabled: Use global or current extrema.  
 		min = button_relativeView_distEval.isSelected() ? filteredDistanceExtrema.getKey().floatValue() : globalDistanceExtrema.getKey().floatValue();
 		max = button_relativeView_distEval.isSelected() ? filteredDistanceExtrema.getValue().floatValue() : globalDistanceExtrema.getValue().floatValue();
-
+		
 		/*
 		 * Bin data.
 		 */
@@ -283,6 +291,16 @@ public class DistancesBarchart extends VisualizationComponent
 		if (updateQuantileLabels) {
 			label_avg.setText("λ: " + String.valueOf(avg));
 			label_median.setText("η: " + String.valueOf(median));
+		}
+		
+		System.out.println("min = " + min + "; max = " + max);
+		
+		// If logarithmic scaling is enabled:
+		if (checkbox_useLogarithmicScaling.isSelected()) {
+			// Scale bin count values accordingly.
+			for (int i = 0; i < distanceBinList.length; i++) {
+				distanceBinList[i] = distanceBinList[i] > 0 ? (int) Math.log(distanceBinList[i]) : 0;
+			}
 		}
 		
 		// Update barchart - add data series.
@@ -334,32 +352,20 @@ public class DistancesBarchart extends VisualizationComponent
 		return data_series;
 	}
 	
-	@Override
-	public void changeViewMode()
-	{
-		// Toggle auto-ranging.
-		barchart.getYAxis().setAutoRanging(button_relativeView_distEval.isSelected());
-		
-		if (button_relativeView_distEval.isSelected()) {
-			filteredDistanceExtrema = identifyExtrema(filteredDistances);
-		}
-		
-		// Refresh chart.
-		refresh(filteredDistances, selectedFilteredDistances, false);
-	}
-	
 	private void findDistanceBinCountMaximum(int[] distanceBinList)
 	{
 		// If in absolute mode for the first time (important: The first draw always happens in absolute
 		// view mode!): Get maximal count of distances associated with one bin.
-		if (!distanceBinCountMaximumDetermined) {
+		//if (!distanceBinCountMaximumDetermined) {
 			distanceBinCountMaximum = 0;
 			for (int binCount : distanceBinList) {
 				distanceBinCountMaximum = binCount > distanceBinCountMaximum ? binCount : distanceBinCountMaximum;
 			}
 			
 			distanceBinCountMaximumDetermined = true;
-		}
+		//}
+		
+		System.out.println("dbcMax = " + distanceBinCountMaximum);
 	}
 	
 	/**
@@ -368,11 +374,36 @@ public class DistancesBarchart extends VisualizationComponent
 	private void adjustYAxisRange()
 	{
 		numberaxis_distanceEvaluation_yaxis.setLowerBound(0);
-		numberaxis_distanceEvaluation_yaxis.setUpperBound(distanceBinCountMaximum * 1.1);
+		numberaxis_distanceEvaluation_yaxis.setUpperBound(distanceBinCountMaximum * 1.2);
 		
     	// Adjust tick width.
-    	final int numberOfTicks = 5;
+    	final int numberOfTicks = 4;
     	numberaxis_distanceEvaluation_yaxis.setTickUnit( (float)distanceBinCountMaximum / numberOfTicks);
-    	numberaxis_distanceEvaluation_yaxis.setMinorTickCount(4);
+    	numberaxis_distanceEvaluation_yaxis.setMinorTickCount(2);
+	}
+	
+	@Override
+	public void changeViewMode()
+	{
+		// Toggle auto-ranging.
+		barchart.getYAxis().setAutoRanging(button_relativeView_distEval.isSelected());
+		
+		// Determine extrema on y axis to adjust chart accordingly.
+		if (button_relativeView_distEval.isSelected()) {
+			filteredDistanceExtrema = identifyExtrema(filteredDistances);
+		}
+		
+		// Refresh chart.
+		refresh(filteredDistances, selectedFilteredDistances, false);
+	}
+	
+	/**
+	 * Checks if logarithmic scaling is enabled.
+	 * Rescales values, if necessary.
+	 */
+	public void changeScalingType()
+	{
+		// Refresh chart.
+		refresh(filteredDistances, selectedFilteredDistances, false);
 	}
 }

@@ -5,6 +5,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Map;
 
+import mdsj.ClassicalScaling;
 import mdsj.Data;
 import mdsj.MDSJ;
 import model.LDAConfiguration;
@@ -34,7 +35,18 @@ public class Task_CalculateMDSCoordinates extends WorkspaceTask
 		final double[][] distances							= workspace.getDistances();
 		
 		// Apply MDS on topic distance matrix.
-		double[][] output									= MDSJ.classicalScaling(distances, 2);
+		double[][] output									= new double[2][distances.length]; 
+		
+		ClassicalScaling.fullmds(distances, output);
+		//MDSJ.classicalScaling(distances, 2);
+	
+		double delta = 0;
+		for (int i = 0; i < distances.length; i++) {
+			for (int j = 0; j < distances[i].length; j++) {
+				delta += Math.abs(distances[i][j] - distances[j][i]);
+			}	
+		}
+		System.out.println("delta = " + delta);
 		
 //		System.out.println(Data.format(distances));
 //		System.out.println("------");

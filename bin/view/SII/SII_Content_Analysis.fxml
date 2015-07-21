@@ -24,19 +24,19 @@
                            <children>
                               <SplitPane dividerPositions="0.298" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <items>
-                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" style="-fx-background-color: #ffffff;">
                                        <children>
                                           <Accordion fx:id="accordion_options" layoutX="34.0" layoutY="13.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="45.0">
                                             <panes>
-                                              <TitledPane fx:id="titledpane_filter" animated="false" text="Result Space | Filter">
+                                              <TitledPane fx:id="titledpane_filter" animated="false" style="-fx-background-color: #ffffff;" text="Result Space | Filter">
                                                 <content>
-                                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: #ffffff;">
                                                          <children>
-                                                            <ScrollPane fx:id="scrollpane_filter" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" layoutX="19.6" layoutY="19.6" prefHeight="306.0" prefWidth="354.0" vbarPolicy="ALWAYS" AnchorPane.bottomAnchor="27.0" AnchorPane.leftAnchor="-8.7" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-0.6">
+                                                            <ScrollPane fx:id="scrollpane_filter" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" layoutX="19.6" layoutY="19.6" prefHeight="306.0" prefWidth="354.0" style="-fx-background-color: #ffffff;" vbarPolicy="ALWAYS" AnchorPane.bottomAnchor="27.0" AnchorPane.leftAnchor="-8.7" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-0.6">
                                                               <content>
-                                                                <AnchorPane>
+                                                                <AnchorPane style="-fx-background-color: #ffffff;">
                                                                      <children>
-                                                                        <GridPane fx:id="gridpane_parameterConfiguration" hgap="10.0" layoutX="1.0" prefHeight="318.0" prefWidth="338.0" vgap="5.0" AnchorPane.bottomAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                                                        <GridPane fx:id="gridpane_parameterConfiguration" hgap="10.0" layoutX="1.0" prefHeight="318.0" prefWidth="338.0" style="-fx-background-color: #ffffff;" vgap="5.0" AnchorPane.bottomAnchor="10.0" AnchorPane.topAnchor="5.0">
                                                                            <children>
                                                                               <Label text="α">
                                                                                  <font>
@@ -94,7 +94,7 @@
                                                                               </TextField>
                                                                               <VBox fx:id="vbox_alpha" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2">
                                                                                  <children>
-                                                                                    <BarChart fx:id="barchart_alpha" alternativeRowFillVisible="false" animated="false" barGap="0.0" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="40.0" maxWidth="230.0" minHeight="40.0" minWidth="230.0" prefHeight="40.0" prefWidth="230.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
+                                                                                    <BarChart fx:id="barchart_alpha" alternativeRowFillVisible="false" animated="false" barGap="0.0" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="40.0" maxWidth="240.0" minHeight="40.0" minWidth="240.0" prefHeight="40.0" prefWidth="240.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
                                                                                        <padding>
                                                                                           <Insets bottom="-20.0" top="-10.0" />
                                                                                        </padding>
@@ -112,7 +112,7 @@
                                                                               </VBox>
                                                                               <VBox fx:id="vbox_eta" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
                                                                                  <children>
-                                                                                    <BarChart fx:id="barchart_eta" alternativeRowFillVisible="false" animated="false" barGap="0.0" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="40.0" maxWidth="220.0" minHeight="40.0" minWidth="220.0" prefHeight="40.0" prefWidth="220.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
+                                                                                    <BarChart fx:id="barchart_eta" alternativeRowFillVisible="false" animated="false" barGap="0.0" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="40.0" maxWidth="240.0" minHeight="40.0" minWidth="240.0" prefHeight="40.0" prefWidth="240.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
                                                                                        <padding>
                                                                                           <Insets bottom="-20.0" top="-10.0" />
                                                                                        </padding>
@@ -130,7 +130,7 @@
                                                                               </VBox>
                                                                               <VBox fx:id="vbox_kappa" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
                                                                                  <children>
-                                                                                    <BarChart fx:id="barchart_kappa" alternativeRowFillVisible="false" animated="false" barGap="0.0" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="40.0" maxWidth="220.0" minHeight="40.0" minWidth="220.0" prefHeight="40.0" prefWidth="220.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
+                                                                                    <BarChart fx:id="barchart_kappa" alternativeRowFillVisible="false" animated="false" barGap="0.0" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="40.0" maxWidth="240.0" minHeight="40.0" minWidth="240.0" prefHeight="40.0" prefWidth="240.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
                                                                                        <padding>
                                                                                           <Insets bottom="-20.0" top="-10.0" />
                                                                                        </padding>
@@ -171,9 +171,9 @@
                                                       </AnchorPane>
                                                 </content>
                                               </TitledPane>
-                                              <TitledPane animated="false" text="Result Space | General">
+                                              <TitledPane animated="false" style="-fx-background-color: #ffffff;" text="Result Space | General">
                                                 <content>
-                                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: #ffffff;">
                                                          <children>
                                                             <VBox prefHeight="354.0" prefWidth="376.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                <children>
@@ -193,12 +193,15 @@
                                                                     <rowConstraints>
                                                                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                                     </rowConstraints>
                                                                      <children>
                                                                         <Label text="Topic distance function" />
                                                                         <Label text="Dataset distance function" GridPane.rowIndex="1" />
                                                                         <ComboBox prefWidth="150.0" GridPane.columnIndex="1" />
                                                                         <ComboBox prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                                        <Label text="Use logarithmic plot" GridPane.rowIndex="2" />
+                                                                        <CheckBox fx:id="checkbox_logarithmicDistanceBarchart" mnemonicParsing="false" onAction="#changeScalingType" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                                                      </children>
                                                                   </GridPane>
                                                                   <Separator prefWidth="200.0">
@@ -264,9 +267,9 @@
                                                          </children></AnchorPane>
                                                 </content>
                                               </TitledPane>
-                                              <TitledPane animated="false" text="Result Space | Local Scope">
+                                              <TitledPane animated="false" style="-fx-background-color: #ffffff;" text="Result Space | Local Scope">
                                                 <content>
-                                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: #ffffff;">
                                                          <children>
                                                             <VBox layoutX="14.0" layoutY="14.0" prefHeight="200.0" prefWidth="354.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                <children>
@@ -306,9 +309,9 @@
                                                          </children></AnchorPane>
                                                 </content>
                                               </TitledPane>
-                                                <TitledPane animated="false" text="Parameter Space">
+                                                <TitledPane animated="false" style="-fx-background-color: #ffffff;" text="Parameter Space">
                                                   <content>
-                                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: #ffffff;">
                                                          <children>
                                                             <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                <children>
@@ -430,7 +433,7 @@
                                                    <children>
                                                       <SplitPane dividerPositions="0.5" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                         <items>
-                                                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                                                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff;">
                                                                <children>
                                                                   <Label layoutX="7.0" layoutY="5.0" text="MDS View" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0">
                                                                      <font>
@@ -448,7 +451,7 @@
                                                                   <Canvas height="50.0" layoutX="216.0" layoutY="221.0" width="50.0" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="28.0" />
                                                                </children>
                                                             </AnchorPane>
-                                                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                                                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff;">
                                                                <children>
                                                                   <Label layoutX="7.0" layoutY="4.0" text="Distance Evaluation" AnchorPane.topAnchor="7.0">
                                                                      <font>
@@ -501,11 +504,11 @@
                                                       </SplitPane>
                                                    </children>
                                                 </AnchorPane>
-                                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="612.0" prefWidth="776.0">
+                                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="612.0" prefWidth="776.0" style="-fx-background-color: #ffffff;">
                                                    <children>
                                                       <SplitPane dividerPositions="0.5" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                         <items>
-                                                          <AnchorPane fx:id="anchorpane_localScope" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                                                          <AnchorPane fx:id="anchorpane_localScope" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff;">
                                                                <children>
                                                                   <Label layoutX="10.0" layoutY="5.0" text="Local Scope" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0">
                                                                      <font>
@@ -523,7 +526,7 @@
                                                                <children>
                                                                   <SplitPane dividerPositions="0.48256880733944957" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                     <items>
-                                                                      <AnchorPane fx:id="anchorpane_parameterSpace_distribution" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0">
+                                                                      <AnchorPane fx:id="anchorpane_parameterSpace_distribution" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" style="-fx-background-color: #ffffff;">
                                                                            <children>
                                                                               <Label layoutX="12.0" layoutY="5.0" text="Parameter | Distribution" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="7.0">
                                                                                  <font>
@@ -540,7 +543,7 @@
                                                                               </ToggleButton>
                                                                            </children>
                                                                         </AnchorPane>
-                                                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" style="-fx-background-color: #ffffff;">
                                                                            <children>
                                                                               <Label layoutX="14.0" layoutY="5.0" text="Parameter | Distance Correlation" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="7.0">
                                                                                  <font>

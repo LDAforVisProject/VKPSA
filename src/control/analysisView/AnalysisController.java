@@ -86,6 +86,8 @@ public class AnalysisController extends Controller
 	private @FXML Label label_avg;
 	private @FXML Label label_median;
 	
+	private @FXML CheckBox checkbox_logarithmicDistanceBarchart;
+	
 	/*
 	 * Toggle buttons indicating view mode.
 	 */
@@ -381,11 +383,11 @@ public class AnalysisController extends Controller
 		for (Map.Entry<String, RangeSlider> entry : rangeSliders.entrySet()) {
 			RangeSlider rs = entry.getValue();
 			
-			rs.setMaxWidth(360);
+			rs.setMaxWidth(230);
 			rs.setMax(25);
 			rs.setMax(100);
 			rs.setMajorTickUnit(5);
-			rs.setMinorTickCount(29);
+			rs.setMinorTickCount(20);
 			rs.setSnapToTicks(true);
 			rs.setShowTickLabels(true);
 			rs.setShowTickMarks(true);
@@ -394,7 +396,7 @@ public class AnalysisController extends Controller
 			rs.setHighValue(100);
 			
 			// Get some distance between range sliders and bar charts.
-			rs.setPadding(new Insets(5, 0, 0, 4));
+			rs.setPadding(new Insets(5, 0, 0, 0));
 			
 			// Add event handler - trigger update of visualizations (and the
 			// data preconditioning necessary for that) if filter settings
@@ -432,7 +434,7 @@ public class AnalysisController extends Controller
 	private void initDistanceBarchart()
 	{
 		distancesBarchart = new DistancesBarchart(	this, barchart_distances, numberaxis_distanceEvaluation_yaxis, 
-													label_avg, label_median, button_relativeView_distEval);
+													label_avg, label_median, button_relativeView_distEval, checkbox_logarithmicDistanceBarchart);
 	}
 	
 	private void initHeatmap()
@@ -865,15 +867,16 @@ public class AnalysisController extends Controller
 					// Seek for extrema.
 					for (String param : coupledParameters) {
 						for (XYChart.Data<Float, Double> dataPoint : diffDataPointSeries.get(param).getData()) {
-							max = dataPoint.getYValue() > max ? dataPoint.getYValue() : max;
-							min = dataPoint.getYValue() < min ? dataPoint.getYValue() : min;
+							double dataPointYValue = dataPoint.getYValue(); 
+							max = dataPointYValue > max ? dataPointYValue : max;
+							min = dataPointYValue < min ? dataPointYValue : min;
 						}
 					}
 					
 					// Remember minimum and maximum.
 					dcValueExtrema				= new Pair<Double, Double>(min, max);
 					// Set flag.
-					dcValueMaximumDetermined	= true;
+					//dcValueMaximumDetermined	= true;
 				}
 				
 				// Set y-axis range.
@@ -1216,6 +1219,12 @@ public class AnalysisController extends Controller
 				refreshDistanceLinechart(filteredLDAConfigurations, filteredDistances);
 			break;
 		}
+	}
+	
+	@FXML
+	public void changeScalingType(ActionEvent e)
+	{
+		distancesBarchart.changeScalingType();
 	}
 	
 	@FXML
