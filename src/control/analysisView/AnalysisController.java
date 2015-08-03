@@ -33,6 +33,7 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
+import javafx.scene.chart.StackedBarChart;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Accordion;
@@ -80,7 +81,7 @@ public class AnalysisController extends Controller
 	
 	private DistancesBarchart distancesBarchart;
 	
-	private @FXML BarChart<String, Integer> barchart_distances;
+	private @FXML StackedBarChart<String, Integer> barchart_distances;
 	private @FXML NumberAxis numberaxis_distanceEvaluation_yaxis;
 	
 	private @FXML Label label_avg;

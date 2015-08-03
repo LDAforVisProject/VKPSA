@@ -458,14 +458,14 @@
                                                                         <Font name="System Bold" size="12.0" />
                                                                      </font>
                                                                   </Label>
-                                                                  <BarChart fx:id="barchart_distances" layoutX="-173.0" layoutY="-88.0" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="30.0">
+                                                                  <StackedBarChart fx:id="barchart_distances" animated="false" layoutX="-173.0" layoutY="-88.0" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="30.0">
                                                                     <xAxis>
                                                                       <CategoryAxis side="BOTTOM" />
                                                                     </xAxis>
                                                                     <yAxis>
                                                                       <NumberAxis fx:id="numberaxis_distanceEvaluation_yaxis" side="LEFT" />
                                                                     </yAxis>
-                                                                  </BarChart>
+                                                                  </StackedBarChart>
                                                                   <GridPane layoutX="7.0" layoutY="217.0" prefHeight="41.0" prefWidth="71.0">
                                                                      <columnConstraints>
                                                                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="106.0" minWidth="10.0" prefWidth="36.0" />
