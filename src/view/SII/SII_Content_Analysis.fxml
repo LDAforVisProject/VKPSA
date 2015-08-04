@@ -552,10 +552,10 @@
                                                                               </Label>
                                                                               <LineChart fx:id="linechart_distanceCorrelation" createSymbols="false" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="30.0">
                                                                                 <xAxis>
-                                                                                  <NumberAxis fx:id="numberAxis_distanceCorrelation_xAxis" side="BOTTOM" />
+                                                                                  <NumberAxis fx:id="numberAxis_distanceCorrelation_xAxis" animated="false" side="BOTTOM" />
                                                                                 </xAxis>
                                                                                 <yAxis>
-                                                                                  <NumberAxis fx:id="numberAxis_distanceCorrelation_yAxis" side="LEFT" />
+                                                                                  <NumberAxis fx:id="numberAxis_distanceCorrelation_yAxis" animated="false" minorTickCount="4" side="LEFT" />
                                                                                 </yAxis>
                                                                               </LineChart>
                                                                               <VBox fx:id="vbox_ddcHoverInformation" layoutX="52.0" layoutY="42.0" prefHeight="50.0" prefWidth="100.0" AnchorPane.leftAnchor="52.0" AnchorPane.topAnchor="45.0" />

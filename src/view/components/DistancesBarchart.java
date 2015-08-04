@@ -84,8 +84,6 @@ public class DistancesBarchart extends VisualizationComponent
 	 */
 	private XYChart.Series<String, Integer> selectedDataSeries;
 	
-	private int seriesCounter;
-	
 	
 	public DistancesBarchart(	AnalysisController analysisController, StackedBarChart<String, Integer> barchart_distances, 
 								NumberAxis numberaxis_distanceEvaluation_yaxis, Label label_avg, 
@@ -104,7 +102,6 @@ public class DistancesBarchart extends VisualizationComponent
 		filteredDistanceExtrema				= new Pair<Double, Double>(null, null);
 		distanceBinCountMaximum				= 0;
 		distanceBinCountMaximumDetermined	= false;
-		seriesCounter						= 0;
 		
 		// Init barchart.
 		initBarchart();
@@ -157,6 +154,11 @@ public class DistancesBarchart extends VisualizationComponent
 		barchart.getData().add(selectedDataSeries);
 		
 		// Init legend.
+		initBarchartLegend();
+	}
+	
+	private void initBarchartLegend()
+	{
 		for (Node n : barchart.getChildrenUnmodifiable()) { 
 			if (n instanceof Legend) { 
 				final Legend legend = (Legend) n;
@@ -192,9 +194,9 @@ public class DistancesBarchart extends VisualizationComponent
 	                }
 	            });
 	        }
-	    }
+	    }	
 	}
-
+	
 	public void identifyGlobalExtrema(double[][] distances)
 	{
 		globalDistanceExtrema = identifyExtrema(distances);

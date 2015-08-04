@@ -23,7 +23,8 @@ public class HoveredThresholdNode extends StackPane
 	private Map<String, Double> stepValues;
 	private ArrayList<String> coupledParameters;
 	
-	public HoveredThresholdNode(AnalysisController analysisController, double priorValue, double value, Map<String, Double> stepValues, ArrayList<String> coupledParameters)
+	public HoveredThresholdNode(AnalysisController analysisController, double priorValue, double value, 
+								Map<String, Double> stepValues, ArrayList<String> coupledParameters)
 	{
 		this.stepValues				= stepValues;
 		this.coupledParameters		= coupledParameters;
@@ -72,7 +73,12 @@ public class HoveredThresholdNode extends StackPane
 		}
 	}
 
-
+	/**
+	 * Create labels for data points.
+	 * @param priorValue
+	 * @param value
+	 * @return List of created labels.
+	 */
 	private ArrayList<Label> createDataThresholdLabels(double priorValue, double value)
 	{
 		final ArrayList<Label> labels	= new ArrayList<Label>();

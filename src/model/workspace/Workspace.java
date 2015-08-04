@@ -42,7 +42,7 @@ import model.workspace.tasks.WorkspaceTask;
 // -----------------------------------------------
 
 // BACKEND / data view:
-// @todo Idea for optimization: Truncate parameter file list / instruct Python script to process only a defined part of it.
+// @todo Idea for optimization: Truncate parameter file list / instruct Python script to process only a defined part of it. Execute parallel script instances.
 // @todox Change file-based system to SQLite.
 
 // FRONTEND / analysis view:
