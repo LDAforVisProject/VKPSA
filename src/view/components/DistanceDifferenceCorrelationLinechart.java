@@ -252,7 +252,6 @@ public class DistanceDifferenceCorrelationLinechart extends	VisualizationCompone
 				// If in absolute mode for the first time (important: The first draw always happens in absolute
 				// view mode!): Get maxima and minima.
 				if (!valueMaximumDetermined) {
-					System.out.println("valueMaximumDetermined = false");
 					double max = valueExtrema.getValue();
 					double min = valueExtrema.getKey();
 					

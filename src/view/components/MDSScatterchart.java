@@ -73,6 +73,10 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	 */
 	private Pair<Double, Double> globalCoordinateExtrema_Y;
 	
+	/*
+	 * Collections storing the domain data. 
+	 */
+	
 	/**
 	 * Reference to this workspace's coordinate collection.
 	 */
@@ -81,6 +85,15 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	 * Reference to this workspace's collection of filtered indices.
 	 */
 	private Set<Integer> indices;
+	
+	/**
+	 * Reference to this workspace's discarded coordinate collection.
+	 */
+	private double discardedCoordinates[][];
+	/**
+	 * Reference to this workspace's collection of discarded indices.
+	 */
+	private Set<Integer> discardedIndices;
 	
 	
 	public MDSScatterchart(AnalysisController analysisController, ScatterChart<Number, Number> scatterchart)
@@ -122,6 +135,10 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
         rubberbandSelection = new RubberBandSelection((Pane) scatterchart.getParent(), this);
 	}
 	
+	/**
+	 * Adds listener processing keyboard events (like toggling from group to single selection mode).
+	 * @param scene
+	 */
 	public void addKeyListener(Scene scene)
 	{
 		selectionMode	= SelectionMode.GROUP;
@@ -164,6 +181,10 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
         });
 	}
 	
+	/**
+	 * Identifies global extrema in the provided dataset.
+	 * @param coordinates
+	 */
 	public void identifyGlobalExtrema(double[][] coordinates)
 	{
 		double minX = Double.MAX_VALUE;
@@ -190,12 +211,16 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	 * Refresh scatterchart with data from MDS coordinates. 
 	 * @param coordinates
 	 * @param indices 
+	 * @param discardedCoordinates
+	 * @param discardedIndices 
 	 */
-	public void refresh(double coordinates[][], Set<Integer> indices)
+	public void refresh(double coordinates[][], Set<Integer> indices, double discardedCoordinates[][], Set<Integer> discardedIndices)
 	{	
 		// Store references to data collection.
-		this.coordinates	= coordinates;
-		this.indices		= indices;
+		this.coordinates			= coordinates;
+		this.indices				= indices;
+		this.discardedCoordinates	= discardedCoordinates;
+		this.discardedIndices		= discardedIndices;
 		
 		// Clear scatterchart.
 		scatterchart.getData().clear();
@@ -258,7 +283,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 					    		selectedMDSPoints.put((int)dataPoint.getExtraValue(), dataPoint);
 					    		
 					    		// Refresh scatterchart.
-					    		refresh(coordinates, filteredIndices);
+					    		refresh(coordinates, filteredIndices, discardedCoordinates, discardedIndices);
 					    		// Refresh other charts.
 					    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet(), false);
 					    	}
@@ -281,7 +306,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 			    		selectedMDSPoints.remove(dataPoint.getExtraValue());
 			    		
 			    		// Refresh scatterchart.
-			    		refresh(coordinates, filteredIndices);
+			    		refresh(coordinates, filteredIndices, discardedCoordinates, discardedIndices);
 			    		// Refresh other charts.
 			    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet(), false);
 			    	}
@@ -320,7 +345,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 			
 			if (changeInSelectionDetected) {
 	    		// Refresh scatterchart.
-	    		refresh(coordinates, indices);
+	    		refresh(coordinates, indices, discardedCoordinates, discardedIndices);
 	    		// Refresh other charts.
 	    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet(), false);
 	    		
@@ -354,7 +379,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 			
 			if (changeInSelectionDetected) {
 	    		// Refresh scatterchart.
-	    		refresh(coordinates, indices);
+	    		refresh(coordinates, indices, discardedCoordinates, discardedIndices);
 	    		// Refresh other charts.
 	    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet(), false);
 	    		
