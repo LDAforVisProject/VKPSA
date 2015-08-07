@@ -157,6 +157,10 @@ public class DistancesBarchart extends VisualizationComponent
 		initBarchartLegend();
 	}
 	
+	/**
+	 * Inits barchart legend.
+	 */
+	@SuppressWarnings("restriction")
 	private void initBarchartLegend()
 	{
 		for (Node n : barchart.getChildrenUnmodifiable()) { 
@@ -276,13 +280,6 @@ public class DistancesBarchart extends VisualizationComponent
 			label_avg.setText("λ: -");
 			label_median.setText("η: -");
 		}
-	}
-	
-	private void addEmptyDataSeries(String name)
-	{
-		final XYChart.Series<String, Integer> emptyDataSeries = new XYChart.Series<String, Integer>();
-		emptyDataSeries.setName(name);
-		barchart.getData().add(emptyDataSeries);
 	}
 
 	/**

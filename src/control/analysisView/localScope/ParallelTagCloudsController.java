@@ -342,7 +342,8 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 		gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 		gc.setFill(Color.BLACK);
 		
-		final int checkedNumberOfTopics = (numberOfTopics - 1) >= tagCloudContainer.size() ? numberOfTopics - 1 : tagCloudContainer.size() - 2; 
+		// Check if desired number of topics is feasible.
+		final int checkedNumberOfTopics = (numberOfTopics - 1) <= tagCloudContainer.size() ? numberOfTopics - 1 : tagCloudContainer.size() - 1; 
 		
 		for (int i = 0; i < checkedNumberOfTopics; i++) {
 			VBox currTagCloud							= tagCloudContainer.get(i);

@@ -216,6 +216,8 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	 */
 	public void refresh(double coordinates[][], Set<Integer> indices, double discardedCoordinates[][], Set<Integer> discardedIndices)
 	{	
+//		NEXT: Show discarded datapoints grayed out (no interactivity).
+
 		// Store references to data collection.
 		this.coordinates			= coordinates;
 		this.indices				= indices;
@@ -225,13 +227,43 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 		// Clear scatterchart.
 		scatterchart.getData().clear();
 		
-        final Series<Number, Number> dataSeries			= new XYChart.Series<>();
-        final Series<Number, Number> selectedDataSeries	= new XYChart.Series<>();
+		// Init data series for filtered, discarded and selected values.
+        final Series<Number, Number> dataSeries				= new XYChart.Series<>();
+        final Series<Number, Number> discardedDataSeries	= new XYChart.Series<>();
+        final Series<Number, Number> selectedDataSeries		= new XYChart.Series<>();
         
-        dataSeries.setName("Data");
-        selectedDataSeries.setName("Selected Data");
+        dataSeries.setName("Filtered");
+        discardedDataSeries.setName("Discarded");
+        selectedDataSeries.setName("Selected");
         
-        // Add filtered points to scatterchart.
+        // Add filtered points as well as filtered and selected points to scatterchart.
+        addActiveDataPoints(dataSeries, selectedDataSeries);
+        
+        // Add discarded data points (greyed out) to scatterchart.
+        addDiscardedDataPoints(discardedDataSeries);
+        
+        // Add data in scatterchart.
+        scatterchart.getData().add(discardedDataSeries);
+        scatterchart.getData().add(dataSeries);
+        scatterchart.getData().add(0, selectedDataSeries);
+        
+        scatterchart.layout();
+        scatterchart.applyCss();
+        
+        // Add mouse listeners.
+        addMouseListenersToMDSScatterchart(this.coordinates, this.indices);
+        
+        // Update scatterchart ranges.
+        updateMDSScatterchartRanges();
+	}
+	
+	/**
+	 * Auxiliary method to add data points to data series in scatterchart.
+	 * @param dataSeries
+	 * @param selectedDataSeries
+	 */
+	private void addActiveDataPoints(final Series<Number, Number> dataSeries, final Series<Number, Number> selectedDataSeries)
+	{
         int count = 0;
         for (int index : indices) {
         	// Add point only if it's not part of the set of manually selected indices.
@@ -242,24 +274,31 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
         	}
         	
         	else {
-        		XYChart.Data<Number, Number> selectedPoint = selectedMDSPoints.get(index);
-        		XYChart.Data<Number, Number> dataPoint = new XYChart.Data<Number, Number>(selectedPoint.getXValue(), selectedPoint.getYValue());
+        		XYChart.Data<Number, Number> selectedPoint	= selectedMDSPoints.get(index);
+        		XYChart.Data<Number, Number> dataPoint		= new XYChart.Data<Number, Number>(selectedPoint.getXValue(), selectedPoint.getYValue());
 	        	dataPoint.setExtraValue(selectedPoint.getExtraValue());
 	        	selectedDataSeries.getData().add(dataPoint);
         	}
         	
         	count++;
         }
-        
-        // Add data in scatterchart.
-        scatterchart.getData().add(0, selectedDataSeries);
-        scatterchart.getData().add(dataSeries);
-        
-        // Add mouse listeners.
-        addMouseListenersToMDSScatterchart(this.coordinates, this.indices);
-        
-        // Update scatterchart ranges.
-        updateMDSScatterchartRanges();
+	}
+	
+	/**
+	 * Adds discarded data points to data series.
+	 * @param discardedDataSeries
+	 */
+	private void addDiscardedDataPoints(final Series<Number, Number> discardedDataSeries)
+	{
+        int count = 0;
+        for (int index : discardedIndices) {
+        	// Add point.
+        	XYChart.Data<Number, Number> dataPoint = new XYChart.Data<Number, Number>(discardedCoordinates[0][count], discardedCoordinates[1][count]);
+        	dataPoint.setExtraValue(index);
+	        discardedDataSeries.getData().add(dataPoint);
+	        
+	        count++;
+        }
 	}
 	
 	/**

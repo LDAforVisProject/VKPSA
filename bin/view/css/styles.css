@@ -1,3 +1,11 @@
 #alpha_barchart {
 	
 }
+
+/* Defines color for discarded data series in scatterchart. */
+.default-color0.chart-symbol { /* hollow circle */
+    -fx-background-color: #CACACA, white;
+    -fx-background-insets: 0, 2;
+    -fx-background-radius: 5px;
+    -fx-padding: 5px;
+}
