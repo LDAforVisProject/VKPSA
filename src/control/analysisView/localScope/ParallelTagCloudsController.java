@@ -113,7 +113,6 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 		// Reset visualization.
 		reset(selectedFilteredLDAConfigurations, maxNumberOfTopics, numberOfTopics, maxNumberOfKeywords, numberOfKeywords);
 		
-		// @todo	Then: Add interactivity.
 		// This type of visualization is reasonable for one LDA configuration
 		// at the same time only, therefore we use only one selected LDAConfiguration.
 		if (selectedFilteredLDAConfigurations.size() > 0)  {

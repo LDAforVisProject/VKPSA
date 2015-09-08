@@ -8,9 +8,11 @@ import javafx.scene.paint.Color;
 
 public class ColorScale extends ImageView
 {
-	private final static double YELLOW_HUE	= Color.YELLOW.getHue();
-    private final static double BLUE_HUE	= Color.BLUE.getHue();
-    private final static double RED_HUE		= Color.RED.getHue();
+	private final static double YELLOW_HUE			= Color.YELLOW.getHue();
+    private final static double BLUE_HUE			= Color.BLUE.getHue();
+    private final static double RED_HUE				= Color.RED.getHue();
+    
+    private final static double DEFAULT_COLOR_HUE	= Color.DARKGREEN.getHue(); 
     
     public ColorScale(WritableImage image)
 	{
@@ -57,8 +59,27 @@ public class ColorScale extends ImageView
         return new ColorScale(image);
     }
     
-    /**
+    /*
      * Calculate value on a blue to red hue scale, dependent on the given minimum and maximum values.
+     * @param value
+     * @param min
+     * @param max
+     * @return
+     */
+//    public static Color getColorForValue(double value, double min, double max) 
+//    {
+//        if (value < min || value > max) {
+//            return Color.BLACK ;
+//        }
+//        
+//        double hue = BLUE_HUE + (RED_HUE - BLUE_HUE) * (value - min) / (max - min);
+//        
+//        return Color.hsb(hue, 1.0, 1.0);
+//    }
+    
+    /**
+     * Returns default color with saturation chosen depending on the relation of the specified argument to the
+     * chosen maximal value.
      * @param value
      * @param min
      * @param max
@@ -70,9 +91,7 @@ public class ColorScale extends ImageView
             return Color.BLACK ;
         }
         
-        double hue = YELLOW_HUE + (RED_HUE - YELLOW_HUE) * (value - min) / (max - min);
-        
-        return Color.hsb(hue, 1.0, 1.0);
+        return Color.hsb(ColorScale.DEFAULT_COLOR_HUE, (value - min) / (max - min), 1.0);
     }
     
     /**
@@ -93,5 +112,10 @@ public class ColorScale extends ImageView
         double hue = minColor.getHue() + (maxColor.getHue() - minColor.getHue()) * (value - min) / (max - min);
         
         return Color.hsb(hue, 1.0, 1.0);
+    }
+    
+    public static Color getDefaultColor()
+    {
+    	return Color.hsb(ColorScale.DEFAULT_COLOR_HUE, 1.0, 1.0);
     }
 }

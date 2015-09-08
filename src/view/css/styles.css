@@ -9,3 +9,19 @@
     -fx-background-radius: 5px;
     -fx-padding: 5px;
 }
+
+/* Defines color for filtered data series in scatterchart. */
+.default-color1.chart-symbol {
+    -fx-background-color: blue;
+    -fx-background-insets: 0, 2;
+    -fx-background-radius: 5px;
+    -fx-padding: 5px;
+}
+
+/* Defines color for selected data series in scatterchart. */
+.default-color2.chart-symbol {
+    -fx-background-color: red;
+    -fx-background-insets: 0, 2;
+    -fx-background-radius: 5px;
+    -fx-padding: 5px;
+}

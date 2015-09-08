@@ -398,7 +398,13 @@ public class AnalysisController extends Controller
 			rs.setHighValue(25);
 			rs.setHighValue(100);
 			
+			// Set width. 
+			rs.setMaxWidth(220);
+			rs.setMinWidth(220);
+			rs.setPrefWidth(220);
+			
 			// Get some distance between range sliders and bar charts.
+			rs.setTranslateX(-6);
 			rs.setPadding(new Insets(5, 0, 0, 0));
 			
 			// Add event handler - trigger update of visualizations (and the
@@ -518,7 +524,7 @@ public class AnalysisController extends Controller
 		// Refresh visualizations.
 		refreshParameterHistograms(50);
 		mdsScatterchart.refresh(filteredCoordinates, filteredIndices, discardedCoordinates, discardedIndices);
-		distancesBarchart.refresh(filteredDistances, selectedFilteredDistances, true);
+		distancesBarchart.refresh(distances, filteredDistances, selectedFilteredDistances, true);
 		parameterspace_ddc_linechart.refresh(filteredLDAConfigurations, filteredDistances, true);
 		heatmap_parameterspace.refresh(ldaConfigurations, filteredLDAConfigurations, combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), button_relativeView_paramDist.isSelected());
 		localScopeInstance.refresh(selectedFilteredLDAConfigurations);
@@ -538,7 +544,8 @@ public class AnalysisController extends Controller
 		selectedFilteredLDAConfigurations	= createSelectedFilteredLDAConfigurations(selectedFilteredIndices);
 				
 		// Refresh other (than MDSScatterchart) visualizations.
-		distancesBarchart.refresh(filteredDistances, selectedFilteredDistances, true);
+		distancesBarchart.refresh(distances, filteredDistances, selectedFilteredDistances, true);
+		// Refresh local scope visualization, if specified.
 		if (includeLocalScope)
 			localScopeInstance.refresh(selectedFilteredLDAConfigurations);
 	}

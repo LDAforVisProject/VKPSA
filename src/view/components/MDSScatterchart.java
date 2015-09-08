@@ -1,13 +1,13 @@
 package view.components;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
+import java.util.Observable;
 import java.util.Set;
 
+import com.sun.javafx.scene.paint.GradientUtils.Point;
+
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -18,6 +18,7 @@ import javafx.scene.chart.XYChart.Series;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.util.Pair;
 import javafx.scene.layout.Pane;
 import control.analysisView.AnalysisController;
@@ -41,12 +42,27 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	
 	private RubberBandSelection rubberbandSelection;
 	
+	/**
+	 * Describes zoom factor.
+	 */
+	private static final float ZOOM_DELTA					= 1.1F;
+	/**
+	 * Describes speed of navigation via translation.
+	 */
+	private static final float TRANSLATION_FACTOR_DEFAULT	= 0.84F;
+	
 	/*
 	 * Other data.
 	 */
 	
 	private SelectionMode selectionMode;
 	private boolean isCtrlDown;
+	private boolean isSpaceDown;
+	
+	/**
+	 * Stores last drag coordinates.
+	 */
+	private MouseEvent lastMouseEvent;
 	
 	/**
 	 * Flips when selection was changed. Refresh of visualizations is only
@@ -110,6 +126,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 		// Init flags.
 		changeInSelectionDetected				= false;
 		changeInSelectionDetected_localScope	= false;
+		isSpaceDown								= false;
 		
 		// Init scatterchart.
 		initScatterchart();
@@ -133,6 +150,102 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
         
         // Add rubberband selection tool.
         rubberbandSelection = new RubberBandSelection((Pane) scatterchart.getParent(), this);
+        
+        // Initialize zooming capabiliy.
+        initZoom();
+	}
+	
+	/**
+	 * Enables zooming in scatterchart.
+	 */
+	private void initZoom()
+	{
+		scatterchart.setOnScroll(new EventHandler<ScrollEvent>() {
+		    public void handle(ScrollEvent event) {
+		        event.consume();
+		        
+		        if (event.getDeltaY() == 0) {
+		            return;
+		        }
+
+		        double scaleFactor = (event.getDeltaY() > 0) ? MDSScatterchart.ZOOM_DELTA : 1 / MDSScatterchart.ZOOM_DELTA;
+
+		        XYChart.Data<Number, Number> firstData = null;
+		        
+		        for (Series<Number, Number> ds : scatterchart.getData()) {
+		        	System.out.println(ds.getName());
+		        }
+		        
+//		        IDEA for pin-point-zoom: Maps seems to zoom to the middle. So:
+//		        	- Add to translation the difference between middle of the chart and the desired (mouse event!) Point.
+//		        	- Keep track of where the new "middle" is; use for following zooms.
+//		        -> Start with first iteration and work that out. All other follows once after the initial task works.
+		        
+		        // Get first data point.
+		        System.out.println(scatterchart.getData().isEmpty());
+		        System.out.println(scatterchart.getData().get(2) != null);
+		        System.out.println(scatterchart.getData().get(2).getData().isEmpty());
+
+		        if (!scatterchart.getData().isEmpty())
+		        	if (scatterchart.getData().get(2) != null)
+		        		if (!scatterchart.getData().get(2).getData().isEmpty())
+		        			firstData = scatterchart.getData().get(2).getData().get(0);
+		        	
+		        double x = event.getX();
+		        
+		        
+		        scatterchart.setAnimated(false);
+		        if (firstData != null) {
+		        System.out.println("--------" + event.getX() + ", " + event.getY());
+//		        System.out.println("BEFORE ****** " + scatterchart.getLayoutX() + " / " + scatterchart.getLayoutY());
+		        System.out.println("BEFORE ****** " + scatterchart.getWidth() + " / " + scatterchart.getHeight());
+		        System.out.println("BEFORE ****** " + firstData.getNode().getBoundsInLocal().getMinX() + " / " + firstData.getNode().getBoundsInLocal().getMinY());
+		        
+		        // Update chart's scale factor.
+		        scatterchart.setScaleX(scatterchart.getScaleX() * scaleFactor);
+		        scatterchart.setScaleY(scatterchart.getScaleY() * scaleFactor);
+		        
+//		        System.out.println("AFTER ****** " + scatterchart.getLayoutX() + " / " + scatterchart.getLayoutY());
+		        System.out.println("AFTER ****** " + firstData.getNode().getBoundsInLocal().getMinX() + " / " + firstData.getNode().getBoundsInLocal().getMinY());
+		        System.out.println("AFTER ****** " + scatterchart.getWidth() + " / " + scatterchart.getHeight());
+		        System.out.println("--------" + event.getX() + ", " + event.getY());
+		        
+		        double translationX = x - (x - 0) * scaleFactor;
+		        }
+		    }
+		});
+
+		scatterchart.setOnMousePressed(new EventHandler<MouseEvent>() {
+		    public void handle(MouseEvent event) {
+		    	lastMouseEvent = event;
+		    	
+		    	if (event.isSecondaryButtonDown() == true) {
+		            scatterchart.setScaleX(1.0);
+		            scatterchart.setScaleY(1.0);
+		            
+		            scatterchart.setTranslateX(0);
+					scatterchart.setTranslateY(0);
+		        }
+		    }
+		});
+		
+		
+		// Enable navigation in zoomed map.
+		scatterchart.setOnMouseDragged(new EventHandler<MouseEvent>() {
+			 public void handle(MouseEvent event) {
+					 if (isSpaceDown) {
+						 event.consume();
+						 
+						 double diffX = event.getX() - lastMouseEvent.getX();
+						 double diffY = event.getY() - lastMouseEvent.getY();
+						 
+						 scatterchart.setTranslateX(scatterchart.getTranslateX() + diffX * TRANSLATION_FACTOR_DEFAULT * scatterchart.getScaleX());
+						 scatterchart.setTranslateY(scatterchart.getTranslateY() + diffY * TRANSLATION_FACTOR_DEFAULT * scatterchart.getScaleY());
+					 }
+					 
+					 lastMouseEvent = event;
+			    }
+		});
 	}
 	
 	/**
@@ -146,7 +259,8 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 		
 		// Ensure that CAPS LOCK is off.
 		//Toolkit.getDefaultToolkit().setLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK, false);
-		
+	
+		// Add key listener for selection mode.
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
             public void handle(KeyEvent ke) 
             {
@@ -166,7 +280,13 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
             			rubberbandSelection.enable();
             		}
             	}
-            	
+
+                // Check if space key is down.
+            	else if (ke.getCode() == KeyCode.SHIFT) {
+        			rubberbandSelection.disable();
+        			isSpaceDown = true;
+        		}
+                
             	// Remember if CTRL is down.
             	isCtrlDown = ke.isControlDown();
             }
@@ -177,6 +297,13 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
             {
             	// Remember if CTRL is down.
             	isCtrlDown = ke.isControlDown();
+            	
+            	// Check if space key is up.
+            	if (ke.getCode() == KeyCode.SHIFT) {
+            		
+            		rubberbandSelection.enable();
+            		isSpaceDown = false;
+            	}
             }
         });
 	}
@@ -216,8 +343,6 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	 */
 	public void refresh(double coordinates[][], Set<Integer> indices, double discardedCoordinates[][], Set<Integer> discardedIndices)
 	{	
-//		NEXT: Show discarded datapoints grayed out (no interactivity).
-
 		// Store references to data collection.
 		this.coordinates			= coordinates;
 		this.indices				= indices;
@@ -233,8 +358,8 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
         final Series<Number, Number> selectedDataSeries		= new XYChart.Series<>();
         
         dataSeries.setName("Filtered");
-        discardedDataSeries.setName("Discarded");
         selectedDataSeries.setName("Selected");
+        discardedDataSeries.setName("Discarded");
         
         // Add filtered points as well as filtered and selected points to scatterchart.
         addActiveDataPoints(dataSeries, selectedDataSeries);

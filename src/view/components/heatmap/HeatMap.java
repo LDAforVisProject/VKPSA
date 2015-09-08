@@ -178,6 +178,7 @@ public class HeatMap extends VisualizationComponent
     	xAxis.setUpperBound(binnedData.getMax_key1());
     	yAxis.setLowerBound(binnedData.getMin_key2());
     	yAxis.setUpperBound(binnedData.getMax_key2());
+    	
     	// Adjust tick width.
     	final int numberOfTicks = binMatrix.length;
     	xAxis.setTickUnit( (binnedData.getMax_key1() - binnedData.getMin_key1()) / numberOfTicks);
