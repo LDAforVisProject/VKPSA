@@ -71,14 +71,22 @@ public class AnalysisController extends Controller
 	 * MDS Scatterchart.
 	 */
 	
+	/**
+	 * MDSScatterchart component.
+	 */
 	private MDSScatterchart mdsScatterchart;
-	
+	/**
+	 * Actual scatterchart.
+	 */
 	private @FXML ScatterChart<Number, Number> scatterchart_global;
 	
 	/*
 	 * Distances barchart. 
 	 */
 	
+	/**
+	 * DistancesBarchart componenet.
+	 */
 	private DistancesBarchart distancesBarchart;
 	
 	private @FXML StackedBarChart<String, Integer> barchart_distances;
@@ -99,6 +107,9 @@ public class AnalysisController extends Controller
 	 * Parameter Space - Distribution.
 	 */
 	
+	/**
+	 * Heatmap component.
+	 */
 	private HeatMap heatmap_parameterspace;
 	
 	private @FXML Canvas canvas_heatmap;
@@ -114,6 +125,9 @@ public class AnalysisController extends Controller
 	 * Parameter Space - Distance correlation.
 	 */
 	
+	/**
+	 * DDCLinechart component.
+	 */
 	private DistanceDifferenceCorrelationLinechart parameterspace_ddc_linechart;
 	
 	private @FXML LineChart<Float, Double> linechart_distanceCorrelation;
@@ -129,7 +143,10 @@ public class AnalysisController extends Controller
 	 * Local scope.
 	 */
 	
-	// At the moment: Only one local scope instance supported (parallel tag clouds).
+	/**
+	 * Local scope instance component.
+	 * At the moment: Only one local scope instance supported (parallel tag clouds).
+	 */
 	private LocalScopeInstance localScopeInstance;
 	
 	private @FXML AnchorPane anchorpane_localScope;
@@ -148,10 +165,10 @@ public class AnalysisController extends Controller
 	private @FXML ScrollPane scrollpane_filter;
 	private @FXML GridPane gridpane_parameterConfiguration;
 	
-	private Map<String, BarChart<String, Integer>> barchartsForFilterControls;
-	private @FXML BarChart<String, Integer> barchart_alpha;
-	private @FXML BarChart<String, Integer> barchart_eta;
-	private @FXML BarChart<String, Integer> barchart_kappa;
+	private Map<String, StackedBarChart<String, Integer>> barchartsForFilterControls;
+	private @FXML StackedBarChart<String, Integer> barchart_alpha;
+	private @FXML StackedBarChart<String, Integer> barchart_eta;
+	private @FXML StackedBarChart<String, Integer> barchart_kappa;
 	
 	private Map<String, RangeSlider> rangeSliders;
 	private @FXML VBox vbox_alpha;
@@ -365,7 +382,7 @@ public class AnalysisController extends Controller
 		// Init collections.
 		rangeSliders				= new HashMap<String, RangeSlider>();
 		textfieldsForFilterControls	= new HashMap<String, Pair<TextField, TextField>>();
-		barchartsForFilterControls	= new HashMap<String, BarChart<String, Integer>>();
+		barchartsForFilterControls	= new HashMap<String, StackedBarChart<String, Integer>>();
 		
 		// Add range sliders to collection.
 		rangeSliders.put("alpha", new RangeSlider());
@@ -390,8 +407,8 @@ public class AnalysisController extends Controller
 			rs.setMax(25);
 			rs.setMax(100);
 			rs.setMajorTickUnit(5);
-			rs.setMinorTickCount(20);
-			rs.setSnapToTicks(true);
+			rs.setMinorTickCount(4);
+			rs.setSnapToTicks(false);
 			rs.setShowTickLabels(true);
 			rs.setShowTickMarks(true);
 			rs.setLowValue(0);
@@ -429,7 +446,7 @@ public class AnalysisController extends Controller
 		vbox_eta.getChildren().add(rangeSliders.get("eta"));
 		vbox_kappa.getChildren().add(rangeSliders.get("kappa"));
 		
-		// Set gridpane's height.
+		// Set gridpane's height (based on the number of supported parameters).
 		final int prefRowHeight = 100;
 		gridpane_parameterConfiguration.setPrefHeight(LDAConfiguration.SUPPORTED_PARAMETERS.length * prefRowHeight);
 		gridpane_parameterConfiguration.setMinHeight(LDAConfiguration.SUPPORTED_PARAMETERS.length * prefRowHeight);
@@ -499,21 +516,8 @@ public class AnalysisController extends Controller
 		// Load current distance data from workspace.
 		distances			= workspace.getDistances();
 		
-		// If not done already: Discover global extrema, adapt components.
-		if (!globalExtremaIdentified) {
-			// Identify global extrema.
-			distancesBarchart.identifyGlobalExtrema(distances);
-			mdsScatterchart.identifyGlobalExtrema(coordinates);
-
-			// Add keyboard listener in order to enable selection.
-			mdsScatterchart.addKeyListener(scene);
-			
-			// Mark global extrema as found.
-			globalExtremaIdentified = true;
-			
-			// Adapt controls to new data.
-			adjustControlExtrema();
-		}
+		// Call initialization procedure.
+		init();
 		
 		// Draw entire data set. Used as initialization call, executed by Workspace instance.
 		if (filterData) {
@@ -530,6 +534,28 @@ public class AnalysisController extends Controller
 		localScopeInstance.refresh(selectedFilteredLDAConfigurations);
 	}
 
+	/**
+	 * Inits some auxiliary variables. Needed before first visualization.
+	 */
+	private void init()
+	{
+		// If not done already: Discover global extrema, adapt components.
+		if (!globalExtremaIdentified) {
+			// Identify global extrema.
+			distancesBarchart.identifyGlobalExtrema(distances);
+			mdsScatterchart.identifyGlobalExtrema(coordinates);
+
+			// Add keyboard listener in order to enable selection.
+			mdsScatterchart.addKeyListener(scene);
+			
+			// Mark global extrema as found.
+			globalExtremaIdentified = true;
+			
+			// Adapt controls to new data.
+			adjustControlExtrema();
+		}
+	}
+	
 	/**
 	 * Refreshes visualization after data in global MDS scatterchart was selected. 
 	 * @param selectedIndices
@@ -858,6 +884,7 @@ public class AnalysisController extends Controller
 		Map<String, Double> parameterValues_low		= new HashMap<String, Double>();
 		Map<String, Double> parameterValues_high	= new HashMap<String, Double>();
 		
+		// Determine minima and maxima for all parameters.
 		for (String param : rangeSliders.keySet()) {
 			parameterValues_low.put(param, rs.getLowValue() >= rangeSliders.get(param).getMin() ? rs.getLowValue() : rangeSliders.get(param).getMin());
 			parameterValues_high.put(param, rs.getHighValue() <= rangeSliders.get(param).getMax() ? rs.getHighValue() : rangeSliders.get(param).getMax());
@@ -898,25 +925,41 @@ public class AnalysisController extends Controller
     	}
 	}
 
+	/**
+	 * Refresh parameter filter control histograms.
+	 * @param numberOfBins
+	 */
 	private void refreshParameterHistograms(final int numberOfBins)
 	{
-		// Map storing one bin list for each parameter.
-		Map<String, int[]> parameterBinLists = new HashMap<String, int[]>();
-		parameterBinLists.put("alpha", new int[numberOfBins]);
-		parameterBinLists.put("eta", new int[numberOfBins]);
-		parameterBinLists.put("kappa", new int[numberOfBins]);
+		// Map storing one bin list for each parameter, counting only filtered datasets.
+		Map<String, int[]> parameterBinLists_filtered	= new HashMap<String, int[]>();
+		// Map storing one bin list for each parameter, counting only discarded datasets.
+		Map<String, int[]> parameterBinLists_discarded	= new HashMap<String, int[]>();
+		
+		// Add parameters to map of bin lists. 
+		for (String supportedParameter : LDAConfiguration.SUPPORTED_PARAMETERS) {
+			parameterBinLists_filtered.put(supportedParameter, new int[numberOfBins]);
+			parameterBinLists_discarded.put(supportedParameter, new int[numberOfBins]);
+		}
 		
 		// Bin data.
 		for (int i = 0; i < ldaConfigurations.size(); i++) {
+			// Check if dataset is filtered (as opposed to discarded).
+			boolean isFilteredDataset = filteredIndices.contains(i);
+			
+			// Evaluate bin counts for this dataset for each parameter.
 			for (String param : rangeSliders.keySet()) {
 				double binInterval	= (rangeSliders.get(param).getMax() - rangeSliders.get(param).getMin()) / numberOfBins;
 				// Calculate index of bin in which to store the current value.
 				int index_key		= (int) ( (ldaConfigurations.get(i).getParameter(param) - rangeSliders.get(param).getMin()) / binInterval);
 				// Check if element is highest allowed entry.
-				index_key = index_key < numberOfBins ? index_key : numberOfBins - 1;
+				index_key			= index_key < numberOfBins ? index_key : numberOfBins - 1;
 				
-				// Increment content of corresponding bin.
-				parameterBinLists.get(param)[index_key]++;
+				// Check if this dataset fits all boundaries / is filtered - then increment content of corresponding bin.
+				if (isFilteredDataset)
+					parameterBinLists_filtered.get(param)[index_key]++;
+				else
+					parameterBinLists_discarded.get(param)[index_key]++;
 			}
 		}
 
@@ -924,15 +967,54 @@ public class AnalysisController extends Controller
 		 * Transfer data to scented widgets.
 		 */
 		
-		// Clear old data.
-		barchart_alpha.getData().clear();
-		barchart_eta.getData().clear();
-		barchart_kappa.getData().clear();
+		for (Map.Entry<String, StackedBarChart<String, Integer>> parameterBarchartEntry : barchartsForFilterControls.entrySet()) {
+			// Clear old data.
+			parameterBarchartEntry.getValue().getData().clear();
 
-		// Add data series to barcharts.
-		barchart_alpha.getData().add(generateParameterHistogramDataSeries("alpha", parameterBinLists, numberOfBins));
-		barchart_eta.getData().add(generateParameterHistogramDataSeries("eta", parameterBinLists, numberOfBins));
-		barchart_kappa.getData().add(generateParameterHistogramDataSeries("kappa", parameterBinLists, numberOfBins));
+			// Add filtered data series to barcharts.
+			parameterBarchartEntry.getValue().getData().add(
+					generateParameterHistogramDataSeries(parameterBarchartEntry.getKey(), parameterBinLists_filtered, numberOfBins)
+			);
+			// Color filtered data.
+			colorParameterHistogramBarchart(parameterBarchartEntry.getValue(), 0);
+			
+			// Add discarded data series to barcharts.
+			parameterBarchartEntry.getValue().getData().add(
+					generateParameterHistogramDataSeries(parameterBarchartEntry.getKey(), parameterBinLists_discarded, numberOfBins)
+			);
+			// Color discarded data.
+			colorParameterHistogramBarchart(parameterBarchartEntry.getValue(), 1);
+		}
+	}
+	
+	/**
+	 * Colours a parameter histogram barchart in the desired colors (one for filtered, one for discarded).
+	 * @param barchart
+	 * @param seriesIndex Index of series to be colored. 0 for discarded, 1 for filtered data points.
+	 */
+	private void colorParameterHistogramBarchart(StackedBarChart<String, Integer> barchart, int seriesIndex)
+	{
+		// Color bars (todo: color according to defined options).
+		for (Node node : barchart.lookupAll(".chart-bar")) {
+			switch (seriesIndex)
+			{
+				// Discarded data.
+				case 1:
+					if (node.getUserData() == null || node.getUserData().toString() == "discarded") {
+						node.setUserData("discarded");
+						node.setStyle("-fx-bar-fill: grey;");
+					}
+				break;
+				
+				// Filtered data.
+				case 0:
+					if (node.getUserData() == null || node.getUserData().toString() == "filtered") {
+						node.setUserData("filtered");
+						node.setStyle("-fx-bar-fill: blue;");
+					}
+				break;
+			}
+		}
 	}
 
 	/**
@@ -947,8 +1029,8 @@ public class AnalysisController extends Controller
 		final XYChart.Series<String, Integer> data_series = new XYChart.Series<String, Integer>();
 		
 		for (int i = 0; i < numberOfBins; i++) {
-			int binContent = parameterBinLists.get(key)[i];
-			data_series.getData().add(new XYChart.Data<String, Integer>(String.valueOf(i), binContent ));
+			final int binContent = parameterBinLists.get(key)[i];
+			data_series.getData().add( new XYChart.Data<String, Integer>(String.valueOf(i), binContent ));
 		}
 		
 		return data_series;
@@ -1071,8 +1153,12 @@ public class AnalysisController extends Controller
 		slider_parameterSpace_distribution_granularity.setDisable(checkbox_parameterSpace_distribution_dynAdjustment.isSelected());
 		heatmap_parameterspace.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
 	}
-	
 
+	/**
+	 * Identify maxima and minima in set of loaded LDA parameters.
+	 * @param ldaConfigurations
+	 * @return
+	 */
 	private Map<String, Pair<Double, Double>> identifyLDAParameterExtrema(ArrayList<LDAConfiguration> ldaConfigurations)
 	{
 		Map<String, Pair<Double, Double>> parameterExtrema = new HashMap<String, Pair<Double, Double>>(LDAConfiguration.SUPPORTED_PARAMETERS.length);
@@ -1121,8 +1207,6 @@ public class AnalysisController extends Controller
 			// Adapt barchart axis.
 			ValueAxis<Integer> yAxis = (ValueAxis<Integer>) barchartsForFilterControls.get(param).getYAxis();
 			yAxis.setMinorTickVisible(false);
-			
-			
 		}
 	}
 	

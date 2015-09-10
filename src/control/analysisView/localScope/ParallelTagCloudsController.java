@@ -84,6 +84,12 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 	 */
 	private double keywordProbabilitySumOverTopicsMin;	
 	
+	/**
+	 * Exponent applied to each keyword's probability.
+	 * Goal: Improve visibility of (small) differences in keyword probability.
+	 */
+	private final double keywordProbabilityExponent = 6; 
+	
 	
 	// -----------------------------------------------
 	// 				Methods
@@ -181,7 +187,7 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 			ArrayList<Pair<String, Double>> topicKeywordProbabilityPairs = data.get(i);
 			
 			VBox vbox = new VBox();
-			vbox.setLayoutX(canvas.getLayoutX() + i * intervalX + intervalX * 0.25);
+			vbox.setLayoutX(canvas.getLayoutX() + i * intervalX + intervalX * 0.15);
 			vbox.setLayoutY(canvas.getLayoutY() + 55);
 			tagCloudContainer.add(vbox);
 			
@@ -216,7 +222,8 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 				vbox.getChildren().add(label);
 				
 				// Update probability sums.
-				probabilitySum += probability;
+				// Modify this statement to enable different approaches to ranking font sizes.
+				probabilitySum += Math.pow(probability, keywordProbabilityExponent);
 				
 				// Update probability sum for this keyword over all topics.
 				if (!keywordProbabilitySumsOverTopics.containsKey(keyword)) {
@@ -262,8 +269,8 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 			
 			// Calculate new number of "font size units" that may be spent so that the vertical axis
 			// is filled entirely.
-			defaultFontSize				= oldFontsize * ratio;
-			double fontSizeUnitsTotal 	= defaultFontSize * numberOfKeywords;
+			defaultFontSize						= oldFontsize * ratio;
+			final double fontSizeUnitsTotal 	= defaultFontSize * numberOfKeywords;
 			
 			// Set new font size
 			for (int i = 0; i < numberOfTopics; i++) {
@@ -279,7 +286,7 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 				// Iterate over all labels, calculate the appropriate font size.
 				for (int j = 0; j < numberOfKeywords; j++) {
 					double probability	= topicKeywordProbabilityPairs.get(j).getValue();
-					Font newFont		= new Font(fontSizeUnitsTotal * (probability / currProbabilitySum));
+					Font newFont		= new Font(fontSizeUnitsTotal * (Math.pow(probability, keywordProbabilityExponent) / currProbabilitySum));
 					
 					// Update used font in current tag label.
 					Label currLabel 	= ((Label)tagCloud.getChildren().get(j));

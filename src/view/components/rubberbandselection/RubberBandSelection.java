@@ -144,6 +144,13 @@ public class RubberBandSelection
         public double mouseAnchorY;
     }
 
+    /**
+     * Translates recorded coordinates to actual coordinates in visualization. 
+     * @param endX
+     * @param endY
+     * @param startX
+     * @param startY
+     */
 	protected void translateToVisualization(double endX, double endY, double startX, double startY)
 	{
 		Pair<Integer, Integer> offset	= listener.provideOffsets();

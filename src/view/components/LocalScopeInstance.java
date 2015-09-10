@@ -42,6 +42,9 @@ public class LocalScopeInstance extends VisualizationComponent
 	 * Other data.
 	 */
 	
+	/**
+	 * Reference to instance of local scope controller actually manipulating the local scope visualization.
+	 */
 	private LocalScopeVisualizationController controller;
 
 	private Workspace workspace;

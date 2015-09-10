@@ -351,14 +351,19 @@ public class DBManagement
 		}
 	}
 	
+	/**
+	 * Load keyword in topic data from database.
+	 * @param ldaConfiguration
+	 * @param maxNumberOfKeywords
+	 * @return
+	 */
 	public ArrayList<ArrayList<Pair<String, Double>>> getKITData(LDAConfiguration ldaConfiguration, int maxNumberOfKeywords)
 	{
 		ArrayList<ArrayList<Pair<String, Double>>> data = null;
 		
 		// Get number of topics for this LDA configuration.
 		String query = 	"select count(*) topicCount from topics t " + 
-						"join ldaConfigurations lda on t.ldaConfigurationID = lda.ldaConfigurationID " +
-						"where lda.ldaConfigurationID = " + ldaConfiguration.getConfigurationID() + ";";
+						"where t.ldaConfigurationID = " + ldaConfiguration.getConfigurationID() + ";";
 
 		try {
 			/*

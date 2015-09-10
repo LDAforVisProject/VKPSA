@@ -38,7 +38,7 @@
                                                                      <children>
                                                                         <GridPane fx:id="gridpane_parameterConfiguration" hgap="10.0" layoutX="1.0" prefHeight="318.0" prefWidth="338.0" style="-fx-background-color: #ffffff;" vgap="5.0" AnchorPane.bottomAnchor="10.0" AnchorPane.topAnchor="5.0">
                                                                            <children>
-                                                                              <Label text="α">
+                                                                              <Label text="a">
                                                                                  <font>
                                                                                     <Font name="System Bold" size="14.0" />
                                                                                  </font>
@@ -46,7 +46,7 @@
                                                                                     <Insets left="5.0" />
                                                                                  </GridPane.margin>
                                                                               </Label>
-                                                                              <Label text="η " GridPane.rowIndex="1">
+                                                                              <Label text="? " GridPane.rowIndex="1">
                                                                                  <font>
                                                                                     <Font name="System Bold" size="14.0" />
                                                                                  </font>
@@ -54,7 +54,7 @@
                                                                                     <Insets left="5.0" />
                                                                                  </GridPane.margin>
                                                                               </Label>
-                                                                              <Label text="κ" GridPane.rowIndex="2">
+                                                                              <Label text="?" GridPane.rowIndex="2">
                                                                                  <font>
                                                                                     <Font name="System Bold" size="14.0" />
                                                                                  </font>
@@ -94,7 +94,7 @@
                                                                               </TextField>
                                                                               <VBox fx:id="vbox_alpha" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2">
                                                                                  <children>
-                                                                                    <BarChart fx:id="barchart_alpha" alternativeRowFillVisible="false" animated="false" barGap="0.0" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="40.0" maxWidth="240.0" minHeight="40.0" minWidth="240.0" prefHeight="40.0" prefWidth="240.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
+                                                                  					<StackedBarChart fx:id="barchart_alpha" alternativeRowFillVisible="false" animated="false" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="40.0" maxWidth="240.0" minHeight="40.0" minWidth="240.0" prefHeight="40.0" prefWidth="240.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
                                                                                        <padding>
                                                                                           <Insets bottom="-20.0" top="-10.0" />
                                                                                        </padding>
@@ -107,12 +107,12 @@
                                                                                        <VBox.margin>
                                                                                           <Insets left="-24.0" top="15.0" />
                                                                                        </VBox.margin>
-                                                                                    </BarChart>
+                                                                                    </StackedBarChart>
                                                                                  </children>
                                                                               </VBox>
                                                                               <VBox fx:id="vbox_eta" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
                                                                                  <children>
-                                                                                    <BarChart fx:id="barchart_eta" alternativeRowFillVisible="false" animated="false" barGap="0.0" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="40.0" maxWidth="240.0" minHeight="40.0" minWidth="240.0" prefHeight="40.0" prefWidth="240.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
+                                                                                    <StackedBarChart fx:id="barchart_eta" alternativeRowFillVisible="false" animated="false" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="40.0" maxWidth="240.0" minHeight="40.0" minWidth="240.0" prefHeight="40.0" prefWidth="240.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
                                                                                        <padding>
                                                                                           <Insets bottom="-20.0" top="-10.0" />
                                                                                        </padding>
@@ -125,12 +125,12 @@
                                                                                        <VBox.margin>
                                                                                           <Insets left="-24.0" top="15.0" />
                                                                                        </VBox.margin>
-                                                                                    </BarChart>
+                                                                                    </StackedBarChart>
                                                                                  </children>
                                                                               </VBox>
                                                                               <VBox fx:id="vbox_kappa" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
                                                                                  <children>
-                                                                                    <BarChart fx:id="barchart_kappa" alternativeRowFillVisible="false" animated="false" barGap="0.0" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="40.0" maxWidth="240.0" minHeight="40.0" minWidth="240.0" prefHeight="40.0" prefWidth="240.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
+                                                                                    <StackedBarChart fx:id="barchart_kappa" alternativeRowFillVisible="false" animated="false" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="40.0" maxWidth="240.0" minHeight="40.0" minWidth="240.0" prefHeight="40.0" prefWidth="240.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
                                                                                        <padding>
                                                                                           <Insets bottom="-20.0" top="-10.0" />
                                                                                        </padding>
@@ -143,7 +143,7 @@
                                                                                        <VBox.margin>
                                                                                           <Insets left="-24.0" top="15.0" />
                                                                                        </VBox.margin>
-                                                                                    </BarChart>
+                                                                                    </StackedBarChart>
                                                                                  </children>
                                                                               </VBox>
                                                                            </children>
@@ -386,17 +386,17 @@
                                                                         <Label text="Parameters to fixed" />
                                                                         <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1">
                                                                            <children>
-                                                                              <CheckBox fx:id="checkbox_ddc_alpha" mnemonicParsing="false" onAction="#ddcButtonStateChanged" selected="true" text="α">
+                                                                              <CheckBox fx:id="checkbox_ddc_alpha" mnemonicParsing="false" onAction="#ddcButtonStateChanged" selected="true" text="a">
                                                                                  <VBox.margin>
                                                                                     <Insets top="15.0" />
                                                                                  </VBox.margin>
                                                                               </CheckBox>
-                                                                              <CheckBox fx:id="checkbox_ddc_eta" mnemonicParsing="false" onAction="#ddcButtonStateChanged" text="η ">
+                                                                              <CheckBox fx:id="checkbox_ddc_eta" mnemonicParsing="false" onAction="#ddcButtonStateChanged" text="? ">
                                                                                  <VBox.margin>
                                                                                     <Insets top="5.0" />
                                                                                  </VBox.margin>
                                                                               </CheckBox>
-                                                                              <CheckBox fx:id="checkbox_ddc_kappa" mnemonicParsing="false" onAction="#ddcButtonStateChanged" text="κ">
+                                                                              <CheckBox fx:id="checkbox_ddc_kappa" mnemonicParsing="false" onAction="#ddcButtonStateChanged" text="?">
                                                                                  <VBox.margin>
                                                                                     <Insets top="5.0" />
                                                                                  </VBox.margin>
