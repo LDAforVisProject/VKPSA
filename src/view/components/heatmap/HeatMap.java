@@ -10,7 +10,10 @@ import model.LDAConfiguration;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart.Data;
 import javafx.scene.paint.Color;
+
+
 
 /**
  * Implements a Canvas-based heatmap.
@@ -27,18 +30,6 @@ public class HeatMap extends VisualizationComponent
 	private NumberAxis yAxis;
 	
 	/**
-	 * References to all LDA configurations in current workspace.
-	 */
-	private ArrayList<LDAConfiguration> allLDAConfigurations;
-	/**
-	 * Store reference to selected LDAConfigurations.
-	 * These are examined, binned and then plotted. 
-	 */
-	private ArrayList<LDAConfiguration> selectedLDAConfigurations;
-	private String key1;
-	private String key2;
-	
-	/**
 	 * Indicates if granularity is to be adjusted dynamically.
 	 */
 	private boolean adjustGranularityDynamically;
@@ -49,17 +40,59 @@ public class HeatMap extends VisualizationComponent
 	private int granularity;
 	
 	/*
+	 * Actual data to be binned and drawn. 
+	 */
+	
+	/**
+	 * References to all LDA configurations in current workspace.
+	 */
+	private ArrayList<LDAConfiguration> allLDAConfigurations;
+	/**
+	 * Store reference to selected LDAConfigurations.
+	 * These are examined, binned and then plotted. 
+	 */
+	private ArrayList<LDAConfiguration> selectedLDAConfigurations;
+
+	/**
+	 * Reference to coordinates of points in MDS scatterplot.
+	 */
+	private double[][] coordinates;
+	/**
+	 * Reference to extrema of .coordinates.
+	 */
+	private double[] coordinateExtrema;
+	
+	/**
 	 * Binned data.
 	 */
 	private BinnedOccurenceEntity binnedData;
 	
-	public HeatMap(AnalysisController analysisController, Canvas canvas, NumberAxis xAxis, NumberAxis yAxis)
+	/*
+	 * Other data.
+	 */
+	
+	/**
+	 * Name of x-axis parameter.
+	 */
+	private String key1;
+	/**
+	 * Name of y-axis parameter.
+	 */
+	private String key2;
+	
+	/**
+	 * Type of heatmap data used with this instance.
+	 */
+	private HeatmapDataType dataType;
+	
+	public HeatMap(AnalysisController analysisController, Canvas canvas, NumberAxis xAxis, NumberAxis yAxis, HeatmapDataType dataType)
     {
 		super(analysisController);
 		
 		this.canvas							= canvas;
 		this.xAxis							= xAxis;
 		this.yAxis							= yAxis;
+		this.dataType						= dataType;
 		
 		// Init granularity settings.
 		this.adjustGranularityDynamically	= true;
@@ -68,16 +101,30 @@ public class HeatMap extends VisualizationComponent
 		// Init axis settings.
 		initAxes();
     }
-	
+
 	private void initAxes()
 	{
-		xAxis.setAutoRanging(false);
-		yAxis.setAutoRanging(false);
-		
-		xAxis.setForceZeroInRange(false);
-		yAxis.setForceZeroInRange(false);
+		if (xAxis != null && yAxis != null) {
+			xAxis.setAutoRanging(false);
+			yAxis.setAutoRanging(false);
+			
+			xAxis.setForceZeroInRange(false);
+			yAxis.setForceZeroInRange(false);
+			
+	    	// Adapt axis options.
+	    	xAxis.setAnimated(false);
+	    	yAxis.setAnimated(false);
+		}
 	}
 
+	/**
+	 * Method to be used when drawing occurence density matrix of one parameter versus another (HeatmapDataType.LDAConfiguration).
+	 * @param allLDAConfigurations
+	 * @param selectedLDAConfigurations
+	 * @param key1
+	 * @param key2
+	 * @param relativeViewMode
+	 */
 	public void refresh(final ArrayList<LDAConfiguration> allLDAConfigurations, final ArrayList<LDAConfiguration> selectedLDAConfigurations, final String key1, final String key2, boolean relativeViewMode) 
     {
 		// If in relative view mode: allLDAConfigurations -> selectedLDAConfigurations.
@@ -86,28 +133,50 @@ public class HeatMap extends VisualizationComponent
     	this.key1						= key1;
     	this.key2						= key2;
     	
-    	// Set label text.
-    	xAxis.setLabel(key1);
-    	yAxis.setLabel(key2);
-    	
-    	// Adapt axis options.
-    	xAxis.setAnimated(false);
-    	yAxis.setAnimated(false);
+    	if (xAxis != null && yAxis != null) {
+	    	// Set label text.
+	    	xAxis.setLabel(key1);
+	    	yAxis.setLabel(key2);
+    	}
     	
     	// Bin LDA configuration parameter frequency data and draw it.
     	binnedData = examineLDAConfigurations();
     	
     	// Draw heatmap.
-    	draw(binnedData);
+    	draw(binnedData, false);
     }
+	
+	/**
+	 * Method to be used when drawing heatmap of occurence density in MDS scatterplot (HeatmapDataType.MDSCoordinates).
+	 * @param coordinates
+	 * @param coordinateExtrema
+	 */
+	public void refresh(double coordinates[][], double coordinateExtrema[])
+	{
+		this.coordinates		= coordinates;
+		this.coordinateExtrema	= coordinateExtrema;
+		
+		// Bind coordinate frequency data.
+		binnedData = examineMDSCoordinateData();
+		
+		// Draw heatmap.
+		draw(binnedData, true);
+	}
     
-    public void refresh(boolean reexamineLDAConfigurations)
+	/**
+	 * Refresh heatmap. Re-examines availble data, if desired.
+	 * @param reexamineData Specifies whether available data is to be re-evaluated.
+	 */
+    public void refresh(boolean reexamineData)
     {
     	// Re-examine LDA configurations, if desired (e.g. after changing the granularity settings).
-    	if (reexamineLDAConfigurations)
-    		binnedData = examineLDAConfigurations();
+    	if (reexamineData) {
+    		binnedData = dataType == HeatmapDataType.LDAConfiguration ? examineLDAConfigurations() : examineMDSCoordinateData();
+    	}
     	
-    	draw(binnedData);
+    	// Draw data.
+    	boolean useBorders = dataType == HeatmapDataType.LDAConfiguration ? false : true;
+    	draw(binnedData, useBorders);
     }
     
     /**
@@ -152,7 +221,7 @@ public class HeatMap extends VisualizationComponent
 			binMatrix[index_key1][index_key2]++;
 		}
 		
-		// 3. Determine minimal and maximal occurence count and return it.
+		// 3. Determine minimal and maximal occurence count.
 		int maxOccurenceCount = Integer.MIN_VALUE;
 		int minOccurenceCount = Integer.MAX_VALUE;
 		
@@ -163,28 +232,100 @@ public class HeatMap extends VisualizationComponent
 			}	
 		}
  		
+		// Return binned data.
 		return new BinnedOccurenceEntity(binMatrix, minOccurenceCount, maxOccurenceCount, min_key1, max_key1, min_key2, max_key2);
     }
     
-    private void draw(BinnedOccurenceEntity binnedData)
+    /**
+     * Bins MDS coordinate data.
+     * @param coordinateExtrema 
+     * @param binMatrix Matrix in which data is binned. Delivered matrix is modified in this function.
+     * @return Minimal and maximal occurence count in bin matrix.
+     */
+    private BinnedOccurenceEntity examineMDSCoordinateData()
+    {
+    	// 1. Get maximum and minimum for defined keys.
+    	
+    	double minX	= coordinateExtrema[0] * 1.0;
+    	double maxX	= coordinateExtrema[1] * 1.0;
+    	double minY	= coordinateExtrema[2] * 1.0;
+		double maxY	= coordinateExtrema[3] * 1.0;
+		
+		// 2. Bin data based on found minima and maxima.
+		
+		final int numberOfBins	= adjustGranularityDynamically ? (int) Math.sqrt(coordinates[0].length) * 2 : granularity;
+		int[][] binMatrix		= new int[numberOfBins][numberOfBins];
+		double binIntervalX		= (maxX - minX) / numberOfBins;
+		double binIntervalY		= (maxY - minY) / numberOfBins;
+		
+		for (int i = 0; i < coordinates[0].length; i++) {
+			// Calculate bin index.
+			int indexX = (int) ( (coordinates[0][i] - minX) / binIntervalX);
+			int indexY = (int) ( (coordinates[1][i] - minY) / binIntervalY);
+			
+			// Check if value is maximum. If so, it should be binned in the last bin nonetheless.
+			indexX = indexX < numberOfBins ? indexX : numberOfBins - 1;
+			indexY = indexY < numberOfBins ? indexY : numberOfBins - 1;
+			
+			// Increment content of corresponding bin.
+			binMatrix[indexX][indexY]++;			
+		}
+		
+		for (int i = 0; i < numberOfBins; i++) {
+			for (int j = 0; j < numberOfBins; j++) {
+				binMatrix[i][j] = (int) (Math.sqrt(binMatrix[i][j])  *  100);
+			}	
+		}
+		
+		// 3. Determine minimal and maximal occurence count.
+		int maxOccurenceCount = Integer.MIN_VALUE;
+		int minOccurenceCount = Integer.MAX_VALUE;
+		
+		for (int i = 0; i < binMatrix.length; i++) {
+			for (int j = 0; j < binMatrix[i].length; j++) {
+				maxOccurenceCount = binMatrix[i][j] > maxOccurenceCount ? binMatrix[i][j] : maxOccurenceCount;
+				minOccurenceCount = (binMatrix[i][j] < minOccurenceCount) && (binMatrix[i][j] > 0)  
+																		? binMatrix[i][j] : minOccurenceCount;
+			}	
+		}
+		
+		// Proofcheck minOccurenceCount (in case no LDA configurations are filtered).
+		minOccurenceCount = minOccurenceCount != Integer.MAX_VALUE ? minOccurenceCount : 0;
+ 		
+		// Return binned data.
+		return new BinnedOccurenceEntity(binMatrix, minOccurenceCount, maxOccurenceCount, minX, maxX, minY, minY);
+    }
+    
+    /**
+     * Draw data to canvas.
+     * @param binnedData
+     * @param useBorders 
+     */
+    private void draw(BinnedOccurenceEntity binnedData, boolean useBorders)
     {
     	GraphicsContext gc		= canvas.getGraphicsContext2D();
     	int binMatrix[][]		= binnedData.getBinMatrix();
     	int minOccurenceCount	= binnedData.getMinOccurenceCount();
     	int maxOccurenceCount	= binnedData.getMaxOccurenceCount();
     	
-    	// Set axis label values.
-    	xAxis.setLowerBound(binnedData.getMin_key1());
-    	xAxis.setUpperBound(binnedData.getMax_key1());
-    	yAxis.setLowerBound(binnedData.getMin_key2());
-    	yAxis.setUpperBound(binnedData.getMax_key2());
+    	// Set stroke color.
+    	gc.setStroke(Color.BLACK);
     	
-    	// Adjust tick width.
-    	final int numberOfTicks = binMatrix.length;
-    	xAxis.setTickUnit( (binnedData.getMax_key1() - binnedData.getMin_key1()) / numberOfTicks);
-    	yAxis.setTickUnit( (binnedData.getMax_key2() - binnedData.getMin_key2()) / numberOfTicks);
-    	xAxis.setMinorTickCount(4);
-    	yAxis.setMinorTickCount(4);
+    	// Adjust tick values at both axes.
+    	if (xAxis != null && yAxis != null) {
+	    	// Set axis label values.
+	    	xAxis.setLowerBound(binnedData.getMin_key1());
+	    	xAxis.setUpperBound(binnedData.getMax_key1());
+	    	yAxis.setLowerBound(binnedData.getMin_key2());
+	    	yAxis.setUpperBound(binnedData.getMax_key2());
+	    	
+	    	// Adjust tick width.
+	    	final int numberOfTicks = binMatrix.length;
+	    	xAxis.setTickUnit( (binnedData.getMax_key1() - binnedData.getMin_key1()) / numberOfTicks);
+	    	yAxis.setTickUnit( (binnedData.getMax_key2() - binnedData.getMin_key2()) / numberOfTicks);
+	    	xAxis.setMinorTickCount(4);
+	    	yAxis.setMinorTickCount(4);
+    	}
     	
     	// Clear canvas.
     	gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
@@ -197,12 +338,14 @@ public class HeatMap extends VisualizationComponent
 		for (int i = 0; i < binMatrix.length; i++) {
 			for (int j = 0; j < binMatrix[i].length; j++) {
 				// Set color for this cell.
-				Color cellColor = ColorScale.getColorForValue(binMatrix[i][j], minOccurenceCount, maxOccurenceCount); 
-				gc.setStroke(cellColor);
+				Color cellColor = ColorScale.getColorForValue(binMatrix[i][j], minOccurenceCount, maxOccurenceCount);
 				gc.setFill(cellColor);
 				
 				// Draw cell.
-				gc.fillRect(cellWidth * i, cellHeight * (binMatrix.length - 1 - j), cellWidth, cellHeight);
+				gc.fillRect(cellWidth * i + 1, cellHeight * (binMatrix.length - 1 - j) - 1, cellWidth, cellHeight);
+				// Draw borders, if this is desired and cell has content.
+				if (useBorders && cellColor != Color.TRANSPARENT)
+					gc.strokeRect(cellWidth * i + 1, cellHeight * (binMatrix.length - 1 - j), cellWidth - 1, cellHeight - 1);
 			}	
 		}
     }

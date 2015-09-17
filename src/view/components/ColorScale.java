@@ -66,16 +66,20 @@ public class ColorScale extends ImageView
      * @param max
      * @return
      */
-//    public static Color getColorForValue(double value, double min, double max) 
-//    {
-//        if (value < min || value > max) {
-//            return Color.BLACK ;
-//        }
-//        
-//        double hue = BLUE_HUE + (RED_HUE - BLUE_HUE) * (value - min) / (max - min);
-//        
-//        return Color.hsb(hue, 1.0, 1.0);
-//    }
+    public static Color getColorForValuex(double value, double min, double max) 
+    {
+        if (value != 0 && (value < min || value > max) ) {
+            return Color.BLACK ;
+        }
+        
+        else if (value == 0) {
+        	return Color.TRANSPARENT;
+        }
+        
+        else {
+        	return Color.hsb(Color.LIGHTBLUE.getHue() + (Color.DARKBLUE.getHue() - Color.LIGHTBLUE.getHue()) * (value - min) / (max - min), 1.0, 1.0);
+        }
+    }
     
     /**
      * Returns default color with saturation chosen depending on the relation of the specified argument to the
@@ -87,11 +91,15 @@ public class ColorScale extends ImageView
      */
     public static Color getColorForValue(double value, double min, double max) 
     {
-        if (value < min || value > max) {
+        if (value != 0 && (value < min || value > max) ) {
             return Color.BLACK ;
         }
         
-        return Color.hsb(ColorScale.DEFAULT_COLOR_HUE, (value - min) / (max - min), 1.0);
+        else if (value == 0) 
+        	return Color.TRANSPARENT;
+        
+        else
+        	return Color.hsb(Color.LIGHTGREEN.getHue() + (Color.DARKOLIVEGREEN.getHue() - Color.LIGHTGREEN.getHue()) * (value - min) / (max - min), (value - min) / (max - min), 1.0);
     }
     
     /**

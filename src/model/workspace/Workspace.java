@@ -49,12 +49,8 @@ import model.workspace.tasks.WorkspaceTask;
 
 // @todox Create working version of parallel tag cloud visualization.
 // @todo After that: Introduce highlighting of selection of MDS datapoints in other charts (and vice versa).
-// @todox Discuss if and to what extend (only visual encoding of each cluster or full-fledged support throughout
-//		 the entire analysis view?) clustering should be supported.
 // @todo Add boxplot for quantiles (and average)? Drop labels instead.
 // @todo Add protocol SplitPane to every view (i.e.: Add in core view).
-// @todo Refactor AnalysisController: Move each chart to a separate component class (common interface structure?)
-//		 for easier maintainability and readability.
 
 /**
  * Encompasses:

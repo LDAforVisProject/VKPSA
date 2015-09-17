@@ -20,6 +20,7 @@ import view.components.DistancesBarchart;
 import view.components.LocalScopeInstance;
 import view.components.MDSScatterchart;
 import view.components.heatmap.HeatMap;
+import view.components.heatmap.HeatmapDataType;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -78,7 +79,28 @@ public class AnalysisController extends Controller
 	/**
 	 * Actual scatterchart.
 	 */
-	private @FXML ScatterChart<Number, Number> scatterchart_global;
+	private @FXML ScatterChart<Number, Number> mds_anchorPane;
+	
+	/**
+	 * Canvas showing the heatmap for the MDS scatter chart.
+	 */
+	private @FXML Canvas mdsHeatmap_canvas;
+	
+	// @todo Don't show heatmap at entry.
+	
+	// Following: Controls for MDS heatmap.
+	/**
+	 * Checkbox for heatmap.
+	 */
+	private @FXML CheckBox checkbox_mdsHeatmap_distribution_dynAdjustment;
+	/**
+	 * Slider specifying MDS heatmap granularity.
+	 */
+	private @FXML Slider slider_mds_distribution_granularity;
+	/**
+	 * Specifies whether or not the MDS heatmap is to be shown.
+	 */
+	private @FXML CheckBox showMSDHeatmap_checkbox;
 	
 	/*
 	 * Distances barchart. 
@@ -110,9 +132,9 @@ public class AnalysisController extends Controller
 	/**
 	 * Heatmap component.
 	 */
-	private HeatMap heatmap_parameterspace;
+	private HeatMap parameterspace_heatmap;
 	
-	private @FXML Canvas canvas_heatmap;
+	private @FXML Canvas paramSpaceHeatmap_canvas;
 	private @FXML NumberAxis numberaxis_parameterSpace_xaxis;
 	private @FXML NumberAxis numberaxis_parameterSpace_yaxis;
 	private @FXML ComboBox<String> combobox_parameterSpace_distribution_xAxis;
@@ -182,8 +204,6 @@ public class AnalysisController extends Controller
 	private @FXML TextField eta_max_textfield;
 	private @FXML TextField kappa_min_textfield;
 	private @FXML TextField kappa_max_textfield;
-	
-	private @FXML CheckBox checkbox_parameterCoupling;
 	
 	// -----------------------------------------------
 	// 				Other data
@@ -320,6 +340,26 @@ public class AnalysisController extends Controller
 		});
 		
 		/*
+		 *  Add resize listeners for MDS anchor pane (needed for correct resizing of heatmap's anchor pane).
+		 */
+		
+		mds_anchorPane.widthProperty().addListener(new ChangeListener<Number>() {
+		    @Override 
+		    public void changed(ObservableValue<? extends Number> observableValue, Number oldWidth, Number newWidth)
+		    {
+		        resizeElement(mds_anchorPane, newWidth.doubleValue(), 0);
+		    }
+		});
+		
+		mds_anchorPane.heightProperty().addListener(new ChangeListener<Number>() {
+		    @Override 
+		    public void changed(ObservableValue<? extends Number> observableValue, Number oldHeight, Number newHeight) 
+		    {
+		    	resizeElement(mds_anchorPane, 0, newHeight.doubleValue());
+		    }
+		});
+		
+		/*
 		 * Add resize listeners for local scope anchor pane.
 		 */
 		
@@ -350,7 +390,7 @@ public class AnalysisController extends Controller
 		initMDSScatterchart();
 		initDistanceBarchart();
 		initDDCLineChart();
-		initHeatmap();
+		initParameterSpaceHeatmap();
 		initLocalScopeView();
 	}
 	
@@ -398,6 +438,12 @@ public class AnalysisController extends Controller
 		barchartsForFilterControls.put("alpha", barchart_alpha);
 		barchartsForFilterControls.put("eta", barchart_eta);
 		barchartsForFilterControls.put("kappa", barchart_kappa);
+		
+//		@todo NEXT: 
+//				- Interactive selection.
+//				- Think about and suggest VKPSA meeting.
+//				- Heatmap layer for MDS selection.
+//				- Visualization for comparison of several LDA topic models/datasets.
 		
 		// Init range slider.
 		for (Map.Entry<String, RangeSlider> entry : rangeSliders.entrySet()) {
@@ -454,7 +500,8 @@ public class AnalysisController extends Controller
 
 	private void initMDSScatterchart()
 	{
-		mdsScatterchart = new MDSScatterchart(this, scatterchart_global);
+		mdsScatterchart = new MDSScatterchart(	this, mds_anchorPane, mdsHeatmap_canvas,
+												checkbox_mdsHeatmap_distribution_dynAdjustment, slider_mds_distribution_granularity);
 	}
 	
 	private void initDistanceBarchart()
@@ -463,7 +510,7 @@ public class AnalysisController extends Controller
 													label_avg, label_median, button_relativeView_distEval, checkbox_logarithmicDistanceBarchart);
 	}
 	
-	private void initHeatmap()
+	private void initParameterSpaceHeatmap()
 	{
 		combobox_parameterSpace_distribution_xAxis.getItems().clear();
 		combobox_parameterSpace_distribution_yAxis.getItems().clear();
@@ -479,7 +526,7 @@ public class AnalysisController extends Controller
 		combobox_parameterSpace_distribution_yAxis.setValue("eta");
 		
 		// Init heatmap.
-		heatmap_parameterspace = new HeatMap(this, canvas_heatmap, numberaxis_parameterSpace_xaxis, numberaxis_parameterSpace_yaxis);
+		parameterspace_heatmap = new HeatMap(this, paramSpaceHeatmap_canvas, numberaxis_parameterSpace_xaxis, numberaxis_parameterSpace_yaxis, HeatmapDataType.LDAConfiguration);
 		
 		/*
 		 * Init option controls.
@@ -489,7 +536,7 @@ public class AnalysisController extends Controller
 		slider_parameterSpace_distribution_granularity.addEventHandler(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) 
             {
-            	heatmap_parameterspace.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
+            	parameterspace_heatmap.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
             }
         });
 		
@@ -497,7 +544,7 @@ public class AnalysisController extends Controller
 		slider_parameterSpace_distribution_granularity.addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) 
             {
-            	heatmap_parameterspace.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
+            	parameterspace_heatmap.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
             };
         });
 	}
@@ -530,7 +577,7 @@ public class AnalysisController extends Controller
 		mdsScatterchart.refresh(filteredCoordinates, filteredIndices, discardedCoordinates, discardedIndices);
 		distancesBarchart.refresh(distances, filteredDistances, selectedFilteredDistances, true);
 		parameterspace_ddc_linechart.refresh(filteredLDAConfigurations, filteredDistances, true);
-		heatmap_parameterspace.refresh(ldaConfigurations, filteredLDAConfigurations, combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), button_relativeView_paramDist.isSelected());
+		parameterspace_heatmap.refresh(ldaConfigurations, filteredLDAConfigurations, combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), button_relativeView_paramDist.isSelected());
 		localScopeInstance.refresh(selectedFilteredLDAConfigurations);
 	}
 
@@ -890,39 +937,24 @@ public class AnalysisController extends Controller
 			parameterValues_high.put(param, rs.getHighValue() <= rangeSliders.get(param).getMax() ? rs.getHighValue() : rangeSliders.get(param).getMax());
 		}
 		
-		if (!checkbox_parameterCoupling.isSelected()) {
-        	switch (parameter) 
-        	{
-        		case "alpha":
-        			alpha_min_textfield.setText(String.valueOf(parameterValues_low.get("alpha")));
-                	alpha_max_textfield.setText(String.valueOf(parameterValues_high.get("alpha")));
-        		break;
+		// Update textfield values.
+    	switch (parameter) 
+    	{
+    		case "alpha":
+    			alpha_min_textfield.setText(String.valueOf(parameterValues_low.get("alpha")));
+            	alpha_max_textfield.setText(String.valueOf(parameterValues_high.get("alpha")));
+    		break;
+    		
+    		case "eta":
+    	       	eta_min_textfield.setText(String.valueOf(parameterValues_low.get("eta")));
+            	eta_max_textfield.setText(String.valueOf(parameterValues_high.get("eta")));
+        	break;
         		
-        		case "eta":
-        	       	eta_min_textfield.setText(String.valueOf(parameterValues_low.get("eta")));
-                	eta_max_textfield.setText(String.valueOf(parameterValues_high.get("eta")));
-            	break;
-            		
-        		case "kappa":
-        			kappa_min_textfield.setText(String.valueOf(parameterValues_low.get("kappa")));
-                	kappa_max_textfield.setText(String.valueOf(parameterValues_high.get("kappa")));
-            	break;	
-        	}            		
-    	}
-    	
-    	else {
-			alpha_min_textfield.setText(String.valueOf(parameterValues_low.get(parameter)));
-        	alpha_max_textfield.setText(String.valueOf(parameterValues_high.get(parameter)));
-		 	eta_min_textfield.setText(String.valueOf(parameterValues_low.get(parameter)));
-        	eta_max_textfield.setText(String.valueOf(parameterValues_high.get(parameter)));
-    		kappa_min_textfield.setText(String.valueOf(parameterValues_low.get(parameter)));
-        	kappa_max_textfield.setText(String.valueOf(parameterValues_high.get(parameter)));
-        	
-        	for (RangeSlider rangeSlider : rangeSliders.values()) {
-        		rangeSlider.setLowValue(parameterValues_low.get(parameter));
-        		rangeSlider.setHighValue(parameterValues_high.get(parameter));
-        	}
-    	}
+    		case "kappa":
+    			kappa_min_textfield.setText(String.valueOf(parameterValues_low.get("kappa")));
+            	kappa_max_textfield.setText(String.valueOf(parameterValues_high.get("kappa")));
+        	break;	
+    	}            		
 	}
 
 	/**
@@ -1048,15 +1080,24 @@ public class AnalysisController extends Controller
 			case "anchorpane_parameterSpace_distribution":
 				// Adapt width.
 				if (width > 0) {	
-					canvas_heatmap.setWidth(width - 59 - 57);
-					heatmap_parameterspace.refresh(false);
+					// Update width of parameter distribution heatmap.
+					paramSpaceHeatmap_canvas.setWidth(width - 59 - 57);
+					parameterspace_heatmap.refresh(false);
 				}
 				
 				// Adapt height.
 				if (height > 0) {
-					canvas_heatmap.setHeight(height - 45 - 45);
-					heatmap_parameterspace.refresh(false);
+					// Update width of parameter distribution heatmap.
+					paramSpaceHeatmap_canvas.setHeight(height - 45 - 45);
+					parameterspace_heatmap.refresh(false);
 				}
+			break;
+			
+			case "mds_anchorPane":
+				// Update heatmap position.
+				mdsScatterchart.updateHeatmapPosition();
+				// Redraw heatmap.
+				mdsScatterchart.refreshHeatmapAfterResize();
 			break;
 			
 			// Resize local scope element.
@@ -1104,8 +1145,8 @@ public class AnalysisController extends Controller
 			filteredLDAConfigurations.add(ldaConfigurations.get(selectedIndex));
 		}
 		
-		if (heatmap_parameterspace != null && combobox_parameterSpace_distribution_xAxis != null && combobox_parameterSpace_distribution_yAxis != null)
-			heatmap_parameterspace.refresh(ldaConfigurations, filteredLDAConfigurations, combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), button_relativeView_paramDist.isSelected());
+		if (parameterspace_heatmap != null && combobox_parameterSpace_distribution_xAxis != null && combobox_parameterSpace_distribution_yAxis != null)
+			parameterspace_heatmap.refresh(ldaConfigurations, filteredLDAConfigurations, combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), button_relativeView_paramDist.isSelected());
 	}
 	
 	public void updateLinechartInfo(boolean show, ArrayList<Label> labels)
@@ -1147,13 +1188,38 @@ public class AnalysisController extends Controller
 		distancesBarchart.changeScalingType();
 	}
 	
+	/**
+	 * Processes new information about granularity of parameter space distribution heatmap.
+	 * @param e
+	 */
 	@FXML
 	public void changeParameterDistributionGranularityMode(ActionEvent e)
 	{
 		slider_parameterSpace_distribution_granularity.setDisable(checkbox_parameterSpace_distribution_dynAdjustment.isSelected());
-		heatmap_parameterspace.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
+		parameterspace_heatmap.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
+	}
+	
+	/**
+	 * Processes new information about granularity of MDS heatmap.
+	 * @param e
+	 */
+	@FXML
+	public void changeHeatmapGranularityMode(ActionEvent e)
+	{
+		slider_mds_distribution_granularity.setDisable(checkbox_mdsHeatmap_distribution_dynAdjustment.isSelected());
+		mdsScatterchart.setHeatmapGranularityInformation(checkbox_mdsHeatmap_distribution_dynAdjustment.isSelected(), (int) slider_mds_distribution_granularity.getValue(), true);
 	}
 
+	/**
+	 * Toggles MDS heatmap visibility.
+	 * @param e
+	 */
+	@FXML
+	public void changeMDSHeatmapVisibility(ActionEvent e)
+	{
+		mdsScatterchart.setHeatmapVisiblity(showMSDHeatmap_checkbox.isSelected());
+	}
+	
 	/**
 	 * Identify maxima and minima in set of loaded LDA parameters.
 	 * @param ldaConfigurations

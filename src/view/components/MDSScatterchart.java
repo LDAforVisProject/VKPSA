@@ -1,5 +1,6 @@
 package view.components;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
@@ -9,19 +10,31 @@ import com.sun.javafx.scene.paint.GradientUtils.Point;
 
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Slider;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.util.Pair;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import control.analysisView.AnalysisController;
+import view.components.heatmap.HeatMap;
+import view.components.heatmap.HeatmapDataType;
 import view.components.rubberbandselection.ISelectableComponent;
 import view.components.rubberbandselection.RubberBandSelection;
 
@@ -36,11 +49,39 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	 * GUI elements.
 	 */
 	
+	/**
+	 * ScatterChart used for visualization.
+	 */
 	private ScatterChart<Number, Number> scatterchart;
 	private NumberAxis scatterchart_xAxis;
 	private NumberAxis scatterchart_yAxis;
 	
+	/**
+	 * Component enabling rubberband-type selection of points in scatterchart.
+	 */
 	private RubberBandSelection rubberbandSelection;
+	
+	/**
+	 * Heatmap displaying number of occurences of MDS points, based on coordinates.
+	 */
+	private HeatMap heatmap;
+	/**
+	 * Canvas used for drawing of heatmap.
+	 */
+	private Canvas heatmap_canvas;
+	
+	/**
+	 * Slider specifying heatmap's granularity.
+	 */
+	private Slider heatmapGranularity_slider;
+	/**
+	 * Checkbox en-/disabling dynamic/customized degree of granularity.
+	 */
+	private CheckBox heatmap_dynGranularity_checkbox;
+	
+	/*
+	 * Constants.
+	 */
 	
 	/**
 	 * Describes zoom factor.
@@ -112,12 +153,18 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	private Set<Integer> discardedIndices;
 	
 	
-	public MDSScatterchart(AnalysisController analysisController, ScatterChart<Number, Number> scatterchart)
+	public MDSScatterchart(	AnalysisController analysisController, ScatterChart<Number, Number> scatterchart,
+							Canvas heatmap_canvas, 
+							CheckBox heatmap_dynGranularity_checkbox, Slider heatmapGranularity_slider)
 	{
 		super(analysisController);
 		
 		this.scatterchart						= scatterchart;
+		this.heatmap_canvas						= heatmap_canvas;
 		
+		this.heatmapGranularity_slider			= heatmapGranularity_slider;
+		this.heatmap_dynGranularity_checkbox	= heatmap_dynGranularity_checkbox;
+	
 		// Init collection of selected data points in the MDS scatterchart.
 		selectedMDSPoints						= new HashMap<Integer, XYChart.Data<Number, Number>>();
 		globalCoordinateExtrema_X				= new Pair<Double, Double>(Double.MAX_VALUE, Double.MIN_VALUE);
@@ -130,6 +177,8 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 		
 		// Init scatterchart.
 		initScatterchart();
+		// Init heatmap.
+		initHeatmap();
 	}
 
 	private void initScatterchart()
@@ -153,6 +202,31 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
         
         // Initialize zooming capabiliy.
         initZoom();
+	}
+	
+	private void initHeatmap()
+	{
+		heatmap = new HeatMap(this.analysisController, heatmap_canvas, (NumberAxis)null, (NumberAxis)null, HeatmapDataType.MDSCoordinates);
+		
+		/*
+		 * Init option controls.
+		 */
+		
+		// Add listener to determine position during after release.
+		heatmapGranularity_slider.addEventHandler(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent event) 
+            {
+            	heatmap.setGranularityInformation(heatmap_dynGranularity_checkbox.isSelected(), (int) heatmapGranularity_slider.getValue(), true);
+            }
+        });
+		
+		// Add listener to determine position during mouse drag.
+		heatmapGranularity_slider.addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent event) 
+            {
+            	heatmap.setGranularityInformation(heatmap_dynGranularity_checkbox.isSelected(), (int) heatmapGranularity_slider.getValue(), true);
+            };
+        });
 	}
 	
 	/**
@@ -314,6 +388,20 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	 */
 	public void identifyGlobalExtrema(double[][] coordinates)
 	{
+		double[] extrema = identifyExtrema(coordinates);
+		
+		globalCoordinateExtrema_X = new Pair<Double, Double>(extrema[0], extrema[1]);
+		globalCoordinateExtrema_Y = new Pair<Double, Double>(extrema[2], extrema[3]);
+	}
+	
+	/**
+	 * Generates an list of extrema (x-minimum, x-maximum, y-minimum, y-maximum) in an 2-dimensional matrix.
+	 * @return
+	 */
+	private double[] identifyExtrema(double[][] coordinates)
+	{
+		double[] extrema = new double[4];
+		
 		double minX = Double.MAX_VALUE;
 		double maxX = Double.MIN_VALUE;
 		double minY = Double.MAX_VALUE;
@@ -330,8 +418,13 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 			maxY = coordinates[1][i] > maxY ? coordinates[1][i] : maxY;			
 		}
 		
-		globalCoordinateExtrema_X = new Pair<Double, Double>(minX, maxX);
-		globalCoordinateExtrema_Y = new Pair<Double, Double>(minY, maxY);
+		// Set and return extrema.
+		extrema[0] = minX;
+		extrema[1] = maxX;
+		extrema[2] = minY;
+		extrema[3] = maxY;
+		
+		return extrema;
 	}
 	
 	/**
@@ -372,14 +465,26 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
         scatterchart.getData().add(dataSeries);
         scatterchart.getData().add(0, selectedDataSeries);
         
+        // Redraw scatterchart.
         scatterchart.layout();
         scatterchart.applyCss();
         
         // Add mouse listeners.
         addMouseListenersToMDSScatterchart(this.coordinates, this.indices);
         
+        // Update heatmap.
+        heatmap.refresh(coordinates, identifyExtrema(coordinates));
+        
         // Update scatterchart ranges.
         updateMDSScatterchartRanges();
+	}
+	
+	/**
+	 * Refreshes chart's heatmap explicitly after resizing.
+	 */
+	public void refreshHeatmapAfterResize()
+	{
+		heatmap.refresh(false);
 	}
 	
 	/**
@@ -608,5 +713,57 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	public Set<Integer> getSelectedIndices()
 	{
 		return selectedMDSPoints.keySet();
+	}
+
+	/**
+	 * Updates granularity information in heatmap. 
+	 * @param selected
+	 * @param value
+	 * @param update
+	 */
+	public void setHeatmapGranularityInformation(boolean selected, int value, boolean update)
+	{
+		heatmap.setGranularityInformation(selected, value, update);
+	}
+
+	/**
+	 * Changes heatmap visiblity.
+	 * @param selected
+	 */
+	public void setHeatmapVisiblity(boolean selected)
+	{
+		heatmap_canvas.setVisible(selected);
+		
+		// Hide data points.
+		for (Series<Number, Number> dataSeries : scatterchart.getData()) {
+			for (XYChart.Data<Number, Number> dataPoint : dataSeries.getData()) {
+				dataPoint.getNode().setVisible(!selected);
+			}
+		}
+		
+		// Show grid lines, if canvas is not visible. Hide them, if canvas is visible.
+//		scatterchart.setHorizontalGridLinesVisible(!selected);
+//		scatterchart.setVerticalGridLinesVisible(!selected);
+//		scatterchart.setHorizontalZeroLineVisible(!selected);
+//		scatterchart.setVerticalZeroLineVisible(!selected);
+	}
+
+	/**
+	 * Update width of chart's heatmap layer.
+	 * @param width
+	 */
+	public void updateHeatmapPosition()
+	{
+		final double xBorderFactor = 0.08;
+		final double yBorderFactor = 0.05;
+		
+		// Set x position and new width.
+		final double offsetX = 43 + scatterchart.getWidth() * xBorderFactor;
+		heatmap_canvas.setLayoutX(offsetX);
+		heatmap_canvas.setWidth( (scatterchart.getWidth() - 15 - offsetX) * (1 - xBorderFactor));
+		// Set y position
+		final double offsetY = scatterchart.getHeight() * yBorderFactor;
+		heatmap_canvas.setTranslateY(offsetY);
+		heatmap_canvas.setHeight((scatterchart.getHeight() - 95 - offsetY) * (1 - yBorderFactor));
 	}
 }
