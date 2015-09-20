@@ -1,16 +1,11 @@
 package view.components;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Observable;
 import java.util.Set;
 
-import com.sun.javafx.scene.paint.GradientUtils.Point;
 
-import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -25,13 +20,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.util.Pair;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import control.analysisView.AnalysisController;
 import view.components.heatmap.HeatMap;
 import view.components.heatmap.HeatmapDataType;
@@ -70,6 +59,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	 */
 	private Canvas heatmap_canvas;
 	
+	// Heatmap controls:
 	/**
 	 * Slider specifying heatmap's granularity.
 	 */
@@ -98,7 +88,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	
 	private SelectionMode selectionMode;
 	private boolean isCtrlDown;
-	private boolean isSpaceDown;
+	private boolean isShiftDown;
 	
 	/**
 	 * Stores last drag coordinates.
@@ -129,6 +119,10 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	 * Global coordinate extrema on y axis (absolute; not filter- or selection-specific).
 	 */
 	private Pair<Double, Double> globalCoordinateExtrema_Y;
+	/**
+	 * Global coordinate extrema in array form. Is to replace pair mode. 
+	 */
+	private double[] globalCoordinateExtrema;
 	
 	/*
 	 * Collections storing the domain data. 
@@ -153,6 +147,10 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	private Set<Integer> discardedIndices;
 	
 	
+	/*
+	 * Methods.
+	 */
+	
 	public MDSScatterchart(	AnalysisController analysisController, ScatterChart<Number, Number> scatterchart,
 							Canvas heatmap_canvas, 
 							CheckBox heatmap_dynGranularity_checkbox, Slider heatmapGranularity_slider)
@@ -169,11 +167,12 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 		selectedMDSPoints						= new HashMap<Integer, XYChart.Data<Number, Number>>();
 		globalCoordinateExtrema_X				= new Pair<Double, Double>(Double.MAX_VALUE, Double.MIN_VALUE);
 		globalCoordinateExtrema_Y				= new Pair<Double, Double>(Double.MAX_VALUE, Double.MIN_VALUE);
+		globalCoordinateExtrema					= new double[4];
 		
 		// Init flags.
 		changeInSelectionDetected				= false;
 		changeInSelectionDetected_localScope	= false;
-		isSpaceDown								= false;
+		isShiftDown								= false;
 		
 		// Init scatterchart.
 		initScatterchart();
@@ -307,7 +306,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 		// Enable navigation in zoomed map.
 		scatterchart.setOnMouseDragged(new EventHandler<MouseEvent>() {
 			 public void handle(MouseEvent event) {
-					 if (isSpaceDown) {
+					 if (isShiftDown) {
 						 event.consume();
 						 
 						 double diffX = event.getX() - lastMouseEvent.getX();
@@ -358,7 +357,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
                 // Check if space key is down.
             	else if (ke.getCode() == KeyCode.SHIFT) {
         			rubberbandSelection.disable();
-        			isSpaceDown = true;
+        			isShiftDown = true;
         		}
                 
             	// Remember if CTRL is down.
@@ -376,7 +375,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
             	if (ke.getCode() == KeyCode.SHIFT) {
             		
             		rubberbandSelection.enable();
-            		isSpaceDown = false;
+            		isShiftDown = false;
             	}
             }
         });
@@ -390,8 +389,9 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	{
 		double[] extrema = identifyExtrema(coordinates);
 		
-		globalCoordinateExtrema_X = new Pair<Double, Double>(extrema[0], extrema[1]);
-		globalCoordinateExtrema_Y = new Pair<Double, Double>(extrema[2], extrema[3]);
+		globalCoordinateExtrema_X 	= new Pair<Double, Double>(extrema[0], extrema[1]);
+		globalCoordinateExtrema_Y 	= new Pair<Double, Double>(extrema[2], extrema[3]);
+		globalCoordinateExtrema		= extrema; 
 	}
 	
 	/**
@@ -473,7 +473,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
         addMouseListenersToMDSScatterchart(this.coordinates, this.indices);
         
         // Update heatmap.
-        heatmap.refresh(coordinates, identifyExtrema(coordinates));
+        heatmap.refresh(this.coordinates, globalCoordinateExtrema);
         
         // Update scatterchart ranges.
         updateMDSScatterchartRanges();
@@ -592,6 +592,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 			for (int i = 1; i < scatterchart.getData().size(); i++) {
 				// Get data series.
 				XYChart.Series<Number, Number> dataSeries = scatterchart.getData().get(i);
+				
 				// Iterate over all data points.
 				for (XYChart.Data<Number, Number> datapoint : dataSeries.getData()) {
 					Node datapointNode			= datapoint.getNode();
@@ -604,22 +605,12 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 							// Set dirty flags.
 							changeInSelectionDetected				= true;
 							changeInSelectionDetected_localScope	= true;
-							
+
 							// Update collection of selected points.
 							selectedMDSPoints.put((int)datapoint.getExtraValue(), datapoint);
 						}
 					}
 				}
-			}
-			
-			if (changeInSelectionDetected) {
-	    		// Refresh scatterchart.
-	    		refresh(coordinates, indices, discardedCoordinates, discardedIndices);
-	    		// Refresh other charts.
-	    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet(), false);
-	    		
-	    		// Reset flag.
-	    		changeInSelectionDetected = false;
 			}
 		}
 		
@@ -645,16 +636,16 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 					}
 				}
 			}
-			
-			if (changeInSelectionDetected) {
-	    		// Refresh scatterchart.
-	    		refresh(coordinates, indices, discardedCoordinates, discardedIndices);
-	    		// Refresh other charts.
-	    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet(), false);
-	    		
-	    		// Reset flag.
-	    		changeInSelectionDetected = false;
-			}
+		}
+		
+		if (changeInSelectionDetected) {
+    		// Refresh scatterchart.
+    		refresh(coordinates, indices, discardedCoordinates, discardedIndices);
+    		// Refresh other charts.
+    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet(), false);
+    		
+    		// Reset flag.
+    		changeInSelectionDetected = false;
 		}
 	}
 	
@@ -740,12 +731,6 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 				dataPoint.getNode().setVisible(!selected);
 			}
 		}
-		
-		// Show grid lines, if canvas is not visible. Hide them, if canvas is visible.
-//		scatterchart.setHorizontalGridLinesVisible(!selected);
-//		scatterchart.setVerticalGridLinesVisible(!selected);
-//		scatterchart.setHorizontalZeroLineVisible(!selected);
-//		scatterchart.setVerticalZeroLineVisible(!selected);
 	}
 
 	/**

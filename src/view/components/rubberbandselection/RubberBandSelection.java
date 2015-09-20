@@ -52,13 +52,19 @@ public class RubberBandSelection
         pane.addEventHandler(MouseEvent.MOUSE_RELEASED, onMouseReleasedEventHandler);
     }
     
+    /**
+     * Enables rubber band selection in pane.
+     */
 	public void enable()
     {
 	    pane.addEventHandler(MouseEvent.MOUSE_PRESSED, onMousePressedEventHandler);
 	    pane.addEventHandler(MouseEvent.MOUSE_DRAGGED, onMouseDraggedEventHandler);
 	    pane.addEventHandler(MouseEvent.MOUSE_RELEASED, onMouseReleasedEventHandler);
     }
-    
+
+    /**
+     * Disables rubber band selection in pane.
+     */
     public void disable()
     {
     	pane.removeEventHandler(MouseEvent.MOUSE_PRESSED, onMousePressedEventHandler);

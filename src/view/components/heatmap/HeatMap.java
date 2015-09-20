@@ -6,12 +6,16 @@ import java.util.Set;
 import control.analysisView.AnalysisController;
 import view.components.ColorScale;
 import view.components.VisualizationComponent;
+import view.components.rubberbandselection.ISelectableComponent;
+import view.components.rubberbandselection.RubberBandSelection;
 import model.LDAConfiguration;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart.Data;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.util.Pair;
 
 
 
@@ -19,7 +23,7 @@ import javafx.scene.paint.Color;
  * Implements a Canvas-based heatmap.
  * Adapted from http://stackoverflow.com/questions/25214538/draw-a-smooth-color-scale-and-assign-specific-values-to-it.
  */
-public class HeatMap extends VisualizationComponent
+public class HeatMap extends VisualizationComponent implements ISelectableComponent
 {
 	/*
 	 * UI elements.
@@ -38,6 +42,11 @@ public class HeatMap extends VisualizationComponent
 	 * Only used when adjustGranularityDynamically == false.
 	 */
 	private int granularity;
+	
+	/**
+	 * Component enabling rubberband-type selection of points in scatterchart.
+	 */
+	private RubberBandSelection rubberbandSelection;
 	
 	/*
 	 * Actual data to be binned and drawn. 
@@ -85,6 +94,20 @@ public class HeatMap extends VisualizationComponent
 	 */
 	private HeatmapDataType dataType;
 	
+	/**
+	 * Signifies whether the ctrl key is down at any given time.
+	 */
+	private boolean isCtrlDown;
+	/**
+	 * Signifies whether the shift key is down at any given time.
+	 */
+	private boolean isShiftDown;
+	
+	
+	/*
+	 * Methods.
+	 */
+	
 	public HeatMap(AnalysisController analysisController, Canvas canvas, NumberAxis xAxis, NumberAxis yAxis, HeatmapDataType dataType)
     {
 		super(analysisController);
@@ -100,7 +123,16 @@ public class HeatMap extends VisualizationComponent
 		
 		// Init axis settings.
 		initAxes();
+		
+		// Init selection tools.
+		initSelection();
     }
+
+	private void initSelection()
+	{
+        // Add rubberband selection tool.
+        rubberbandSelection = new RubberBandSelection((Pane) canvas.getParent(), this);
+	}
 
 	private void initAxes()
 	{
@@ -362,6 +394,29 @@ public class HeatMap extends VisualizationComponent
 	@Override
 	public void changeViewMode()
 	{
+		
+	}
+
+	@Override
+	public void processSelectionManipulationRequest(double minX, double minY, double maxX, double maxY)
+	{
+		System.out.println(minX + "/" + minY + " to " + maxX + "/" + maxY);
+		
+//		 @todo: 	Identify selected cells, select (in addition to already-selected) corresponding datasets.
+//					After that: Think about how to select from DDC (average distances?).
+//					After that: Research possibilities for local selection comparison.
+	}
+
+	@Override
+	public Pair<Integer, Integer> provideOffsets()
+	{
+		return new Pair<Integer, Integer>(69, 45);
+	}
+
+	@Override
+	public void processEndOfSelectionManipulation()
+	{
+		// @todo Auto-generated method stub
 		
 	}
 }
