@@ -400,7 +400,7 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 	@Override
 	public void processSelectionManipulationRequest(double minX, double minY, double maxX, double maxY)
 	{
-		System.out.println(minX + "/" + minY + " to " + maxX + "/" + maxY);
+//		System.out.println(minX + "/" + minY + " to " + maxX + "/" + maxY);
 		
 //		 @todo: 	Identify selected cells, select (in addition to already-selected) corresponding datasets.
 //					After that: Think about how to select from DDC (average distances?).

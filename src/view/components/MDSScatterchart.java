@@ -487,8 +487,17 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 		heatmap.refresh(false);
 	}
 	
+	public void updateSelection(Set<Integer> selectedIndices)
+	{
+		NEXT: Integrate new set of selecteded indices in MDSScatterchart.
+		System.out.println(scatterchart.getData().get(2).getName());
+		for (int index : indices) {
+			
+		}
+	}
+	
 	/**
-	 * Auxiliary method to add data points to data series in scatterchart.
+	 * Auxiliary method to add filtered data points to data series in scatterchart.
 	 * @param dataSeries
 	 * @param selectedDataSeries
 	 */

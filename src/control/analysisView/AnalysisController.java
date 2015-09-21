@@ -2,6 +2,7 @@ package control.analysisView;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -86,8 +87,6 @@ public class AnalysisController extends Controller
 	 */
 	private @FXML Canvas mdsHeatmap_canvas;
 	
-	// @todo Don't show heatmap at entry.
-	
 	// Following: Controls for MDS heatmap.
 	/**
 	 * Checkbox for heatmap.
@@ -111,7 +110,7 @@ public class AnalysisController extends Controller
 	 */
 	private DistancesBarchart distancesBarchart;
 	
-	private @FXML StackedBarChart<String, Integer> barchart_distances;
+	private @FXML BarChart<String, Number> barchart_distances;
 	private @FXML NumberAxis numberaxis_distanceEvaluation_yaxis;
 	private @FXML Label label_avg;
 	private @FXML Label label_median;
@@ -304,7 +303,7 @@ public class AnalysisController extends Controller
 		// Init collection of filtered/selected indices.
 		filteredIndices						= new LinkedHashSet<Integer>();
 		selectedFilteredIndices				= new LinkedHashSet<Integer>();
-		discardedIndices						= new LinkedHashSet<Integer>();
+		discardedIndices					= new LinkedHashSet<Integer>();
 		
 		// Auxiliary variable storing whether or not the global extrema have already been identified.
 		globalExtremaIdentified				= false;
@@ -575,7 +574,7 @@ public class AnalysisController extends Controller
 		// Refresh visualizations.
 		refreshParameterHistograms(50);
 		mdsScatterchart.refresh(filteredCoordinates, filteredIndices, discardedCoordinates, discardedIndices);
-		distancesBarchart.refresh(distances, filteredDistances, selectedFilteredDistances, true);
+		distancesBarchart.refresh(discardedDistances, filteredDistances, selectedFilteredDistances, true);
 		parameterspace_ddc_linechart.refresh(filteredLDAConfigurations, filteredDistances, true);
 		parameterspace_heatmap.refresh(ldaConfigurations, filteredLDAConfigurations, combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), button_relativeView_paramDist.isSelected());
 		localScopeInstance.refresh(selectedFilteredLDAConfigurations);
@@ -601,6 +600,50 @@ public class AnalysisController extends Controller
 			// Adapt controls to new data.
 			adjustControlExtrema();
 		}
+	}
+	
+	/**
+	 * Integrates barchart selection into MDS selection, then fires update for all visualizations.
+	 * @param selectedLocalIndices
+	 * @param addToSelection true for addition of selected data to global selection; false for their removal.
+	 */
+	public void integrateBarchartSelection(ArrayList<Integer> selectedLocalIndices, final boolean addToSelection)
+	{
+//		@todo continue with integration of (1) filtered (add) and (2) selected (remove) data.
+		ArrayList<Integer> indicesList 		= new ArrayList<Integer>();
+		// Check if there is any change in the set of selected datasets.
+		boolean changeDetected				= false;
+		
+		// 1. If selection should be added: Compare with set of filtered and selected datasets.
+		if (addToSelection) {
+			// Transfer indices into arraylist for more convenient access.
+			indicesList.addAll(filteredIndices);
+			
+			// Translate local indices to global indices.
+			for (int i = 0; i < selectedLocalIndices.size(); i++) {
+				// Add to set of selected indices. 
+				if (!selectedFilteredIndices.contains(indicesList.get(selectedLocalIndices.get(i)))) {
+					selectedFilteredIndices.add( indicesList.get(selectedLocalIndices.get(i)) );
+					// Change detected.
+					changeDetected = true;
+				}
+			}
+		}
+		
+		else {
+			
+		}
+		
+		// 2. Update related (i.e. dependent on the set of selected entities) datasets, if there were any changes made.
+		if (changeDetected) {
+			// Find selected and filtered values.
+			selectedFilteredDistances			= createSelectedFilteredDistanceMatrix(selectedFilteredIndices);
+			selectedFilteredLDAConfigurations	= createSelectedFilteredLDAConfigurations(selectedFilteredIndices);
+		}
+		
+		// 3. Refresh other visualizations.
+		mdsScatterchart.updateSelection(selectedFilteredIndices);
+		//refreshVisualizations(false);
 	}
 	
 	/**
@@ -746,7 +789,8 @@ public class AnalysisController extends Controller
 	}
 	
 	/**
-	 * Creates distance matrix out of sets of filtered and selected indices. 
+	 * Creates distance matrix out of sets of discarded indices.
+	 * Contains distances between discarded datasets only.
 	 * @param filteredIndices
 	 * @param selectedIndices
 	 * @return
@@ -757,7 +801,7 @@ public class AnalysisController extends Controller
 		double[][] discardedDistances = new double[discardedIndices.size()][discardedIndices.size()];
 		
 		int count = 0;
-		for (int index : selectedFilteredIndices) {
+		for (int index : discardedIndices) {
 			int innerCount = 0;
 			for (int innerIndex : discardedIndices) {
 				discardedDistances[count][innerCount] = distances[index][innerIndex];
@@ -907,7 +951,7 @@ public class AnalysisController extends Controller
 		discardedIndices					= createDiscardedIndexSet(filteredIndices);
 		// Update set of discarded values.
 		discardedCoordinates				= createDiscardedCoordinateMatrix(discardedIndices);
-		discardedDistances					= createDiscardedDistanceMatrix(selectedFilteredIndices);
+		discardedDistances					= createDiscardedDistanceMatrix(discardedIndices);
 		discardedLDAConfigurations			= createDiscardedLDAConfigurations(selectedFilteredIndices);
 		
 		/*

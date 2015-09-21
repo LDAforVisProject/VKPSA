@@ -43,12 +43,9 @@ import model.workspace.tasks.WorkspaceTask;
 
 // BACKEND / data view:
 // @todo Idea for optimization: Truncate parameter file list / instruct Python script to process only a defined part of it. Execute parallel script instances.
-// @todox Change file-based system to SQLite.
 
 // FRONTEND / analysis view:
 
-// @todox Create working version of parallel tag cloud visualization.
-// @todo After that: Introduce highlighting of selection of MDS datapoints in other charts (and vice versa).
 // @todo Add boxplot for quantiles (and average)? Drop labels instead.
 // @todo Add protocol SplitPane to every view (i.e.: Add in core view).
 

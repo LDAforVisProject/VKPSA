@@ -2,14 +2,10 @@ package view.components;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 
 import view.components.rubberbandselection.ISelectableComponent;
 import view.components.rubberbandselection.RubberBandSelection;
@@ -18,16 +14,9 @@ import com.sun.javafx.charts.Legend;
 
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.StackedBarChart;
-import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
@@ -35,9 +24,9 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.util.Pair;
 import control.analysisView.AnalysisController;
 
@@ -47,7 +36,7 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 	 * GUI elements.
 	 */
 	
-	private StackedBarChart<String, Integer> barchart;
+	private BarChart<String, Number> barchart;
 	private NumberAxis numberaxis_distanceEvaluation_yaxis;
 	
 	private Label label_avg;
@@ -98,7 +87,10 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 	 * Stores which bars contain distances from which 
 	 */
 	private Map<String, ArrayList<Integer>> barToDataAssociations;
-	
+	/**
+	 * Collection of the descriptions of selected bars.
+	 */
+	private Set<String> selectedBars;
 	
 	/*
 	 * Actual data.
@@ -107,7 +99,7 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 	/**
 	 * Matrix containing all loaded distances.
 	 */
-	private double[][] distances;
+	private double[][] discardedDistances;
 	/**
 	 * Matrix containing all currently filtered distances.
 	 */
@@ -120,27 +112,28 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 	/**
 	 * Series containing all data.
 	 */
-	private XYChart.Series<String, Integer> allDataSeries;
+	private XYChart.Series<String, Number> discardedDataSeries;
 	/**
 	 * Series containing filtered data.
 	 */
-	private XYChart.Series<String, Integer> filteredDataSeries;
+	private XYChart.Series<String, Number> filteredDataSeries;
 	/**
 	 * Series containing filtered and selected data.
 	 */
-	private XYChart.Series<String, Integer> selectedDataSeries;
+	private XYChart.Series<String, Number> selectedDataSeries;
 
 	
 	/*
 	 * Methods.
 	 */
 	
-	public DistancesBarchart(	AnalysisController analysisController, StackedBarChart<String, Integer> barchart_distances, 
+	public DistancesBarchart(	AnalysisController analysisController, BarChart<String, Number> barchart_distances, 
 								NumberAxis numberaxis_distanceEvaluation_yaxis, Label label_avg, 
 								Label label_median, ToggleButton button_relativeView_distEval, CheckBox checkbox_useLogarithmicScaling)
 	{
 		super(analysisController);
 
+		// Set references to GUI elements.
 		this.barchart 								= barchart_distances;
 		this.numberaxis_distanceEvaluation_yaxis	= numberaxis_distanceEvaluation_yaxis;
 		this.label_avg								= label_avg;
@@ -148,9 +141,11 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 		this.button_relativeView_distEval			= button_relativeView_distEval;
 		this.checkbox_useLogarithmicScaling			= checkbox_useLogarithmicScaling;
 		
+		// Init metadata.
 		globalDistanceExtrema				= new Pair<Double, Double>(null, null);
 		filteredDistanceExtrema				= new Pair<Double, Double>(null, null);
 		barToDataAssociations				= new HashMap<String, ArrayList<Integer>>();
+		selectedBars						= new HashSet<String>();
 		distanceBinCountMaximum				= 0;
 		distanceBinCountMaximumDetermined	= false;
 		
@@ -185,7 +180,7 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 	{
 		barchart.setLegendVisible(true);
 		barchart.setAnimated(false);
-		//barchart.setBarGap(0);
+		barchart.setBarGap(0);
 		barchart.setCategoryGap(1);
 		
 		// Disable auto-ranging (absolute view is default).
@@ -193,16 +188,16 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 		barchart.getYAxis().setAutoRanging(false);
 		
 		// Initialize data series.
-		allDataSeries		= new XYChart.Series<String, Integer>();
-		filteredDataSeries	= new XYChart.Series<String, Integer>();
-		selectedDataSeries	= new XYChart.Series<String, Integer>();
+		discardedDataSeries		= new XYChart.Series<String, Number>();
+		filteredDataSeries	= new XYChart.Series<String, Number>();
+		selectedDataSeries	= new XYChart.Series<String, Number>();
 		
-		allDataSeries.setName("Discarded");
+		discardedDataSeries.setName("Discarded");
 		filteredDataSeries.setName("Filtered");
 		selectedDataSeries.setName("Selected");
 		
 		barchart.getData().clear();
-		barchart.getData().add(allDataSeries);
+		barchart.getData().add(discardedDataSeries);
 		barchart.getData().add(filteredDataSeries);
 		barchart.getData().add(selectedDataSeries);
 		
@@ -278,16 +273,34 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 		globalDistanceExtrema = identifyExtrema(distances);
 	}
 	
+	/**
+	 * Identifies and return extreme average distances in given distance matrix.
+	 * @param distances
+	 * @return
+	 */
 	private Pair<Double, Double> identifyExtrema(double[][] distances)
 	{
 		double min = Double.MAX_VALUE;
 		double max = Double.MIN_VALUE;
 		
 		for (int i = 0; i < distances.length; i++) {
-			for (int j = i + 1; j < distances[i].length; j++) {
-				min = distances[i][j] < min ? distances[i][j] : min;
-				max = distances[i][j] > max ? distances[i][j] : max;
+			double tempSum = 0;
+			
+			for (int j = 0; j < distances[i].length; j++) {
+				tempSum += distances[i][j];
 			}
+			
+			// Normalize tempSum.
+			tempSum /= distances.length;
+			
+			// Determine extrema.
+			min = tempSum < min ? tempSum : min;
+			max = tempSum > max ? tempSum : max;
+			
+//			for (int j = i + 1; j < distances[i].length; j++) {
+//				min = distances[i][j] < min ? distances[i][j] : min;
+//				max = distances[i][j] > max ? distances[i][j] : max;
+//			}
 		}
 		
 		return new Pair<Double, Double>(min, max);
@@ -299,9 +312,10 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 	 * @param selectedFilteredDistances
 	 * @param haveFilterSettingsChanged Determines if filter settings may have been changed since the last call.
 	 */
-	public void refresh(double distances[][], double filteredDistances[][], double[][] selectedFilteredDistances, boolean haveFilterSettingsChanged)
+	public void refresh(double discardedDistances[][], double filteredDistances[][], double[][] selectedFilteredDistances, boolean haveFilterSettingsChanged)
 	{
-		this.distances					= distances;
+		// Set/update references.
+		this.discardedDistances			= discardedDistances;
 		this.filteredDistances			= filteredDistances;
 		this.selectedFilteredDistances	= selectedFilteredDistances;
 		
@@ -309,20 +323,17 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 		barchart.getData().clear();
 		barToDataAssociations.clear();
 		
+		// Calculate binning parameters.
+		final int numberOfBins					= 25;
+		int numberOfSelectedElements			= 0;
+		final int numberOfFilteredElements		= ((filteredDistances.length - 1) * (filteredDistances.length - 1) + (filteredDistances.length - 1)) / 2;
+		final int numberOfDiscardedElements		= ((discardedDistances.length - 1) * (discardedDistances.length - 1) + (discardedDistances.length - 1)) / 2;
+		
 		// Process data.
 		if (filteredDistances != null) {
 			// If filter settings may have been changed: Refresh filtered extrema.
 			if (haveFilterSettingsChanged)
 				filteredDistanceExtrema = identifyExtrema(filteredDistances);
-			
-			// Calculate binning parameters.
-			final int numberOfBins					= 25;
-			int numberOfSelectedElements			= 0;
-			final int numberOfFilteredElements		= ((filteredDistances.length - 1) * (filteredDistances.length - 1) + (filteredDistances.length - 1)) / 2;
-			final int numberOfAllElements			= ((distances.length - 1) * (distances.length - 1) + (distances.length - 1)) / 2;
-			
-			// Data series holding subtractive values.
-			ArrayList<ObservableList<Data<String, Integer>>> subtractiveSeriesList = new ArrayList<ObservableList<Data<String,Integer>>>(); 
 			
 			// Process selected distances, if there are any.
 			if (numberOfFilteredElements > 0) {
@@ -333,22 +344,18 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 					// Add data series only to chart if it contains data points.
 					if (numberOfSelectedElements > 0) {
 						// Add distance values to data series.
-						addToDataSeries(selectedDataSeries, 2, null, selectedFilteredDistances, numberOfBins, numberOfSelectedElements, false);
-						// Add to list of subtractive values.
-						subtractiveSeriesList.add(selectedDataSeries.getData());
+						addToDataSeries(selectedDataSeries, 2, selectedFilteredDistances, numberOfBins, numberOfSelectedElements, false);
 					}
 				}
 				
 				// Add all filtered distances to chart.
-				int[] filteredDistanceBinList	= addToDataSeries(filteredDataSeries, 1, subtractiveSeriesList, filteredDistances, numberOfBins, numberOfFilteredElements, true);
-				// Add to list of subtractive values.
-				subtractiveSeriesList.add(filteredDataSeries.getData());
-				
-				// Add all (other) distances to chart.
-				int[] distanceBinList			= addToDataSeries(allDataSeries, 0, subtractiveSeriesList, distances, numberOfBins, numberOfAllElements, true); 
+				addToDataSeries(filteredDataSeries, 1, filteredDistances, numberOfBins, numberOfFilteredElements, true);
 				
 				// Set y-axis range, if in absolute mode and the maximal bin count has not yet been determined.
-				determineDistanceBinCountMaximum(distanceBinList);
+				if (!button_relativeView_distEval.isSelected() && !distanceBinCountMaximumDetermined) {
+					adjustYAxisRange();
+					distanceBinCountMaximumDetermined = true;
+				}
 			}
 			
 			else {
@@ -356,48 +363,33 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 				label_avg.setText("x̄: -");
 				label_median.setText("M: -");
 			}
-		}
-		
-		else {
-			// Update text info.
-			label_avg.setText("x̄: -");
-			label_median.setText("M: -");
+			
+			if (numberOfDiscardedElements > 0) {
+				// Add all (other) distances to chart.
+				if (discardedDistances.length > 0) {
+					addToDataSeries(discardedDataSeries, 0, discardedDistances, numberOfBins, numberOfDiscardedElements, true);
+				}
+			}
 		}
 	}
 
-	/**
-	 * Auxiliary methodd determining distance bin count maximum, if that hasn't already been done.
-	 * @param distanceBinList
-	 */
-	private void determineDistanceBinCountMaximum(int[] distanceBinList)
-	{
-		if (!button_relativeView_distEval.isSelected() && !distanceBinCountMaximumDetermined) {
-			// Adjust x-axis.
-			findDistanceBinCountMaximum(distanceBinList);
-			
-			// Adjust y-axis, if in absolute mode and the maximal bin count has not yet been determined.
-			adjustYAxisRange();
-			
-			// Update flag.
-			distanceBinCountMaximumDetermined = true;
-		}
-	}
 
 	/**
 	 * Assign given distances to specified number of bins. Adds these bins to the distance barchart automatically.
 	 * Return list of bins containing the number of distances fitting the respective boundaries.
-	 * @param subtractiveValues 
+	 * @param dataSeries
+	 * @param seriesIndex 2 for selected, 1 for filtered, 0 for selected. 
 	 * @param distances
 	 * @param numberOfBins
 	 * @param numberOfElements
 	 * @param updateQuantileLabels
 	 * @return
 	 */
-	private int[] addToDataSeries(	XYChart.Series<String, Integer> dataSeries, int seriesIndex, ArrayList< ObservableList<Data<String, Integer>> > subtractiveSeriesList, 
+	private int[] addToDataSeries(	XYChart.Series<String, Number> dataSeries, int seriesIndex,
 									double[][] distances, int numberOfBins, int numberOfElements, boolean updateQuantileLabels)
 	{
 		// Holds the average distance of one datapoint to all other datapoints in one element.
-		double averageDistances[]	= new double[distances.length];
+		double averageDistances[]								= new double[distances.length];
 		
 		// If this is the filtered data series: Remember which bins are associated with which elements. 
 		HashMap<Integer, ArrayList<Integer>> binToDatasetIndices = new HashMap<Integer, ArrayList<Integer>>();
@@ -407,36 +399,36 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 		}
 		
 		// Determine statistical measures.	
-		float sum		= 0;
-		float max		= Float.MIN_VALUE;
-		float min		= Float.MAX_VALUE;
-		float avg		= 0;
-		float median	= 0;
+		double max		= Float.MIN_VALUE;
+		double min		= Float.MAX_VALUE;
+		double avg		= 0;
+		double median	= 0;
+		double avgSum	= 0;
 		
-		// Average data per element.	
+		// Average data on element basis.	
 		for (int i = 0; i < distances.length; i++) {
 			double distanceSum = 0;
 			
-			for (int j = i + 1; j < distances.length; j++) { 
+			for (int j = 0; j < distances.length; j++) { 
 				// Sum up distances.
 				distanceSum	+= distances[i][j];
-				sum			+= distances[i][j];
 			}
 			
-			averageDistances[i] = distanceSum / distances.length;
+			averageDistances[i]  = distanceSum / distances.length;
+			avgSum				+= averageDistances[i]; 
 		}
-		
+
 		// Calculate average.
-		avg = sum / numberOfElements;
+		avg = avgSum / averageDistances.length;
 		
 		// Sort array.
 		Arrays.sort(averageDistances);
 		
 		// Calculate median.
 		if (averageDistances.length % 2 == 0)
-		    median = (float) ( (averageDistances[averageDistances.length / 2] + averageDistances[averageDistances.length / 2 - 1]) / 2 );
+		    median = (averageDistances[averageDistances.length / 2] + averageDistances[averageDistances.length / 2 - 1]) / 2;
 		else
-		    median = (float) averageDistances[averageDistances.length / 2];
+		    median = averageDistances[averageDistances.length / 2];
 		
 		// Determine extrema.
 		// 	Depending on whether absolute or relative mode is enabled: Use global or current extrema.  
@@ -447,11 +439,10 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 		 * Bin data.
 		 */
 		
-		int distanceBinList[] 	= new int[numberOfBins];
+		int distanceBinList[] 	= new int[numberOfBins];	
 		double binInterval		= (max - min) / numberOfBins;
 
 		for (int i = 0; i < averageDistances.length; i++) {
-		//for (double value : averageDistances) {
 			double value	= averageDistances[i];
 			int index_key	= (int) ( (value - min) / binInterval);
 			index_key		= index_key < numberOfBins ? index_key : numberOfBins - 1;
@@ -461,6 +452,11 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 			
 			// Insert entry into map translating bin indices to dataset indices.
 			binToDatasetIndices.get(index_key).add(i);
+		}
+		
+		// Transform absolute numbers in bins to percentages.
+		for (int i = 0; i < distanceBinList.length; i++) {
+			distanceBinList[i] /= ( (double)distances.length / 100);
 		}
 		
 		/*
@@ -485,7 +481,7 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 		dataSeries.getData().clear();
 		
 		//dataSeries.setData(generateDataForDistanceHistogram(distanceBinList, numberOfBins, binInterval, min, max));
-		generateDataForDistanceHistogram(	dataSeries, subtractiveSeriesList, 
+		generateDataForDistanceHistogram(	dataSeries, 
 											distanceBinList, seriesIndex == 1 ? binToDatasetIndices : null, 
 											numberOfBins, binInterval, min, max);
 
@@ -507,6 +503,7 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 				case 1:
 					if (node.getUserData() == null || node.getUserData().toString() == "filtered") {
 						node.setUserData("filtered");
+						
 						node.setStyle("-fx-bar-fill: blue;");
 					}
 				break;
@@ -523,6 +520,35 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 		
 		return distanceBinList;
 	}
+	
+	/**
+	 * Toggles border glow (indicating the bar having been selected) on/off.
+	 * @param node
+	 */
+	private void setBarHighlighting(Node node, boolean on)
+	{
+		if (!on) {
+			node.setEffect(null);
+		}
+		
+		else {
+			 // Setting the uniform variable for the glow width and height
+			int depth = 20;
+			
+			DropShadow borderGlow= new DropShadow();
+			borderGlow.setOffsetY(0f);
+			borderGlow.setOffsetX(0f);
+			
+			borderGlow.setRadius(1);
+			borderGlow.setColor(Color.RED);
+			borderGlow.setWidth(depth);
+			borderGlow.setHeight(depth); 
+			
+			// Apply the borderGlow effect to the JavaFX node.
+			node.setEffect(borderGlow); 
+		}
+	}
+	
 //	private int[] addToDataSeries(	XYChart.Series<String, Integer> dataSeries, int seriesIndex, ArrayList< ObservableList<Data<String, Integer>> > subtractiveSeriesList, 
 //			double[][] distances, int numberOfBins, int numberOfElements, boolean updateQuantileLabels)
 //	{
@@ -609,7 +635,7 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 //		// dataSeries.setData(generateDataForDistanceHistogram(distanceBinList,
 //		// numberOfBins, binInterval, min, max));
 //		generateDataForDistanceHistogram(dataSeries, subtractiveSeriesList,
-//				distanceBinList, numberOfBins, binInterval, min, max);
+//				distanceBinList, null, numberOfBins, binInterval, min, max);
 //
 //		// Add anew to fire redraw event.
 //		barchart.getData().add(dataSeries);
@@ -659,12 +685,11 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 	 * @param max
 	 * @return
 	 */
-	private ObservableList<Data<String, Integer>> generateDataForDistanceHistogram(	Series<String, Integer> dataSeries, ArrayList<ObservableList<Data<String, Integer>>> subtractiveSeriesList, 
+	private ObservableList<Data<String, Number>> generateDataForDistanceHistogram(	Series<String, Number> dataSeries, 
 																					int[] distanceBinList, HashMap<Integer, ArrayList<Integer>> binToDatasetIndices, 
 																					int numberOfBins, double binInterval, double min, double max)
 	{
-		final XYChart.Series<String, Integer> data_series	= new XYChart.Series<String, Integer>();
-		//Map<String, Integer> categoryCounts					= new HashMap<String, Integer>();
+		final XYChart.Series<String, Number> data_series = new XYChart.Series<String, Number>();
 		
 		// Add data points.
 		for (int i = 0; i < numberOfBins; i++) {
@@ -677,48 +702,17 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 				categoryDescription += (char)29;
 			
 			// Store bin to dataset(s) translation.
-			if (binToDatasetIndices != null)
+			if (binToDatasetIndices != null) {
+				// Add new bar -> local dataset index association.
 				barToDataAssociations.put(categoryDescription, binToDatasetIndices.get(i));
-			
-			// There are subtractive value lists.
-			if (subtractiveSeriesList != null && subtractiveSeriesList.size() > 0) {
-				// Subtract values at index i from all subtractive series.
-				for (ObservableList<Data<String, Integer>> subtractiveSeries : subtractiveSeriesList) {
-					value -= subtractiveSeries.get(i).getYValue();
-				}
-				
-				// Add adjusted datapoint.
-				dataSeries.getData().add( new XYChart.Data<String, Integer>(categoryDescription, value) );
 			}
 			
-			// No subtractive value lists.
-			else {
-				dataSeries.getData().add(new XYChart.Data<String, Integer>(categoryDescription, value));
-			}
+			// Add data to series.
+			dataSeries.getData().add(new XYChart.Data<String, Number>(categoryDescription, value));
 		}
 		
 		// Return newly generated data series.
 		return data_series.getData();
-	}
-	
-	/**
-	 * Find maximum in list of bin values.
-	 * @param distanceBinList
-	 */
-	private void findDistanceBinCountMaximum(int[] distanceBinList)
-	{
-		// If in absolute mode for the first time (important: The first draw always happens in absolute
-		// view mode!): Get maximal count of distances associated with one bin.
-		//if (!distanceBinCountMaximumDetermined) {
-			distanceBinCountMaximum = 0;
-			for (int binCount : distanceBinList) {
-				distanceBinCountMaximum = binCount > distanceBinCountMaximum ? binCount : distanceBinCountMaximum;
-			}
-			
-			distanceBinCountMaximumDetermined = true;
-		//}
-		
-//		System.out.println("dbcMax = " + distanceBinCountMaximum);
 	}
 	
 	/**
@@ -727,11 +721,11 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 	private void adjustYAxisRange()
 	{
 		numberaxis_distanceEvaluation_yaxis.setLowerBound(0);
-		numberaxis_distanceEvaluation_yaxis.setUpperBound(distanceBinCountMaximum * 1.1);
+		numberaxis_distanceEvaluation_yaxis.setUpperBound(100);
 		
     	// Adjust tick width.
-    	final int numberOfTicks = 3;
-    	numberaxis_distanceEvaluation_yaxis.setTickUnit( (float)distanceBinCountMaximum / numberOfTicks);
+    	final int numberOfTicks = 4;
+    	numberaxis_distanceEvaluation_yaxis.setTickUnit( (float)100 / numberOfTicks);
     	numberaxis_distanceEvaluation_yaxis.setMinorTickCount(2);
 	}
 	
@@ -751,7 +745,7 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 		}
 		
 		// Refresh chart.
-		refresh(distances, filteredDistances, selectedFilteredDistances, false);
+		refresh(discardedDistances, filteredDistances, selectedFilteredDistances, false);
 	}
 	
 	/**
@@ -761,48 +755,75 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 	public void changeScalingType()
 	{
 		// Refresh chart.
-		refresh(distances, filteredDistances, selectedFilteredDistances, false);
+		refresh(discardedDistances, filteredDistances, selectedFilteredDistances, false);
 	}
 
 	@Override
 	public void processSelectionManipulationRequest(double minX, double minY, double maxX, double maxY)
 	{
-		//System.out.println(minX + "/" + minY + " to " + maxX + "/" + maxY);
-
 		// If control is not down: Ignore selected points, add all non-selected in chosen area.
 		if (!isCtrlDown) {
-			int dataIndex = 0;
-			
 			// Process filtered, non-selected data.
-			for (Data<String, Integer> data : filteredDataSeries.getData()) {
+			for (Data<String, Number> data : filteredDataSeries.getData()) {
 				Node dataNode = data.getNode();
 				
-				if (	dataNode.getLayoutX() >= minX && dataNode.getLayoutX() + dataNode.getBoundsInLocal().getWidth() <= maxX &&
-						dataNode.getLayoutY() >= minY && dataNode.getLayoutY() + dataNode.getBoundsInLocal().getHeight() <= maxY )//||
-						//dataNode.intersects(minX, minY, maxX - minX, maxY - minY))
-					//System.out.println("fits: " + data.getXValue());
-				System.out.println(data.getXValue() + ": " + dataNode.getLayoutX() + ", " + dataNode.getBoundsInLocal().getWidth() + "\n---------");
-				// Keep track.
-				dataIndex++;
+				if (	barToDataAssociations.get(data.getXValue()).size() > 0 &&
+						dataNode.getLayoutX() >= minX && dataNode.getLayoutX() + dataNode.getBoundsInLocal().getWidth() <= maxX &&
+						dataNode.getLayoutY() >= minY && dataNode.getLayoutY() + dataNode.getBoundsInLocal().getHeight() <= maxY ) {
+					// Highlight bar.
+					setBarHighlighting(dataNode, true);
+				
+					// Add to collection.
+					if (!selectedBars.contains(data.getXValue())) {
+						selectedBars.add(data.getXValue());
+					}
+				}
+				
+				else {
+					// Disable bar highlighting.
+					setBarHighlighting(dataNode, false);
+					
+					// Remove from collection.
+					selectedBars.remove(data.getXValue());
+				}
 			}
-			
-			// Process filtered, selected data.
-			for (Data<String, Integer> data : selectedDataSeries.getData()) {
+		}
+		
+		else {
+			// @todo Examine selected data.
+			// Process filtered, non-selected data.
+			for (Data<String, Number> data : selectedDataSeries.getData()) {
 				
 			}
 		}
 	}
 
 	@Override
+	public void processEndOfSelectionManipulation()
+	{
+		ArrayList<Integer> selectedLocalIndices = new ArrayList<Integer>();
+		
+		System.out.println("selected: " + selectedBars.size());
+		for (String description : selectedBars) {
+			System.out.println("\t" + description + "\t" + barToDataAssociations.get(description).size());
+			System.out.print("\t\t");
+			for (int i : barToDataAssociations.get(description))
+				System.out.print(i + " ");
+			System.out.println("");
+			
+			// Add to collection.
+			selectedLocalIndices.addAll(barToDataAssociations.get(description));
+		}
+		System.out.println("-------------------------------- " + selectedLocalIndices.size());
+		
+		// Pass selection data on to controller.
+		analysisController.integrateBarchartSelection(selectedLocalIndices, !isCtrlDown);
+	}
+	
+	@Override
 	public Pair<Integer, Integer> provideOffsets()
 	{
 		return new Pair<Integer, Integer>(47, 46);
 	}
 
-	@Override
-	public void processEndOfSelectionManipulation()
-	{
-		// @todo Auto-generated method stub
-		System.out.println("pESM");
-	}
 }
