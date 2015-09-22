@@ -47,6 +47,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
@@ -112,8 +113,6 @@ public class AnalysisController extends Controller
 	
 	private @FXML BarChart<String, Number> barchart_distances;
 	private @FXML NumberAxis numberaxis_distanceEvaluation_yaxis;
-	private @FXML Label label_avg;
-	private @FXML Label label_median;
 	private @FXML CheckBox checkbox_logarithmicDistanceBarchart;
 	
 	/*
@@ -506,7 +505,7 @@ public class AnalysisController extends Controller
 	private void initDistanceBarchart()
 	{
 		distancesBarchart = new DistancesBarchart(	this, barchart_distances, numberaxis_distanceEvaluation_yaxis, 
-													label_avg, label_median, button_relativeView_distEval, checkbox_logarithmicDistanceBarchart);
+													button_relativeView_distEval, checkbox_logarithmicDistanceBarchart);
 	}
 	
 	private void initParameterSpaceHeatmap()
@@ -592,7 +591,9 @@ public class AnalysisController extends Controller
 			mdsScatterchart.identifyGlobalExtrema(coordinates);
 
 			// Add keyboard listener in order to enable selection.
-			mdsScatterchart.addKeyListener(scene);
+//			mdsScatterchart.addKeyListener(scene);
+//			distancesBarchart.addKeyListener(scene);
+			addKeyListener();
 			
 			// Mark global extrema as found.
 			globalExtremaIdentified = true;
@@ -605,23 +606,24 @@ public class AnalysisController extends Controller
 	/**
 	 * Integrates barchart selection into MDS selection, then fires update for all visualizations.
 	 * @param selectedLocalIndices
-	 * @param addToSelection true for addition of selected data to global selection; false for their removal.
+	 * @param isAddition true for addition of selected data to global selection; false for their removal.
 	 */
-	public void integrateBarchartSelection(ArrayList<Integer> selectedLocalIndices, final boolean addToSelection)
+	public void integrateBarchartSelection(ArrayList<Integer> selectedLocalIndices, final boolean isAddition)
 	{
-//		@todo continue with integration of (1) filtered (add) and (2) selected (remove) data.
 		ArrayList<Integer> indicesList 		= new ArrayList<Integer>();
 		// Check if there is any change in the set of selected datasets.
 		boolean changeDetected				= false;
 		
+		System.out.println("Captured: " + selectedLocalIndices.size());
+		
 		// 1. If selection should be added: Compare with set of filtered and selected datasets.
-		if (addToSelection) {
+		if (isAddition) {
 			// Transfer indices into arraylist for more convenient access.
 			indicesList.addAll(filteredIndices);
 			
 			// Translate local indices to global indices.
 			for (int i = 0; i < selectedLocalIndices.size(); i++) {
-				// Add to set of selected indices. 
+				// Add to set of selected, translated indices. 
 				if (!selectedFilteredIndices.contains(indicesList.get(selectedLocalIndices.get(i)))) {
 					selectedFilteredIndices.add( indicesList.get(selectedLocalIndices.get(i)) );
 					// Change detected.
@@ -631,7 +633,20 @@ public class AnalysisController extends Controller
 		}
 		
 		else {
+			int count = 0;
+			// Transfer indices into arraylist for more convenient access.
+			indicesList.addAll(selectedFilteredIndices);
 			
+			// Translate local indices to global indices.
+			for (int i = 0; i < selectedLocalIndices.size(); i++) {
+				// Add to set of selected, translated indices. 
+				if (selectedFilteredIndices.contains( indicesList.get(selectedLocalIndices.get(i))) ) {
+					selectedFilteredIndices.remove( indicesList.get(selectedLocalIndices.get(i)) );
+					// Change detected.
+					changeDetected = true;
+					count++;
+				}
+			}
 		}
 		
 		// 2. Update related (i.e. dependent on the set of selected entities) datasets, if there were any changes made.
@@ -639,10 +654,18 @@ public class AnalysisController extends Controller
 			// Find selected and filtered values.
 			selectedFilteredDistances			= createSelectedFilteredDistanceMatrix(selectedFilteredIndices);
 			selectedFilteredLDAConfigurations	= createSelectedFilteredLDAConfigurations(selectedFilteredIndices);
+			
+			// 3. Refresh other visualizations.
+			if (isAddition)
+				mdsScatterchart.addToSelection(selectedFilteredIndices);
+			else
+				mdsScatterchart.removeFromSelection(selectedFilteredIndices);
+			
+			// 4. Refresh visualizations.
+			mdsScatterchart.refresh(coordinates, filteredIndices, discardedCoordinates, discardedIndices);
+			distancesBarchart.refresh(discardedDistances, filteredDistances, selectedFilteredDistances, true);
 		}
 		
-		// 3. Refresh other visualizations.
-		mdsScatterchart.updateSelection(selectedFilteredIndices);
 		//refreshVisualizations(false);
 	}
 	
@@ -660,7 +683,7 @@ public class AnalysisController extends Controller
 		selectedFilteredLDAConfigurations	= createSelectedFilteredLDAConfigurations(selectedFilteredIndices);
 				
 		// Refresh other (than MDSScatterchart) visualizations.
-		distancesBarchart.refresh(distances, filteredDistances, selectedFilteredDistances, true);
+		distancesBarchart.refresh(discardedDistances, filteredDistances, selectedFilteredDistances, true);
 		// Refresh local scope visualization, if specified.
 		if (includeLocalScope)
 			localScopeInstance.refresh(selectedFilteredLDAConfigurations);
@@ -1318,6 +1341,29 @@ public class AnalysisController extends Controller
 			ValueAxis<Integer> yAxis = (ValueAxis<Integer>) barchartsForFilterControls.get(param).getYAxis();
 			yAxis.setMinorTickVisible(false);
 		}
+	}
+	
+	/**
+	 * Adds listener processing keyboard events (like toggling from group to single selection mode).
+	 * @param scene
+	 */
+	public void addKeyListener()
+	{
+		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            public void handle(KeyEvent ke) 
+            {
+            	mdsScatterchart.processKeyPressedEvent(ke);
+            	distancesBarchart.processKeyPressedEvent(ke);
+            }
+		});
+		
+		scene.setOnKeyReleased(new EventHandler<KeyEvent>() {
+            public void handle(KeyEvent ke) 
+            {
+            	mdsScatterchart.processKeyReleasedEvent(ke);
+            	distancesBarchart.processKeyReleasedEvent(ke);
+            }
+		});
 	}
 	
 	public ArrayList<LDAConfiguration> getLDAConfigurations()

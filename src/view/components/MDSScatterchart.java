@@ -1,8 +1,10 @@
 package view.components;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
 
 
 import javafx.event.EventHandler;
@@ -42,7 +44,13 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	 * ScatterChart used for visualization.
 	 */
 	private ScatterChart<Number, Number> scatterchart;
+	/**
+	 * NumberAxis on x-axis. 
+	 */
 	private NumberAxis scatterchart_xAxis;
+	/**
+	 * NumberAxis on y-axis. 
+	 */
 	private NumberAxis scatterchart_yAxis;
 	
 	/**
@@ -124,6 +132,19 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	 */
 	private double[] globalCoordinateExtrema;
 	
+	/**
+	 * Data series holding all discarded data points.
+	 */
+	private Series<Number, Number> discardedDataSeries;
+	/**
+	 * Data series holding all filtered data points.
+	 */
+	private Series<Number, Number> filteredDataSeries;
+	/**
+	 * Data series holding all selected data points.
+	 */
+	private Series<Number, Number> selectedDataSeries;
+	
 	/*
 	 * Collections storing the domain data. 
 	 */
@@ -135,7 +156,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	/**
 	 * Reference to this workspace's collection of filtered indices.
 	 */
-	private Set<Integer> indices;
+	private Set<Integer> filteredIndices;
 	
 	/**
 	 * Reference to this workspace's discarded coordinate collection.
@@ -168,16 +189,38 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 		globalCoordinateExtrema_X				= new Pair<Double, Double>(Double.MAX_VALUE, Double.MIN_VALUE);
 		globalCoordinateExtrema_Y				= new Pair<Double, Double>(Double.MAX_VALUE, Double.MIN_VALUE);
 		globalCoordinateExtrema					= new double[4];
+		discardedDataSeries						= new Series<Number, Number>();
+		filteredDataSeries						= new Series<Number, Number>();
+		selectedDataSeries						= new Series<Number, Number>();
 		
 		// Init flags.
 		changeInSelectionDetected				= false;
 		changeInSelectionDetected_localScope	= false;
 		isShiftDown								= false;
+		isCtrlDown								= false;
+		
+		// Init other data.
+		selectionMode							= SelectionMode.GROUP;
 		
 		// Init scatterchart.
 		initScatterchart();
+		
 		// Init heatmap.
 		initHeatmap();
+		
+		// Init data series.
+		initDataSeries();
+	}
+
+	private void initDataSeries()
+	{
+		discardedDataSeries.setName("Discarded");
+		filteredDataSeries.setName("Filtered");
+		selectedDataSeries.setName("Selected");
+		
+		scatterchart.getData().add(discardedDataSeries);
+        scatterchart.getData().add(filteredDataSeries);
+        scatterchart.getData().add(0, selectedDataSeries);
 	}
 
 	private void initScatterchart()
@@ -322,63 +365,53 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	}
 	
 	/**
-	 * Adds listener processing keyboard events (like toggling from group to single selection mode).
-	 * @param scene
+	 * Processes global (captured by analysis controller in scene) KeyPressedEvent.
+	 * @param ke
 	 */
-	public void addKeyListener(Scene scene)
+	public void processKeyPressedEvent(KeyEvent ke)
 	{
-		selectionMode	= SelectionMode.GROUP;
-		isCtrlDown		= false;
-		
-		// Ensure that CAPS LOCK is off.
-		//Toolkit.getDefaultToolkit().setLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK, false);
-	
-		// Add key listener for selection mode.
-        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            public void handle(KeyEvent ke) 
-            {
-                if (ke.getCode() == KeyCode.CAPS) {
-            		// Switch selection mode.
-            		if (selectionMode == SelectionMode.GROUP) {
-            			selectionMode = SelectionMode.SINGULAR;
-            			
-            			// Disable rubber band selection listener.
-            			rubberbandSelection.disable();
-            		}
-            		
-            		else {
-            			selectionMode = SelectionMode.GROUP;
-            			
-            			// Enable rubber band selection listener.
-            			rubberbandSelection.enable();
-            		}
-            	}
+		if (ke.getCode() == KeyCode.CAPS) {
+    		// Switch selection mode.
+    		if (selectionMode == SelectionMode.GROUP) {
+    			selectionMode = SelectionMode.SINGULAR;
+    			
+    			// Disable rubber band selection listener.
+    			rubberbandSelection.disable();
+    		}
+    		
+    		else {
+    			selectionMode = SelectionMode.GROUP;
+    			
+    			// Enable rubber band selection listener.
+    			rubberbandSelection.enable();
+    		}
+    	}
 
-                // Check if space key is down.
-            	else if (ke.getCode() == KeyCode.SHIFT) {
-        			rubberbandSelection.disable();
-        			isShiftDown = true;
-        		}
-                
-            	// Remember if CTRL is down.
-            	isCtrlDown = ke.isControlDown();
-            }
-        });
+        // Check if space key is down.
+    	else if (ke.getCode() == KeyCode.SHIFT) {
+			rubberbandSelection.disable();
+			isShiftDown = true;
+		}
         
-        scene.setOnKeyReleased(new EventHandler<KeyEvent>() {
-            public void handle(KeyEvent ke) 
-            {
-            	// Remember if CTRL is down.
-            	isCtrlDown = ke.isControlDown();
-            	
-            	// Check if space key is up.
-            	if (ke.getCode() == KeyCode.SHIFT) {
-            		
-            		rubberbandSelection.enable();
-            		isShiftDown = false;
-            	}
-            }
-        });
+    	// Remember if CTRL is down.
+    	isCtrlDown = ke.isControlDown();
+	}
+	
+	/**
+	 * Processes global (captured by analysis controller in scene) KeyReleasedEvent.
+	 * @param ke
+	 */
+	public void processKeyReleasedEvent(KeyEvent ke)
+	{	
+    	// Check if space key is up.
+    	if (ke.getCode() == KeyCode.SHIFT) {
+    		
+    		rubberbandSelection.enable();
+    		isShiftDown = false;
+    	}
+    	
+		// Remember if CTRL is down.
+    	isCtrlDown = ke.isControlDown();
 	}
 	
 	/**
@@ -430,39 +463,34 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	/**
 	 * Refresh scatterchart with data from MDS coordinates. 
 	 * @param coordinates
-	 * @param indices 
+	 * @param filteredIndices 
 	 * @param discardedCoordinates
 	 * @param discardedIndices 
 	 */
-	public void refresh(double coordinates[][], Set<Integer> indices, double discardedCoordinates[][], Set<Integer> discardedIndices)
+	public void refresh(double coordinates[][], Set<Integer> filteredIndices, 
+						double discardedCoordinates[][], Set<Integer> discardedIndices)
 	{	
 		// Store references to data collection.
 		this.coordinates			= coordinates;
-		this.indices				= indices;
+		this.filteredIndices		= filteredIndices;
 		this.discardedCoordinates	= discardedCoordinates;
 		this.discardedIndices		= discardedIndices;
 		
 		// Clear scatterchart.
 		scatterchart.getData().clear();
+		discardedDataSeries.getData().clear();
+		filteredDataSeries.getData().clear();
+		selectedDataSeries.getData().clear();
 		
-		// Init data series for filtered, discarded and selected values.
-        final Series<Number, Number> dataSeries				= new XYChart.Series<>();
-        final Series<Number, Number> discardedDataSeries	= new XYChart.Series<>();
-        final Series<Number, Number> selectedDataSeries		= new XYChart.Series<>();
-        
-        dataSeries.setName("Filtered");
-        selectedDataSeries.setName("Selected");
-        discardedDataSeries.setName("Discarded");
-        
         // Add filtered points as well as filtered and selected points to scatterchart.
-        addActiveDataPoints(dataSeries, selectedDataSeries);
+        addActiveDataPoints(filteredDataSeries, selectedDataSeries);
         
         // Add discarded data points (greyed out) to scatterchart.
         addDiscardedDataPoints(discardedDataSeries);
         
         // Add data in scatterchart.
         scatterchart.getData().add(discardedDataSeries);
-        scatterchart.getData().add(dataSeries);
+        scatterchart.getData().add(filteredDataSeries);
         scatterchart.getData().add(0, selectedDataSeries);
         
         // Redraw scatterchart.
@@ -470,7 +498,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
         scatterchart.applyCss();
         
         // Add mouse listeners.
-        addMouseListenersToMDSScatterchart(this.coordinates, this.indices);
+        addMouseListenersToMDSScatterchart(this.coordinates, this.filteredIndices);
         
         // Update heatmap.
         heatmap.refresh(this.coordinates, globalCoordinateExtrema);
@@ -487,12 +515,54 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 		heatmap.refresh(false);
 	}
 	
-	public void updateSelection(Set<Integer> selectedIndices)
+	/**
+	 * Marks a set of selected datasets (represented through their indices) as selected.
+	 * @param selectedIndices
+	 */
+	public void addToSelection(Set<Integer> selectedIndices)
 	{
-		NEXT: Integrate new set of selecteded indices in MDSScatterchart.
-		System.out.println(scatterchart.getData().get(2).getName());
-		for (int index : indices) {
+		// Examine all data points in filtered data series.
+		for (XYChart.Data<Number, Number> filteredData : filteredDataSeries.getData()) {
+			final int dataIndex = (int)filteredData.getExtraValue();
 			
+			// If point's index is in set of selected indices, but not in set of selected points: Add copy to selected points.
+			if ( selectedIndices.contains(dataIndex) && !selectedMDSPoints.containsKey(dataIndex) ) {
+        		XYChart.Data<Number, Number> dataPoint		= new XYChart.Data<Number, Number>(filteredData.getXValue(), filteredData.getYValue());
+	        	dataPoint.setExtraValue(dataIndex);
+	        	
+	        	// Add to data series.
+	        	selectedDataSeries.getData().add(dataPoint);
+	        	// Update references of selected data points.
+	        	selectedMDSPoints.put(dataIndex, dataPoint);
+			}
+		}
+	}
+	
+	/**
+	 * Marks a set of selected datasets (represented through their indices) as non-selected.
+	 * @param selectedIndices Index set of datasets still supposed to be selected. All other datasets will be removed from selection.
+	 */
+	public void removeFromSelection(Set<Integer> selectedIndices)
+	{
+		ArrayList<XYChart.Data<Number, Number>> datasetsToRemove = new ArrayList<XYChart.Data<Number, Number>>();
+		
+		// Examine all data points in filtered data series.
+		for (XYChart.Data<Number, Number> selectedData : selectedDataSeries.getData()) {
+			final int dataIndex = (int)selectedData.getExtraValue();
+			
+			// If point's index is in set of deselected indices: Remove copy to selected points.
+			if ( !selectedIndices.contains(dataIndex) && selectedMDSPoints.containsKey(dataIndex) ) {
+				// Mark dataset for removal from data series.
+				datasetsToRemove.add(selectedData);
+	        	
+	        	// Update references of selected data points.
+	        	selectedMDSPoints.remove(dataIndex);
+			}
+		}
+		
+		// Remove datasets from collection for selected data.
+		for (XYChart.Data<Number, Number> selectedData : datasetsToRemove) {
+			selectedDataSeries.getData().remove(selectedData);
 		}
 	}
 	
@@ -504,7 +574,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	private void addActiveDataPoints(final Series<Number, Number> dataSeries, final Series<Number, Number> selectedDataSeries)
 	{
         int count = 0;
-        for (int index : indices) {
+        for (int index : filteredIndices) {
         	// Add point only if it's not part of the set of manually selected indices.
         	if (!selectedMDSPoints.containsKey(index)) {
 	        	XYChart.Data<Number, Number> dataPoint = new XYChart.Data<Number, Number>(coordinates[0][count], coordinates[1][count]);
@@ -649,7 +719,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 		
 		if (changeInSelectionDetected) {
     		// Refresh scatterchart.
-    		refresh(coordinates, indices, discardedCoordinates, discardedIndices);
+    		refresh(coordinates, filteredIndices, discardedCoordinates, discardedIndices);
     		// Refresh other charts.
     		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet(), false);
     		
