@@ -19,6 +19,8 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.effect.ColorAdjust;
+import javafx.scene.effect.Effect;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -64,6 +66,8 @@ public class CoreController extends Controller
 		workspace		= new Workspace("");
 		
 		blockAnalysisView();
+		blockSettingsView();
+		blockHelpView();
 		
 //		// Display data view at startup.
 //		Timer displayDataViewTimer = new Timer(true);
@@ -290,11 +294,25 @@ public class CoreController extends Controller
 	public void unblockAnalysisView()
 	{
 		icon_analyze.setDisable(false);
+		icon_analyze.setEffect(null);
 	}
 	
 	public void blockAnalysisView()
 	{
 		icon_analyze.setDisable(true);
+		icon_analyze.setEffect(new ColorAdjust(0, 0, 0.75, 0));
+	}
+	
+	public void blockSettingsView()
+	{
+		icon_settings.setDisable(true);
+		icon_settings.setEffect(new ColorAdjust(0, 0, 0.75, 0));
+	}
+	
+	public void blockHelpView()
+	{
+		icon_help.setDisable(true);
+		icon_help.setEffect(new ColorAdjust(0, 0, 0.75, 0));
 	}
 	
 	/**

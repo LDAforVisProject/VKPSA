@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.effect.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.image.*?>
@@ -66,12 +68,12 @@
                               <Insets left="25.0" top="2.5" />
                            </HBox.margin>
                         </ImageView>
-                        <ImageView fx:id="icon_analyze" fitHeight="20.0" fitWidth="27.0" onMouseClicked="#actionButtonClicked" onMouseEntered="#enableActiveCursor" onMouseExited="#disableActiveCursor" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="icon_analyze" fitHeight="30.0" fitWidth="30.0" onMouseClicked="#actionButtonClicked" onMouseEntered="#enableActiveCursor" onMouseExited="#disableActiveCursor" pickOnBounds="true" preserveRatio="true">
                            <HBox.margin>
-                              <Insets left="10.0" top="5.0" />
+                              <Insets left="10.0" />
                            </HBox.margin>
                            <image>
-                              <Image url="@icons/eye.jpg" />
+                              <Image url="@icons/eye2.png" />
                            </image>
                         </ImageView>
                      </children>
