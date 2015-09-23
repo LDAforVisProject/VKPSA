@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.*?>
 <?import javafx.scene.shape.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.effect.*?>
@@ -432,14 +433,14 @@
                                                 </TitledPane>
                                             </panes>
                                           </Accordion>
-                                          <Label layoutX="45.0" layoutY="12.0" text="Filter" AnchorPane.leftAnchor="45.0" AnchorPane.topAnchor="12.0">
+                                          <Label layoutX="45.0" layoutY="12.0" text="Settings" AnchorPane.leftAnchor="45.0" AnchorPane.topAnchor="12.0">
                                              <font>
                                                 <Font name="System Bold" size="12.0" />
                                              </font>
                                           </Label>
-                                          <ImageView fitHeight="30.0" fitWidth="30.0" layoutX="11.0" layoutY="8.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                          <ImageView fitHeight="25.0" fitWidth="25.0" layoutX="10.0" layoutY="9.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="9.0">
                                              <image>
-                                                <Image url="@icons/filter.gif" />
+                                                <Image url="@icons/cog.png" />
                                              </image>
                                           </ImageView>
                                        </children>
@@ -452,14 +453,14 @@
                                                    <children>
                                                       <SplitPane dividerPositions="0.5593869731800766" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                         <items>
-                                                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff;">
+                                                          <AnchorPane fx:id="mds_anchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff;">
                                                                <children>
                                                                   <Label layoutX="7.0" layoutY="5.0" text="MDS View" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0">
                                                                      <font>
                                                                         <Font name="System Bold" size="12.0" />
                                                                      </font>
                                                                   </Label>
-                                                                  <ScatterChart fx:id="mds_anchorPane" animated="false" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="30.0">
+                                                                  <ScatterChart fx:id="mds_scatterchart" animated="false" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="30.0">
                                                                     <xAxis>
                                                                       <NumberAxis side="BOTTOM" />
                                                                     </xAxis>
@@ -469,14 +470,17 @@
                                                                   </ScatterChart>
                                                                   <Canvas height="50.0" layoutX="216.0" layoutY="221.0" width="50.0" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="28.0" />
                                                                   <Canvas fx:id="mdsHeatmap_canvas" height="180.0" layoutX="43.0" layoutY="48.0" visible="false" width="288.0" />
-                                                                  <ImageView fx:id="settings_mds_icon" fitHeight="15.0" fitWidth="15.0" layoutX="81.0" layoutY="6.0" onMouseClicked="#switchToSettingsPane" onMouseEntered="#enableActiveCursor" onMouseExited="#disableActiveCursor" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="81.0" AnchorPane.topAnchor="6.0">
+                                                                  <ImageView fx:id="settings_mds_icon" fitHeight="15.0" fitWidth="15.0" layoutX="81.0" layoutY="6.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="81.0" AnchorPane.topAnchor="6.0">
                                                                      <image>
                                                                         <Image url="@icons/cog.png" />
                                                                      </image>
+                                                                     <cursor>
+                                                                        <Cursor fx:constant="HAND" />
+                                                                     </cursor>
                                                                   </ImageView>
                                                                </children>
                                                             </AnchorPane>
-                                                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff;">
+                                                          <AnchorPane fx:id="distEval_anchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff;">
                                                                <children>
                                                                   <Label layoutX="7.0" layoutY="4.0" text="Distance Evaluation" AnchorPane.topAnchor="7.0">
                                                                      <font>
@@ -496,10 +500,13 @@
                                                                         <Font size="10.0" />
                                                                      </font>
                                                                   </ToggleButton>
-                                                                  <ImageView fx:id="settings_distEval_icon" fitHeight="15.0" fitWidth="15.0" layoutX="133.0" layoutY="9.0" onMouseClicked="#switchToSettingsPane" onMouseEntered="#enableActiveCursor" onMouseExited="#disableActiveCursor" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="132.0" AnchorPane.topAnchor="8.0">
+                                                                  <ImageView fx:id="settings_distEval_icon" fitHeight="15.0" fitWidth="15.0" layoutX="133.0" layoutY="9.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="132.0" AnchorPane.topAnchor="8.0">
                                                                      <image>
                                                                         <Image url="@icons/cog.png" />
                                                                      </image>
+                                                                     <cursor>
+                                                                        <Cursor fx:constant="HAND" />
+                                                                     </cursor>
                                                                   </ImageView>
                                                                </children>
                                                             </AnchorPane>
@@ -511,7 +518,7 @@
                                                    <children>
                                                       <SplitPane dividerPositions="0.5" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                         <items>
-                                                          <AnchorPane fx:id="anchorpane_localScope" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff;">
+                                                          <AnchorPane fx:id="localScope_anchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff;">
                                                                <children>
                                                                   <Label layoutX="10.0" layoutY="5.0" text="Local Scope" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0">
                                                                      <font>
@@ -523,10 +530,13 @@
                                                                         <Font name="System Italic" size="12.0" />
                                                                      </font>
                                                                   </Label>
-                                                                  <ImageView fx:id="settings_localScope_icon" fitHeight="15.0" fitWidth="15.0" layoutX="91.0" layoutY="6.0" onMouseClicked="#switchToSettingsPane" onMouseEntered="#enableActiveCursor" onMouseExited="#disableActiveCursor" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="92.0" AnchorPane.topAnchor="7.0">
+                                                                  <ImageView fx:id="settings_localScope_icon" fitHeight="15.0" fitWidth="15.0" layoutX="91.0" layoutY="6.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="92.0" AnchorPane.topAnchor="7.0">
                                                                      <image>
                                                                         <Image url="@icons/cog.png" />
                                                                      </image>
+                                                                     <cursor>
+                                                                        <Cursor fx:constant="HAND" />
+                                                                     </cursor>
                                                                   </ImageView>
                                                                </children>
                                                             </AnchorPane>
@@ -534,14 +544,14 @@
                                                                <children>
                                                                   <SplitPane dividerPositions="0.48256880733944957" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                     <items>
-                                                                      <AnchorPane fx:id="anchorpane_parameterSpace_distribution" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" style="-fx-background-color: #ffffff;">
+                                                                      <AnchorPane fx:id="paramSpace_distribution_anchorPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" style="-fx-background-color: #ffffff;">
                                                                            <children>
                                                                               <Label layoutX="12.0" layoutY="5.0" text="Parameter | Distribution" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="7.0">
                                                                                  <font>
                                                                                     <Font name="System Bold" size="12.0" />
                                                                                  </font>
                                                                               </Label>
-                                                                              <Canvas fx:id="paramSpaceHeatmap_canvas" height="150.0" layoutX="68.0" layoutY="45.0" width="150.0" AnchorPane.bottomAnchor="47.0" AnchorPane.leftAnchor="68.0" AnchorPane.rightAnchor="49.0" AnchorPane.topAnchor="45.0" />
+                                                                              <Canvas fx:id="paramSpaceHeatmap_canvas" height="164.0" layoutX="68.0" layoutY="45.0" width="150.0" AnchorPane.bottomAnchor="47.0" AnchorPane.leftAnchor="67.0" AnchorPane.rightAnchor="49.0" AnchorPane.topAnchor="45.0" />
                                                                               <NumberAxis fx:id="numberaxis_parameterSpace_xaxis" label="key1" layoutX="67.0" layoutY="196.0" prefHeight="41.0" prefWidth="150.0" side="BOTTOM" tickLength="5.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="67.0" AnchorPane.rightAnchor="50.0" />
                                                                               <NumberAxis fx:id="numberaxis_parameterSpace_yaxis" label="key2" layoutX="1.0" layoutY="45.0" prefHeight="150.0" prefWidth="67.0" side="LEFT" tickLength="5.0" AnchorPane.bottomAnchor="47.0" AnchorPane.leftAnchor="1.0" AnchorPane.topAnchor="45.0" />
                                                                               <ToggleButton fx:id="button_relativeView_paramDist" layoutX="183.0" layoutY="2.0" mnemonicParsing="false" onAction="#changeVisualizationViewMode" text="Relative view" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
@@ -549,14 +559,17 @@
                                                                                     <Font size="10.0" />
                                                                                  </font>
                                                                               </ToggleButton>
-                                                                              <ImageView fx:id="settings_paramDist_icon" fitHeight="15.0" fitWidth="15.0" layoutX="156.0" layoutY="9.0" onMouseClicked="#switchToSettingsPane" onMouseEntered="#enableActiveCursor" onMouseExited="#disableActiveCursor" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="155.0" AnchorPane.topAnchor="8.0">
+                                                                              <ImageView fx:id="settings_paramDist_icon" fitHeight="15.0" fitWidth="15.0" layoutX="156.0" layoutY="9.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="155.0" AnchorPane.topAnchor="8.0">
                                                                                  <image>
                                                                                     <Image url="@icons/cog.png" />
                                                                                  </image>
+                                                                                 <cursor>
+                                                                                    <Cursor fx:constant="HAND" />
+                                                                                 </cursor>
                                                                               </ImageView>
                                                                            </children>
                                                                         </AnchorPane>
-                                                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" style="-fx-background-color: #ffffff;">
+                                                                      <AnchorPane fx:id="paramSpace_correlation_anchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="160.0" prefWidth="100.0" style="-fx-background-color: #ffffff;">
                                                                            <children>
                                                                               <Label fx:id="settings_distCorrelation_icon" layoutX="14.0" layoutY="5.0" text="Parameter | Dist. Correlation" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="7.0">
                                                                                  <font>
@@ -577,10 +590,13 @@
                                                                                     <Font size="10.0" />
                                                                                  </font>
                                                                               </ToggleButton>
-                                                                              <ImageView fx:id="settings_paramDistCorr_icon" fitHeight="15.0" fitWidth="15.0" layoutX="180.0" layoutY="10.0" onMouseClicked="#switchToSettingsPane" onMouseEntered="#enableActiveCursor" onMouseExited="#disableActiveCursor" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="179.0" AnchorPane.topAnchor="8.0">
+                                                                              <ImageView fx:id="settings_paramDistCorr_icon" fitHeight="15.0" fitWidth="15.0" layoutX="180.0" layoutY="10.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="179.0" AnchorPane.topAnchor="8.0">
                                                                                  <image>
                                                                                     <Image url="@icons/cog.png" />
                                                                                  </image>
+                                                                                 <cursor>
+                                                                                    <Cursor fx:constant="HAND" />
+                                                                                 </cursor>
                                                                               </ImageView>
                                                                            </children>
                                                                         </AnchorPane>

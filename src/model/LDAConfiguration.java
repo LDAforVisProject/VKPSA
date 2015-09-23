@@ -19,7 +19,7 @@ public class LDAConfiguration
 	/**
 	 * Lists all parametes currently fully or partially supported.
 	 */
-	public static String[] SUPPORTED_PARAMETERS = {"alpha", "eta", "kappa"};
+	public static String[] SUPPORTED_PARAMETERS 	= {"alpha", "eta", "kappa"};
 	
 	/**
 	 * Contains all LDA parameters currently used in a LDA configuration.

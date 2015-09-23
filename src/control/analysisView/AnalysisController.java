@@ -26,6 +26,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.event.EventTarget;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
@@ -65,16 +66,40 @@ public class AnalysisController extends Controller
 	private Scene scene;
 	
 	/*
-	 * Anchor pane for options.
+	 * Accordion and other elements for options section.
 	 */
 	
-	private @FXML AnchorPane anchorpane_parameterSpace_distribution;
 	private @FXML Accordion accordion_options;
 	// Panes in accordion.
 	private @FXML TitledPane filter_titledPane;
 	private @FXML TitledPane mdsDistEval_titledPane;
 	private @FXML TitledPane localScope_titledPane;
 	private @FXML TitledPane paramSpace_titledPane;
+	
+	/*
+	 * Anchorpanes hosting visualizations. 
+	 */
+	
+	/**
+	 * For MDS scatterchart.
+	 */
+	private @FXML AnchorPane mds_anchorPane;
+	/**
+	 * For distance evaluation barchart.
+	 */
+	private @FXML AnchorPane distEval_anchorPane;
+	/**
+	 * For the parameter spae distribution heatmap.
+	 */
+	private @FXML AnchorPane paramSpace_distribution_anchorPane;
+	/**
+	 * For local scope visualization(s).
+	 */
+	private @FXML AnchorPane localScope_anchorPane; // localScope_anchorPane
+	/**
+	 * For distance correlation linechart.
+	 */
+	private @FXML AnchorPane paramSpace_correlation_anchorPane;
 	
 	/*
 	 * MDS Scatterchart.
@@ -87,8 +112,7 @@ public class AnalysisController extends Controller
 	/**
 	 * Actual scatterchart.
 	 */
-	private @FXML ScatterChart<Number, Number> mds_anchorPane;
-	
+	private @FXML ScatterChart<Number, Number> mds_scatterchart;
 	/**
 	 * Canvas showing the heatmap for the MDS scatter chart.
 	 */
@@ -175,7 +199,6 @@ public class AnalysisController extends Controller
 	 */
 	private LocalScopeInstance localScopeInstance;
 	
-	private @FXML AnchorPane anchorpane_localScope;
 	private @FXML Label label_visType;
 	
 	// Local scope options.
@@ -339,19 +362,19 @@ public class AnalysisController extends Controller
 		 * Add resize listeners for parameter space anchor pane.
 		 */
 		
-		anchorpane_parameterSpace_distribution.widthProperty().addListener(new ChangeListener<Number>() {
+		paramSpace_distribution_anchorPane.widthProperty().addListener(new ChangeListener<Number>() {
 		    @Override 
 		    public void changed(ObservableValue<? extends Number> observableValue, Number oldWidth, Number newWidth)
 		    {
-		        resizeElement(anchorpane_parameterSpace_distribution, newWidth.doubleValue(), 0);
+		        resizeElement(paramSpace_distribution_anchorPane, newWidth.doubleValue(), 0);
 		    }
 		});
 		
-		anchorpane_parameterSpace_distribution.heightProperty().addListener(new ChangeListener<Number>() {
+		paramSpace_distribution_anchorPane.heightProperty().addListener(new ChangeListener<Number>() {
 		    @Override 
 		    public void changed(ObservableValue<? extends Number> observableValue, Number oldHeight, Number newHeight) 
 		    {
-		    	resizeElement(anchorpane_parameterSpace_distribution, 0, newHeight.doubleValue());
+		    	resizeElement(paramSpace_distribution_anchorPane, 0, newHeight.doubleValue());
 		    }
 		});
 		
@@ -379,19 +402,19 @@ public class AnalysisController extends Controller
 		 * Add resize listeners for local scope anchor pane.
 		 */
 		
-		anchorpane_localScope.widthProperty().addListener(new ChangeListener<Number>() {
+		localScope_anchorPane.widthProperty().addListener(new ChangeListener<Number>() {
 		    @Override 
 		    public void changed(ObservableValue<? extends Number> observableValue, Number oldWidth, Number newWidth)
 		    {
-		        resizeElement(anchorpane_localScope, newWidth.doubleValue(), 0);
+		        resizeElement(localScope_anchorPane, newWidth.doubleValue(), 0);
 		    }
 		});
 		
-		anchorpane_localScope.heightProperty().addListener(new ChangeListener<Number>() {
+		localScope_anchorPane.heightProperty().addListener(new ChangeListener<Number>() {
 		    @Override 
 		    public void changed(ObservableValue<? extends Number> observableValue, Number oldHeight, Number newHeight) 
 		    {
-		    	resizeElement(anchorpane_localScope, 0, newHeight.doubleValue());
+		    	resizeElement(localScope_anchorPane, 0, newHeight.doubleValue());
 		    }
 		});
 	}
@@ -424,7 +447,7 @@ public class AnalysisController extends Controller
 		String fxmlPath = "/view/SII/localScope/SII_Content_Analysis_LocalScope_ParallelTagCloud.fxml";
 		
 		// Create new instance of local scope.
-		localScopeInstance = new LocalScopeInstance(this, anchorpane_localScope, label_visType, 
+		localScopeInstance = new LocalScopeInstance(this, localScope_anchorPane, label_visType, 
 													slider_localScope_numTopicsToUse, textfield_localScope_numTopicsToUse,
 													slider_localScope_numKeywordsToUse, textfield_localScope_numKeywordsToUse);
 		localScopeInstance.load(fxmlPath);
@@ -524,7 +547,7 @@ public class AnalysisController extends Controller
 
 	private void initMDSScatterchart()
 	{
-		mdsScatterchart = new MDSScatterchart(	this, mds_anchorPane, mdsHeatmap_canvas,
+		mdsScatterchart = new MDSScatterchart(	this, mds_scatterchart, mdsHeatmap_canvas,
 												checkbox_mdsHeatmap_distribution_dynAdjustment, slider_mds_distribution_granularity);
 	}
 	
@@ -639,8 +662,6 @@ public class AnalysisController extends Controller
 		ArrayList<Integer> indicesList 		= new ArrayList<Integer>();
 		// Check if there is any change in the set of selected datasets.
 		boolean changeDetected				= false;
-		
-		System.out.println("Captured: " + selectedLocalIndices.size());
 		
 		// 1. If selection should be added: Compare with set of filtered and selected datasets.
 		if (isAddition) {
@@ -1169,8 +1190,9 @@ public class AnalysisController extends Controller
 	@Override
 	protected void resizeElement(Node node, double width, double height)
 	{
+		System.out.println("node.id = " + node.getId());
 		switch (node.getId()) {
-			case "anchorpane_parameterSpace_distribution":
+			case "paramSpace_distribution_anchorPane":
 				// Adapt width.
 				if (width > 0) {	
 					// Update width of parameter distribution heatmap.
@@ -1417,26 +1439,6 @@ public class AnalysisController extends Controller
 	}
 	
 	/**
-	 * Enable active / "button" cursor if it hovers over an active ImageView.
-	 * @param e
-	 */
-	@FXML
-	public void enableActiveCursor(MouseEvent e)
-	{
-		scene.setCursor(Cursor.HAND);
-	}
-	
-	/**
-	 * Disable active / "button" cursor if it hovers over an active ImageView.
-	 * @param e
-	 */
-	@FXML
-	public void disableActiveCursor(MouseEvent e)
-	{
-		scene.setCursor(Cursor.DEFAULT);
-	}
-	
-	/**
 	 * Switches to settings panel after corresponding icon has been clicked.
 	 * @param e
 	 */
@@ -1482,7 +1484,7 @@ public class AnalysisController extends Controller
 			
 			case "settings_distEval_icon":
 				accordion_options.setExpandedPane(mdsDistEval_titledPane);
-				settings_distEval_icon.setStyle("-fx-font-weight:bold");
+				mdsDistEval_titledPane.setStyle("-fx-font-weight:bold");
 			break;
 				
 			case "settings_paramDist_icon":
@@ -1527,5 +1529,65 @@ public class AnalysisController extends Controller
 		
 		// Set new font style.
 		((TitledPane) e.getSource()).setStyle("-fx-font-weight:bold");
+	}
+
+	/**
+	 * Shows respective settings icon.
+	 * @param e
+	 */
+	@FXML
+	public void showSettingsIcon(MouseEvent e)
+	{
+		switch ( ((Node)e.getSource()).getId() ) {
+			case "mds_anchorPane":
+				settings_mds_icon.setVisible(true);
+			break;
+			
+			case "distEval_anchorPane":
+				settings_distEval_icon.setVisible(true);
+			break;
+			
+			case "paramSpace_distribution_anchorPane":
+				settings_paramDist_icon.setVisible(true);
+			break;
+			
+			case "localScope_anchorPane":
+				settings_localScope_icon.setVisible(true);
+			break;
+			
+			case "paramSpace_correlation_anchorPane":
+				settings_paramDistCorr_icon.setVisible(true);
+			break;			
+		}
+	}
+	
+	/**
+	 * Hide respective settings icon.
+	 * @param e
+	 */
+	@FXML
+	public void hideSettingsIcon(MouseEvent e)
+	{
+		switch ( ((Node)e.getSource()).getId() ) {
+			case "mds_anchorPane":
+				settings_mds_icon.setVisible(false);
+			break;
+			
+			case "distEval_anchorPane":
+				settings_distEval_icon.setVisible(false);
+			break;
+			
+			case "paramSpace_distribution_anchorPane":
+				settings_paramDist_icon.setVisible(false);
+			break;
+			
+			case "localScope_anchorPane":
+				settings_localScope_icon.setVisible(false);
+			break;
+			
+			case "paramSpace_correlation_anchorPane":
+				settings_paramDistCorr_icon.setVisible(false);
+			break;			
+		}		
 	}
 }

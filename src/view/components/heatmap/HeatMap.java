@@ -1,6 +1,10 @@
 package view.components.heatmap;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import control.analysisView.AnalysisController;
@@ -29,8 +33,18 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 	 * UI elements.
 	 */
 	
+	/**
+	 * Canvas on which heatmap is drawn.
+	 */
 	private Canvas canvas;
+	
+	/**
+	 * NumberAxis for x-Axis.
+	 */
 	private NumberAxis xAxis;
+	/**
+	 * NumberAxis for y-Axis.
+	 */
 	private NumberAxis yAxis;
 	
 	/**
@@ -57,10 +71,10 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 	 */
 	private ArrayList<LDAConfiguration> allLDAConfigurations;
 	/**
-	 * Store reference to selected LDAConfigurations.
+	 * Store reference to chosen (may be filtered or selected) LDAConfigurations.
 	 * These are examined, binned and then plotted. 
 	 */
-	private ArrayList<LDAConfiguration> selectedLDAConfigurations;
+	private ArrayList<LDAConfiguration> chosenLDAConfigurations;
 
 	/**
 	 * Reference to coordinates of points in MDS scatterplot.
@@ -76,6 +90,23 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 	 */
 	private BinnedOccurenceEntity binnedData;
 	
+	/*
+	 * Metadata.
+	 */
+	
+	/**
+	 * Stores index of an cell (key is in form of rowIndex * 10 + columnIndex) and the IDs of the corresponding/contained LDA configurations.
+	 */
+	private Map<Integer, Set<Integer>> cellsToConfigurationIDs;
+	/**
+	 * Stores index of an cell (key is in form of rowIndex * 10 + columnIndex) and the coordinates (minX, minY, maxX, maxY) of this cell.
+	 */
+	private Map<Integer, double[]> cellsToCoordinates;
+	/**
+	 * Store which cells were selected.
+	 */
+	Set<Integer> selectedCellIDs;
+			
 	/*
 	 * Other data.
 	 */
@@ -98,10 +129,6 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 	 * Signifies whether the ctrl key is down at any given time.
 	 */
 	private boolean isCtrlDown;
-	/**
-	 * Signifies whether the shift key is down at any given time.
-	 */
-	private boolean isShiftDown;
 	
 	
 	/*
@@ -121,6 +148,11 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 		this.adjustGranularityDynamically	= true;
 		this.granularity					= -1;
 		
+		// Init metadata collections.
+		cellsToConfigurationIDs				= new HashMap<Integer, Set<Integer>>();
+		cellsToCoordinates					= new HashMap<Integer, double[]>();
+		selectedCellIDs						= new HashSet<Integer>();
+		
 		// Init axis settings.
 		initAxes();
 		
@@ -132,6 +164,9 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 	{
         // Add rubberband selection tool.
         rubberbandSelection = new RubberBandSelection((Pane) canvas.getParent(), this);
+        
+        if (dataType == HeatmapDataType.MDSCoordinates)
+        	rubberbandSelection.disable();
 	}
 
 	private void initAxes()
@@ -157,11 +192,12 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 	 * @param key2
 	 * @param relativeViewMode
 	 */
-	public void refresh(final ArrayList<LDAConfiguration> allLDAConfigurations, final ArrayList<LDAConfiguration> selectedLDAConfigurations, final String key1, final String key2, boolean relativeViewMode) 
+	public void refresh(final ArrayList<LDAConfiguration> allLDAConfigurations, final ArrayList<LDAConfiguration> chosenLDAConfigurations, final String key1, final String key2, boolean relativeViewMode) 
     {
 		// If in relative view mode: allLDAConfigurations -> selectedLDAConfigurations.
-		this.allLDAConfigurations		= relativeViewMode ? selectedLDAConfigurations : allLDAConfigurations;
-    	this.selectedLDAConfigurations	= selectedLDAConfigurations;
+		this.allLDAConfigurations		= relativeViewMode ? chosenLDAConfigurations : allLDAConfigurations;
+    	this.chosenLDAConfigurations	= chosenLDAConfigurations;
+    	
     	this.key1						= key1;
     	this.key2						= key2;
     	
@@ -170,6 +206,11 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 	    	xAxis.setLabel(key1);
 	    	yAxis.setLabel(key2);
     	}
+    	
+    	// Reset metadata collections.
+    	cellsToConfigurationIDs.clear();
+    	cellsToCoordinates.clear();
+    	selectedCellIDs.clear();
     	
     	// Bin LDA configuration parameter frequency data and draw it.
     	binnedData = examineLDAConfigurations();
@@ -240,7 +281,7 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 		double binInterval_key1	= (max_key1 - min_key1) / numberOfBins;
 		double binInterval_key2	= (max_key2 - min_key2) / numberOfBins;
 		
-		for (LDAConfiguration ldaConfig : selectedLDAConfigurations) {
+		for (LDAConfiguration ldaConfig : chosenLDAConfigurations) {
 			// Calculate bin index.
 			int index_key1 = (int) ( (ldaConfig.getParameter(key1) - min_key1) / binInterval_key1);
 			int index_key2 = (int) ( (ldaConfig.getParameter(key2) - min_key2) / binInterval_key2);
@@ -251,6 +292,15 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 			
 			// Increment content of corresponding bin.
 			binMatrix[index_key1][index_key2]++;
+			
+			// Store references from cells to actual data.
+			final int mapCellKey = index_key1 * 10 + index_key2;
+			// 	Add entry in map, if it doesn't exist already.
+			if (!cellsToConfigurationIDs.containsKey(mapCellKey)) {
+				cellsToConfigurationIDs.put(mapCellKey, new HashSet<Integer>());
+			}
+			// 	Add to collection of datasets in this cell.
+			cellsToConfigurationIDs.get(index_key1 * 10 + index_key2).add(ldaConfig.getConfigurationID());
 		}
 		
 		// 3. Determine minimal and maximal occurence count.
@@ -365,19 +415,30 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 		// Calculate cell width and height (a quadratic matrix is assumed).
 		final double cellWidth	= canvas.getWidth() / binMatrix.length; 
 		final double cellHeight	= canvas.getHeight() / binMatrix.length;
-		
+		System.out.println("length = " + binMatrix.length);
 		// Draw each cell in its corresponding place.
 		for (int i = 0; i < binMatrix.length; i++) {
 			for (int j = 0; j < binMatrix[i].length; j++) {
+				// Calculate coordinates (minX, minY, maxX, maxY).
+				double[] cellCoordinates	= new double[4];
+				cellCoordinates[0]			= cellWidth * i + 1;
+				cellCoordinates[1]			= cellHeight * (binMatrix.length - 1 - j) - 1;
+				cellCoordinates[2] 			= cellCoordinates[0] + cellWidth;
+				cellCoordinates[3] 			= cellCoordinates[1] + cellHeight;
+				
 				// Set color for this cell.
 				Color cellColor = ColorScale.getColorForValue(binMatrix[i][j], minOccurenceCount, maxOccurenceCount);
 				gc.setFill(cellColor);
 				
 				// Draw cell.
-				gc.fillRect(cellWidth * i + 1, cellHeight * (binMatrix.length - 1 - j) - 1, cellWidth, cellHeight);
+				gc.fillRect(cellCoordinates[0], cellCoordinates[1], cellWidth, cellHeight);
+				
 				// Draw borders, if this is desired and cell has content.
 				if (useBorders && cellColor != Color.TRANSPARENT)
-					gc.strokeRect(cellWidth * i + 1, cellHeight * (binMatrix.length - 1 - j), cellWidth - 1, cellHeight - 1);
+					gc.strokeRect(cellCoordinates[0], cellCoordinates[1] + 1, cellWidth - 1, cellHeight - 1);
+				
+				// Add coordinate metadata to collection.
+				cellsToCoordinates.put(i * 10 + j, cellCoordinates);
 			}	
 		}
     }
@@ -399,24 +460,81 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 
 	@Override
 	public void processSelectionManipulationRequest(double minX, double minY, double maxX, double maxY)
-	{
-//		System.out.println(minX + "/" + minY + " to " + maxX + "/" + maxY);
+	{	
+		// Get GraphicsContext for drawing.
+		GraphicsContext gc					= canvas.getGraphicsContext2D();
 		
-//		 @todo: 	Identify selected cells, select (in addition to already-selected) corresponding datasets.
-//					After that: Think about how to select from DDC (average distances?).
-//					After that: Research possibilities for local selection comparison.
-	}
+		// Get current metadata.
+		final int[][] binMatrix				= binnedData.getBinMatrix();
+		final int minOccurenceCount			= binnedData.getMinOccurenceCount();
+		final int maxOccurenceCount			= binnedData.getMaxOccurenceCount();
+    	
+		// Check if settings icon was used. Workaround due to problems with selection's mouse event handling. 
+		if (minX == maxX && minY == maxY) {
+			Pair<Integer, Integer> offsets = provideOffsets();
+			analysisController.checkIfSettingsIconWasClicked(minX + offsets.getKey(), minY + offsets.getValue(), "settings_paramDist_icon");
+		}
+		
+		// Set stroke color.
+    	gc.setFill(new Color(1.0, 0.0, 0.0, 0.5));
+    	
+		// Check which cells are in selected area, highlight them.
+		for (Map.Entry<Integer, double[]> cellCoordinateEntry : cellsToCoordinates.entrySet()) {
+			double cellMinX = cellCoordinateEntry.getValue()[0];
+			double cellMinY = cellCoordinateEntry.getValue()[1];
+			double cellMaxX = cellCoordinateEntry.getValue()[2];
+			double cellMaxY = cellCoordinateEntry.getValue()[3];
+			
+			// Get cell ID/location.
+			final int cellID = cellCoordinateEntry.getKey();
+			
+			if (	cellMinX > minX && cellMaxX < maxX &&
+					cellMinY > minY && cellMaxY < maxY) {
+				// Get cell's cell of contents.
+				final Set<Integer> cellContentSet	= cellsToConfigurationIDs.get(cellCoordinateEntry.getKey()); 
 
-	@Override
-	public Pair<Integer, Integer> provideOffsets()
-	{
-		return new Pair<Integer, Integer>(69, 45);
+				// Add cell content to collection (if there is any).
+				if (cellContentSet != null) {
+					// Check if cell('s content) was already selected. If not: Highlight it, add content to selection.  
+					if (!selectedCellIDs.contains(cellID)) {
+						// Highlight cell.
+						gc.fillRect(cellMinX, cellMinY, cellMaxX - cellMinX, cellMaxY - cellMinY);
+						
+						// Add to collection of selected cells.
+						selectedCellIDs.add(cellID);
+					}
+				}
+			}
+			
+			// If not in selected area anymore: Paint in original color, remove from selection.
+			else if (selectedCellIDs.contains(cellID)) {
+				// Get row and column.
+				final int cellRow		= cellID / 10;
+				final int cellColumn	= cellID % 10;
+				
+				// Calculate original color.
+				Color cellColor = ColorScale.getColorForValue(binMatrix[cellRow][cellColumn], minOccurenceCount, maxOccurenceCount);
+				gc.setFill(cellColor);
+				
+				// Paint cell in original color.
+				gc.fillRect(cellMinX, cellMinY, cellMaxX - cellMinX, cellMaxY - cellMinY);
+				
+				// Remove from selection.
+				selectedCellIDs.remove(cellID);
+			}
+		}
 	}
 
 	@Override
 	public void processEndOfSelectionManipulation()
 	{
-		// @todo Auto-generated method stub
+		// @todo Send selection to analysis controller, update other visualizations.
 		
+	}
+	
+	@Override
+	public Pair<Integer, Integer> provideOffsets()
+	{
+		return new Pair<Integer, Integer>(67, 45);
 	}
 }
