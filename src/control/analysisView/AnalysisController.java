@@ -28,6 +28,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -47,6 +48,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -68,7 +70,11 @@ public class AnalysisController extends Controller
 	
 	private @FXML AnchorPane anchorpane_parameterSpace_distribution;
 	private @FXML Accordion accordion_options;
-	private @FXML TitledPane titledpane_filter;
+	// Panes in accordion.
+	private @FXML TitledPane filter_titledPane;
+	private @FXML TitledPane mdsDistEval_titledPane;
+	private @FXML TitledPane localScope_titledPane;
+	private @FXML TitledPane paramSpace_titledPane;
 	
 	/*
 	 * MDS Scatterchart.
@@ -203,6 +209,17 @@ public class AnalysisController extends Controller
 	private @FXML TextField kappa_min_textfield;
 	private @FXML TextField kappa_max_textfield;
 	
+	/*
+	 * Setting shortcuts icons.
+	 */
+	
+	private @FXML ImageView settings_mds_icon;
+	private @FXML ImageView settings_distEval_icon;
+	private @FXML ImageView settings_paramDist_icon;
+	private @FXML ImageView settings_paramDistCorr_icon;
+	private @FXML ImageView settings_localScope_icon;
+	
+	
 	// -----------------------------------------------
 	// 				Other data
 	// -----------------------------------------------
@@ -312,7 +329,8 @@ public class AnalysisController extends Controller
 		addResizeListeners();
 		
 		// Expand filter pane.
-		accordion_options.setExpandedPane(titledpane_filter);
+		accordion_options.setExpandedPane(filter_titledPane);
+		filter_titledPane.setStyle("-fx-font-weight:bold");
 	}
 	
 	private void addResizeListeners()
@@ -390,8 +408,16 @@ public class AnalysisController extends Controller
 		initDDCLineChart();
 		initParameterSpaceHeatmap();
 		initLocalScopeView();
+		
+		// Init setting shortcut icons.
+		initSettingShortcutIcons();
 	}
 	
+	private void initSettingShortcutIcons()
+	{
+		
+	}
+
 	private void initLocalScopeView()
 	{
 		// Determine path to visualization to be loaded.
@@ -1388,5 +1414,118 @@ public class AnalysisController extends Controller
 		
 		// Pass reference on to instance of local scope component.
 		localScopeInstance.setWorkspace(workspace);
+	}
+	
+	/**
+	 * Enable active / "button" cursor if it hovers over an active ImageView.
+	 * @param e
+	 */
+	@FXML
+	public void enableActiveCursor(MouseEvent e)
+	{
+		scene.setCursor(Cursor.HAND);
+	}
+	
+	/**
+	 * Disable active / "button" cursor if it hovers over an active ImageView.
+	 * @param e
+	 */
+	@FXML
+	public void disableActiveCursor(MouseEvent e)
+	{
+		scene.setCursor(Cursor.DEFAULT);
+	}
+	
+	/**
+	 * Switches to settings panel after corresponding icon has been clicked.
+	 * @param e
+	 */
+	@FXML
+	public void switchToSettingsPane(MouseEvent e)
+	{
+		openSettingsPane( ((Node)e.getSource()).getId() );
+	}
+	
+	/**
+	 * Workaround for selection-using panels: Check if clicked coordinates fit a settings icon.
+	 * @param x
+	 * @param y
+	 */
+	public void checkIfSettingsIconWasClicked(double x, double y, String iconID)
+	{
+		if(	(iconID == "settings_mds_icon" 				&& settings_mds_icon.getBoundsInParent().contains(x, y))			||
+			(iconID == "settings_distEval_icon" 		&& settings_distEval_icon.getBoundsInParent().contains(x, y))		||
+			(iconID == "settings_paramDist_icon" 		&& settings_paramDist_icon.getBoundsInParent().contains(x, y))		||
+			(iconID == "settings_paramDistCorr_icon" 	&& settings_paramDistCorr_icon.getBoundsInParent().contains(x, y))	||
+			(iconID == "settings_localScope_icon" 		&& settings_localScope_icon.getBoundsInParent().contains(x, y))
+		) {
+			// Open corresponding settings panel.
+			openSettingsPane(iconID);
+		}
+	}
+	
+	/**
+	 * Opens pane in settings panel.
+	 * @param paneID
+	 */
+	private void openSettingsPane(String paneID)
+	{	
+		// Reset title styles.
+		resetSettingsPanelsFontStyles();
+		
+		// Select new pane.
+		switch (paneID) {
+			case "settings_mds_icon":
+				accordion_options.setExpandedPane(mdsDistEval_titledPane);
+				mdsDistEval_titledPane.setStyle("-fx-font-weight:bold");
+			break;
+			
+			case "settings_distEval_icon":
+				accordion_options.setExpandedPane(mdsDistEval_titledPane);
+				settings_distEval_icon.setStyle("-fx-font-weight:bold");
+			break;
+				
+			case "settings_paramDist_icon":
+				accordion_options.setExpandedPane(paramSpace_titledPane);
+				paramSpace_titledPane.setStyle("-fx-font-weight:bold");
+			break;
+				
+			case "settings_paramDistCorr_icon":
+				accordion_options.setExpandedPane(paramSpace_titledPane);
+				paramSpace_titledPane.setStyle("-fx-font-weight:bold");
+			break;
+				
+			case "settings_localScope_icon":
+				accordion_options.setExpandedPane(localScope_titledPane);
+				localScope_titledPane.setStyle("-fx-font-weight:bold");
+			break;
+		}
+	}
+	
+	/**
+	 * Reset font styles in setting panel's titles.
+	 */
+	private void resetSettingsPanelsFontStyles()
+	{
+		// Change all font weights back to normal.
+		filter_titledPane.setStyle("-fx-font-weight:normal");
+		mdsDistEval_titledPane.setStyle("-fx-font-weight:normal");
+		paramSpace_titledPane.setStyle("-fx-font-weight:normal");
+		paramSpace_titledPane.setStyle("-fx-font-weight:normal");
+		localScope_titledPane.setStyle("-fx-font-weight:normal");
+	}
+	
+	/**
+	 * Called when user opens a settings pane directly.
+	 * @param e
+	 */
+	@FXML
+	public void selectSettingsPane(MouseEvent e) 
+	{
+		// Reset title styles.
+		resetSettingsPanelsFontStyles();
+		
+		// Set new font style.
+		((TitledPane) e.getSource()).setStyle("-fx-font-weight:bold");
 	}
 }
