@@ -17,6 +17,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart.Data;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.util.Pair;
@@ -415,7 +416,7 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 		// Calculate cell width and height (a quadratic matrix is assumed).
 		final double cellWidth	= canvas.getWidth() / binMatrix.length; 
 		final double cellHeight	= canvas.getHeight() / binMatrix.length;
-		System.out.println("length = " + binMatrix.length);
+		
 		// Draw each cell in its corresponding place.
 		for (int i = 0; i < binMatrix.length; i++) {
 			for (int j = 0; j < binMatrix[i].length; j++) {
@@ -471,12 +472,13 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
     	
 		// Check if settings icon was used. Workaround due to problems with selection's mouse event handling. 
 		if (minX == maxX && minY == maxY) {
-			Pair<Integer, Integer> offsets = provideOffsets();
+			final Pair<Integer, Integer> offsets = provideOffsets();
 			analysisController.checkIfSettingsIconWasClicked(minX + offsets.getKey(), minY + offsets.getValue(), "settings_paramDist_icon");
 		}
 		
-		// Set stroke color.
-    	gc.setFill(new Color(1.0, 0.0, 0.0, 0.5));
+		// Set highlight color (red for additional selection, blue for subtractive).
+		final Color highlightColor = isCtrlDown ? new Color(0.0, 0.0, 1.0, 0.5) : new Color(1.0, 0.0, 0.0, 0.5); 
+    	gc.setFill(highlightColor);
     	
 		// Check which cells are in selected area, highlight them.
 		for (Map.Entry<Integer, double[]> cellCoordinateEntry : cellsToCoordinates.entrySet()) {
@@ -528,13 +530,32 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 	@Override
 	public void processEndOfSelectionManipulation()
 	{
-		// @todo Send selection to analysis controller, update other visualizations.
+		// Collect content in all selected cells.
+		Set<Integer> selectedLDAConfigIDs = new HashSet<Integer>();
 		
+		for (int cellID : selectedCellIDs) {
+			selectedLDAConfigIDs.addAll(cellsToConfigurationIDs.get(cellID));
+		}
+		
+		// Pass references to selected data onward to AnalysisController.
+		analysisController.integrateHeatmapSelection(selectedLDAConfigIDs, !isCtrlDown);
 	}
 	
 	@Override
 	public Pair<Integer, Integer> provideOffsets()
 	{
 		return new Pair<Integer, Integer>(67, 45);
+	}
+
+	@Override
+	public void processKeyPressedEvent(KeyEvent ke)
+	{
+		isCtrlDown = ke.isControlDown();
+	}
+	
+	@Override
+	public void processKeyReleasedEvent(KeyEvent ke)
+	{
+		isCtrlDown = ke.isControlDown();
 	}
 }

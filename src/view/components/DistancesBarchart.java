@@ -160,6 +160,7 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 	 * Processes global (captured by analysis controller in scene) KeyPressedEvent.
 	 * @param ke
 	 */
+	@Override
 	public void processKeyPressedEvent(KeyEvent ke)
 	{
 		isCtrlDown = ke.isControlDown();
@@ -169,6 +170,7 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 	 * Processes global (captured by analysis controller in scene) KeyReleasedEvent.
 	 * @param ke
 	 */
+	@Override
 	public void processKeyReleasedEvent(KeyEvent ke)
 	{	
 		isCtrlDown = ke.isControlDown();

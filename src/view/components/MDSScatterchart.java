@@ -7,6 +7,8 @@ import java.util.Set;
 
 
 
+
+
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -368,6 +370,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	 * Processes global (captured by analysis controller in scene) KeyPressedEvent.
 	 * @param ke
 	 */
+	@Override
 	public void processKeyPressedEvent(KeyEvent ke)
 	{
 		if (ke.getCode() == KeyCode.CAPS) {
@@ -401,6 +404,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	 * Processes global (captured by analysis controller in scene) KeyReleasedEvent.
 	 * @param ke
 	 */
+	@Override
 	public void processKeyReleasedEvent(KeyEvent ke)
 	{	
     	// Check if space key is up.

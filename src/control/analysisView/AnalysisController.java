@@ -244,7 +244,7 @@ public class AnalysisController extends Controller
 	
 	
 	// -----------------------------------------------
-	// 				Other data
+	// 				Data.
 	// -----------------------------------------------
 	
 	/**
@@ -640,8 +640,6 @@ public class AnalysisController extends Controller
 			mdsScatterchart.identifyGlobalExtrema(coordinates);
 
 			// Add keyboard listener in order to enable selection.
-//			mdsScatterchart.addKeyListener(scene);
-//			distancesBarchart.addKeyListener(scene);
 			addKeyListener();
 			
 			// Mark global extrema as found.
@@ -653,26 +651,105 @@ public class AnalysisController extends Controller
 	}
 	
 	/**
-	 * Integrates barchart selection into MDS selection, then fires update for all visualizations.
-	 * @param selectedLocalIndices
+	 * Integrates heatmap selection into MDS selection, then fires update for all relevant visualizations.
+	 * @param newlySelectedLDAConfigIDs
+	 * @param isAddition
+	 */
+	public void integrateHeatmapSelection(Set<Integer> newlySelectedLDAConfigIDs, final boolean isAddition)
+	{
+		// Check if there is any change in the set of selected datasets.
+		boolean changeDetected = false;
+		
+		// 1. 	Check which elements are to be added/removed from current selection by comparing 
+		// 		with set of filtered and selected datasets.
+		
+		// Selection should be added:
+		if (isAddition) {
+			// Check if any of the newly selected IDs are not contained in global selection yet.
+			// If so: Add them.
+			for (LDAConfiguration selectedLDAConfiguration : this.selectedFilteredLDAConfigurations) {
+				final int alreadySelectedLDAConfigID = selectedLDAConfiguration.getConfigurationID(); 
+				
+				// If newly selected set already contained in existing selection: Remove from addition set.
+				if (newlySelectedLDAConfigIDs.contains(alreadySelectedLDAConfigID)) {
+					newlySelectedLDAConfigIDs.remove(alreadySelectedLDAConfigID);
+				}
+			}
+			
+			// If set of newly selected indices still contains elements: Change detected.
+			if (newlySelectedLDAConfigIDs.size() > 0) {
+				// Update flag.
+				changeDetected = true;
+				
+				// Add missing LDA configurations to collection.
+				for (final int ldaConfigIndex : this.filteredIndices) {
+					// Get LDA configuration for this index.
+					final LDAConfiguration ldaConfiguration = ldaConfigurations.get(ldaConfigIndex);
+					
+					// Check if this LDA configuration is part of the set of newly selected LDA configurations. 
+					if ( newlySelectedLDAConfigIDs.contains(ldaConfiguration.getConfigurationID()) )
+						this.selectedFilteredIndices.add(ldaConfigIndex);
+				}
+			}
+		}
+		
+		// Selection should be removed:
+		else {
+			// Set of dataset indices (instead of configuration IDs) to delete.
+			Set<Integer> indicesToDeleteFromSelection = new HashSet<Integer>();
+			
+			// Check if any of the newly selected IDs are contained in global selection.
+			// If so: Remove them.
+			for (final int ldaConfigIndex : this.selectedFilteredIndices) {
+				// Get LDA configuration for this index.
+				final LDAConfiguration ldaConfiguration = this.ldaConfigurations.get(ldaConfigIndex); 
+				
+				// If currently examine LDAConfiguration is in set of newly selected indices:
+				// Remove LDAConfiguration from set of selected indices.
+				if (newlySelectedLDAConfigIDs.contains(ldaConfiguration.getConfigurationID())) {
+					// Update flag.
+					changeDetected = true;
+					
+					// Add dataset index to collection of indices to remove from selection.
+					indicesToDeleteFromSelection.add(ldaConfigIndex);
+				}
+			}
+			
+			// Remove set of indices to delete from set of selected indices.
+			this.selectedFilteredIndices.removeAll(indicesToDeleteFromSelection);
+		}
+		
+		// 2. 	Update related (i.e. dependent on the set of selected entities) datasets and visualization, if there were any changes made.
+		if (changeDetected)
+			refreshVisualizationsAfterLocalSelection(isAddition);
+	}
+	
+	/**
+	 * Integrates barchart selection into MDS selection, then fires update for all relevant visualizations.
+	 * @param newlySelectedLocalIndices
 	 * @param isAddition true for addition of selected data to global selection; false for their removal.
 	 */
-	public void integrateBarchartSelection(ArrayList<Integer> selectedLocalIndices, final boolean isAddition)
+	public void integrateBarchartSelection(ArrayList<Integer> newlySelectedLocalIndices, final boolean isAddition)
 	{
 		ArrayList<Integer> indicesList 		= new ArrayList<Integer>();
 		// Check if there is any change in the set of selected datasets.
 		boolean changeDetected				= false;
 		
-		// 1. If selection should be added: Compare with set of filtered and selected datasets.
+		// 1. 	Check which elements are to be added/removed from current selection by comparing 
+		// 		with set of filtered and selected datasets.
+		
+		// Selection should be added:
 		if (isAddition) {
 			// Transfer indices into arraylist for more convenient access.
 			indicesList.addAll(filteredIndices);
 			
 			// Translate local indices to global indices.
-			for (int i = 0; i < selectedLocalIndices.size(); i++) {
+			for (int i = 0; i < newlySelectedLocalIndices.size(); i++) {
 				// Add to set of selected, translated indices. 
-				if (!selectedFilteredIndices.contains(indicesList.get(selectedLocalIndices.get(i)))) {
-					selectedFilteredIndices.add( indicesList.get(selectedLocalIndices.get(i)) );
+				if (!selectedFilteredIndices.contains(indicesList.get(newlySelectedLocalIndices.get(i)))) {
+					// Add to collection of selected indices.
+					selectedFilteredIndices.add( indicesList.get(newlySelectedLocalIndices.get(i)) );
+					
 					// Change detected.
 					changeDetected = true;
 				}
@@ -680,40 +757,45 @@ public class AnalysisController extends Controller
 		}
 		
 		else {
-			int count = 0;
 			// Transfer indices into arraylist for more convenient access.
 			indicesList.addAll(selectedFilteredIndices);
 			
 			// Translate local indices to global indices.
-			for (int i = 0; i < selectedLocalIndices.size(); i++) {
+			for (int i = 0; i < newlySelectedLocalIndices.size(); i++) {
 				// Add to set of selected, translated indices. 
-				if (selectedFilteredIndices.contains( indicesList.get(selectedLocalIndices.get(i))) ) {
-					selectedFilteredIndices.remove( indicesList.get(selectedLocalIndices.get(i)) );
+				if (selectedFilteredIndices.contains( indicesList.get(newlySelectedLocalIndices.get(i))) ) {
+					selectedFilteredIndices.remove( indicesList.get(newlySelectedLocalIndices.get(i)) );
 					// Change detected.
 					changeDetected = true;
-					count++;
 				}
 			}
 		}
 		
-		// 2. Update related (i.e. dependent on the set of selected entities) datasets, if there were any changes made.
-		if (changeDetected) {
-			// Find selected and filtered values.
-			selectedFilteredDistances			= createSelectedFilteredDistanceMatrix(selectedFilteredIndices);
-			selectedFilteredLDAConfigurations	= createSelectedFilteredLDAConfigurations(selectedFilteredIndices);
-			
-			// 3. Refresh other visualizations.
-			if (isAddition)
-				mdsScatterchart.addToSelection(selectedFilteredIndices);
-			else
-				mdsScatterchart.removeFromSelection(selectedFilteredIndices);
-			
-			// 4. Refresh visualizations.
-			mdsScatterchart.refresh(coordinates, filteredIndices, discardedCoordinates, discardedIndices);
-			distancesBarchart.refresh(discardedDistances, filteredDistances, selectedFilteredDistances, true);
-		}
+		// 2. 	Update related (i.e. dependent on the set of selected entities) datasets and visualization, if there were any changes made.
+		if (changeDetected)
+			refreshVisualizationsAfterLocalSelection(isAddition);
+	}
+	
+	/**
+	 * Updates data and refreshes relevant visualizations after a change in selection was enacted
+	 * through a (non-MDS-scatterchart) visualization.
+	 * @param isAddition
+	 */
+	private void refreshVisualizationsAfterLocalSelection(boolean isAddition)
+	{
+		// Find selected and filtered values.
+		selectedFilteredDistances			= createSelectedFilteredDistanceMatrix(selectedFilteredIndices);
+		selectedFilteredLDAConfigurations	= createSelectedFilteredLDAConfigurations(selectedFilteredIndices);
 		
-		//refreshVisualizations(false);
+		// 3.	Refresh other visualizations.
+		if (isAddition)
+			mdsScatterchart.addToSelection(selectedFilteredIndices);
+		else
+			mdsScatterchart.removeFromSelection(selectedFilteredIndices);
+		
+		// 4.	Refresh visualizations.
+		mdsScatterchart.refresh(coordinates, filteredIndices, discardedCoordinates, discardedIndices);
+		distancesBarchart.refresh(discardedDistances, filteredDistances, selectedFilteredDistances, true);
 	}
 	
 	/**
@@ -1190,7 +1272,6 @@ public class AnalysisController extends Controller
 	@Override
 	protected void resizeElement(Node node, double width, double height)
 	{
-		System.out.println("node.id = " + node.getId());
 		switch (node.getId()) {
 			case "paramSpace_distribution_anchorPane":
 				// Adapt width.
@@ -1402,6 +1483,7 @@ public class AnalysisController extends Controller
             {
             	mdsScatterchart.processKeyPressedEvent(ke);
             	distancesBarchart.processKeyPressedEvent(ke);
+            	parameterspace_heatmap.processKeyPressedEvent(ke);
             }
 		});
 		
@@ -1410,6 +1492,7 @@ public class AnalysisController extends Controller
             {
             	mdsScatterchart.processKeyReleasedEvent(ke);
             	distancesBarchart.processKeyReleasedEvent(ke);
+            	parameterspace_heatmap.processKeyReleasedEvent(ke);
             }
 		});
 	}
@@ -1479,27 +1562,27 @@ public class AnalysisController extends Controller
 		switch (paneID) {
 			case "settings_mds_icon":
 				accordion_options.setExpandedPane(mdsDistEval_titledPane);
-				mdsDistEval_titledPane.setStyle("-fx-font-weight:bold");
+				mdsDistEval_titledPane.lookup(".title").setStyle("-fx-font-weight:bold");
 			break;
 			
 			case "settings_distEval_icon":
 				accordion_options.setExpandedPane(mdsDistEval_titledPane);
-				mdsDistEval_titledPane.setStyle("-fx-font-weight:bold");
+				mdsDistEval_titledPane.lookup(".title").setStyle("-fx-font-weight:bold");
 			break;
 				
 			case "settings_paramDist_icon":
 				accordion_options.setExpandedPane(paramSpace_titledPane);
-				paramSpace_titledPane.setStyle("-fx-font-weight:bold");
+				paramSpace_titledPane.lookup(".title").setStyle("-fx-font-weight:bold");
 			break;
 				
 			case "settings_paramDistCorr_icon":
 				accordion_options.setExpandedPane(paramSpace_titledPane);
-				paramSpace_titledPane.setStyle("-fx-font-weight:bold");
+				paramSpace_titledPane.lookup(".title").setStyle("-fx-font-weight:bold");
 			break;
 				
 			case "settings_localScope_icon":
 				accordion_options.setExpandedPane(localScope_titledPane);
-				localScope_titledPane.setStyle("-fx-font-weight:bold");
+				localScope_titledPane.lookup(".title").setStyle("-fx-font-weight:bold");
 			break;
 		}
 	}
@@ -1510,11 +1593,11 @@ public class AnalysisController extends Controller
 	private void resetSettingsPanelsFontStyles()
 	{
 		// Change all font weights back to normal.
-		filter_titledPane.setStyle("-fx-font-weight:normal");
-		mdsDistEval_titledPane.setStyle("-fx-font-weight:normal");
-		paramSpace_titledPane.setStyle("-fx-font-weight:normal");
-		paramSpace_titledPane.setStyle("-fx-font-weight:normal");
-		localScope_titledPane.setStyle("-fx-font-weight:normal");
+		filter_titledPane.lookup(".title").setStyle("-fx-font-weight:normal");
+		mdsDistEval_titledPane.lookup(".title").setStyle("-fx-font-weight:normal");
+		paramSpace_titledPane.lookup(".title").setStyle("-fx-font-weight:normal");
+		paramSpace_titledPane.lookup(".title").setStyle("-fx-font-weight:normal");
+		localScope_titledPane.lookup(".title").setStyle("-fx-font-weight:normal");
 	}
 	
 	/**
@@ -1528,7 +1611,7 @@ public class AnalysisController extends Controller
 		resetSettingsPanelsFontStyles();
 		
 		// Set new font style.
-		((TitledPane) e.getSource()).setStyle("-fx-font-weight:bold");
+		((TitledPane) e.getSource()).lookup(".title").setStyle("-fx-font-weight:bold");
 	}
 
 	/**
