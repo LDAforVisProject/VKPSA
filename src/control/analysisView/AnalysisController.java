@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import model.AnalysisDataspace;
 import model.LDAConfiguration;
 import model.workspace.Workspace;
 
@@ -248,17 +249,9 @@ public class AnalysisController extends Controller
 	// -----------------------------------------------
 	
 	/**
-	 * MDS coordinates of all datasets in workspace / currently loaded.
+	 * Dataspace for all relevant data handled in AnalysisController.
 	 */
-	private double[][] coordinates;
-	/**
-	 * Distances of all datasets in workspace / currently loaded.
-	 */
-	private double[][] distances;
-	/**
-	 * LDA configurations all datasets in workspace / currently loaded.
-	 */
-	private ArrayList<LDAConfiguration> ldaConfigurations;
+	private AnalysisDataspace dataspace;
 	
 	/*
 	 * Collections holding metadata of filtered or selected datasets. 
@@ -289,6 +282,10 @@ public class AnalysisController extends Controller
 	 * Set of all datasets matching the currently defined thresholds and selection.
 	 */
 	private Set<Integer> selectedFilteredIndices;
+	/**
+	 * Stores selected coordinates.
+	 */
+	private double selectedCoordinates[][];
 	/**
 	 * Stores filtered and selecte distances.
 	 */
@@ -338,7 +335,10 @@ public class AnalysisController extends Controller
 	public void initialize(URL location, ResourceBundle resources)
 	{
 		System.out.println("Initializing SII_AnalysisController.");
-	
+		
+		// Create dataspace.
+		dataspace = new AnalysisDataspace(this);
+		
 		// Init collection of filtered/selected indices.
 		filteredIndices						= new LinkedHashSet<Integer>();
 		selectedFilteredIndices				= new LinkedHashSet<Integer>();
@@ -353,7 +353,7 @@ public class AnalysisController extends Controller
 		
 		// Expand filter pane.
 		accordion_options.setExpandedPane(filter_titledPane);
-		filter_titledPane.setStyle("-fx-font-weight:bold");
+		//filter_titledPane.lookup(".title").setStyle("-fx-font-weight:bold");
 	}
 	
 	private void addResizeListeners()
@@ -431,14 +431,6 @@ public class AnalysisController extends Controller
 		initDDCLineChart();
 		initParameterSpaceHeatmap();
 		initLocalScopeView();
-		
-		// Init setting shortcut icons.
-		initSettingShortcutIcons();
-	}
-	
-	private void initSettingShortcutIcons()
-	{
-		
 	}
 
 	private void initLocalScopeView()
@@ -485,12 +477,6 @@ public class AnalysisController extends Controller
 		barchartsForFilterControls.put("alpha", barchart_alpha);
 		barchartsForFilterControls.put("eta", barchart_eta);
 		barchartsForFilterControls.put("kappa", barchart_kappa);
-		
-//		@todo NEXT: 
-//				- Interactive selection.
-//				- Think about and suggest VKPSA meeting.
-//				- Heatmap layer for MDS selection.
-//				- Visualization for comparison of several LDA topic models/datasets.
 		
 		// Init range slider.
 		for (Map.Entry<String, RangeSlider> entry : rangeSliders.entrySet()) {
@@ -602,13 +588,7 @@ public class AnalysisController extends Controller
 	 */
 	public void refreshVisualizations(boolean filterData)
 	{
-		// Get LDA configurations. Important: Integrity/consistency checks ensure that
-		// workspace.ldaConfigurations and coordinates/distances are in the same order. 
-		ldaConfigurations 	= workspace.getLDAConfigurations();
-		// Load current MDS data from workspace.
-		coordinates			= workspace.getMDSCoordinates();
-		// Load current distance data from workspace.
-		distances			= workspace.getDistances();
+		dataspace.setDataReferences(workspace.getLDAConfigurations(),  workspace.getMDSCoordinates(), workspace.getDistances());
 		
 		// Call initialization procedure.
 		init();
@@ -621,10 +601,10 @@ public class AnalysisController extends Controller
 		
 		// Refresh visualizations.
 		refreshParameterHistograms(50);
-		mdsScatterchart.refresh(filteredCoordinates, filteredIndices, discardedCoordinates, discardedIndices);
+		mdsScatterchart.refresh(filteredCoordinates, filteredIndices, selectedCoordinates, selectedFilteredIndices, discardedCoordinates, discardedIndices);
 		distancesBarchart.refresh(discardedDistances, filteredDistances, selectedFilteredDistances, true);
 		parameterspace_ddc_linechart.refresh(filteredLDAConfigurations, filteredDistances, true);
-		parameterspace_heatmap.refresh(ldaConfigurations, filteredLDAConfigurations, combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), button_relativeView_paramDist.isSelected());
+		parameterspace_heatmap.refresh(dataspace.getLDAConfigurations(), filteredLDAConfigurations, combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), button_relativeView_paramDist.isSelected());
 		localScopeInstance.refresh(selectedFilteredLDAConfigurations);
 	}
 
@@ -636,8 +616,8 @@ public class AnalysisController extends Controller
 		// If not done already: Discover global extrema, adapt components.
 		if (!globalExtremaIdentified) {
 			// Identify global extrema.
-			distancesBarchart.identifyGlobalExtrema(distances);
-			mdsScatterchart.identifyGlobalExtrema(coordinates);
+			distancesBarchart.identifyGlobalExtrema(dataspace.getDistances());
+			mdsScatterchart.identifyGlobalExtrema(dataspace.getCoordinates());
 
 			// Add keyboard listener in order to enable selection.
 			addKeyListener();
@@ -663,7 +643,7 @@ public class AnalysisController extends Controller
 		// 1. 	Check which elements are to be added/removed from current selection by comparing 
 		// 		with set of filtered and selected datasets.
 		
-		// Selection should be added:
+		// 1.a.	Selection should be added:
 		if (isAddition) {
 			// Check if any of the newly selected IDs are not contained in global selection yet.
 			// If so: Add them.
@@ -684,7 +664,7 @@ public class AnalysisController extends Controller
 				// Add missing LDA configurations to collection.
 				for (final int ldaConfigIndex : this.filteredIndices) {
 					// Get LDA configuration for this index.
-					final LDAConfiguration ldaConfiguration = ldaConfigurations.get(ldaConfigIndex);
+					final LDAConfiguration ldaConfiguration = dataspace.getLDAConfigurations().get(ldaConfigIndex);
 					
 					// Check if this LDA configuration is part of the set of newly selected LDA configurations. 
 					if ( newlySelectedLDAConfigIDs.contains(ldaConfiguration.getConfigurationID()) )
@@ -693,7 +673,7 @@ public class AnalysisController extends Controller
 			}
 		}
 		
-		// Selection should be removed:
+		// 1.b.	Selection should be removed:
 		else {
 			// Set of dataset indices (instead of configuration IDs) to delete.
 			Set<Integer> indicesToDeleteFromSelection = new HashSet<Integer>();
@@ -702,7 +682,7 @@ public class AnalysisController extends Controller
 			// If so: Remove them.
 			for (final int ldaConfigIndex : this.selectedFilteredIndices) {
 				// Get LDA configuration for this index.
-				final LDAConfiguration ldaConfiguration = this.ldaConfigurations.get(ldaConfigIndex); 
+				final LDAConfiguration ldaConfiguration = this.dataspace.getLDAConfigurations().get(ldaConfigIndex); 
 				
 				// If currently examine LDAConfiguration is in set of newly selected indices:
 				// Remove LDAConfiguration from set of selected indices.
@@ -776,6 +756,7 @@ public class AnalysisController extends Controller
 			refreshVisualizationsAfterLocalSelection(isAddition);
 	}
 	
+	
 	/**
 	 * Updates data and refreshes relevant visualizations after a change in selection was enacted
 	 * through a (non-MDS-scatterchart) visualization.
@@ -784,17 +765,18 @@ public class AnalysisController extends Controller
 	private void refreshVisualizationsAfterLocalSelection(boolean isAddition)
 	{
 		// Find selected and filtered values.
-		selectedFilteredDistances			= createSelectedFilteredDistanceMatrix(selectedFilteredIndices);
-		selectedFilteredLDAConfigurations	= createSelectedFilteredLDAConfigurations(selectedFilteredIndices);
+		selectedFilteredDistances			= dataspace.createSelectedFilteredDistanceMatrix(selectedFilteredIndices);
+		selectedFilteredLDAConfigurations	= dataspace.createSelectedFilteredLDAConfigurations(selectedFilteredIndices);
 		
 		// 3.	Refresh other visualizations.
 		if (isAddition)
 			mdsScatterchart.addToSelection(selectedFilteredIndices);
-		else
-			mdsScatterchart.removeFromSelection(selectedFilteredIndices);
+//		else
+//			mdsScatterchart.removeFromSelection(selectedFilteredIndices);
 		
 		// 4.	Refresh visualizations.
-		mdsScatterchart.refresh(coordinates, filteredIndices, discardedCoordinates, discardedIndices);
+		
+		mdsScatterchart.refresh(dataspace.getCoordinates(), filteredIndices, selectedCoordinates, selectedFilteredIndices, discardedCoordinates, discardedIndices);
 		distancesBarchart.refresh(discardedDistances, filteredDistances, selectedFilteredDistances, true);
 	}
 	
@@ -805,11 +787,11 @@ public class AnalysisController extends Controller
 	public void refreshVisualizationsAfterGlobalSelection(Set<Integer> selectedIndices, boolean includeLocalScope)
 	{
 		// Update set of filtered and selected indices.
-		selectedFilteredIndices				= createSelectedFilteredIndexSet(filteredIndices, selectedIndices);
+		selectedFilteredIndices				= dataspace.createSelectedFilteredIndexSet(filteredIndices, selectedIndices);
 		
 		// Find selected and filtered values.
-		selectedFilteredDistances			= createSelectedFilteredDistanceMatrix(selectedFilteredIndices);
-		selectedFilteredLDAConfigurations	= createSelectedFilteredLDAConfigurations(selectedFilteredIndices);
+		selectedFilteredDistances			= dataspace.createSelectedFilteredDistanceMatrix(selectedFilteredIndices);
+		selectedFilteredLDAConfigurations	= dataspace.createSelectedFilteredLDAConfigurations(selectedFilteredIndices);
 				
 		// Refresh other (than MDSScatterchart) visualizations.
 		distancesBarchart.refresh(discardedDistances, filteredDistances, selectedFilteredDistances, true);
@@ -822,149 +804,6 @@ public class AnalysisController extends Controller
 	{
 		localScopeInstance.refresh(selectedFilteredLDAConfigurations);
 	}
-	
-	/**
-	 * Creates set of selected and filtered indices.
-	 * @param filteredIndices
-	 * @param selectedIndices
-	 * @return
-	 */
-	private Set<Integer> createSelectedFilteredIndexSet(Set<Integer> filteredIndices, Set<Integer> selectedIndices)
-	{
-		Set<Integer> selectedFilteredIndices = new HashSet<Integer>(selectedIndices.size());
-		
-		for (int selectedIndex : selectedIndices) {
-			if (filteredIndices.contains(selectedIndex)) {
-				selectedFilteredIndices.add(selectedIndex);
-			}
-		}
-		
-		return selectedFilteredIndices;
-	}
-	
-	/**
-	 * Creates set of discarded indices.
-	 * Picks every index from 0 to the number of LDA configurations that's not in 
-	 * the set of filtered indices.
-	 * @param filteredIndices
-	 * @return
-	 */
-	private Set<Integer> createDiscardedIndexSet(Set<Integer> filteredIndices)
-	{
-		Set<Integer> discardedIndices = new HashSet<Integer>();
-		
-		for (int i = 0; i < ldaConfigurations.size(); i++) {
-			if (!filteredIndices.contains(i))
-				discardedIndices.add(i);
-		}
-		
-		return discardedIndices;
-	}
-
-	/**
-	 * Creates matrix of coordinates of discarded (non-filtered) datapoints.
-	 * @param discardedIndices
-	 * @return
-	 */
-	private double[][] createDiscardedCoordinateMatrix(Set<Integer> discardedIndices)
-	{
-		double[][] discardedCoordinates = new double[this.coordinates.length][discardedIndices.size()];
-		
-		int count = 0;
-		for (int discardedIndex : discardedIndices) {
-			// Copy MDS coordinates.
-			for (int column = 0; column < this.coordinates.length; column++) {
-				discardedCoordinates[column][count] = coordinates[column][discardedIndex];
-			}
-			
-			count++;
-		}
-		
-		return discardedCoordinates;
-	}
-	
-	/**
-	 * Creates list of LDA configurations out of sets of filtered and selected indices. 
-	 * @param selectedFilteredIndices
-	 * @return
-	 */
-	private ArrayList<LDAConfiguration> createSelectedFilteredLDAConfigurations(Set<Integer> selectedFilteredIndices)
-	{
-		ArrayList<LDAConfiguration> selectedFilteredLDAConfigurations = new ArrayList<LDAConfiguration>(selectedFilteredIndices.size());
-		
-		for (int index : selectedFilteredIndices) {
-			selectedFilteredLDAConfigurations.add(ldaConfigurations.get(index));
-		}
-		
-		return selectedFilteredLDAConfigurations;
-	}
-	
-	/**
-	 * Creates list of LDA configurations out of sets of discarded indices. 
-	 * @param discardedIndices
-	 * @return
-	 */
-	private ArrayList<LDAConfiguration> createDiscardedLDAConfigurations(Set<Integer> discardedIndices)
-	{
-		ArrayList<LDAConfiguration> discardedLDAConfigurations = new ArrayList<LDAConfiguration>(discardedIndices.size());
-		
-		for (int index : discardedIndices) {
-			discardedLDAConfigurations.add(ldaConfigurations.get(index));
-		}
-		
-		return discardedLDAConfigurations;
-	}	
-	
-	/**
-	 * Creates distance matrix out of sets of filtered and selected indices. 
-	 * @param filteredIndices
-	 * @param selectedIndices
-	 * @return
-	 */
-	private double[][] createSelectedFilteredDistanceMatrix(Set<Integer> selectedFilteredIndices)
-	{
-		// Copy actual distance data in array.
-		double[][] filteredSelectedDistances = new double[selectedFilteredIndices.size()][selectedFilteredIndices.size()];
-		
-		int count = 0;
-		for (int index : selectedFilteredIndices) {
-			int innerCount = 0;
-			for (int innerIndex : selectedFilteredIndices) {
-				filteredSelectedDistances[count][innerCount] = distances[index][innerIndex];
-				innerCount++;
-			}
-			
-			count++;
-		}
-		
-		return filteredSelectedDistances;
-	}
-	
-	/**
-	 * Creates distance matrix out of sets of discarded indices.
-	 * Contains distances between discarded datasets only.
-	 * @param filteredIndices
-	 * @param selectedIndices
-	 * @return
-	 */
-	private double[][] createDiscardedDistanceMatrix(Set<Integer> discardedIndices)
-	{
-		// Copy actual distance data in array.
-		double[][] discardedDistances = new double[discardedIndices.size()][discardedIndices.size()];
-		
-		int count = 0;
-		for (int index : discardedIndices) {
-			int innerCount = 0;
-			for (int innerIndex : discardedIndices) {
-				discardedDistances[count][innerCount] = distances[index][innerIndex];
-				innerCount++;
-			}
-			
-			count++;
-		}
-		
-		return discardedDistances;
-	}	
 	
 	/**
 	 * Adds event handler processing slide and other events to a specified range slider.
@@ -1020,8 +859,8 @@ public class AnalysisController extends Controller
 		}
 		
 		// Iterate through all LDA configurations in workspace.
-		for (int i = 0; i < ldaConfigurations.size(); i++) {
-			LDAConfiguration ldaConfig	= ldaConfigurations.get(i);
+		for (int i = 0; i < dataspace.getLDAConfigurations().size(); i++) {
+			LDAConfiguration ldaConfig	= dataspace.getLDAConfigurations().get(i);
 			boolean fitsBoundaries		= true;
 			
 			// Check if this particular LDA configuration is in bounds of all specified parameter thresholds.
@@ -1061,6 +900,11 @@ public class AnalysisController extends Controller
 					filteredIndices.remove(i);
 			}
 		}
+		
+		// Determine set of discarded indices.
+		discardedIndices		= dataspace.createDiscardedIndexSet(filteredIndices);
+		// Determine set of filtered and selected indices.
+		selectedFilteredIndices	= dataspace.createSelectedFilteredIndexSet(filteredIndices, mdsScatterchart.getSelectedIndices());
 	}
 	
 	private void filterData()
@@ -1070,7 +914,7 @@ public class AnalysisController extends Controller
 		 */
 		
 		// Use AnalysisController.filteredIndices to filter out data in desired parameter boundaries.
-		filteredCoordinates			= new double[coordinates.length][filteredIndices.size()];
+		filteredCoordinates			= new double[dataspace.getCoordinates().length][filteredIndices.size()];
 		filteredDistances			= new double[filteredIndices.size()][filteredIndices.size()];
 		filteredLDAConfigurations	= new ArrayList<LDAConfiguration>(filteredIndices.size());
 		
@@ -1078,19 +922,19 @@ public class AnalysisController extends Controller
 		int count = 0;
 		for (int filteredIndex : filteredIndices) {
 			// Copy MDS coordinates.
-			for (int column = 0; column < coordinates.length; column++) {
-				filteredCoordinates[column][count] = coordinates[column][filteredIndex];
+			for (int column = 0; column < dataspace.getCoordinates().length; column++) {
+				filteredCoordinates[column][count] = dataspace.getCoordinates()[column][filteredIndex];
 			}
 			
 			// Copy distances.
 			int innerCount = 0;
 			for (int filteredInnerIndex : filteredIndices) {
-				filteredDistances[count][innerCount] = distances[filteredIndex][filteredInnerIndex];
+				filteredDistances[count][innerCount] = dataspace.getDistances()[filteredIndex][filteredInnerIndex];
 				innerCount++;
 			}
 			
 			// Copy LDA configurations.
-			filteredLDAConfigurations.add(ldaConfigurations.get(filteredIndex));
+			filteredLDAConfigurations.add(dataspace.getLDAConfigurations().get(filteredIndex));
 			
 			count++;
 		}
@@ -1099,22 +943,20 @@ public class AnalysisController extends Controller
 		 * Update data collections for discarded (not filtered) datasets. 
 		 */
 		
-		// Determine set of discarded indices.
-		discardedIndices					= createDiscardedIndexSet(filteredIndices);
+
 		// Update set of discarded values.
-		discardedCoordinates				= createDiscardedCoordinateMatrix(discardedIndices);
-		discardedDistances					= createDiscardedDistanceMatrix(discardedIndices);
-		discardedLDAConfigurations			= createDiscardedLDAConfigurations(selectedFilteredIndices);
+		discardedCoordinates				= dataspace.createDiscardedCoordinateMatrix(discardedIndices);
+		discardedDistances					= dataspace.createDiscardedDistanceMatrix(discardedIndices);
+		discardedLDAConfigurations			= dataspace.createDiscardedLDAConfigurations(selectedFilteredIndices);
 		
 		/*
 		 * Update data collections for filtered and selected datapoints. 
 		 */
 		
-		// Determine set of filtered and selected indices.
-		selectedFilteredIndices				= createSelectedFilteredIndexSet(filteredIndices, mdsScatterchart.getSelectedIndices());
 		// Update set of filtered and selected values.
-		selectedFilteredDistances			= createSelectedFilteredDistanceMatrix(selectedFilteredIndices);
-		selectedFilteredLDAConfigurations	= createSelectedFilteredLDAConfigurations(selectedFilteredIndices);
+		selectedCoordinates					= dataspace.createSelectedCoordinateMatrix(selectedFilteredIndices);
+		selectedFilteredDistances			= dataspace.createSelectedFilteredDistanceMatrix(selectedFilteredIndices);
+		selectedFilteredLDAConfigurations	= dataspace.createSelectedFilteredLDAConfigurations(selectedFilteredIndices);
 	}
 
 	/**
@@ -1171,7 +1013,7 @@ public class AnalysisController extends Controller
 		}
 		
 		// Bin data.
-		for (int i = 0; i < ldaConfigurations.size(); i++) {
+		for (int i = 0; i < dataspace.getLDAConfigurations().size(); i++) {
 			// Check if dataset is filtered (as opposed to discarded).
 			boolean isFilteredDataset = filteredIndices.contains(i);
 			
@@ -1179,7 +1021,7 @@ public class AnalysisController extends Controller
 			for (String param : rangeSliders.keySet()) {
 				double binInterval	= (rangeSliders.get(param).getMax() - rangeSliders.get(param).getMin()) / numberOfBins;
 				// Calculate index of bin in which to store the current value.
-				int index_key		= (int) ( (ldaConfigurations.get(i).getParameter(param) - rangeSliders.get(param).getMin()) / binInterval);
+				int index_key		= (int) ( (dataspace.getLDAConfigurations().get(i).getParameter(param) - rangeSliders.get(param).getMin()) / binInterval);
 				// Check if element is highest allowed entry.
 				index_key			= index_key < numberOfBins ? index_key : numberOfBins - 1;
 				
@@ -1315,12 +1157,12 @@ public class AnalysisController extends Controller
 			// Copy distances.
 			int innerCount = 0;
 			for (int selectedInnerIndex : filteredIndices) {
-				filteredDistances[count][innerCount] = distances[selectedIndex][selectedInnerIndex];
+				filteredDistances[count][innerCount] = dataspace.getDistances()[selectedIndex][selectedInnerIndex];
 				innerCount++;
 			}
 			
 			// Copy LDA configurations.
-			filteredLDAConfigurations.add(ldaConfigurations.get(selectedIndex));
+			filteredLDAConfigurations.add(dataspace.getLDAConfigurations().get(selectedIndex));
 			
 			count++;
 		}
@@ -1338,11 +1180,11 @@ public class AnalysisController extends Controller
 		// Copy data corresponding to chosen LDA configurations in new arrays.
 		for (int selectedIndex : filteredIndices) {
 			// Copy LDA configurations.
-			filteredLDAConfigurations.add(ldaConfigurations.get(selectedIndex));
+			filteredLDAConfigurations.add(dataspace.getLDAConfigurations().get(selectedIndex));
 		}
 		
 		if (parameterspace_heatmap != null && combobox_parameterSpace_distribution_xAxis != null && combobox_parameterSpace_distribution_yAxis != null)
-			parameterspace_heatmap.refresh(ldaConfigurations, filteredLDAConfigurations, combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), button_relativeView_paramDist.isSelected());
+			parameterspace_heatmap.refresh(dataspace.getLDAConfigurations(), filteredLDAConfigurations, combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), button_relativeView_paramDist.isSelected());
 	}
 	
 	public void updateLinechartInfo(boolean show, ArrayList<Label> labels)
@@ -1417,40 +1259,11 @@ public class AnalysisController extends Controller
 	}
 	
 	/**
-	 * Identify maxima and minima in set of loaded LDA parameters.
-	 * @param ldaConfigurations
-	 * @return
-	 */
-	private Map<String, Pair<Double, Double>> identifyLDAParameterExtrema(ArrayList<LDAConfiguration> ldaConfigurations)
-	{
-		Map<String, Pair<Double, Double>> parameterExtrema = new HashMap<String, Pair<Double, Double>>(LDAConfiguration.SUPPORTED_PARAMETERS.length);
-		
-		// Init parameter extrema collection.
-		for (String param : LDAConfiguration.SUPPORTED_PARAMETERS) {
-			parameterExtrema.put(param, new Pair<Double, Double>(Double.MAX_VALUE, Double.MIN_VALUE));
-		}
-		
-		// Search for extrema in all LDA configurations.
-		for (LDAConfiguration ldaConfig : ldaConfigurations) {
-			// For all supported parameters:
-			for (String param : LDAConfiguration.SUPPORTED_PARAMETERS) {
-				double value	= ldaConfig.getParameter(param);
-				double min		= value < parameterExtrema.get(param).getKey()		? value : parameterExtrema.get(param).getKey();
-				double max 		= value > parameterExtrema.get(param).getValue() 	? value : parameterExtrema.get(param).getValue();
-				
-				parameterExtrema.put(param, new Pair<Double, Double>(min, max));
-			}
-		}
-		
-		return parameterExtrema;
-	}
-	
-	/**
 	 * Adjusts minimal and maximal control values so that they fit the loaded data set.
 	 */
 	private void adjustControlExtrema()
 	{
-		Map<String, Pair<Double, Double>> ldaParameterExtrema = identifyLDAParameterExtrema(ldaConfigurations);
+		Map<String, Pair<Double, Double>> ldaParameterExtrema = dataspace.identifyLDAParameterExtrema(dataspace.getLDAConfigurations());
 		
 		// Update values of range slider. 
 		for (Map.Entry<String, RangeSlider> rs : rangeSliders.entrySet()) {
@@ -1499,7 +1312,7 @@ public class AnalysisController extends Controller
 	
 	public ArrayList<LDAConfiguration> getLDAConfigurations()
 	{
-		return ldaConfigurations;
+		return dataspace.getLDAConfigurations();
 	}
 
 	public Scene getScene()

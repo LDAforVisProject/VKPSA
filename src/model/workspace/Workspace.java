@@ -167,10 +167,9 @@ public class Workspace implements ITaskListener
 	 */
 	private boolean isMetadataLoaded;
 	
-	// -----------------------------------------------
-	// 		Database
-	// -----------------------------------------------	
-	
+	/**
+	 * Database management.
+	 */
 	private DBManagement db;
 	
 	// -----------------------------------------------	
@@ -357,14 +356,6 @@ public class Workspace implements ITaskListener
 	{
 		// Open connection to database.
 		numberOfDatasetsInWS = db.readNumberOfLDAConfigurations();
-		
-		// File-based:
-//		for(File f : new File(directory).listFiles()) {
-//			String filePath			= f.getAbsolutePath();
-//			String fileExtension	= filePath.substring(filePath.lastIndexOf(".") + 1, filePath.length());
-//			
-//			numberOfDatasetsInWS	= "csv".equals(fileExtension) ? numberOfDatasetsInWS + 1 : numberOfDatasetsInWS;
-//		}
 		
 		return numberOfDatasetsInWS;
 	}
