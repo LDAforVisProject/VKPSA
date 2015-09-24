@@ -606,7 +606,10 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	        	dataPoint.setExtraValue(index);
 	        	dataSeries.getData().add(dataPoint);
         	}
-        	
+        HERE: 		Base series association on selectedIndices/filteredIndices instead of selectedMDSPoints.
+        THEN:		Use set of selectedIndices to add/remove datasets (selected in other vis. components) instead of adding them to selectedMDSPoints.
+        			Eventually get rid of selectedMDSPoints altogether.
+        FINALLY:	Once cross-component selection works without flaws (or at least without bugs), implement alternative/selection heatmap (adapt colors!).
         	else {
         		XYChart.Data<Number, Number> selectedPoint	= selectedMDSPoints.get(index);
         		XYChart.Data<Number, Number> dataPoint		= new XYChart.Data<Number, Number>(selectedPoint.getXValue(), selectedPoint.getYValue());
