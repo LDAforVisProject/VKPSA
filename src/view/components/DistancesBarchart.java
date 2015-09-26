@@ -456,7 +456,6 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 
 		int count = 0;
 		for (int dataSetIndex : indices) {
-//		for (int i = 0; i < averageDistances.length; i++) {
 			double value	= averageDistances[count];
 			int binIndex	= (int) ( (value - min) / binInterval);
 			binIndex		= binIndex < numberOfBins ? binIndex : numberOfBins - 1;

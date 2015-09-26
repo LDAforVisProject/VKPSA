@@ -376,6 +376,9 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 		// Proofcheck minOccurenceCount (in case no LDA configurations are filtered).
 		minOccurenceCount = minOccurenceCount != Integer.MAX_VALUE ? minOccurenceCount : 0;
  		
+		System.out.println("max = " + maxOccurenceCount);
+		System.out.println("max = " + minOccurenceCount);
+		
 		// Return binned data.
 		return new BinnedOccurenceEntity(binMatrix, minOccurenceCount, maxOccurenceCount, minX, maxX, minY, minY);
     }
@@ -387,6 +390,10 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
      */
     private void draw(BinnedOccurenceEntity binnedData, boolean useBorders)
     {
+    	if (dataType == HeatmapDataType.MDSCoordinates) {
+//    		System.out.println("drawing - " + canvas.getWidth() + " x" + canvas.getHeight());
+    	}
+    	
     	GraphicsContext gc		= canvas.getGraphicsContext2D();
     	int binMatrix[][]		= binnedData.getBinMatrix();
     	int minOccurenceCount	= binnedData.getMinOccurenceCount();

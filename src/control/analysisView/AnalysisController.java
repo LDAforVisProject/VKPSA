@@ -978,7 +978,7 @@ public class AnalysisController extends Controller
 			break;
 			
 			case "mds_anchorPane":
-				// Update heatmap position.
+	        	// Update MDS heatmap position/indentation.
 				mdsScatterchart.updateHeatmapPosition();
 				// Redraw heatmap.
 				mdsScatterchart.refreshHeatmapAfterResize();

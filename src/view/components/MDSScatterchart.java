@@ -498,7 +498,6 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 						double selectedCoordinates[][], Set<Integer> selectedIndices,
 						double discardedCoordinates[][], Set<Integer> discardedIndices)
 	{	
-		System.out.println("refreshing scatterchart");
 		// Store references to data collection.
 		this.filteredCoordinates	= filteredCoordinates;
 		this.filteredIndices		= filteredIndices;
@@ -535,8 +534,16 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
         addMouseListenersToMDSScatterchart(this.filteredCoordinates, this.filteredIndices);
         
         // Update heatmap.
+        System.out.println("mds -> " + scatterchart.getWidth() + ", " + scatterchart.getHeight());
+        System.out.println("mdsHeatmap -> " + heatmap_canvas.getWidth() + ", " + heatmap_canvas.getHeight());
         heatmap.refresh(this.filteredCoordinates, globalCoordinateExtrema);
-        
+        //if (heatmap_canvas.getWidth() < 0 || heatmap_canvas.getHeight() < 0) {
+        	// Update position/indentation.
+//			updateHeatmapPosition();
+//			// Redraw heatmap.
+//			refreshHeatmapAfterResize();
+			//}
+		System.out.println("mdsHeatmap -> " + heatmap_canvas.getWidth() + ", " + heatmap_canvas.getHeight());
         // Update scatterchart ranges.
         updateMDSScatterchartRanges();
 	}
@@ -546,7 +553,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	 */
 	public void refreshHeatmapAfterResize()
 	{
-//		heatmap.refresh(false);
+		heatmap.refresh(false);
 	}
 	
 	/**
@@ -925,6 +932,11 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 				dataPoint.getNode().setVisible(!selected);
 			}
 		}
+		
+		// Update heatmap position/indentation.
+		updateHeatmapPosition();
+		// Redraw heatmap.
+		refreshHeatmapAfterResize();
 	}
 
 	/**
@@ -940,7 +952,8 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 		final double offsetX = 43 + scatterchart.getWidth() * xBorderFactor;
 		heatmap_canvas.setLayoutX(offsetX);
 		heatmap_canvas.setWidth( (scatterchart.getWidth() - 15 - offsetX) * (1 - xBorderFactor));
-		// Set y position
+		
+		// Set y positiona and new height.
 		final double offsetY = scatterchart.getHeight() * yBorderFactor;
 		heatmap_canvas.setTranslateY(offsetY);
 		heatmap_canvas.setHeight((scatterchart.getHeight() - 95 - offsetY) * (1 - yBorderFactor));
