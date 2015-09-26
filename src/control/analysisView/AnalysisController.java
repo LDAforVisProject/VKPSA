@@ -266,7 +266,7 @@ public class AnalysisController extends Controller
 	/**
 	 * Stores filterd coordinates.
 	 */
-	private double filteredCoordinates[][];
+	private double coordinates[][];
 	/**
 	 * Stores filtered distances.
 	 */
@@ -601,8 +601,12 @@ public class AnalysisController extends Controller
 		
 		// Refresh visualizations.
 		refreshParameterHistograms(50);
-		mdsScatterchart.refresh(filteredCoordinates, filteredIndices, selectedCoordinates, selectedFilteredIndices, discardedCoordinates, discardedIndices);
-		distancesBarchart.refresh(discardedDistances, filteredDistances, selectedFilteredDistances, true);
+		mdsScatterchart.refresh(coordinates, filteredIndices, 
+								selectedCoordinates, selectedFilteredIndices, 
+								discardedCoordinates, discardedIndices);
+		distancesBarchart.refresh(	discardedIndices, filteredIndices, selectedFilteredIndices,
+									discardedDistances, filteredDistances, selectedFilteredDistances, 
+									true);
 		parameterspace_ddc_linechart.refresh(filteredLDAConfigurations, filteredDistances, true);
 		parameterspace_heatmap.refresh(dataspace.getLDAConfigurations(), filteredLDAConfigurations, combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), button_relativeView_paramDist.isSelected());
 		localScopeInstance.refresh(selectedFilteredLDAConfigurations);
@@ -711,7 +715,6 @@ public class AnalysisController extends Controller
 	 */
 	public void integrateBarchartSelection(ArrayList<Integer> newlySelectedLocalIndices, final boolean isAddition)
 	{
-		ArrayList<Integer> indicesList 		= new ArrayList<Integer>();
 		// Check if there is any change in the set of selected datasets.
 		boolean changeDetected				= false;
 		
@@ -720,15 +723,11 @@ public class AnalysisController extends Controller
 		
 		// Selection should be added:
 		if (isAddition) {
-			// Transfer indices into arraylist for more convenient access.
-			indicesList.addAll(filteredIndices);
-			
 			// Translate local indices to global indices.
 			for (int i = 0; i < newlySelectedLocalIndices.size(); i++) {
-				// Add to set of selected, translated indices. 
-				if (!selectedFilteredIndices.contains(indicesList.get(newlySelectedLocalIndices.get(i)))) {
+				if (!selectedFilteredIndices.contains( newlySelectedLocalIndices.get(i)) ) {
 					// Add to collection of selected indices.
-					selectedFilteredIndices.add( indicesList.get(newlySelectedLocalIndices.get(i)) );
+					selectedFilteredIndices.add( newlySelectedLocalIndices.get(i) );
 					
 					// Change detected.
 					changeDetected = true;
@@ -737,14 +736,11 @@ public class AnalysisController extends Controller
 		}
 		
 		else {
-			// Transfer indices into arraylist for more convenient access.
-			indicesList.addAll(selectedFilteredIndices);
-			
 			// Translate local indices to global indices.
 			for (int i = 0; i < newlySelectedLocalIndices.size(); i++) {
 				// Add to set of selected, translated indices. 
-				if (selectedFilteredIndices.contains( indicesList.get(newlySelectedLocalIndices.get(i))) ) {
-					selectedFilteredIndices.remove( indicesList.get(newlySelectedLocalIndices.get(i)) );
+				if (selectedFilteredIndices.contains( newlySelectedLocalIndices.get(i)) ) {
+					selectedFilteredIndices.remove( newlySelectedLocalIndices.get(i) );
 					// Change detected.
 					changeDetected = true;
 				}
@@ -765,19 +761,22 @@ public class AnalysisController extends Controller
 	private void refreshVisualizationsAfterLocalSelection(boolean isAddition)
 	{
 		// Find selected and filtered values.
-		selectedFilteredDistances			= dataspace.createSelectedFilteredDistanceMatrix(selectedFilteredIndices);
-		selectedFilteredLDAConfigurations	= dataspace.createSelectedFilteredLDAConfigurations(selectedFilteredIndices);
-		
+		selectedFilteredDistances			= dataspace.createSelectedDistanceMatrix(selectedFilteredIndices);
+		selectedFilteredLDAConfigurations	= dataspace.createSelectedLDAConfigurations(selectedFilteredIndices);
+		selectedCoordinates					= dataspace.createSelectedCoordinateMatrix(selectedFilteredIndices);
 		// 3.	Refresh other visualizations.
-		if (isAddition)
-			mdsScatterchart.addToSelection(selectedFilteredIndices);
+//		if (isAddition)
+//			mdsScatterchart.addToSelection(selectedFilteredIndices);
 //		else
 //			mdsScatterchart.removeFromSelection(selectedFilteredIndices);
 		
 		// 4.	Refresh visualizations.
-		
-		mdsScatterchart.refresh(dataspace.getCoordinates(), filteredIndices, selectedCoordinates, selectedFilteredIndices, discardedCoordinates, discardedIndices);
-		distancesBarchart.refresh(discardedDistances, filteredDistances, selectedFilteredDistances, true);
+		mdsScatterchart.refresh(dataspace.getCoordinates(), filteredIndices, 
+								selectedCoordinates, selectedFilteredIndices, 
+								discardedCoordinates, discardedIndices);
+		distancesBarchart.refresh(	discardedIndices, filteredIndices, selectedFilteredIndices,
+									discardedDistances, filteredDistances, selectedFilteredDistances, 
+									false);
 	}
 	
 	/**
@@ -790,11 +789,15 @@ public class AnalysisController extends Controller
 		selectedFilteredIndices				= dataspace.createSelectedFilteredIndexSet(filteredIndices, selectedIndices);
 		
 		// Find selected and filtered values.
-		selectedFilteredDistances			= dataspace.createSelectedFilteredDistanceMatrix(selectedFilteredIndices);
-		selectedFilteredLDAConfigurations	= dataspace.createSelectedFilteredLDAConfigurations(selectedFilteredIndices);
+		selectedFilteredDistances			= dataspace.createSelectedDistanceMatrix(selectedFilteredIndices);
+		selectedFilteredLDAConfigurations	= dataspace.createSelectedLDAConfigurations(selectedFilteredIndices);
 				
 		// Refresh other (than MDSScatterchart) visualizations.
-		distancesBarchart.refresh(discardedDistances, filteredDistances, selectedFilteredDistances, true);
+		distancesBarchart.refresh(	discardedIndices, filteredIndices, selectedFilteredIndices,
+									discardedDistances, filteredDistances, selectedFilteredDistances, 
+									true);
+		// @todo Refresh heatmap.
+		
 		// Refresh local scope visualization, if specified.
 		if (includeLocalScope)
 			localScopeInstance.refresh(selectedFilteredLDAConfigurations);
@@ -914,7 +917,7 @@ public class AnalysisController extends Controller
 		 */
 		
 		// Use AnalysisController.filteredIndices to filter out data in desired parameter boundaries.
-		filteredCoordinates			= new double[dataspace.getCoordinates().length][filteredIndices.size()];
+		coordinates			= new double[dataspace.getCoordinates().length][filteredIndices.size()];
 		filteredDistances			= new double[filteredIndices.size()][filteredIndices.size()];
 		filteredLDAConfigurations	= new ArrayList<LDAConfiguration>(filteredIndices.size());
 		
@@ -923,7 +926,7 @@ public class AnalysisController extends Controller
 		for (int filteredIndex : filteredIndices) {
 			// Copy MDS coordinates.
 			for (int column = 0; column < dataspace.getCoordinates().length; column++) {
-				filteredCoordinates[column][count] = dataspace.getCoordinates()[column][filteredIndex];
+				coordinates[column][count] = dataspace.getCoordinates()[column][filteredIndex];
 			}
 			
 			// Copy distances.
@@ -955,8 +958,8 @@ public class AnalysisController extends Controller
 		
 		// Update set of filtered and selected values.
 		selectedCoordinates					= dataspace.createSelectedCoordinateMatrix(selectedFilteredIndices);
-		selectedFilteredDistances			= dataspace.createSelectedFilteredDistanceMatrix(selectedFilteredIndices);
-		selectedFilteredLDAConfigurations	= dataspace.createSelectedFilteredLDAConfigurations(selectedFilteredIndices);
+		selectedFilteredDistances			= dataspace.createSelectedDistanceMatrix(selectedFilteredIndices);
+		selectedFilteredLDAConfigurations	= dataspace.createSelectedLDAConfigurations(selectedFilteredIndices);
 	}
 
 	/**

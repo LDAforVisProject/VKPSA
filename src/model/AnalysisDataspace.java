@@ -245,7 +245,7 @@ public class AnalysisDataspace
 	 * @param selectedFilteredIndices
 	 * @return
 	 */
-	public ArrayList<LDAConfiguration> createSelectedFilteredLDAConfigurations(Set<Integer> selectedFilteredIndices)
+	public ArrayList<LDAConfiguration> createSelectedLDAConfigurations(Set<Integer> selectedFilteredIndices)
 	{
 		ArrayList<LDAConfiguration> selectedFilteredLDAConfigurations = new ArrayList<LDAConfiguration>(selectedFilteredIndices.size());
 		
@@ -278,7 +278,7 @@ public class AnalysisDataspace
 	 * @param selectedIndices
 	 * @return
 	 */
-	public double[][] createSelectedFilteredDistanceMatrix(Set<Integer> selectedFilteredIndices)
+	public double[][] createSelectedDistanceMatrix(Set<Integer> selectedFilteredIndices)
 	{
 		// Copy actual distance data in array.
 		double[][] filteredSelectedDistances = new double[selectedFilteredIndices.size()][selectedFilteredIndices.size()];

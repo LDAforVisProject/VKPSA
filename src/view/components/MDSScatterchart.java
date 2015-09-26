@@ -162,7 +162,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	/**
 	 * Reference to this workspace's coordinate collection.
 	 */
-	private double coordinates[][];
+	private double filteredCoordinates[][];
 	/**
 	 * Reference to this workspace's collection of filtered indices.
 	 */
@@ -220,7 +220,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 		
 		// Init other data.
 		selectionMode							= SelectionMode.GROUP;
-		pointsManipulatedInCurrSelectionStep		= new HashSet<Integer>();
+		pointsManipulatedInCurrSelectionStep	= new HashSet<Integer>();
 		
 		// Init scatterchart.
 		initScatterchart();
@@ -484,17 +484,17 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	
 	/**
 	 * Refresh scatterchart with data from MDS coordinates. 
-	 * @param coordinates
+	 * @param filteredCoordinates
 	 * @param filteredIndices 
 	 * @param discardedCoordinates
 	 * @param discardedIndices 
 	 */
-	public void refresh(double coordinates[][], Set<Integer> filteredIndices,
+	public void refresh(double filteredCoordinates[][], Set<Integer> filteredIndices,
 						double selectedCoordinates[][], Set<Integer> selectedIndices,
 						double discardedCoordinates[][], Set<Integer> discardedIndices)
 	{	
 		// Store references to data collection.
-		this.coordinates			= coordinates;
+		this.filteredCoordinates	= filteredCoordinates;
 		this.filteredIndices		= filteredIndices;
 		this.selectedCoordinates	= selectedCoordinates;
 		this.selectedIndices		= selectedIndices;
@@ -523,10 +523,10 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
         scatterchart.applyCss();
         
         // Add mouse listeners.
-        addMouseListenersToMDSScatterchart(this.coordinates, this.filteredIndices);
+        addMouseListenersToMDSScatterchart(this.filteredCoordinates, this.filteredIndices);
         
         // Update heatmap.
-        heatmap.refresh(this.coordinates, globalCoordinateExtrema);
+        heatmap.refresh(this.filteredCoordinates, globalCoordinateExtrema);
         
         // Update scatterchart ranges.
         updateMDSScatterchartRanges();
@@ -599,23 +599,31 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	private void addActiveDataPoints(final Series<Number, Number> dataSeries, final Series<Number, Number> selectedDataSeries)
 	{
         int count = 0;
+
+        // xxx
+//        HERE: 		Base series association on selectedIndices/filteredIndices instead of selectedMDSPoints.
+//        THEN:		Use set of selectedIndices to add/remove datasets (selected in other vis. components) instead of adding them to selectedMDSPoints.
+//        			Eventually get rid of selectedMDSPoints altogether.
+//        FINALLY:	Once cross-component selection works without flaws (or at least without bugs), implement alternative/selection heatmap (adapt colors!).
+
+        // Add filtered data points.
         for (int index : filteredIndices) {
-        	// Add point only if it's not part of the set of manually selected indices.
-        	if (!selectedMDSPoints.containsKey(index)) {
-	        	XYChart.Data<Number, Number> dataPoint = new XYChart.Data<Number, Number>(coordinates[0][count], coordinates[1][count]);
+        	// Add point only if it's not part of the set of selected indices.
+        	if (!selectedIndices.contains(index)) {
+	        	XYChart.Data<Number, Number> dataPoint = new XYChart.Data<Number, Number>(filteredCoordinates[0][count], filteredCoordinates[1][count]);
 	        	dataPoint.setExtraValue(index);
 	        	dataSeries.getData().add(dataPoint);
         	}
-        HERE: 		Base series association on selectedIndices/filteredIndices instead of selectedMDSPoints.
-        THEN:		Use set of selectedIndices to add/remove datasets (selected in other vis. components) instead of adding them to selectedMDSPoints.
-        			Eventually get rid of selectedMDSPoints altogether.
-        FINALLY:	Once cross-component selection works without flaws (or at least without bugs), implement alternative/selection heatmap (adapt colors!).
-        	else {
-        		XYChart.Data<Number, Number> selectedPoint	= selectedMDSPoints.get(index);
-        		XYChart.Data<Number, Number> dataPoint		= new XYChart.Data<Number, Number>(selectedPoint.getXValue(), selectedPoint.getYValue());
-	        	dataPoint.setExtraValue(selectedPoint.getExtraValue());
+        	
+        	count++;
+        }
+        
+        // Add selected data points.
+        count = 0;
+        for (int index : selectedIndices) {
+        		XYChart.Data<Number, Number> dataPoint = new XYChart.Data<Number, Number>(selectedCoordinates[0][count], selectedCoordinates[1][count]);
+	        	dataPoint.setExtraValue(index);
 	        	selectedDataSeries.getData().add(dataPoint);
-        	}
         	
         	count++;
         }
@@ -640,6 +648,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	
 	/**
 	 * Adds mouse event listeners handling single-point requests.
+	 * @todo Adapt to new selection handling method.
 	 */
 	private void addMouseListenersToMDSScatterchart(double coordinates[][], Set<Integer> filteredIndices)
 	{
@@ -707,10 +716,6 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 		
 		return nodeXWithinBounds && nodeYWithinBounds;
 	}
-	
-	NEXT: 
-		- Fix inter-visualization selection.
-		- Then: Alternative (selection) heatmap.
 	
 	@Override
 	public void processSelectionManipulationRequest(double minX, double minY, double maxX, double maxY)
@@ -827,11 +832,9 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 				// Change selection status.
 				changeDataPointSelectionStatus(newlyDeselectedDataPoint, false);
 			}
-						
-    		// Refresh scatterchart.
-    		//refresh(coordinates, filteredIndices, selectedCoordinates, selectedIndices, discardedCoordinates, discardedIndices);
+			
     		// Refresh other charts.
-    		//analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet(), false);
+    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet(), false);
     		
     		// Reset flag.
     		changeInSelectionDetected = false;
@@ -877,9 +880,9 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 		pointsManipulatedInCurrSelectionStep.clear();
 
 		System.out.println("pesm");
+		
 		// Update local scope.
 		if (changeInSelectionDetected_localScope) {
-			System.out.println("pesm - true");
 			// Refresh local scope visualization.
 //			analysisController.refreshLocalScopeAfterGlobalSelection();
 //			// Reset dirty flag.
@@ -895,7 +898,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	
 	/**
 	 * Updates x- and y-range of the MDS scatterchart.
-	 * @param coordinates
+	 * @param filteredCoordinates
 	 */
 	public void updateMDSScatterchartRanges()
 	{
