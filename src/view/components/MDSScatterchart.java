@@ -162,6 +162,10 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	/**
 	 * Reference to this workspace's coordinate collection.
 	 */
+	private double coordinates[][];
+	/**
+	 * Reference to this workspace's filtered coordinate collection.
+	 */
 	private double filteredCoordinates[][];
 	/**
 	 * Reference to this workspace's collection of filtered indices.
@@ -489,10 +493,12 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	 * @param discardedCoordinates
 	 * @param discardedIndices 
 	 */
-	public void refresh(double filteredCoordinates[][], Set<Integer> filteredIndices,
+	public void refresh(double coordinates[][],
+						double filteredCoordinates[][], Set<Integer> filteredIndices,
 						double selectedCoordinates[][], Set<Integer> selectedIndices,
 						double discardedCoordinates[][], Set<Integer> discardedIndices)
 	{	
+		System.out.println("refreshing scatterchart");
 		// Store references to data collection.
 		this.filteredCoordinates	= filteredCoordinates;
 		this.filteredIndices		= filteredIndices;
@@ -506,12 +512,15 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 		discardedDataSeries.getData().clear();
 		filteredDataSeries.getData().clear();
 		selectedDataSeries.getData().clear();
+		pointsManipulatedInCurrSelectionStep.clear();
+		selectedMDSPoints.clear();
 		
-        // Add filtered points as well as filtered and selected points to scatterchart.
-        addActiveDataPoints(filteredDataSeries, selectedDataSeries);
-        
+        // Add filtered points points to scatterchart.
+        addFilteredDataPoints();
+        // Add selected data points to scatterchart.
+        addSelectedDataPoints();
         // Add discarded data points (greyed out) to scatterchart.
-        addDiscardedDataPoints(discardedDataSeries);
+        addDiscardedDataPoints();
         
         // Add data in scatterchart.
         scatterchart.getData().add(discardedDataSeries);
@@ -537,58 +546,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	 */
 	public void refreshHeatmapAfterResize()
 	{
-		heatmap.refresh(false);
-	}
-	
-	/**
-	 * Marks a set of selected datasets (represented through their indices) as selected.
-	 * @param selectedIndices
-	 */
-	public void addToSelection(Set<Integer> selectedIndices)
-	{
-		// Examine all data points in filtered data series.
-		for (XYChart.Data<Number, Number> filteredData : filteredDataSeries.getData()) {
-			final int dataIndex = (int)filteredData.getExtraValue();
-			
-			// If point's index is in set of selected indices, but not in set of selected points: Add copy to selected points.
-			if ( selectedIndices.contains(dataIndex) && !selectedMDSPoints.containsKey(dataIndex) ) {
-        		XYChart.Data<Number, Number> dataPoint		= new XYChart.Data<Number, Number>(filteredData.getXValue(), filteredData.getYValue());
-	        	dataPoint.setExtraValue(dataIndex);
-	        	
-	        	// Add to data series.
-	        	selectedDataSeries.getData().add(dataPoint);
-	        	// Update references of selected data points.
-	        	selectedMDSPoints.put(dataIndex, dataPoint);
-			}
-		}
-	}
-	
-	/**
-	 * Marks a set of selected datasets (represented through their indices) as non-selected.
-	 * @param selectedIndices Index set of datasets still supposed to be selected. All other datasets will be removed from selection.
-	 */
-	public void removeFromSelection(Set<Integer> selectedIndices)
-	{
-		ArrayList<XYChart.Data<Number, Number>> datasetsToRemove = new ArrayList<XYChart.Data<Number, Number>>();
-		
-		// Examine all data points in filtered data series.
-		for (XYChart.Data<Number, Number> selectedData : selectedDataSeries.getData()) {
-			final int dataIndex = (int)selectedData.getExtraValue();
-			
-			// If point's index is in set of deselected indices: Remove copy to selected points.
-			if ( !selectedIndices.contains(dataIndex) && selectedMDSPoints.containsKey(dataIndex) ) {
-				// Mark dataset for removal from data series.
-				datasetsToRemove.add(selectedData);
-	        	
-	        	// Update references of selected data points.
-	        	selectedMDSPoints.remove(dataIndex);
-			}
-		}
-		
-		// Remove datasets from collection for selected data.
-		for (XYChart.Data<Number, Number> selectedData : datasetsToRemove) {
-			selectedDataSeries.getData().remove(selectedData);
-		}
+//		heatmap.refresh(false);
 	}
 	
 	/**
@@ -596,14 +554,11 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	 * @param dataSeries
 	 * @param selectedDataSeries
 	 */
-	private void addActiveDataPoints(final Series<Number, Number> dataSeries, final Series<Number, Number> selectedDataSeries)
+	private void addFilteredDataPoints()
 	{
         int count = 0;
 
         // xxx
-//        HERE: 		Base series association on selectedIndices/filteredIndices instead of selectedMDSPoints.
-//        THEN:		Use set of selectedIndices to add/remove datasets (selected in other vis. components) instead of adding them to selectedMDSPoints.
-//        			Eventually get rid of selectedMDSPoints altogether.
 //        FINALLY:	Once cross-component selection works without flaws (or at least without bugs), implement alternative/selection heatmap (adapt colors!).
 
         // Add filtered data points.
@@ -612,28 +567,38 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
         	if (!selectedIndices.contains(index)) {
 	        	XYChart.Data<Number, Number> dataPoint = new XYChart.Data<Number, Number>(filteredCoordinates[0][count], filteredCoordinates[1][count]);
 	        	dataPoint.setExtraValue(index);
-	        	dataSeries.getData().add(dataPoint);
+	        	filteredDataSeries.getData().add(dataPoint);
         	}
-        	
-        	count++;
-        }
-        
-        // Add selected data points.
-        count = 0;
-        for (int index : selectedIndices) {
-        		XYChart.Data<Number, Number> dataPoint = new XYChart.Data<Number, Number>(selectedCoordinates[0][count], selectedCoordinates[1][count]);
-	        	dataPoint.setExtraValue(index);
-	        	selectedDataSeries.getData().add(dataPoint);
         	
         	count++;
         }
 	}
 	
 	/**
+	 * Auxiliary method to add selected data points to data series in scatterchart.
+	 * @param dataSeries
+	 * @param selectedDataSeries
+	 */
+	private void addSelectedDataPoints()
+	{
+        int count = 0;
+        
+        // Add selected data points.
+        count = 0;
+        for (int index : selectedIndices) {
+    		XYChart.Data<Number, Number> dataPoint = new XYChart.Data<Number, Number>(selectedCoordinates[0][count], selectedCoordinates[1][count]);
+        	dataPoint.setExtraValue(index);
+        	selectedDataSeries.getData().add(dataPoint);
+        	selectedMDSPoints.put(index, dataPoint);
+    	
+        	count++;
+        }
+	}
+	/**
 	 * Adds discarded data points to data series.
 	 * @param discardedDataSeries
 	 */
-	private void addDiscardedDataPoints(final Series<Number, Number> discardedDataSeries)
+	private void addDiscardedDataPoints()
 	{
         int count = 0;
         for (int index : discardedIndices) {
@@ -668,9 +633,9 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 					    		selectedMDSPoints.put((int)dataPoint.getExtraValue(), dataPoint);
 					    		
 					    		// Refresh scatterchart.
-					    		refresh(coordinates, filteredIndices, selectedCoordinates, selectedIndices, discardedCoordinates, discardedIndices);
-					    		// Refresh other charts.
-					    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet(), false);
+//					    		refresh(coordinates, filteredIndices, selectedCoordinates, selectedIndices, discardedCoordinates, discardedIndices);
+//					    		// Refresh other charts.
+//					    		analysisController.integrateMDSSelection(selectedMDSPoints.keySet(), false);
 					    	}
 				    	}
 				    }
@@ -691,9 +656,9 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 			    		selectedMDSPoints.remove(dataPoint.getExtraValue());
 			    		
 			    		// Refresh scatterchart.
-			    		refresh(coordinates, filteredIndices, selectedCoordinates, selectedIndices, discardedCoordinates, discardedIndices);
-			    		// Refresh other charts.
-			    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet(), false);
+//			    		refresh(coordinates, filteredIndices, selectedCoordinates, selectedIndices, discardedCoordinates, discardedIndices);
+//			    		// Refresh other charts.
+//			    		analysisController.integrateMDSSelection(selectedMDSPoints.keySet(), false);
 			    	}
 			    }
 			});
@@ -834,7 +799,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 			}
 			
     		// Refresh other charts.
-    		analysisController.refreshVisualizationsAfterGlobalSelection(selectedMDSPoints.keySet(), false);
+    		analysisController.integrateMDSSelection(selectedMDSPoints.keySet(), false);
     		
     		// Reset flag.
     		changeInSelectionDetected = false;

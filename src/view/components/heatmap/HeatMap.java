@@ -227,6 +227,7 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 	 */
 	public void refresh(double coordinates[][], double coordinateExtrema[])
 	{
+		System.out.println("refreshing mds.heatmap");
 		this.coordinates		= coordinates;
 		this.coordinateExtrema	= coordinateExtrema;
 		

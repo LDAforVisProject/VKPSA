@@ -97,6 +97,11 @@ public class AnalysisDataspace
 	 * Stores filtered and selected LDA configurations.
 	 */
 	private ArrayList<LDAConfiguration> selectedFilteredLDAConfigurations;
+	/**
+	 * Stores selected coordinates.
+	 */
+	private double selectedCoordinates[][];
+
 	
 	/*
 	 * Miscanellous data.
@@ -181,12 +186,22 @@ public class AnalysisDataspace
 	}
 	
 	/**
+	 * Updates set of selected indices.
+	 * @param filteredIndices
+	 * @param selectedIndices
+	 */
+	public void updateSelectedIndexSet(Set<Integer> selectedIndices)
+	{
+		this.selectedFilteredIndices = createSelectedIndexSet(this.filteredIndices, selectedIndices);
+	}
+	
+	/**
 	 * Creates set of selected and filtered indices.
 	 * @param filteredIndices
 	 * @param selectedIndices
 	 * @return
 	 */
-	public Set<Integer> createSelectedFilteredIndexSet(Set<Integer> filteredIndices, Set<Integer> selectedIndices)
+	public Set<Integer> createSelectedIndexSet(Set<Integer> filteredIndices, Set<Integer> selectedIndices)
 	{
 		Set<Integer> selectedFilteredIndices = new HashSet<Integer>(selectedIndices.size());
 		
@@ -197,6 +212,15 @@ public class AnalysisDataspace
 		}
 		
 		return selectedFilteredIndices;
+	}
+	
+	/**
+	 * Updtes set of discarded indices.
+	 * @param filteredIndices
+	 */
+	public void updateDiscardedIndexSet()
+	{
+		this.discardedIndices = createDiscardedIndexSet(this.filteredIndices);
 	}
 	
 	/**
@@ -218,6 +242,15 @@ public class AnalysisDataspace
 		return discardedIndices;
 	}
 
+	/**
+	 * Updates matrix of discarded coordinate.
+	 * @param discardedIndices
+	 */
+	public void updateDiscardedCoordinateMatrix(Set<Integer> discardedIndices)
+	{
+		this.discardedCoordinates = createDiscardedCoordinateMatrix(discardedIndices);
+	}
+	
 	/**
 	 * Creates matrix of coordinates of discarded (non-filtered) datapoints.
 	 * @param discardedIndices
@@ -241,6 +274,15 @@ public class AnalysisDataspace
 	}
 	
 	/**
+	 * Updates selected LDA configuration set.
+	 * @param selectedFilteredIndices
+	 */
+	public void updateSelectedLDAConfigurations()
+	{
+		this.selectedFilteredLDAConfigurations = createSelectedLDAConfigurations(this.selectedFilteredIndices);
+	}
+	
+	/**
 	 * Creates list of LDA configurations out of sets of filtered and selected indices. 
 	 * @param selectedFilteredIndices
 	 * @return
@@ -254,6 +296,15 @@ public class AnalysisDataspace
 		}
 		
 		return selectedFilteredLDAConfigurations;
+	}
+	
+	/**
+	 * Updates discarded LDA configuration set.
+	 * @param discardedIndices
+	 */
+	public void updateDiscardedLDAConfigurations(Set<Integer> discardedIndices)
+	{
+		this.discardedLDAConfigurations = createDiscardedLDAConfigurations(discardedIndices);
 	}
 	
 	/**
@@ -271,6 +322,15 @@ public class AnalysisDataspace
 		
 		return discardedLDAConfigurations;
 	}	
+	
+	/**
+	 * Updates selected distance matrix.
+	 * @param selectedFilteredIndices
+	 */
+	public void updateSelectedDistanceMatrix()
+	{
+		this.selectedFilteredDistances = createSelectedDistanceMatrix(this.selectedFilteredIndices);
+	}
 	
 	/**
 	 * Creates distance matrix out of sets of filtered and selected indices. 
@@ -298,6 +358,15 @@ public class AnalysisDataspace
 	}
 	
 	/**
+	 * Update selected coordinate matrix.
+	 * @param selectedIndices
+	 */
+	public void updateSelectedCoordinateMatrix()
+	{
+		this.selectedCoordinates = createSelectedCoordinateMatrix(this.selectedFilteredIndices);
+	}
+	
+	/**
 	 * Creates matrix of coordinates of selected (non-filtered) datapoints.
 	 * @param selectedIndices
 	 * @return
@@ -317,6 +386,16 @@ public class AnalysisDataspace
 		}
 		
 		return selectedCoordinates;
+	}
+	
+	/**
+	 * Updates discarded distance matrix.
+	 * @param discardedIndices
+	 * @return
+	 */
+	public void updateDiscardedDistanceMatrix(Set<Integer> discardedIndices)
+	{
+		this.discardedDistances = createDiscardedDistanceMatrix(discardedIndices);
 	}
 	
 	/**
@@ -343,7 +422,112 @@ public class AnalysisDataspace
 		}
 		
 		return discardedDistances;
-	}	
+	}
+	
+	public void filterIndices(final Map<String, Pair<Double, Double>> parameterBoundaries)
+	{
+		// Iterate through all LDA configurations in workspace.
+		for (int i = 0; i < ldaConfigurations.size(); i++) {
+			LDAConfiguration ldaConfig	= ldaConfigurations.get(i);
+			boolean fitsBoundaries		= true;
+			
+			// Check if this particular LDA configuration is in bounds of all specified parameter thresholds.
+			for (Map.Entry<String, Pair<Double, Double>> entry : parameterBoundaries.entrySet()) {
+				double value	= ldaConfig.getParameter(entry.getKey());
+				double min		= entry.getValue().getKey();
+				double max		= entry.getValue().getValue();
+				
+				// Exclude LDA configuration if limits are exceeded.
+				if (value < min || value > max) {
+					fitsBoundaries = false;
+					
+					// Stop loop.
+					break;
+				}
+			}
+			
+			// If in boundaries and not contained in selection:
+			if (fitsBoundaries) {
+				// Remove from set of discarded indices, if in there.
+				if (discardedIndices.contains(i))
+					discardedIndices.remove(i);
+				
+				// Add to set of filtered indices, if not already in there.
+				if (!filteredIndices.contains(i))
+					filteredIndices.add(i);
+			}
+			
+			// Else if not in boundaries and contained in selection:
+			else if (!fitsBoundaries) {
+				// Add to set of discarded indices, if not already in there.
+				if (!discardedIndices.contains(i))
+					discardedIndices.add(i);
+				
+				// Remove from set of filtered indices, if in there.
+				if (filteredIndices.contains(i))
+					filteredIndices.remove(i);
+			}
+		}
+		
+		// Determine set of discarded indices.
+		discardedIndices		= createDiscardedIndexSet(filteredIndices);
+		// Determine set of filtered and selected indices.
+		selectedFilteredIndices	= createSelectedIndexSet(filteredIndices, selectedFilteredIndices);
+	}
+	
+	/**
+	 * Filters data.
+	 */
+	public void filterData()
+	{
+		/*
+		 * Update data collections for filtered datasets. 
+		 */
+		
+		// Use AnalysisController.filteredIndices to filter out data in desired parameter boundaries.
+		filteredCoordinates			= new double[coordinates.length][filteredIndices.size()];
+		filteredDistances			= new double[filteredIndices.size()][filteredIndices.size()];
+		filteredLDAConfigurations	= new ArrayList<LDAConfiguration>(filteredIndices.size());
+		
+		// Copy data corresponding to chosen LDA configurations in new arrays.
+		int count = 0;
+		for (int filteredIndex : filteredIndices) {
+			// Copy MDS coordinates.
+			for (int column = 0; column < coordinates.length; column++) {
+				filteredCoordinates[column][count] = coordinates[column][filteredIndex];
+			}
+			
+			// Copy distances.
+			int innerCount = 0;
+			for (int filteredInnerIndex : filteredIndices) {
+				filteredDistances[count][innerCount] = distances[filteredIndex][filteredInnerIndex];
+				innerCount++;
+			}
+			
+			// Copy LDA configurations.
+			filteredLDAConfigurations.add(ldaConfigurations.get(filteredIndex));
+			
+			count++;
+		}
+		
+		/*
+		 * Update data collections for discarded (not filtered) datasets. 
+		 */
+
+		// Update set of discarded values.
+		discardedCoordinates				= createDiscardedCoordinateMatrix(discardedIndices);
+		discardedDistances					= createDiscardedDistanceMatrix(discardedIndices);
+		discardedLDAConfigurations			= createDiscardedLDAConfigurations(selectedFilteredIndices);
+		
+		/*
+		 * Update data collections for filtered and selected datapoints. 
+		 */
+		
+		// Update set of filtered and selected values.
+		selectedCoordinates					= createSelectedCoordinateMatrix(selectedFilteredIndices);
+		selectedFilteredDistances			= createSelectedDistanceMatrix(selectedFilteredIndices);
+		selectedFilteredLDAConfigurations	= createSelectedLDAConfigurations(selectedFilteredIndices);
+	}
 	
 	// -----------------------------------------------
 	// 				Getter and Setter
@@ -417,6 +601,11 @@ public class AnalysisDataspace
 	public ArrayList<LDAConfiguration> getSelectedFilteredLDAConfigurations()
 	{
 		return selectedFilteredLDAConfigurations;
+	}
+
+	public double[][] getSelectedCoordinates()
+	{
+		return selectedCoordinates;
 	}
 
 	public boolean isGlobalExtremaIdentified()
