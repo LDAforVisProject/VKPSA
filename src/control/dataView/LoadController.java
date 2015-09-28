@@ -44,6 +44,7 @@ public class LoadController extends DataSubViewController
 		directoryChooser = new DirectoryChooser();
 
 		// Set default directory, if specified.
+		// @todo Read from settings file.
 		directoryChooser.setInitialDirectory(new File("D:\\Workspace\\Scientific Computing\\VKPSA\\src\\data"));	
 		
 		directoryChooser.setTitle("Choose Workspace");
@@ -65,6 +66,9 @@ public class LoadController extends DataSubViewController
 	@FXML
 	public void openFileBrowser(ActionEvent event)
 	{
+		log("Looking for working directory");
+		setProgressStatus(true);
+		
 		// Hide workspace chooser popup.
 		dataViewController.toggleWorkspaceChooserStatus(false);
 		
@@ -80,6 +84,8 @@ public class LoadController extends DataSubViewController
 		
 		// Load workspace.
 		loadData(event);
+		
+		setProgressStatus(false);
 	}
 	
 	/**

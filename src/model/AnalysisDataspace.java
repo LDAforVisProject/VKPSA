@@ -96,7 +96,7 @@ public class AnalysisDataspace
 	/**
 	 * Stores filtered and selected LDA configurations.
 	 */
-	private ArrayList<LDAConfiguration> selectedFilteredLDAConfigurations;
+	private ArrayList<LDAConfiguration> selectedLDAConfigurations;
 	/**
 	 * Stores selected coordinates.
 	 */
@@ -279,7 +279,7 @@ public class AnalysisDataspace
 	 */
 	public void updateSelectedLDAConfigurations()
 	{
-		this.selectedFilteredLDAConfigurations = createSelectedLDAConfigurations(this.selectedFilteredIndices);
+		this.selectedLDAConfigurations = createSelectedLDAConfigurations(this.selectedFilteredIndices);
 	}
 	
 	/**
@@ -526,7 +526,7 @@ public class AnalysisDataspace
 		// Update set of filtered and selected values.
 		selectedCoordinates					= createSelectedCoordinateMatrix(selectedFilteredIndices);
 		selectedFilteredDistances			= createSelectedDistanceMatrix(selectedFilteredIndices);
-		selectedFilteredLDAConfigurations	= createSelectedLDAConfigurations(selectedFilteredIndices);
+		selectedLDAConfigurations	= createSelectedLDAConfigurations(selectedFilteredIndices);
 	}
 	
 	// -----------------------------------------------
@@ -598,9 +598,9 @@ public class AnalysisDataspace
 		return selectedFilteredDistances;
 	}
 
-	public ArrayList<LDAConfiguration> getSelectedFilteredLDAConfigurations()
+	public ArrayList<LDAConfiguration> getSelectedLDAConfigurations()
 	{
-		return selectedFilteredLDAConfigurations;
+		return selectedLDAConfigurations;
 	}
 
 	public double[][] getSelectedCoordinates()

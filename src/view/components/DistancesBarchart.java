@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import view.components.heatmap.HeatmapDataBinding;
 import view.components.rubberbandselection.ISelectableComponent;
 import view.components.rubberbandselection.RubberBandSelection;
 
@@ -630,13 +631,13 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 			Pair<Double, Double> discardedDistanceExtrema	= identifyExtrema(discardedDistances);
 			
 			// Find absolute extrema.
-			double min = Double.MAX_VALUE;
-			min = filteredDistanceExtrema.getKey() < selectedDistanceExtrema.getKey() ? filteredDistanceExtrema.getKey() : selectedDistanceExtrema.getKey();
-			min = discardedDistanceExtrema.getKey() < min ? discardedDistanceExtrema.getKey() : min;
+			double min 	= Double.MAX_VALUE;
+			min 		= filteredDistanceExtrema.getKey() < selectedDistanceExtrema.getKey() ? filteredDistanceExtrema.getKey() : selectedDistanceExtrema.getKey();
+			min 		= discardedDistanceExtrema.getKey() < min ? discardedDistanceExtrema.getKey() : min;
 			
-			double max = Double.MIN_VALUE;
-			max = filteredDistanceExtrema.getValue() > selectedDistanceExtrema.getValue() ? filteredDistanceExtrema.getValue() : selectedDistanceExtrema.getValue();
-			max = discardedDistanceExtrema.getValue() > min ? discardedDistanceExtrema.getValue() : max;
+			double max	= Double.MIN_VALUE;
+			max 		= filteredDistanceExtrema.getValue() > selectedDistanceExtrema.getValue() ? filteredDistanceExtrema.getValue() : selectedDistanceExtrema.getValue();
+			max 		= discardedDistanceExtrema.getValue() > min ? discardedDistanceExtrema.getValue() : max;
 			
 			// Store new absolute extrema.
 			absoluteDistanceExtrema = new Pair<Double, Double>(min, max);
@@ -739,6 +740,14 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 			// Add to collection.
 			final String seriesSuffix = !isCtrlDown ? filteredDataSeries.getName() : selectedDataSeries.getName(); 
 			selectedLocalIndices.addAll(barToDataAssociations.get(description + seriesSuffix));
+			
+			// Remove glow from all bars.
+			for (Data<String, Number> data : filteredDataSeries.getData()) {
+				setBarHighlighting(data.getNode(), false, null);	
+			}
+			for (Data<String, Number> data : selectedDataSeries.getData()) {
+				setBarHighlighting(data.getNode(), false, null);	
+			}
 		}
 		
 		// Clear collection of selected bars.

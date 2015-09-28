@@ -534,16 +534,8 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
         addMouseListenersToMDSScatterchart(this.filteredCoordinates, this.filteredIndices);
         
         // Update heatmap.
-        System.out.println("mds -> " + scatterchart.getWidth() + ", " + scatterchart.getHeight());
-        System.out.println("mdsHeatmap -> " + heatmap_canvas.getWidth() + ", " + heatmap_canvas.getHeight());
         heatmap.refresh(this.filteredCoordinates, globalCoordinateExtrema);
-        //if (heatmap_canvas.getWidth() < 0 || heatmap_canvas.getHeight() < 0) {
-        	// Update position/indentation.
-//			updateHeatmapPosition();
-//			// Redraw heatmap.
-//			refreshHeatmapAfterResize();
-			//}
-		System.out.println("mdsHeatmap -> " + heatmap_canvas.getWidth() + ", " + heatmap_canvas.getHeight());
+
         // Update scatterchart ranges.
         updateMDSScatterchartRanges();
 	}
@@ -850,8 +842,6 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	{
 		// Clear selection-step-dependent data collections.
 		pointsManipulatedInCurrSelectionStep.clear();
-
-		System.out.println("pesm");
 		
 		// Update local scope.
 		if (changeInSelectionDetected_localScope) {

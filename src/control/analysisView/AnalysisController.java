@@ -2,10 +2,8 @@ package control.analysisView;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -22,15 +20,14 @@ import view.components.DistancesBarchart;
 import view.components.LocalScopeInstance;
 import view.components.MDSScatterchart;
 import view.components.heatmap.HeatMap;
+import view.components.heatmap.HeatmapDataBinding;
 import view.components.heatmap.HeatmapDataType;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.event.EventTarget;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
-import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -166,12 +163,19 @@ public class AnalysisController extends Controller
 	private @FXML Canvas paramSpaceHeatmap_canvas;
 	private @FXML NumberAxis numberaxis_parameterSpace_xaxis;
 	private @FXML NumberAxis numberaxis_parameterSpace_yaxis;
+	
+	// Heatmap setting controls (and metadata).
+	
 	private @FXML ComboBox<String> combobox_parameterSpace_distribution_xAxis;
 	private @FXML ComboBox<String> combobox_parameterSpace_distribution_yAxis;
-	
 	private @FXML Slider slider_parameterSpace_distribution_granularity;
 	private @FXML CheckBox checkbox_parameterSpace_distribution_dynAdjustment;
-
+	private @FXML ComboBox<String> paramDistributionHeatmap_datasetBinding_combobox;
+	/**
+	 * Stores heatmap's current data binding (filtered or selected data).
+	 */
+	private HeatmapDataBinding paramSpaceHeatmap_dataBinding;
+	
 	/*
 	 * Parameter Space - Distance correlation.
 	 */
@@ -203,6 +207,7 @@ public class AnalysisController extends Controller
 	private @FXML Label label_visType;
 	
 	// Local scope options.
+	 
 	private @FXML Slider slider_localScope_numTopicsToUse;
 	private @FXML TextField textfield_localScope_numTopicsToUse;
 	private @FXML Slider slider_localScope_numKeywordsToUse;
@@ -253,7 +258,6 @@ public class AnalysisController extends Controller
 	 */
 	private AnalysisDataspace dataspace;
 
-	
 	/*
 	 * Information on global extrema.
 	 */
@@ -280,7 +284,7 @@ public class AnalysisController extends Controller
 		dataspace = new AnalysisDataspace(this);
 		
 		// Auxiliary variable storing whether or not the global extrema have already been identified.
-		globalExtremaIdentified				= false;
+		globalExtremaIdentified	= false;
 		
 		// Init GUI elements.
 		initUIElements();
@@ -482,6 +486,15 @@ public class AnalysisController extends Controller
 	{
 		combobox_parameterSpace_distribution_xAxis.getItems().clear();
 		combobox_parameterSpace_distribution_yAxis.getItems().clear();
+		paramDistributionHeatmap_datasetBinding_combobox.getItems().clear();
+		
+		// Add databinding options.
+		paramDistributionHeatmap_datasetBinding_combobox.getItems().add("Filtered data");
+		paramDistributionHeatmap_datasetBinding_combobox.getItems().add("Selected data");
+		paramDistributionHeatmap_datasetBinding_combobox.requestLayout();
+		paramDistributionHeatmap_datasetBinding_combobox.applyCss();
+		// Set default databinding option.
+		paramDistributionHeatmap_datasetBinding_combobox.getSelectionModel().selectFirst();
 		
 		// Add supported parameters to axis comboboxes. 
 		for (String param : LDAConfiguration.SUPPORTED_PARAMETERS) {
@@ -523,6 +536,9 @@ public class AnalysisController extends Controller
 	 */
 	public void refreshVisualizations(boolean filterData)
 	{
+		for (int i = 0; i < 100; i++)
+			log("Refreshing visualizations.");
+		// Set references to data collections.
 		dataspace.setDataReferences(workspace.getLDAConfigurations(),  workspace.getMDSCoordinates(), workspace.getDistances());
 		
 		// Call initialization procedure.
@@ -534,18 +550,34 @@ public class AnalysisController extends Controller
 			applyFilter();
 		}
 		
+		
 		// Refresh visualizations.
+		
+		// 	Parameter filtering controls:
 		refreshParameterHistograms(50);
+
+		// 	MDS scatterchart:
 		mdsScatterchart.refresh(	dataspace.getCoordinates(),
 									dataspace.getFilteredCoordinates(), dataspace.getFilteredIndices(), 
 									dataspace.getSelectedCoordinates(), dataspace.getSelectedFilteredIndices(), 
 									dataspace.getDiscardedCoordinates(), dataspace.getDiscardedIndices());
+
+		//	Distance evaluation barchart:
 		distancesBarchart.refresh(	dataspace.getDiscardedIndices(), dataspace.getFilteredIndices(), dataspace.getSelectedFilteredIndices(),
 									dataspace.getDiscardedDistances(), dataspace.getFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
 									true);
+
+		// 	Parameter dataset distance correlation: 
 		parameterspace_ddc_linechart.refresh(dataspace.getFilteredLDAConfigurations(), dataspace.getFilteredDistances(), true);
-		parameterspace_heatmap.refresh(dataspace.getLDAConfigurations(), dataspace.getFilteredLDAConfigurations(), combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), button_relativeView_paramDist.isSelected());
-		localScopeInstance.refresh(dataspace.getSelectedFilteredLDAConfigurations());
+		
+		// 	Heatmap:
+		parameterspace_heatmap.refresh(	dataspace.getLDAConfigurations(),
+										paramSpaceHeatmap_dataBinding == HeatmapDataBinding.FILTERED ? dataspace.getFilteredLDAConfigurations() : dataspace.getSelectedLDAConfigurations(), 
+										combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), 
+										button_relativeView_paramDist.isSelected(), paramSpaceHeatmap_dataBinding);
+		
+		//	Local scope:
+		localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
 	}
 
 	/**
@@ -592,16 +624,19 @@ public class AnalysisController extends Controller
 //				dataspace.getFilteredCoordinates(), dataspace.getFilteredIndices(), 
 //				dataspace.getSelectedCoordinates(), dataspace.getSelectedFilteredIndices(), 
 //				dataspace.getDiscardedCoordinates(), dataspace.getDiscardedIndices());
-		// @todo Refresh heatmap.
+		parameterspace_heatmap.refresh(	dataspace.getLDAConfigurations(),
+										paramSpaceHeatmap_dataBinding == HeatmapDataBinding.FILTERED ? dataspace.getFilteredLDAConfigurations() : dataspace.getSelectedLDAConfigurations(), 
+										combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), 
+										button_relativeView_paramDist.isSelected(), paramSpaceHeatmap_dataBinding);
 		
 		// Refresh local scope visualization, if specified.
 		if (includeLocalScope)
-			localScopeInstance.refresh(dataspace.getSelectedFilteredLDAConfigurations());
+			localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
 	}
 	
 	public void refreshLocalScopeAfterGlobalSelection()
 	{
-		localScopeInstance.refresh(dataspace.getSelectedFilteredLDAConfigurations());
+		localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
 	}
 	
 	/**
@@ -621,7 +656,7 @@ public class AnalysisController extends Controller
 		if (isAddition) {
 			// Check if any of the newly selected IDs are not contained in global selection yet.
 			// If so: Add them.
-			for (LDAConfiguration selectedLDAConfiguration : dataspace.getSelectedFilteredLDAConfigurations()) {
+			for (LDAConfiguration selectedLDAConfiguration : dataspace.getSelectedLDAConfigurations()) {
 				final int alreadySelectedLDAConfigID = selectedLDAConfiguration.getConfigurationID(); 
 				
 				// If newly selected set already contained in existing selection: Remove from addition set.
@@ -736,15 +771,18 @@ public class AnalysisController extends Controller
 		dataspace.updateSelectedLDAConfigurations();
 		dataspace.updateSelectedCoordinateMatrix();
 
-		
 		// 4.	Refresh visualizations.
-		distancesBarchart.refresh(	dataspace.getDiscardedIndices(), dataspace.getFilteredIndices(), dataspace.getSelectedFilteredIndices(),
-									dataspace.getDiscardedDistances(), dataspace.getFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
-									true);
-		mdsScatterchart.refresh(	dataspace.getCoordinates(),
-									dataspace.getFilteredCoordinates(), dataspace.getFilteredIndices(), 
-									dataspace.getSelectedCoordinates(), dataspace.getSelectedFilteredIndices(), 
-									dataspace.getDiscardedCoordinates(), dataspace.getDiscardedIndices());
+		distancesBarchart.refresh(		dataspace.getDiscardedIndices(), dataspace.getFilteredIndices(), dataspace.getSelectedFilteredIndices(),
+										dataspace.getDiscardedDistances(), dataspace.getFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
+										true);
+		mdsScatterchart.refresh(		dataspace.getCoordinates(),
+										dataspace.getFilteredCoordinates(), dataspace.getFilteredIndices(), 
+										dataspace.getSelectedCoordinates(), dataspace.getSelectedFilteredIndices(), 
+										dataspace.getDiscardedCoordinates(), dataspace.getDiscardedIndices());
+		parameterspace_heatmap.refresh(	dataspace.getLDAConfigurations(),
+										paramSpaceHeatmap_dataBinding == HeatmapDataBinding.FILTERED ? dataspace.getFilteredLDAConfigurations() : dataspace.getSelectedLDAConfigurations(), 
+										combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), 
+										button_relativeView_paramDist.isSelected(), paramSpaceHeatmap_dataBinding);
 	}
 	
 	/**
@@ -1029,8 +1067,15 @@ public class AnalysisController extends Controller
 			filteredLDAConfigurations.add(dataspace.getLDAConfigurations().get(selectedIndex));
 		}
 		
-		if (parameterspace_heatmap != null && combobox_parameterSpace_distribution_xAxis != null && combobox_parameterSpace_distribution_yAxis != null)
-			parameterspace_heatmap.refresh(dataspace.getLDAConfigurations(), filteredLDAConfigurations, combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), button_relativeView_paramDist.isSelected());
+		if (	parameterspace_heatmap != null 						&& 
+				combobox_parameterSpace_distribution_xAxis != null 	&& 
+				combobox_parameterSpace_distribution_yAxis != null) {
+			// Refresh heatmap.
+			parameterspace_heatmap.refresh(	dataspace.getLDAConfigurations(),
+											paramSpaceHeatmap_dataBinding == HeatmapDataBinding.FILTERED ? dataspace.getFilteredLDAConfigurations() : dataspace.getSelectedLDAConfigurations(), 
+											combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), 
+											button_relativeView_paramDist.isSelected(), paramSpaceHeatmap_dataBinding);
+		}
 	}
 	
 	public void updateLinechartInfo(boolean show, ArrayList<Label> labels)
@@ -1102,6 +1147,26 @@ public class AnalysisController extends Controller
 	public void changeMDSHeatmapVisibility(ActionEvent e)
 	{
 		mdsScatterchart.setHeatmapVisiblity(showMSDHeatmap_checkbox.isSelected());
+	}
+	
+	/**
+	 * Changes which dataset the parameter distribution heatmap is bound to (filtered or selected datasets). 
+	 * @param e
+	 */
+	@FXML
+	public void changeParamDistributionHeatmapDataBinding(ActionEvent e)
+	{
+		// Translate control value into valid HeatmapDataBinding entitiy.
+		final String selectedDataBindingString	= paramDistributionHeatmap_datasetBinding_combobox.getSelectionModel().getSelectedItem();
+		this.paramSpaceHeatmap_dataBinding		= HeatMap.translateItemstringToDataBindingType(selectedDataBindingString);
+
+		// Refresh heatmap.
+		if (dataspace.getLDAConfigurations() != null) {
+			parameterspace_heatmap.refresh(	dataspace.getLDAConfigurations(),
+											paramSpaceHeatmap_dataBinding == HeatmapDataBinding.FILTERED ? dataspace.getFilteredLDAConfigurations() : dataspace.getSelectedLDAConfigurations(), 
+											combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), 
+											button_relativeView_paramDist.isSelected(), paramSpaceHeatmap_dataBinding);
+		}
 	}
 	
 	/**

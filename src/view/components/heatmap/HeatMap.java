@@ -107,6 +107,15 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 	 * Store which cells were selected.
 	 */
 	Set<Integer> selectedCellIDs;
+	
+	/**
+	 * Type of heatmap data used with this instance.
+	 */
+	private HeatmapDataType dataType;
+	/**
+	 * Represents which elements (selected or filtered) the current heatmap is bound to. 
+	 */
+	private HeatmapDataBinding dataBinding;
 			
 	/*
 	 * Other data.
@@ -120,11 +129,6 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 	 * Name of y-axis parameter.
 	 */
 	private String key2;
-	
-	/**
-	 * Type of heatmap data used with this instance.
-	 */
-	private HeatmapDataType dataType;
 	
 	/**
 	 * Signifies whether the ctrl key is down at any given time.
@@ -193,8 +197,13 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 	 * @param key2
 	 * @param relativeViewMode
 	 */
-	public void refresh(final ArrayList<LDAConfiguration> allLDAConfigurations, final ArrayList<LDAConfiguration> chosenLDAConfigurations, final String key1, final String key2, boolean relativeViewMode) 
+	public void refresh(final ArrayList<LDAConfiguration> allLDAConfigurations, final ArrayList<LDAConfiguration> chosenLDAConfigurations, 
+						final String key1, final String key2, 
+						boolean relativeViewMode, HeatmapDataBinding dataBinding)
     {
+		// Update data binding type.
+		this.dataBinding				= dataBinding;
+		
 		// If in relative view mode: allLDAConfigurations -> selectedLDAConfigurations.
 		this.allLDAConfigurations		= relativeViewMode ? chosenLDAConfigurations : allLDAConfigurations;
     	this.chosenLDAConfigurations	= chosenLDAConfigurations;
@@ -227,7 +236,6 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 	 */
 	public void refresh(double coordinates[][], double coordinateExtrema[])
 	{
-		System.out.println("refreshing mds.heatmap");
 		this.coordinates		= coordinates;
 		this.coordinateExtrema	= coordinateExtrema;
 		
@@ -375,9 +383,6 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 		
 		// Proofcheck minOccurenceCount (in case no LDA configurations are filtered).
 		minOccurenceCount = minOccurenceCount != Integer.MAX_VALUE ? minOccurenceCount : 0;
- 		
-		System.out.println("max = " + maxOccurenceCount);
-		System.out.println("max = " + minOccurenceCount);
 		
 		// Return binned data.
 		return new BinnedOccurenceEntity(binMatrix, minOccurenceCount, maxOccurenceCount, minX, maxX, minY, minY);
@@ -390,10 +395,6 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
      */
     private void draw(BinnedOccurenceEntity binnedData, boolean useBorders)
     {
-    	if (dataType == HeatmapDataType.MDSCoordinates) {
-//    		System.out.println("drawing - " + canvas.getWidth() + " x" + canvas.getHeight());
-    	}
-    	
     	GraphicsContext gc		= canvas.getGraphicsContext2D();
     	int binMatrix[][]		= binnedData.getBinMatrix();
     	int minOccurenceCount	= binnedData.getMinOccurenceCount();
@@ -401,6 +402,10 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
     	
     	// Set stroke color.
     	gc.setStroke(Color.BLACK);
+    	
+    	// Set base colors for heatmap, dependent on data binding type.
+    	Color minColor = dataBinding == HeatmapDataBinding.FILTERED ? Color.LIGHTBLUE 	: Color.RED;
+    	Color maxColor = dataBinding == HeatmapDataBinding.FILTERED ? Color.DARKBLUE	: Color.DARKRED;
     	
     	// Adjust tick values at both axes.
     	if (xAxis != null && yAxis != null) {
@@ -436,7 +441,8 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 				cellCoordinates[3] 			= cellCoordinates[1] + cellHeight;
 				
 				// Set color for this cell.
-				Color cellColor = ColorScale.getColorForValue(binMatrix[i][j], minOccurenceCount, maxOccurenceCount);
+//				Color cellColor = ColorScale.getColorForValue(binMatrix[i][j], minOccurenceCount, maxOccurenceCount);
+				Color cellColor = ColorScale.getColorForValue(binMatrix[i][j], minOccurenceCount, maxOccurenceCount, minColor, maxColor);
 				gc.setFill(cellColor);
 				
 				// Draw cell.
@@ -565,5 +571,27 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 	public void processKeyReleasedEvent(KeyEvent ke)
 	{
 		isCtrlDown = ke.isControlDown();
+	}
+	
+	/**
+	 * Translates ComboBox item string to HeatmapDataBinding instance. 
+	 * @param item
+	 */
+	public static HeatmapDataBinding translateItemstringToDataBindingType(String item)
+	{
+		HeatmapDataBinding dataBinding = null;
+		
+		switch (item) 
+		{
+			case "Filtered data":
+				dataBinding = HeatmapDataBinding.FILTERED;
+			break;
+			
+			case "Selected data":
+				dataBinding = HeatmapDataBinding.SELECTED;
+			break;
+		}
+		
+		return dataBinding;
 	}
 }

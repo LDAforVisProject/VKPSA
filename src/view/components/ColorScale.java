@@ -59,8 +59,9 @@ public class ColorScale extends ImageView
         return new ColorScale(image);
     }
     
-    /*
+    /**
      * Calculate value on a blue to red hue scale, dependent on the given minimum and maximum values.
+     * @deprecated
      * @param value
      * @param min
      * @param max
@@ -98,8 +99,10 @@ public class ColorScale extends ImageView
         else if (value == 0) 
         	return Color.TRANSPARENT;
         
-        else
-        	return Color.hsb(Color.LIGHTGREEN.getHue() + (Color.DARKOLIVEGREEN.getHue() - Color.LIGHTGREEN.getHue()) * (value - min) / (max - min), (value - min) / (max - min), 1.0);
+        else {
+        	final double hue = Color.LIGHTGREEN.getHue() + (Color.DARKOLIVEGREEN.getHue() - Color.LIGHTGREEN.getHue()) * (value - min) / (max - min);
+        	return Color.hsb(hue, (value - min) / (max - min), 1.0);
+        }
     }
     
     /**
@@ -113,13 +116,17 @@ public class ColorScale extends ImageView
      */
     public static Color getColorForValue(double value, double min, double max, Color minColor, Color maxColor) 
     {
-        if (value < min || value > max) {
+        if (value != 0 && (value < min || value > max) ) {
             return Color.BLACK ;
         }
         
-        double hue = minColor.getHue() + (maxColor.getHue() - minColor.getHue()) * (value - min) / (max - min);
+        else if (value == 0) 
+        	return Color.TRANSPARENT;
         
-        return Color.hsb(hue, 1.0, 1.0);
+        else {
+	        final double hue = minColor.getHue() + (maxColor.getHue() - minColor.getHue()) * (value - min) / (max - min);
+	        return Color.hsb(hue, (value - min) / (max - min), 1.0);
+        }
     }
     
     public static Color getDefaultColor()

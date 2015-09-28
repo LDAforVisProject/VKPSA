@@ -5,8 +5,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import control.analysisView.AnalysisController;
 import control.dataView.DataSubViewController;
@@ -16,15 +14,20 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TextArea;
 import javafx.scene.effect.ColorAdjust;
-import javafx.scene.effect.Effect;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 
+/**
+ * Base controller for the entire application. 
+ * @author RM
+ *
+ */
 public class CoreController extends Controller
 {
 	private @FXML Node root;
@@ -44,14 +47,30 @@ public class CoreController extends Controller
 	
 	private @FXML AnchorPane pane_content;
 	
-	// Reference to main scene.
+	/**
+	 * Protocol pane's ProgressIndicator.
+	 */
+	private @FXML ProgressIndicator protocol_progressindicator;
+	/**
+	 * Protocol pane's TextArea.
+	 */
+	private @FXML TextArea protocol_textarea;
+	
+	/**
+	 *  Reference to main scene.
+	 */
 	private Scene scene;
 	
-	// References to instances of content pane's controllers.
+	/**
+	 *  References to instances of content pane's controllers.
+	 */
 	private Map<String, Controller> controllerMap;
 	
-	// References to loaded UI pane views.
+	/**
+	 *  References to loaded UI pane views.
+	 */
 	private Map<String, Node> viewNodeMap;
+	
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources)
@@ -116,7 +135,7 @@ public class CoreController extends Controller
 					initView("analyze", "/view/SII/SII_Content_Analysis.fxml");
 					
 					// Set scene and draw visualizations.
-					((AnalysisController)controllerMap.get("analyze")).setScene(scene);;
+					((AnalysisController)controllerMap.get("analyze")).setScene(scene);
 					((AnalysisController)controllerMap.get("analyze")).refreshVisualizations(true);
 				}
 				
@@ -174,6 +193,8 @@ public class CoreController extends Controller
 			
 			// Set current workspace in analysis controller.
 			controller.setWorkspace(workspace);
+			// Set protocol elements.
+			controller.setProtocolElements(protocol_progressindicator, protocol_textarea);
 			
 			// Ensure resizability of content.
 			AnchorPane.setTopAnchor(contentNode, 0.0);
@@ -223,7 +244,12 @@ public class CoreController extends Controller
 				
 	        	// Get and store controller.
 	        	controllerMap.put(viewID, (Controller)fxmlLoader.getController());
+				
+	        	// Set current workspace in analysis controller.	        	
 				controllerMap.get(viewID).setWorkspace(workspace);
+				// Set protocol elements.
+				controllerMap.get(viewID).setProtocolElements(protocol_progressindicator, protocol_textarea);
+				
 				// Set dataViewController in respective sub-controller.
 				((DataSubViewController)controllerMap.get(viewID)).setDataViewController(dvController);
 				
