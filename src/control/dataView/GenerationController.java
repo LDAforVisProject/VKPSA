@@ -70,6 +70,7 @@ public class GenerationController extends DataSubViewController
 	@FXML private ProgressIndicator generate_progressIndicator;
 	
 	private Map<String, RangeSlider> rangeSliders;
+	private Map<String, BarChart> barcharts;
 	private Map<String, VBox> vBoxes;
 	
 	// -----------------------------------------------
@@ -77,7 +78,13 @@ public class GenerationController extends DataSubViewController
 	// -----------------------------------------------
 	
 	private Map<String, ArrayList<Double>> parameterValues;
+	/**
+	 * Total number of datasets to generate.
+	 */
 	private int numberOfDatasetsToGenerate;
+	/**
+	 * Total number of divisions for each parameter.
+	 */
 	private int numberOfDivisions;
 	
 	
@@ -107,6 +114,7 @@ public class GenerationController extends DataSubViewController
 	private void initUIElements() 
 	{
 		// Init UI element collections.
+		barcharts		= new HashMap<String, BarChart>();
 		//spinners		= new HashMap<String, Spinner<Float>>();
 		rangeSliders	= new HashMap<String, RangeSlider>();
 		vBoxes			= new HashMap<String, VBox>();
@@ -158,6 +166,9 @@ public class GenerationController extends DataSubViewController
 	    	}
 	    }
 		
+		// Init barcharts.
+		initBarcharts();
+		
 		// Init range sliders.
 		initRangeSliders();
 		
@@ -168,6 +179,13 @@ public class GenerationController extends DataSubViewController
 		initComboBoxes();
 	}
 	
+	private void initBarcharts()
+	{
+		barcharts.put("alpha", alpha_barchart);
+		barcharts.put("eta", eta_barchart);
+		barcharts.put("kappa", kappa_barchart);
+	}
+
 	/**
 	 * Initialize ComboBox UI elements.
 	 */
@@ -175,8 +193,10 @@ public class GenerationController extends DataSubViewController
 	{
 		sampling_combobox.getItems().clear();
 		sampling_combobox.getItems().add("Random");
-		sampling_combobox.getItems().add("Cartesic");
-		sampling_combobox.getItems().add("Latin Hypercube");
+		sampling_combobox.getItems().add("Cartesian");
+//		sampling_combobox.getItems().add("Latin Hypercube");
+
+		// Set default value.
 		sampling_combobox.setValue("Random");
 	}
 	
@@ -193,10 +213,25 @@ public class GenerationController extends DataSubViewController
 		kappa_max_textfield.setText(String.valueOf(rangeSliders.get("kappa").getHighValue()));
 		
 		try {
+			// Add listener for focus changes.
+//			numberOfDatasets_textfield.focusedProperty().addListener(new ChangeListener<Boolean>() {
+//			    @Override
+//			    public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldPropertyValue, Boolean newPropertyValue)
+//			    {
+//			        updateNumberOfDatasets(null);
+//			    }
+//			});
+//			numberOfDivisions_textfield.focusedProperty().addListener(new ChangeListener<Boolean>() {
+//			    @Override
+//			    public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldPropertyValue, Boolean newPropertyValue)
+//			    {
+//			        updateNumberOfDivisions(null);
+//			    }
+//			});
+			
+			// Set initial values.
 			numberOfDatasetsToGenerate	= Integer.parseInt(numberOfDatasets_textfield.getText());
 			numberOfDivisions			= Integer.parseInt(numberOfDivisions_textfield.getText());
-			
-			numberOfDatasets_textfield.setDisable(true);
 		}
 		
 		catch (NumberFormatException e) {
@@ -216,18 +251,19 @@ public class GenerationController extends DataSubViewController
 		for (Map.Entry<String, RangeSlider> entry : rangeSliders.entrySet()) {
 			RangeSlider rs = entry.getValue();
 			
-			rs.setMaxWidth(360);
+			rs.setMaxWidth(337);
+			rs.setPrefWidth(337);
 			rs.setMax(25);
 			rs.setMajorTickUnit(5);
-			rs.setMinorTickCount(29);
-			rs.setSnapToTicks(true);
+			rs.setMinorTickCount(4);
+//			rs.setSnapToTicks(true);
 			rs.setShowTickLabels(true);
 			rs.setShowTickMarks(true);
 			rs.setLowValue(0);
 			rs.setHighValue(25);
 			
 			// Get some distance between range sliders and bar charts.
-			rs.setPadding(new Insets(10, 0, 0, 0));
+			rs.setPadding(new Insets(10, 0, 0, -2));
 			
 			addEventHandlerToRangeSlider(rs, entry.getKey());
 		}
@@ -249,7 +285,13 @@ public class GenerationController extends DataSubViewController
 		rs.addEventHandler(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) 
             {
-            	// Update control values after slider values where changed.
+            	// Special adjustments after drag is finished.
+            	if (parameter == "kappa") {
+            		rs.setLowValue(Math.round(rs.getLowValue()));
+            		rs.setHighValue(Math.round(rs.getHighValue()));
+            	}
+            	
+            	// Update control values after slider values were changed.
             	updateControlValues(rs, parameter);
             	
             	// Re-generate parameter values.
@@ -328,15 +370,22 @@ public class GenerationController extends DataSubViewController
 				// If sampling mode == random: Number of datasets to generate equals number of divisions for each parameter.
 				case "Random":
 					numberOfDivisions = numberOfDatasetsToGenerate;
-					numberOfDivisions_textfield.setText(String.valueOf(numberOfDivisions));
 				break;
 				
-				case "Cartesic":
+				case "Cartesian":
+					numberOfDivisions			= (int) Math.pow(numberOfDatasetsToGenerate,  1.0 / LDAConfiguration.SUPPORTED_PARAMETERS.length);
+					
+					// Round down number of datasets to nearest possible value.
+					numberOfDatasetsToGenerate	= (int) Math.pow(numberOfDivisions, LDAConfiguration.SUPPORTED_PARAMETERS.length);
+					numberOfDatasets_textfield.setText(String.valueOf(numberOfDatasetsToGenerate));
 				break;
 				
-				case "Hypercube":
+				case "Latin Hypercube":
 				break;
 			}
+			
+			// Update textfield content.
+			numberOfDivisions_textfield.setText(String.valueOf(numberOfDivisions));
 			
 			// Update scented widget histograms.
 			generateParameterValues();
@@ -358,15 +407,22 @@ public class GenerationController extends DataSubViewController
 				// If sampling mode == random: Number of datasets to generate equals number of divisions for each parameter.				
 				case "Random":
 					numberOfDatasetsToGenerate = numberOfDivisions;
-					numberOfDatasets_textfield.setText(String.valueOf(numberOfDatasetsToGenerate));
 				break;
 				
-				case "Cartesic":
+				case "Cartesian":
+					numberOfDatasetsToGenerate = (int) Math.pow(numberOfDivisions, LDAConfiguration.SUPPORTED_PARAMETERS.length);
+					
+					// Round down number of divisions to nearest possible value.
+//					numberOfDivisions			= (int) Math.pow(numberOfDivisions, LDAConfiguration.SUPPORTED_PARAMETERS.length);
+//					numberOfDatasets_textfield.setText(String.valueOf(numberOfDatasetsToGenerate));
 				break;
 				
 				case "Hypercube":
 				break;
 			}
+
+			// Update textfield content.
+			numberOfDatasets_textfield.setText(String.valueOf(numberOfDatasetsToGenerate));
 			
 			// Update scented widget histograms.
 			generateParameterValues();
@@ -403,18 +459,33 @@ public class GenerationController extends DataSubViewController
 		 * Generate numberOfDivisions values for each parameter.
 		 */
 		
-		// Init random number generator.
-		Random randomGenerator	= new Random();
-		// Generated values are allowed to be up to rangeSlider.getHighValue() and as low as rangeSlider.getLowValue().
-		double intervalAlpha 	= rangeSliders.get("alpha").getHighValue() - rangeSliders.get("alpha").getLowValue();
-		double intervalEta		= rangeSliders.get("eta").getHighValue() - rangeSliders.get("eta").getLowValue();
-		double intervalKappa	= rangeSliders.get("kappa").getHighValue() - rangeSliders.get("kappa").getLowValue();
-
-		// Generate random parameter values.		
-		for (int i = 0; i < numberOfDivisions; i++) {
-			parameterValues.get("alpha").add(rangeSliders.get("alpha").getLowValue() + randomGenerator.nextFloat() * intervalAlpha);
-			parameterValues.get("eta").add(rangeSliders.get("eta").getLowValue() + randomGenerator.nextFloat() * intervalEta);
-			parameterValues.get("kappa").add(rangeSliders.get("kappa").getLowValue() + randomGenerator.nextFloat() * intervalKappa);
+		switch (sampling_combobox.getValue())
+		{
+			case "Random":
+				// Init random number generator.
+				Random randomGenerator	= new Random();
+				// Generated values are allowed to be up to rangeSlider.getHighValue() and as low as rangeSlider.getLowValue().
+				double intervalAlpha 	= rangeSliders.get("alpha").getHighValue() - rangeSliders.get("alpha").getLowValue();
+				double intervalEta		= rangeSliders.get("eta").getHighValue() - rangeSliders.get("eta").getLowValue();
+				double intervalKappa	= rangeSliders.get("kappa").getHighValue() - rangeSliders.get("kappa").getLowValue();
+				
+				// Generate random parameter values.		
+				for (int i = 0; i < numberOfDivisions; i++) {
+					parameterValues.get("alpha").add(rangeSliders.get("alpha").getLowValue() + randomGenerator.nextFloat() * intervalAlpha);
+					parameterValues.get("eta").add(rangeSliders.get("eta").getLowValue() + randomGenerator.nextFloat() * intervalEta);
+					parameterValues.get("kappa").add(rangeSliders.get("kappa").getLowValue() + randomGenerator.nextFloat() * intervalKappa);
+				}
+			break;
+			
+			case "Cartesian":
+				for (String param : LDAConfiguration.SUPPORTED_PARAMETERS) {
+					final double interval = (rangeSliders.get(param).getHighValue() - rangeSliders.get(param).getLowValue()) / (numberOfDivisions - 1);
+					
+					for (int i = 0; i < numberOfDivisions; i++) {
+						parameterValues.get(param).add(rangeSliders.get(param).getLowValue() + interval * i);
+					}
+				}
+			break;
 		}
 		
 		/*
@@ -589,5 +660,12 @@ public class GenerationController extends DataSubViewController
 	@Override
 	public void resizeContent(double width, double height)
 	{
+	}
+	
+	@FXML
+	public void changeSamplingMethod(ActionEvent e)
+	{
+		// Update number of datasets.
+		updateNumberOfDatasets(e);
 	}
 }

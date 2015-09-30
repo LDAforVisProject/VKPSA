@@ -18,10 +18,10 @@ import control.Controller;
 import view.components.DistanceDifferenceCorrelationLinechart;
 import view.components.DistancesBarchart;
 import view.components.LocalScopeInstance;
-import view.components.MDSScatterchart;
 import view.components.heatmap.HeatMap;
 import view.components.heatmap.HeatmapDataBinding;
 import view.components.heatmap.HeatmapDataType;
+import view.components.mdsScatterchart.MDSScatterchart;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -536,8 +536,8 @@ public class AnalysisController extends Controller
 	 */
 	public void refreshVisualizations(boolean filterData)
 	{
-		for (int i = 0; i < 100; i++)
-			log("Refreshing visualizations.");
+		log("Refreshing visualizations.");
+		
 		// Set references to data collections.
 		dataspace.setDataReferences(workspace.getLDAConfigurations(),  workspace.getMDSCoordinates(), workspace.getDistances());
 		

@@ -81,6 +81,10 @@ public class DataViewController extends Controller
         });
 	}
 	
+	/**
+	 * Show workspace chooser.
+	 * @param disableSubDataViewse
+	 */
 	public void showWorkspaceChooser(boolean disableSubDataViewse)
 	{
 		if (workspaceChooser_popover != null && !workspaceChooser_popover.isShowing()) {
@@ -98,6 +102,10 @@ public class DataViewController extends Controller
 		}
 	}
 	
+	/**
+	 * Hide workspace chooser.
+	 * @param enableSubDataViews
+	 */
 	public void hideWorkspaceChooser(boolean enableSubDataViews)
 	{
 		if (workspaceChooser_popover != null && workspaceChooser_popover.isShowing()) {
@@ -110,6 +118,10 @@ public class DataViewController extends Controller
 		}
 	}
 	
+	/**
+	 * Toggle visibility (and related properties) of workspace chooser.
+	 * @param toggleSubDataViews
+	 */
 	public void toggleWorkspaceChooserStatus(boolean toggleSubDataViews)
 	{
 		// Toggle subDataView's .enable option, if desired.
@@ -175,7 +187,8 @@ public class DataViewController extends Controller
 	{
 		Node result = null;
 		
-		switch (viewID) {
+		switch (viewID) 
+		{
 			case "load":
 				result = root;
 			break;

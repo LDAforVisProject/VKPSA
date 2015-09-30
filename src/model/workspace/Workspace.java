@@ -46,8 +46,7 @@ import model.workspace.tasks.WorkspaceTask;
 
 // FRONTEND / analysis view:
 
-// @todo Add boxplot for quantiles (and average)? Drop labels instead.
-// @todo Add protocol SplitPane to every view (i.e.: Add in core view).
+// @todo Add boxplot for quantiles (and average)?
 
 /**
  * Encompasses:

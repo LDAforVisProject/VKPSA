@@ -11,7 +11,7 @@ import javafx.util.Pair;
 import control.analysisView.AnalysisController;
 
 /**
- * @todo Provides abstraction for data used in AnalysisController.
+ * Provides abstraction for data used in AnalysisController.
  * Encompasses all relevant data and methods used for tasks in AnalysisController.
  * @author RM
  *

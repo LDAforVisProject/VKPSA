@@ -1,10 +1,11 @@
-package view.components;
+package view.components.mdsScatterchart;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 
 
 
@@ -29,6 +30,7 @@ import javafx.scene.input.ScrollEvent;
 import javafx.util.Pair;
 import javafx.scene.layout.Pane;
 import control.analysisView.AnalysisController;
+import view.components.VisualizationComponent;
 import view.components.heatmap.HeatMap;
 import view.components.heatmap.HeatmapDataType;
 import view.components.rubberbandselection.ISelectableComponent;
@@ -189,6 +191,22 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	 * Reference to this workspace's collection of discarded indices.
 	 */
 	private Set<Integer> discardedIndices;
+	
+	/*
+	 * Event handler (used for single selection mode).
+	 */
+	/**
+	 * EventHandler for click on a filtered point.
+	 */
+	private EventHandler<MouseEvent> singleSelectionMode_filteredPointHandler;
+	/**
+	 * EventHandler for click on a selected point.
+	 */
+	private EventHandler<MouseEvent> singleSelectionMode_selectedPointHandler;
+	/**
+	 * EventHandler for click on a discarded point.
+	 */
+	private EventHandler<MouseEvent> singleSelectionMode_discardedPointHandler;
 	
 	
 	// -----------------------------------------------
@@ -389,35 +407,51 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	}
 	
 	/**
+	 * Initializes mouse click event handler for single selection mode.
+	 */
+	private void initSingleSelectionModeEventHandler()
+	{
+//		singleSelectionMode_selectedPointHandler = new EventHandler(<InputEvent>() {
+//		    public void handle(InputEvent event) {
+//		        System.out.println("Handling event " + event.getEventType()); 
+//		        event.consume();
+//		    }
+ 
+//				(new EventHandler<MouseEvent>() {
+//		    @Override
+//		    public void handle(MouseEvent mouseEvent)
+//		    {       
+//		    	// If control is not down: Add to selection.
+//		    	if (!mouseEvent.isControlDown()) {
+//			    	if (!selectedMDSPoints.containsKey(dataPoint.getExtraValue())) {
+//			    		// Add to map of selected data points.
+////				    		selectedMDSPoints.put((int)dataPoint.getExtraValue(), dataPoint);
+//			    		
+//			    		// Refresh scatterchart.
+////				    		refresh(coordinates, filteredIndices, selectedCoordinates, selectedIndices, discardedCoordinates, discardedIndices);
+////				    		
+//			    		// Update collection of selected points.
+//						selectedMDSPoints.put((int)dataPoint.getExtraValue(), dataPoint);
+//
+//						// Change data point selection status.
+//						changeDataPointSelectionStatus(dataPoint, true);
+//						
+//						// 
+//						
+//						// Refresh other charts.
+//			    		analysisController.integrateMDSSelection(selectedMDSPoints.keySet(), false);								
+//			    	}
+//		    	}
+//		    });
+	}
+	
+	/**
 	 * Processes global (captured by analysis controller in scene) KeyPressedEvent.
 	 * @param ke
 	 */
 	@Override
 	public void processKeyPressedEvent(KeyEvent ke)
 	{
-		if (ke.getCode() == KeyCode.CAPS) {
-    		// Switch selection mode.
-    		if (selectionMode == SelectionMode.GROUP) {
-    			selectionMode = SelectionMode.SINGULAR;
-    			
-    			// Disable rubber band selection listener.
-    			rubberbandSelection.disable();
-    		}
-    		
-    		else {
-    			selectionMode = SelectionMode.GROUP;
-    			
-    			// Enable rubber band selection listener.
-    			rubberbandSelection.enable();
-    		}
-    	}
-
-        // Check if space key is down.
-    	else if (ke.getCode() == KeyCode.SHIFT) {
-			rubberbandSelection.disable();
-			isShiftDown = true;
-		}
-        
     	// Remember if CTRL is down.
     	isCtrlDown = ke.isControlDown();
 	}
@@ -429,11 +463,23 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	@Override
 	public void processKeyReleasedEvent(KeyEvent ke)
 	{	
-    	// Check if space key is up.
-    	if (ke.getCode() == KeyCode.SHIFT) {
+    	// Check if CAPS was released.
+		if (ke.getCode() == KeyCode.CAPS) {
+			
+    		// Switch selection mode.
+    		if (selectionMode == SelectionMode.GROUP) {
+    			selectionMode = SelectionMode.SINGULAR;
     		
-    		rubberbandSelection.enable();
-    		isShiftDown = false;
+    			// Disable rubber band selection listener.
+    			rubberbandSelection.disable();
+    		}
+    		
+    		else {
+    			selectionMode = SelectionMode.GROUP;
+    			
+    			// Enable rubber band selection listener.
+    			rubberbandSelection.enable();
+    		}
     	}
     	
 		// Remember if CTRL is down.
@@ -531,7 +577,7 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
         scatterchart.applyCss();
         
         // Add mouse listeners.
-        addMouseListenersToMDSScatterchart(this.filteredCoordinates, this.filteredIndices);
+        addMouseListenersToMDSScatterchart();
         
         // Update heatmap.
         heatmap.refresh(this.filteredCoordinates, globalCoordinateExtrema);
@@ -556,9 +602,6 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	private void addFilteredDataPoints()
 	{
         int count = 0;
-
-        // xxx
-//        FINALLY:	Once cross-component selection works without flaws (or at least without bugs), implement alternative/selection heatmap (adapt colors!).
 
         // Add filtered data points.
         for (int index : filteredIndices) {
@@ -611,16 +654,15 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	}
 	
 	/**
-	 * Adds mouse event listeners handling single-point requests.
-	 * @todo Adapt to new selection handling method.
+	 * Assigns mouse listener for single selection node to data point's node.
+	 * @param dataPoint
 	 */
-	private void addMouseListenersToMDSScatterchart(double coordinates[][], Set<Integer> filteredIndices)
+	private void addSingleSelectionModeMouseListenerToNode(XYChart.Data<Number, Number> dataPoint, DataPointState state)
 	{
-		// Add listeners to all series of non-selected data points.
-		for (int i = 1; i < scatterchart.getData().size(); i++) {
-	        // Add mouse event listeners to points in this data series.
-	        for (XYChart.Data<Number, Number> dataPoint : scatterchart.getData().get(i).getData()) {
-	        	dataPoint.getNode().setOnMouseClicked(new EventHandler<MouseEvent>()
+		switch (state)
+		{
+			case FILTERED:
+				dataPoint.getNode().setOnMouseClicked(new EventHandler<MouseEvent>()
 				{
 				    @Override
 				    public void handle(MouseEvent mouseEvent)
@@ -628,39 +670,61 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 				    	// If control is not down: Add to selection.
 				    	if (!mouseEvent.isControlDown()) {
 					    	if (!selectedMDSPoints.containsKey(dataPoint.getExtraValue())) {
-					    		// Add to map of selected data points.
-					    		selectedMDSPoints.put((int)dataPoint.getExtraValue(), dataPoint);
+					    		// Update collection of selected points.
+								selectedMDSPoints.put((int)dataPoint.getExtraValue(), dataPoint);
+
+								// Change data point selection status.
+								changeDataPointSelectionStatus(dataPoint, true);
 					    		
-					    		// Refresh scatterchart.
-//					    		refresh(coordinates, filteredIndices, selectedCoordinates, selectedIndices, discardedCoordinates, discardedIndices);
-//					    		// Refresh other charts.
-//					    		analysisController.integrateMDSSelection(selectedMDSPoints.keySet(), false);
+								// Refresh other charts.
+					    		analysisController.integrateMDSSelection(selectedMDSPoints.keySet(), false);
 					    	}
 				    	}
+				    	else
+				    		System.out.println("blub");
 				    }
 				});
-	        }
+			break;
+			
+			case SELECTED:
+	        	dataPoint.getNode().setOnMouseClicked(new EventHandler<MouseEvent>()
+    			{
+    			    @Override
+    			    public void handle(MouseEvent mouseEvent)
+    			    {       
+    			    	System.out.println("in event");
+    			    	// If control is down: Remove from selection.
+    			    	if (isCtrlDown || mouseEvent.isControlDown()) {
+				    		// Update collection of selected points.
+				    		selectedMDSPoints.remove(dataPoint.getExtraValue());
+							
+							// Change data point selection status.
+							changeDataPointSelectionStatus(dataPoint, false);
+							
+							// Refresh other charts.
+				    		analysisController.integrateMDSSelection(selectedMDSPoints.keySet(), false);
+    			    	}
+    			    }
+    			});
+			break;
 		}
+	}
+	
+	/**
+	 * Adds mouse event listeners handling single-point requests.
+	 * @todo Adapt to new selection handling method.
+	 */
+	private void addMouseListenersToMDSScatterchart()
+	{
+        // Add mouse event listeners to points in all data series.
+		
+        for (XYChart.Data<Number, Number> dataPoint : filteredDataSeries.getData()) {
+        	addSingleSelectionModeMouseListenerToNode(dataPoint, DataPointState.FILTERED);
+        }
 		
 		// Add mouse listeners for selected data points.
-        for (XYChart.Data<Number, Number> dataPoint : scatterchart.getData().get(0).getData()) {
-        	dataPoint.getNode().setOnMouseClicked(new EventHandler<MouseEvent>()
-			{
-			    @Override
-			    public void handle(MouseEvent mouseEvent)
-			    {       
-			    	// If control is down: Remove from selection.
-			    	if (mouseEvent.isControlDown()) {
-				    	// Remove from set of selected data points.
-			    		selectedMDSPoints.remove(dataPoint.getExtraValue());
-			    		
-			    		// Refresh scatterchart.
-//			    		refresh(coordinates, filteredIndices, selectedCoordinates, selectedIndices, discardedCoordinates, discardedIndices);
-//			    		// Refresh other charts.
-//			    		analysisController.integrateMDSSelection(selectedMDSPoints.keySet(), false);
-			    	}
-			    }
-			});
+        for (XYChart.Data<Number, Number> dataPoint : selectedDataSeries.getData()) {
+        	addSingleSelectionModeMouseListenerToNode(dataPoint, DataPointState.SELECTED);
         }
 	}
 	
@@ -823,6 +887,9 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 			// Add copy to selectedDataSeries.
 			if (!selectedDataSeries.getData().contains(data)) {
 				selectedDataSeries.getData().add(dataCopy);
+
+				// Add listener for single selection mode.
+	    		addSingleSelectionModeMouseListenerToNode(dataCopy, DataPointState.SELECTED);
 			}
 		}
 		
@@ -833,6 +900,9 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 			// Add copy to filteredDataSeries.
 			if (!filteredDataSeries.getData().contains(data)) {
 				filteredDataSeries.getData().add(dataCopy);
+				
+				// Add listener for single selection mode.
+	    		addSingleSelectionModeMouseListenerToNode(dataCopy, DataPointState.FILTERED);
 			}
 		}
 	}
