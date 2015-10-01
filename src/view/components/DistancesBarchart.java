@@ -582,9 +582,10 @@ public class DistancesBarchart extends VisualizationComponent implements ISelect
 		
 		// Add data points.
 		for (int i = 0; i < numberOfBins; i++) {
-			String categoryDescription	= String.valueOf(min + i * binInterval);
-			categoryDescription			= categoryDescription.length() > 5 ? categoryDescription.substring(0, 5) : categoryDescription;
-			int value					= distanceBinList[i];
+			String categoryDescription			= String.valueOf(min + i * binInterval);
+			String categoryDescriptionSuffix 	= categoryDescription.contains("E") ? categoryDescription.substring(categoryDescription.length() - 3) : "";  
+			categoryDescription					= categoryDescription.length() > 5 ? categoryDescription.substring(0, 5) + categoryDescriptionSuffix : categoryDescription;
+			int value							= distanceBinList[i];
 			
 			// Avoid category clash by adding "invisible" characters.
 			for (int x = 0; x < i; x++)

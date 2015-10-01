@@ -1,20 +1,8 @@
 package model.workspace;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import javafx.util.Pair;
-import mdsj.MDSJ;
 import model.LDAConfiguration;
 import model.topic.Topic;
 
@@ -70,19 +58,26 @@ public class Dataset
 	 * @param dataset1
 	 * @param dataset2
 	 * @param distanceType
+	 * @param test 
 	 * @return
 	 */
-	public double calculateDatasetDistance(final Dataset dataset, DatasetDistance distanceType)
+	public double calculateDatasetDistance(final Dataset dataset, DatasetDistance distanceType, double[][] topicDistances)
 	{
 		double distance = 0;
-		
+
+//		@todo: 
+//			x Use topic distance matrix in actual distance calculate methods to store values.
+			- Create table for topic distances.
+			- Write data to table.
+			* To be finished at the beginning of the next week at the latest!
+			
 		switch (distanceType) {
 			case MinimalDistance:
-				distance = (calculateMinimalDatasetDistance(dataset) + calculateMinimalDatasetDistance(dataset)) / 2;
+				distance = (calculateMinimalDatasetDistance(dataset, topicDistances, false) + dataset.calculateMinimalDatasetDistance(this, topicDistances, true)) / 2;
 			break;
 			
 			case HausdorffDistance:
-				distance = (calculateHausdorffDatasetDistance(dataset) + calculateHausdorffDatasetDistance(dataset)) / 2;
+				distance = (calculateHausdorffDatasetDistance(dataset, topicDistances, false) + dataset.calculateHausdorffDatasetDistance(this, topicDistances, true)) / 2;
 			break;
 			
 			default:
@@ -96,12 +91,13 @@ public class Dataset
 	 * @todo Add relaxed/strict enum parameter to distuingish whether the same topic may be used for
 	 * multiple other topics.
 	 * Calculates distance between two datasets using the average of all minimal distances between
-	 * one topic of one dataset and all topics of the other Workspace. 
-	 * @param dataset1
-	 * @param dataset2
+	 * one topic of one dataset and all topics of the other Workspace.
+	 * @param dataset
+	 * @param topicDistances
+	 * @param reversedCallOrder
 	 * @return
 	 */
-	private double calculateMinimalDatasetDistance(final Dataset dataset)
+	private double calculateMinimalDatasetDistance(final Dataset dataset, double[][] topicDistances, boolean reversedCallOrder)
 	{
 		double minDistance	= Double.MAX_VALUE;
 		Topic currentTopic	= null;
@@ -117,6 +113,12 @@ public class Dataset
 			for (int j = 0; j < topics2.size(); j++) {
 				double distance	= currentTopic.calculateBhattacharyyaDistance(topics2.get(j)); 
 				minDistance		= minDistance > distance ? distance : minDistance;
+				
+				// Store topic distance in topic distance matrix.
+				if (!reversedCallOrder)
+					topicDistances[i][j] += distance / 2;
+				else 
+					topicDistances[j][i] += distance / 2;
 			}	
 		}
 		
@@ -128,11 +130,12 @@ public class Dataset
 	 * @todo Add relaxed/strict enum parameter to distuingish whether the same topic may be used for
 	 * multiple other topics.
 	 * Calculates distance between two datasets using the Hausdorff distance.
-	 * @param dataset1
-	 * @param dataset2
+	 * @param dataset
+	 * @param topicDistances
+	 * @param reversedCallOrder
 	 * @return
 	 */
-	private double calculateHausdorffDatasetDistance(final Dataset dataset)
+	private double calculateHausdorffDatasetDistance(final Dataset dataset, double[][] topicDistances, boolean reversedCallOrder)
 	{
 		double minDistance		= Double.MAX_VALUE;
 		double maxMinDistance	= 0;
@@ -149,7 +152,13 @@ public class Dataset
 			// Unrolled loop to avoid calculation of distance i to i without using an if.
 			for (int j = 0; j < topics2.size(); j++) {
 				double distance = currentTopic.calculateBhattacharyyaDistance(topics2.get(j)); 
-				minDistance = minDistance > distance ? distance : minDistance;
+				minDistance		= minDistance > distance ? distance : minDistance;
+				
+				// Store topic distance in topic distance matrix.
+				if (!reversedCallOrder)
+					topicDistances[i][j] += distance / 2;
+				else 
+					topicDistances[j][i] += distance / 2;				
 			}
 			
 			maxMinDistance = maxMinDistance < minDistance ? minDistance : maxMinDistance;

@@ -536,8 +536,7 @@ public class GenerationController extends DataSubViewController
 	
 	@FXML
 	private void generateData(ActionEvent e)
-	{
-		
+	{	
 		dataViewController.freezeControls();
 		
 		// Create LDA configurations out of parameter lists, transfer to workspace.

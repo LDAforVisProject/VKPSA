@@ -88,6 +88,9 @@ public class CoreController extends Controller
 		blockSettingsView();
 		blockHelpView();
 		
+		// Enable logging in workspace.
+		workspace.setProtocolElements(protocol_progressindicator, protocol_textarea);
+		
 //		// Display data view at startup.
 //		Timer displayDataViewTimer = new Timer(true);
 //		displayDataViewTimer.scheduleAtFixedRate(

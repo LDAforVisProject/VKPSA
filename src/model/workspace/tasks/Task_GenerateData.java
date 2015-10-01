@@ -52,7 +52,7 @@ public class Task_GenerateData extends WorkspaceTask
 			String output_path	= workspace.getDirectory();
 			
 			// Get current time (before starting the execution of the LDA script).
-			long beforeGeneration = new Date().getTime();
+//			long beforeGeneration = new Date().getTime();
 			
 			/*
 			 * Start multiple threads each processing a part of the parameter file list.

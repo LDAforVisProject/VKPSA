@@ -21,7 +21,7 @@ import model.workspace.tasks.WorkspaceTask;
 public class DBManagement
 {
 	private String dbPath;
-	private Connection db;
+	private Connection connection;
 	
 	/**
 	 * Is supposed to be equal for all LDA configurations and topics.
@@ -35,11 +35,14 @@ public class DBManagement
 		initConnection();
 	}
 	
-	void initConnection()
+	/**
+	 * Init connection to database.
+	 */
+	private void initConnection()
 	{
 	    try {
 	      Class.forName("org.sqlite.JDBC");
-	      db = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
+	      connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
 	    } 
 	    
 	    catch ( Exception e ) {
@@ -66,10 +69,10 @@ public class DBManagement
 		
 		try {
 			// Disable auto-commit.
-			db.setAutoCommit(false);
+			connection.setAutoCommit(false);
 			
 			// Prepare statement.
-			PreparedStatement insertStmt = db.prepareStatement(insertString);
+			PreparedStatement insertStmt = connection.prepareStatement(insertString);
 			
 			// Read one dataset (in order to extract the keywords from it).
 			Pair<LDAConfiguration, ArrayList<Topic>> topics = Topic.generateTopicsFromFile(directory, filename, TopicKeywordAlignment.HORIZONTAL);
@@ -82,10 +85,10 @@ public class DBManagement
 			
 			// Execute batch and commit.
 			insertStmt.executeBatch();
-			db.commit();
+			connection.commit();
 			
 			// Re-enable auto-commit.
-			db.setAutoCommit(true);
+			connection.setAutoCommit(true);
 		} 
 		
 		catch (Exception e) {
@@ -100,11 +103,11 @@ public class DBManagement
 	public void reopen()
 	{
 		try {
-			if (db != null && !db.isClosed()) {
-				db.close();
+			if (connection != null && !connection.isClosed()) {
+				connection.close();
 			}
 			
-			db = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
+			connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
 		}
 		
 		catch (SQLException e) {
@@ -115,8 +118,8 @@ public class DBManagement
 	public void close()
 	{
 		try {
-			if (db != null && !db.isClosed()) {
-				db.close();
+			if (connection != null && !connection.isClosed()) {
+				connection.close();
 			}
 		} 
 		
@@ -148,7 +151,7 @@ public class DBManagement
 			
 			
 			// Prepare statement for selection of raw data and fetch results.
-			PreparedStatement stmt	= db.prepareStatement(query);
+			PreparedStatement stmt	= connection.prepareStatement(query);
 			rs						= stmt.executeQuery();
 			
 			// As long as row is not the last one: Process it.
@@ -168,6 +171,11 @@ public class DBManagement
 		return ldaConfigurations;
 	}
 	
+	/**
+	 * Loads complete set of raw data.
+	 * @param task
+	 * @return
+	 */
 	public Map<LDAConfiguration, Dataset> loadRawData(WorkspaceTask task)
 	{
 		// Check if number of keywords was determined correctly. If not, try again.
@@ -201,7 +209,7 @@ public class DBManagement
 			Map<String, Double> keywordProbabilityMap				= new HashMap<String, Double>(numberOfKeywordsPerTopic);
 			
 			// Prepare statement for selection of raw data and fetch results.
-			PreparedStatement stmt	= db.prepareStatement(query);
+			PreparedStatement stmt	= connection.prepareStatement(query);
 			rs						= stmt.executeQuery();
 			
 			/*
@@ -258,7 +266,7 @@ public class DBManagement
         	Dataset test = new Dataset(currLDAConfig, ldaConfigTopics.get(currLDAConfig));
         	datasetMap.put( currLDAConfig, test );
         	
-			System.out.println(count + " rows.");
+//			System.out.println(count + " rows.");
 		}
 		
 		catch (SQLException e) {
@@ -275,7 +283,7 @@ public class DBManagement
 		
 		try {
 			// Parse statement.
-			PreparedStatement stmt	= db.prepareStatement(query);
+			PreparedStatement stmt	= connection.prepareStatement(query);
 			
 			// Fetch results.
 			ResultSet rs			= stmt.executeQuery();
@@ -300,7 +308,7 @@ public class DBManagement
 		
 		try {
 			// Parse statement.
-			PreparedStatement stmt	= db.prepareStatement(query);
+			PreparedStatement stmt	= connection.prepareStatement(query);
 			
 			// Fetch results.
 			ResultSet rs			= stmt.executeQuery();
@@ -321,7 +329,7 @@ public class DBManagement
 		try {
 			if (useDedicatedTable) {
 				// Get number of keywords.
-				PreparedStatement numKeywordsStmt	= db.prepareStatement("select count(*) as numKeywords from keywords");
+				PreparedStatement numKeywordsStmt	= connection.prepareStatement("select count(*) as numKeywords from keywords");
 				ResultSet rs						= numKeywordsStmt.executeQuery();
 				numberOfKeywordsPerTopic			= rs.getInt("numKeywords");
 			}
@@ -339,7 +347,7 @@ public class DBManagement
 														"group by lda.ldaConfigurationID, topicID " +
 														"order by lda.ldaConfigurationID, topicID";
 				
-				PreparedStatement numKeywordsStmt	= db.prepareStatement(stmtString);
+				PreparedStatement numKeywordsStmt	= connection.prepareStatement(stmtString);
 				ResultSet rs						= numKeywordsStmt.executeQuery();
 				// Grab first result (they should all amount to the same number).
 				numberOfKeywordsPerTopic			= rs.next() ? rs.getInt("actualKWCount") : -1; 
@@ -370,7 +378,7 @@ public class DBManagement
 			 * 1. Get number of topics for this LDA configuration.
 			 */
 			
-			PreparedStatement numKeywordsStmt	= db.prepareStatement(query);
+			PreparedStatement numKeywordsStmt	= connection.prepareStatement(query);
 			ResultSet rs						= numKeywordsStmt.executeQuery();
 			int numberOfTopics					= rs.getInt("topicCount");
 			
@@ -405,7 +413,7 @@ public class DBManagement
 					"	topicID between 0 and " + (numberOfTopics - 1) + " " + 
 					"order by probability desc, topicID";
 			
-			PreparedStatement topicKeywordDataStmt	= db.prepareStatement(query);
+			PreparedStatement topicKeywordDataStmt	= connection.prepareStatement(query);
 			rs										= topicKeywordDataStmt.executeQuery();
 			
 			boolean allRelevantRowsProcessed 	= false;
@@ -436,5 +444,127 @@ public class DBManagement
 		}
 		
 		return data;
+	}
+
+	/**
+	 * Writes dataset distances to DB.
+	 * @param ldaConfigurations
+	 * @param distances
+	 * @param overwriteExistingValues
+	 * @todo Allow decision between whether or not existing values should be replaced.
+	 */
+	public void saveDatasetDistances(	final ArrayList<LDAConfiguration> ldaConfigurations, final double[][] distances,
+										final boolean overwriteExistingValues)
+	{
+		try {
+			// Init prepepard statement with query template.
+			PreparedStatement statement = connection.prepareStatement("INSERT INTO datasetDistances(ldaConfigurationID_1, ldaConfigurationID_2, distance) VALUES(?, ?, ?)");
+			
+			// Set auto-commit to false.
+			connection.setAutoCommit(false);
+			
+			// Iterate through distance matrix, create query, attach to batch.
+			for (int i = 0; i < ldaConfigurations.size(); i++) {
+				for (int j = i + 1; j < ldaConfigurations.size(); j++) {
+					// Set values for row.
+					statement.setInt(1, ldaConfigurations.get(i).getConfigurationID());
+					statement.setInt(2, ldaConfigurations.get(j).getConfigurationID());
+					statement.setDouble(3, distances[i][j]);
+
+					// Add row to batch.
+					statement.addBatch();
+				}
+			}
+			
+			// Execute batch.
+			statement.executeBatch();
+			
+			// Commit transaction.
+			connection.commit();
+			
+			// Re-enable auto-commit.
+			connection.setAutoCommit(true);	
+		} 
+		
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Loads distance matrix. 
+	 * @param ldaConfigurations
+	 * @param loadingTask Assigning task. Optional, may be null.
+	 * @return
+	 */
+	public double[][] loadDistances(ArrayList<LDAConfiguration> ldaConfigurations, WorkspaceTask loadingTask)
+	{
+		double[][] distances			= new double[ldaConfigurations.size()][ldaConfigurations.size()];
+		final int totalNumberOfItems	= (ldaConfigurations.size() * ldaConfigurations.size() - ldaConfigurations.size()) / 2;
+		
+//		NEXT: 
+//			Test  if DB distance loading is working.
+//			Then: Remove file integrity check (and all other .dis-based methods and attributes).
+//			Then: Design system for topic distance data.
+		
+		// Init prepared statement with query template.
+		try {
+			PreparedStatement statement = connection.prepareStatement("SELECT * FROM datasetDistances");
+			ResultSet rs				= statement.executeQuery();
+			
+			// Process distance data rows.
+			int processedRowCount		= 0;
+			while (rs.next()) {
+				int row		= processedRowCount / ldaConfigurations.size();
+				int column	= processedRowCount % ldaConfigurations.size();
+				
+				// Symmetric distance matrix - [row][column] = [column][row].
+				distances[row][column] = rs.getDouble("distance");
+				distances[column][row] = distances[row][column];
+				
+				// Update loading task, if provided.
+				if (loadingTask != null)
+					loadingTask.updateTaskProgress(processedRowCount, totalNumberOfItems);
+				
+				// Keep track of processed rows.
+				processedRowCount++;
+			}
+			
+			if (totalNumberOfItems != processedRowCount)
+				System.out.println("mismatch");
+		}
+		
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return distances;
+	}
+
+	/**
+	 * Reads number of datasets in dataset distance table.
+	 * @return
+	 */
+	public int readNumberOfDatasetsInDISTable()
+	{
+		int numberOfDatasets = -1;
+		
+		try {
+			PreparedStatement statement = connection.prepareStatement("	SELECT count(*) datasetCount FROM (" + 
+																		    "SELECT distinct ldaConfigurationID_1 from datasetDistances " +
+																		    "union " +
+																		    "SELECT distinct ldaConfigurationID_2 from datasetDistances" +
+																		    ")"
+																	);
+			ResultSet rs				= statement.executeQuery();
+			numberOfDatasets			= rs.getInt("datasetCount");
+		} 
+		
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		
+		return numberOfDatasets;
 	}
 }

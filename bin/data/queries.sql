@@ -19,8 +19,12 @@ order by lda.ldaConfigurationID;
 select count(*) as numKeywords from keywords;
 
 delete from keywordInTopic;
+delete from sqlite_sequence where name='keywordInTopic';
 delete from topics;
+delete from sqlite_sequence where name='topics';
 delete from ldaConfigurations;
+delete from sqlite_sequence where name='ldaConfigurations';
+
 
 select lda.ldaConfigurationID, topicID, keyword, probability from keywordInTopic kit
 join keywords kw on kw.keywordID = kit.keywordID

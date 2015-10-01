@@ -15,14 +15,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections4.MultiMap;
-
-
-
 
 
 import database.DBManagement;
 import javafx.beans.property.DoubleProperty;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TextArea;
 import javafx.util.Pair;
 import model.LDAConfiguration;
 import model.workspace.tasks.ITaskListener;
@@ -108,7 +106,8 @@ public class Workspace implements ITaskListener
 	 * Contains pre-calculated MDS coordinates. Read from .FILENAME_MDSCOORDINATES.
 	 */
 	private double[][] mdsCoordinates;
-	/**	 * Contains pre-calculated distance values (between datasets). Read from .FILENAME_DISTANCES.
+	/**
+	 * Contains pre-calculated distance values (between datasets). Read from .FILENAME_DISTANCES.
 	 */
 	private double[][] distances;
 	
@@ -132,7 +131,7 @@ public class Workspace implements ITaskListener
 	/**
 	 * Number of datasets/LDA configurations in in this workspace's .dis file. Used to check workspace integrity.
 	 */
-	private int numberOfDatasetsInDISFile;
+	private int numberOfDatasetsInDISTable;
 	
 	// -----------------------------------------------
 	// 		Auxiliary options and flags
@@ -165,6 +164,24 @@ public class Workspace implements ITaskListener
 	 * Indicates whether metadata from raw topic files were loaded and processed or not.
 	 */
 	private boolean isMetadataLoaded;
+	
+	// -----------------------------------------------
+	// 			Logging utilities.
+	// -----------------------------------------------	
+	
+	/**
+	 * Protocol pane's ProgressIndicator.
+	 */
+	protected ProgressIndicator log_protocol_progressindicator;
+	
+	/**
+	 * Protocol pane's TextArea.
+	 */
+	protected TextArea log_protocol_textarea;
+	
+	// -----------------------------------------------
+	// 			Database management.
+	// -----------------------------------------------	
 	
 	/**
 	 * Database management.
@@ -335,9 +352,9 @@ public class Workspace implements ITaskListener
 		mdsCoordinates				= null;
 		
 		// Reset counters.
-		numberOfDatasetsInDISFile	= 0;
-		numberOfDatasetsInMDSFile	= 0;
-		numberOfDatasetsInWS		= 0;
+		numberOfDatasetsInDISTable	= -1;
+		numberOfDatasetsInMDSFile	= -1;
+		numberOfDatasetsInWS		= -1;
 		
 		// Reset flags.
 		isMetadataLoaded			= false;
@@ -360,9 +377,21 @@ public class Workspace implements ITaskListener
 	}
 	
 	/**
+	 * Reads number of datasets in dataset distance table.
+	 * @return
+	 */
+	public int readNumberOfDatasetsInDISTable()
+	{
+		numberOfDatasetsInDISTable = db.readNumberOfDatasetsInDISTable();
+		
+		return numberOfDatasetsInDISTable;
+	}
+	
+	/**
 	 * Returns number of .csv files in this directory modified later than the specified timestamp. 
 	 * Does not check whether this .csv is actually an appropriate file.
 	 * @param minCreationTimestamp
+	 * @deprecated
 	 * @return Number of .csv files in this directory modified later than the given timestamp value.
 	 */
 	public int readNumberOfDatasets(long minCreationTimestamp)
@@ -392,6 +421,7 @@ public class Workspace implements ITaskListener
 	
 	/**
 	 * Checks if .dis file exists.
+	 * @deprecated
 	 * @return
 	 */
 	public boolean containsDISFile()
@@ -410,17 +440,10 @@ public class Workspace implements ITaskListener
 		boolean isIntegrous			= true;
 		int numberOfDatasetsInWS	= getNumberOfDatasetsInWS();
 		
+		// @todo Adapt integrity check.
 		// Check for integrity of pre-calculated distance data.
-		if (isDistanceDataLoaded) {
-			if (numberOfDatasetsInWS != numberOfDatasetsInDISFile) {
-				isIntegrous = false;
-			}
-			
-			// Check if configuration in line in .dis file is consistent with configuration line
-			// parsed from raw topic data files.
-			else {
-				isIntegrous = compareToLDAConfiguration(Paths.get(directory, FILENAME_DISTANCES), "\t");
-			}
+		if (numberOfDatasetsInWS != numberOfDatasetsInDISTable) {
+			isIntegrous = false;
 		}
 
 		// Check for integrity of pre-calculated MDS coordinate data.
@@ -483,6 +506,9 @@ public class Workspace implements ITaskListener
 		return true;
 	}
 	
+	/**
+	 * Parses .config file in working directory; stores specified options.
+	 */
 	private void parseConfigurationFile()
 	{
 		// Check if configuration file exists.
@@ -533,6 +559,23 @@ public class Workspace implements ITaskListener
 		}
 	}
 	
+	/**
+	 * Adds specified line to the protocol panel.
+	 * @param additionalLogString
+	 */
+	public void log(String additionalLogString)
+	{
+		log_protocol_textarea.setText(log_protocol_textarea.getText() + "\n" + additionalLogString);
+	}
+	
+	/**
+	 * Sets indicator to busy/idle.
+	 */
+	public void setProgressStatus(boolean isBusy)
+	{
+		log_protocol_progressindicator.setVisible(isBusy);		
+	}
+	
 	// ------------------------------
 	// From here: Getter and setter.
 	// ------------------------------
@@ -542,18 +585,30 @@ public class Workspace implements ITaskListener
 		return directory;
 	}
 
+	/**
+	 * Set references to protocol UI elements.
+	 * @param log_protocol_progressindicator
+	 * @param log_protocol_textarea
+	 */
+	public void setProtocolElements(ProgressIndicator log_protocol_progressindicator, TextArea log_protocol_textarea)
+	{
+		this.log_protocol_progressindicator = log_protocol_progressindicator;
+		this.log_protocol_textarea			= log_protocol_textarea;
+	}
+
 	public void setDirectory(String directory)
 	{
 		this.directory = directory;
 		
-		// @todo Check for directory switches (necessary?).
 		if (db == null) {
 			String dbPath	= directory + "\\" + Workspace.DBNAME;
 			db				= new DBManagement(dbPath);
+			log("Successfully initiated database at " + dbPath + ".");
 			System.out.println("Successfully initiated database at " + dbPath + ".");
 		}
 		
 		else {
+			log("### ERROR ### Directory switch currently not supported.");
 			System.out.println("### ERROR ### Directory switch currently not supported.");
 		}
 		
@@ -681,14 +736,17 @@ public class Workspace implements ITaskListener
 		this.isMDSDataLoaded = isMDSDataLoaded;
 	}
 
-	public int getNumberOfDatasetsInDISFile()
+	public int getNumberOfDatasetsInDISTable()
 	{
-		return numberOfDatasetsInDISFile;
+		if (numberOfDatasetsInDISTable < 0)
+			return readNumberOfDatasetsInDISTable();
+		
+		return numberOfDatasetsInDISTable;
 	}
 
-	public void setNumberOfDatasetsInDISFile(int numberOfDatasetsInDISFile)
+	public void setNumberOfDatasetsInDISTable(int numberOfDatasetsInDISTable)
 	{
-		this.numberOfDatasetsInDISFile = numberOfDatasetsInDISFile;
+		this.numberOfDatasetsInDISTable = numberOfDatasetsInDISTable;
 	}
 
 	public ArrayList<LDAConfiguration> getConfigurationsToGenerate()

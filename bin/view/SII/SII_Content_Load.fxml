@@ -31,7 +31,6 @@
          </columnConstraints>
          <rowConstraints>
             <RowConstraints maxHeight="29.0" minHeight="10.0" prefHeight="29.0" vgrow="SOMETIMES" />
-            <RowConstraints maxHeight="36.0" minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
             <RowConstraints maxHeight="31.0" minHeight="10.0" prefHeight="24.0" vgrow="SOMETIMES" />
             <RowConstraints maxHeight="37.0" minHeight="10.0" prefHeight="26.0" vgrow="SOMETIMES" />
             <RowConstraints maxHeight="39.0" minHeight="10.0" prefHeight="22.0" vgrow="SOMETIMES" />
@@ -39,12 +38,12 @@
             <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
          </rowConstraints>
          <children>
-            <Label fx:id="label_consistency" layoutX="660.0" layoutY="508.0" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="5">
+            <Label fx:id="label_consistency" layoutX="660.0" layoutY="508.0" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="4">
                <GridPane.margin>
                   <Insets left="20.0" />
                </GridPane.margin>
             </Label>
-            <Label layoutX="396.0" layoutY="507.0" text=".DIS/.MDS/datasets consistent:" GridPane.rowIndex="5">
+            <Label layoutX="396.0" layoutY="507.0" text=".DIS/.MDS/datasets consistent:" GridPane.rowIndex="4">
                <GridPane.margin>
                   <Insets left="10.0" />
                </GridPane.margin>
@@ -59,52 +58,42 @@
                   <Insets left="20.0" />
                </GridPane.margin>
             </Label>
-            <Label fx:id="label_numberMDSdatasets" layoutX="660.0" layoutY="447.0" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="4">
+            <Label fx:id="label_numberMDSdatasets" layoutX="660.0" layoutY="447.0" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="3">
                <GridPane.margin>
                   <Insets left="20.0" />
                </GridPane.margin>
             </Label>
-            <Label layoutX="396.0" layoutY="487.0" text=".DIS file found:" GridPane.rowIndex="1">
+            <Label layoutX="395.0" layoutY="448.0" text="Number of datasets in .mds file:" GridPane.rowIndex="3">
                <GridPane.margin>
                   <Insets left="10.0" />
                </GridPane.margin>
             </Label>
-            <Label layoutX="395.0" layoutY="448.0" text="Number of datasets in .mds file:" GridPane.rowIndex="4">
+            <Label layoutX="396.0" layoutY="534.0" text="Workspace Integrity" GridPane.rowIndex="5">
                <GridPane.margin>
                   <Insets left="10.0" />
                </GridPane.margin>
             </Label>
-            <Label layoutX="396.0" layoutY="534.0" text="Workspace Integrity" GridPane.rowIndex="6">
-               <GridPane.margin>
-                  <Insets left="10.0" />
-               </GridPane.margin>
-            </Label>
-            <Label fx:id="label_mdsFound" layoutX="660.0" layoutY="468.0" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="2">
+            <Label fx:id="label_mdsFound" layoutX="660.0" layoutY="468.0" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="1">
                <GridPane.margin>
                   <Insets left="20.0" />
                </GridPane.margin>
             </Label>
-            <Circle fx:id="shape_integrity" fill="#42ff1f" layoutX="674.0" layoutY="543.0" radius="8.0" stroke="BLACK" strokeType="INSIDE" GridPane.columnIndex="1" GridPane.rowIndex="6">
+            <Circle fx:id="shape_integrity" fill="#42ff1f" layoutX="674.0" layoutY="543.0" radius="8.0" stroke="BLACK" strokeType="INSIDE" GridPane.columnIndex="1" GridPane.rowIndex="5">
                <GridPane.margin>
                   <Insets left="25.0" />
                </GridPane.margin>
             </Circle>
-            <Label layoutX="396.0" layoutY="468.0" text=".MDS file found:" GridPane.rowIndex="2">
+            <Label layoutX="396.0" layoutY="468.0" text=".MDS file found:" GridPane.rowIndex="1">
                <GridPane.margin>
                   <Insets left="10.0" />
                </GridPane.margin>
             </Label>
-            <Label fx:id="label_disFound" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="1">
-               <GridPane.margin>
-                  <Insets left="20.0" />
-               </GridPane.margin>
-            </Label>
-            <Label text="Number of datasets in .dis file:" GridPane.rowIndex="3">
+            <Label text="Number of datasets in .dis table:" GridPane.rowIndex="2">
                <padding>
                   <Insets left="10.0" />
                </padding>
             </Label>
-            <Label fx:id="label_numberDISdatasets" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="3">
+            <Label fx:id="label_numberDISdatasets" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="2">
                <GridPane.margin>
                   <Insets left="20.0" />
                </GridPane.margin>

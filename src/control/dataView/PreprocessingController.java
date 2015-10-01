@@ -94,15 +94,16 @@ public class PreprocessingController extends DataSubViewController
 				
 				// Otherwise: Load distance data, then calculate MDS coordinates.
 				else {
-					// If .dis file exists: Load it, then calculate MDS data.
-					if (workspace.containsDISFile()) {
+					// If .dis data exists: Load it, then calculate MDS data.
+					if (workspace.getNumberOfDatasetsInDISTable() > 0 &&
+						workspace.getNumberOfDatasetsInDISTable() == workspace.getNumberOfDatasetsInWS()) {
 						System.out.println("Loading distance data.");
 						workspace.executeWorkspaceAction(WorkspaceAction.LOAD_DISTANCES, progressIndicator_calculateMDSCoordinates.progressProperty(), this);
 					}
 					
 					// Otherwise: Prompt user to calculate distance data first.
 					else {
-						System.out.println("### WARNING ### Distance data is required, but not yet calculated.");
+						System.out.println("### WARNING ### Distance data is required, but not consistent or not existent.");
 					}
 				}
 			break;			
@@ -126,7 +127,7 @@ public class PreprocessingController extends DataSubViewController
 			
 			case LOAD_DISTANCES:
 				System.out.println("Finished loading distance data. Calculating MDS coordinates.");
-				//workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_MDS_COORDINATES, progressIndicator_distanceCalculation.progressProperty(), this);
+				workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_MDS_COORDINATES, progressIndicator_distanceCalculation.progressProperty(), this);
 			break;
 			
 			case CALCULATE_DISTANCES:

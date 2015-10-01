@@ -27,7 +27,6 @@ public class LoadController extends DataSubViewController
 	private @FXML Label label_datasetNumber;
 	private @FXML Label label_numberDISdatasets;
 	private @FXML Label label_numberMDSdatasets;
-	private @FXML Label label_disFound;
 	private @FXML Label label_mdsFound;
 	private @FXML Label label_consistency;
 	private @FXML Shape shape_integrity;
@@ -134,7 +133,7 @@ public class LoadController extends DataSubViewController
 				System.out.println("Collected file metadata.");
 				
 				// If .dis exists: Load it.
-				if (workspace.containsDISFile()) {
+				if (workspace.getNumberOfDatasetsInDISTable() > 0) {
 					// Load distance data.
 					workspace.executeWorkspaceAction(WorkspaceAction.LOAD_DISTANCES, progressIndicator_load.progressProperty(), this);
 				}
@@ -190,26 +189,24 @@ public class LoadController extends DataSubViewController
 	private String displayIntegrityCheck()
 	{
 		boolean mdsFileExists	= workspace.containsMDSFile();
-		boolean disFileExists	= workspace.containsDISFile();
 		String message			= ""; 
 		
 		label_datasetNumber.setText(String.valueOf(workspace.getNumberOfDatasetsInWS()));
-		label_numberDISdatasets.setText(String.valueOf(workspace.getNumberOfDatasetsInDISFile()));
+		label_numberDISdatasets.setText(String.valueOf(workspace.getNumberOfDatasetsInDISTable()));
 		label_numberMDSdatasets.setText(String.valueOf(workspace.getNumberOfDatasetsInMDSFile()));
 		label_mdsFound.setText(mdsFileExists ? "Yes" : "No");
-		label_disFound.setText(disFileExists ? "Yes" : "No");
 		
 		// Check workspace integrity. Cross-check with .dis file to see if datasets in
 		// directory and referenced datasets in .dis are the same.
 		// Workspace may be consistent (green), incomplete (orange to yellow) or corrupted (red). 
 		
 		// Worskpace consistent, but neither .mds nor .dis exists:
-		if (!mdsFileExists && !disFileExists) {
+		if (!mdsFileExists) {
 			label_consistency.setText("-");
 			shape_integrity.setFill(Color.ORANGE);
 			
 			if (workspace.getNumberOfDatasetsInWS() > 0) {
-				message = "Warning: Neither .mds or .dis file exist in this workspace. Run preprocessing on "
+				message = "Warning: .mds file doesn't exist in this workspace. Run preprocessing on "
 						+ "the raw topic data in this workspace.";
 			}
 			
@@ -218,16 +215,8 @@ public class LoadController extends DataSubViewController
 			}
 		}
 		
-		// Workspace consistent and one of both metadata file exists (and is consistent): Yellow.
-		else if ( (mdsFileExists && !disFileExists) || (!mdsFileExists && disFileExists)) {
-			label_consistency.setText("-");
-			shape_integrity.setFill(Color.YELLOW);
-			message = "Warning: .mds or .dis file doesn't exist in this workspace. Run preprocessing on "
-					+ "the raw topic data in this workspace.";
-		}
-		
 		// Both .mds and .dis exist. Conistent?
-		else if (mdsFileExists && disFileExists) {
+		else if (mdsFileExists) {
 			// Workspace not consistent: .mds and .dis files don't fit each other or the actual datasets.
 			if (!workspace.checkIntegrity()) {
 				label_consistency.setText("No");

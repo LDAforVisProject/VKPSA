@@ -32,11 +32,12 @@ public class Task_LoadRawData extends WorkspaceTask
 
 		// Update task progress.
 		updateProgress(0,  1);
-		
+
+		System.out.println("Loading raw data.");
 		// Collection of datasets including lists of topics where each topic includes a complete 
 		// dictionary containing words and their probabilities for the respective words for this topic.
 		// Get all keyword/probability pairs for each topic in each dataset/LDA configuration.
-		Map<LDAConfiguration, Dataset> datasetMap			= db.loadRawData(this);;
+		Map<LDAConfiguration, Dataset> datasetMap			= db.loadRawData(this);
 		
 		// Update task progress.
 		updateProgress(1,  1);
