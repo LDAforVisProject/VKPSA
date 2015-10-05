@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javafx.util.Pair;
 import database.DBManagement;
+import mdsj.Data;
 import model.LDAConfiguration;
 import model.workspace.Dataset;
 import model.workspace.DatasetDistance;
@@ -44,7 +45,7 @@ public class Task_CalculateDistances extends WorkspaceTask
 		// Stores number of calculated distances to date.
 		int numberOfCalculatedDistances						= 0;
 		// Total number of distances to calculate.
-		int totalNumberOfDistances							= (n * n + n) / 2; 
+		int totalNumberOfDistances							= (n * n + n) / 2 + n; 
 		// Stores the factor needed to get all distances to >= 1 (workaround needed for MDSJ to work correctly). @deprecated
 		int normalizationFactor								= 0;
 		
@@ -62,13 +63,15 @@ public class Task_CalculateDistances extends WorkspaceTask
 		for (int i = 0; i < ldaConfigurations.size(); i++) {
 			distances[i][i] = 0;
 			
+			// Get dataset 1.
+			Dataset dataset1 = datasetMap.get(ldaConfigurations.get(i));
+			
 			// Calculate other distances.
-			for (int j = i + 1; j < ldaConfigurations.size(); j++) {
+			for (int j = i; j < ldaConfigurations.size(); j++) {
 				// Update task progress.
-				updateProgress(numberOfCalculatedDistances, totalNumberOfDistances * 1.25);
+				updateProgress(numberOfCalculatedDistances, totalNumberOfDistances);
 				
-				// Get datasets.
-				Dataset dataset1 = datasetMap.get(ldaConfigurations.get(i));
+				// Get dataset 2.
 				Dataset dataset2 = datasetMap.get(ldaConfigurations.get(j));
 				
 				// Allocate topic distance matrix.
@@ -77,6 +80,8 @@ public class Task_CalculateDistances extends WorkspaceTask
 				// Assume symmetric distance calculations is done in .calculateDatasetDistance().
 				distances[i][j] = (float)dataset1.calculateDatasetDistance(dataset2, DatasetDistance.HausdorffDistance, currTopicDistances);
 				distances[j][i] = distances[i][j];
+				
+//				System.out.println(Data.format(currTopicDistances));
 				
 				// Store topic distance matrix for the current two datasets/topic models in map.
 				Pair<LDAConfiguration, LDAConfiguration> topicDistanceKey = new Pair<LDAConfiguration, LDAConfiguration>(ldaConfigurations.get(i),  ldaConfigurations.get(j));
@@ -90,8 +95,13 @@ public class Task_CalculateDistances extends WorkspaceTask
 			}
 		}
 		
-		// Save distances to database.
-		db.saveDatasetDistances(ldaConfigurations, distances, false);
+		
+		
+		// Save topic distances to database.
+		db.saveTopicDistances(topicDistances, false, this);
+		
+		// Save dataset distances to database.
+		db.saveDatasetDistances(ldaConfigurations, distances, false, this);
 		
 		// Update task progress.
 		updateProgress(1, 1);

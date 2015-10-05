@@ -227,9 +227,10 @@ public class DBManagement
 			while (rs.next()) {
 				final LDAConfiguration ldaConfig 	= new LDAConfiguration(rs.getInt("ldaConfigurationID"), rs.getInt("kappa"), rs.getDouble("alpha"), rs.getDouble("eta"));
 				int topicID 						= rs.getInt("topicID");
-		      
-				// Current row contains first entry of new LDA configuration.
-				if (!ldaConfig.equals(currLDAConfig)) {
+				boolean isNewLDAConfig				= !ldaConfig.equals(currLDAConfig); 
+
+				// Current row contains first entry of new LDA configuration: Commit LDA configuration processed so far.
+				if (isNewLDAConfig) {
 		        	// 1. Create new topic out of collected keyword/probability pairs.
 		        	ldaConfigTopics.get(currLDAConfig).add(new Topic(currTopicID, keywordProbabilityMap));
 		        	
@@ -239,13 +240,16 @@ public class DBManagement
 		        	// Update currLDAConfig.
 		        	currLDAConfig.copy(ldaConfig);
 		        	
+		        	// Update currTopicID.
+		        	currTopicID = topicID;
+		        	
 		        	// Clear topic collection.
 		        	ldaConfigTopics.put(ldaConfig, new ArrayList<Topic>());
 		        }
 		        
-				// Current row contains first entry of new topic.
-		        if (topicID != currTopicID) {
-		        	// Create new topic out of collected keyword/probability pairs.
+				// Current row contains first entry of new topic: Commit topic processed so far.
+				else if (topicID != currTopicID) {
+		        	// Create new topic out of collected keyword/probability pairs so far.
 		        	ldaConfigTopics.get(currLDAConfig).add(new Topic(currTopicID, keywordProbabilityMap));
 		        	
 		        	// Update currTopicID.
@@ -451,11 +455,17 @@ public class DBManagement
 	 * @param ldaConfigurations
 	 * @param distances
 	 * @param overwriteExistingValues
+	 * 	@param task
 	 * @todo Allow decision between whether or not existing values should be replaced.
 	 */
-	public void saveDatasetDistances(	final ArrayList<LDAConfiguration> ldaConfigurations, final double[][] distances,
-										final boolean overwriteExistingValues)
+	public void saveDatasetDistances(	final ArrayList<LDAConfiguration> ldaConfigurations,
+										final double[][] distances,
+										final boolean overwriteExistingValues,
+										WorkspaceTask task)
 	{
+		// Keep track of processed rows.
+		int processedRowCount = 0;
+		
 		try {
 			// Init prepepard statement with query template.
 			PreparedStatement statement = connection.prepareStatement("INSERT INTO datasetDistances(ldaConfigurationID_1, ldaConfigurationID_2, distance) VALUES(?, ?, ?)");
@@ -474,7 +484,76 @@ public class DBManagement
 					// Add row to batch.
 					statement.addBatch();
 				}
+				
+				// Update loading task, if provided.
+				if (task != null)
+					task.updateTaskProgress(processedRowCount, ldaConfigurations.size());
 			}
+			
+			// Execute batch.
+			statement.executeBatch();
+			
+			// Commit transaction.
+			connection.commit();
+			
+			// Re-enable auto-commit.
+			connection.setAutoCommit(true);	
+		} 
+		
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Stores distances between topics in different LDA datsets.
+	 * @param topicDistances
+	 * @param overwriteExistingValues
+	 * @param task
+	 */
+	public void saveTopicDistances(	final Map<Pair<LDAConfiguration, LDAConfiguration>, double[][]> topicDistances,
+									final boolean overwriteExistingValues,
+									WorkspaceTask task)
+	{
+		// Keep track of processed rows.		
+		int processedRowCount = 0;
+		
+		try {
+			// Init prepepard statement with query template.
+			PreparedStatement statement = connection.prepareStatement("INSERT INTO topicDistances(ldaConfigurationID_1, ldaConfigurationID_2, topicID_1, topicID_2, distance) VALUES(?, ?, ?, ?, ?)");
+			
+			// Set auto-commit to false.
+			connection.setAutoCommit(false);
+			
+			// Iterate through pairs of LDA configurations, store respective distances.
+			for (Pair<LDAConfiguration, LDAConfiguration> ldaConfigurationPair : topicDistances.keySet()) {
+				// Topic distance matrix.
+				double[][] topicDistanceMatrix	= topicDistances.get(ldaConfigurationPair);
+				// LDA configuration 1.
+				int ldaConfigID_1				= ldaConfigurationPair.getKey().getConfigurationID();
+				// LDA configuration 2.
+				int ldaConfigID_2				= ldaConfigurationPair.getValue().getConfigurationID();
+				
+				// Iterate through topic distances for this pair of LDA configurations.
+				for (int i = 0; i < topicDistanceMatrix.length; i++) {
+					for (int j = 0; j < topicDistanceMatrix[i].length; j++) {
+						// Set values for row.
+						statement.setInt(1, ldaConfigID_1);
+						statement.setInt(2, ldaConfigID_2);
+						statement.setInt(3, i);
+						statement.setInt(4, j);
+						statement.setDouble(5, topicDistanceMatrix[i][j]);
+
+						// Add row to batch.
+						statement.addBatch();
+					}	
+				}
+				
+				// Update loading task, if provided.
+				if (task != null)
+					task.updateTaskProgress(processedRowCount, topicDistances.size());
+			}
+			
 			
 			// Execute batch.
 			statement.executeBatch();
@@ -494,10 +573,10 @@ public class DBManagement
 	/**
 	 * Loads distance matrix. 
 	 * @param ldaConfigurations
-	 * @param loadingTask Assigning task. Optional, may be null.
+	 * @param task Assigning task. Optional, may be null.
 	 * @return
 	 */
-	public double[][] loadDistances(ArrayList<LDAConfiguration> ldaConfigurations, WorkspaceTask loadingTask)
+	public double[][] loadDistances(ArrayList<LDAConfiguration> ldaConfigurations, WorkspaceTask task)
 	{
 		double[][] distances			= new double[ldaConfigurations.size()][ldaConfigurations.size()];
 		final int totalNumberOfItems	= (ldaConfigurations.size() * ldaConfigurations.size() - ldaConfigurations.size()) / 2;
@@ -523,8 +602,8 @@ public class DBManagement
 				distances[column][row] = distances[row][column];
 				
 				// Update loading task, if provided.
-				if (loadingTask != null)
-					loadingTask.updateTaskProgress(processedRowCount, totalNumberOfItems);
+				if (task != null)
+					task.updateTaskProgress(processedRowCount, totalNumberOfItems);
 				
 				// Keep track of processed rows.
 				processedRowCount++;

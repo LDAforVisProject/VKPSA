@@ -15,11 +15,24 @@ import javafx.util.Pair;
 
 public class Topic
 {
+	/**
+	 * Topic ID.
+	 */
 	private int topicNumber;
+	
+	/**
+	 * Map of keywords with theire respective probabilities.
+	 */
 	private Map<String, Double> keywordProbabilityMap;
 	
-	// Pre-calculate log_2 for distance calculations.
+	/**
+	 * Pre-calculate log_2 for distance calculations.
+	 */
 	private static final double log2 = Math.log(2);
+	
+	// ---------------------------------------------------
+	//						Methods
+	// ---------------------------------------------------
 	
 	public Topic(int topicNumber)
 	{
@@ -83,6 +96,11 @@ public class Topic
 		}
 				
 		return result + "\n";
+	}
+	
+	public int getTopicNumber()
+	{
+		return topicNumber;
 	}
 	
 	public int getNumberOfItems()

@@ -40,6 +40,7 @@ public class Task_CalculateMDSCoordinates extends WorkspaceTask
 		ClassicalScaling.fullmds(distances, output);
 		//MDSJ.classicalScaling(distances, 2);
 	
+		// @todo Check why delta is not zero.
 		double delta = 0;
 		for (int i = 0; i < distances.length; i++) {
 			for (int j = 0; j < distances[i].length; j++) {

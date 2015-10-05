@@ -67,9 +67,9 @@ public class Dataset
 
 //		@todo: 
 //			x Use topic distance matrix in actual distance calculate methods to store values.
-			- Create table for topic distances.
-			- Write data to table.
-			* To be finished at the beginning of the next week at the latest!
+//			- Create table for topic distances.
+//			- Write data to table.
+//			* To be finished at the beginning of the next week at the latest!
 			
 		switch (distanceType) {
 			case MinimalDistance:

@@ -459,6 +459,9 @@ public class Workspace implements ITaskListener
 			}
 		}
 	
+		// Check if number of datasets in DIS table and MDS file match each other.
+		if (numberOfDatasetsInDISTable != numberOfDatasetsInMDSFile)
+			isIntegrous = false;
 		
 		return isIntegrous;
 	}
