@@ -520,7 +520,7 @@
                                        <children>
                                           <SplitPane dividerPositions="0.5" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <items>
-                                              <AnchorPane fx:id="localScope_anchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff;">
+                                              <AnchorPane fx:id="localScope_containingAnchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff;">
                                                    <children>
                                                       <Label layoutX="10.0" layoutY="5.0" text="Local Scope" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0">
                                                          <font>
@@ -540,6 +540,12 @@
                                                             <Cursor fx:constant="HAND" />
                                                          </cursor>
                                                       </ImageView>
+                                                      <SplitPane dividerPositions="0.29797979797979796" layoutY="31.0" prefHeight="228.0" prefWidth="562.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
+                                                        <items>
+                                                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
+                                                          <AnchorPane fx:id="localScope_anchorPane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
+                                                        </items>
+                                                      </SplitPane>
                                                    </children>
                                                 </AnchorPane>
                                               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">

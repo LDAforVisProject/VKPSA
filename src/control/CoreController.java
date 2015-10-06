@@ -367,16 +367,6 @@ public class CoreController extends Controller
 	@Override
 	public void resizeContent(double width, double height)
 	{
-		// Adapt width.
-		if (width > 0) {
-			
-		}
-		
-		// Adapt height.
-		if (height > 0) {
-			
-		}
-		
 		// Propagate event to other controllers.
 		for (Controller controller : controllerMap.values()) {
 			controller.resizeContent(width, height);

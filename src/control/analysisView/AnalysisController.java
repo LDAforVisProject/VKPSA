@@ -93,7 +93,7 @@ public class AnalysisController extends Controller
 	/**
 	 * For local scope visualization(s).
 	 */
-	private @FXML AnchorPane localScope_anchorPane; // localScope_anchorPane
+	private @FXML AnchorPane localScope_anchorPane;
 	/**
 	 * For distance correlation linechart.
 	 */
@@ -340,7 +340,6 @@ public class AnalysisController extends Controller
 		/*
 		 * Add resize listeners for local scope anchor pane.
 		 */
-		
 		localScope_anchorPane.widthProperty().addListener(new ChangeListener<Number>() {
 		    @Override 
 		    public void changed(ObservableValue<? extends Number> observableValue, Number oldWidth, Number newWidth)
@@ -608,30 +607,35 @@ public class AnalysisController extends Controller
 	 */
 	public void integrateMDSSelection(Set<Integer> selectedIndices, boolean includeLocalScope)
 	{
+		boolean changeDetected = !( selectedIndices.containsAll(dataspace.getSelectedFilteredIndices()) && dataspace.getSelectedFilteredIndices().containsAll(selectedIndices) );
+
 		// Update set of filtered and selected indices.
-		dataspace.updateSelectedIndexSet(selectedIndices);
-		
-		// Find selected and filtered values.
-		dataspace.updateSelectedDistanceMatrix();
-		dataspace.updateSelectedLDAConfigurations();
-		dataspace.updateSelectedCoordinateMatrix();
-		
-		// Refresh other (than MDSScatterchart) visualizations.
-		distancesBarchart.refresh(	dataspace.getDiscardedIndices(), dataspace.getFilteredIndices(), dataspace.getSelectedFilteredIndices(),
-									dataspace.getDiscardedDistances(), dataspace.getFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
-									true);
-//		mdsScatterchart.refresh(	dataspace.getCoordinates(),
-//				dataspace.getFilteredCoordinates(), dataspace.getFilteredIndices(), 
-//				dataspace.getSelectedCoordinates(), dataspace.getSelectedFilteredIndices(), 
-//				dataspace.getDiscardedCoordinates(), dataspace.getDiscardedIndices());
-		parameterspace_heatmap.refresh(	dataspace.getLDAConfigurations(),
-										paramSpaceHeatmap_dataBinding == HeatmapDataBinding.FILTERED ? dataspace.getFilteredLDAConfigurations() : dataspace.getSelectedLDAConfigurations(), 
-										combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), 
-										button_relativeView_paramDist.isSelected(), paramSpaceHeatmap_dataBinding);
-		
-		// Refresh local scope visualization, if specified.
-		if (includeLocalScope)
+		if (changeDetected) {
+			dataspace.updateSelectedIndexSet(selectedIndices);
+			
+			// Find selected and filtered values.
+			dataspace.updateSelectedDistanceMatrix();
+			dataspace.updateSelectedLDAConfigurations();
+			dataspace.updateSelectedCoordinateMatrix();
+			
+			// Refresh other (than MDSScatterchart) visualizations.
+			//	Distances barchart:
+			distancesBarchart.refresh(	dataspace.getDiscardedIndices(), dataspace.getFilteredIndices(), dataspace.getSelectedFilteredIndices(),
+										dataspace.getDiscardedDistances(), dataspace.getFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
+										true);
+	//		mdsScatterchart.refresh(	dataspace.getCoordinates(),
+	//				dataspace.getFilteredCoordinates(), dataspace.getFilteredIndices(), 
+	//				dataspace.getSelectedCoordinates(), dataspace.getSelectedFilteredIndices(), 
+	//				dataspace.getDiscardedCoordinates(), dataspace.getDiscardedIndices());
+			//	Paramer space heatmap:
+			parameterspace_heatmap.refresh(	dataspace.getLDAConfigurations(),
+											paramSpaceHeatmap_dataBinding == HeatmapDataBinding.FILTERED ? dataspace.getFilteredLDAConfigurations() : dataspace.getSelectedLDAConfigurations(), 
+											combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), 
+											button_relativeView_paramDist.isSelected(), paramSpaceHeatmap_dataBinding);
+			
+	//		if (includeLocalScope) 
 			localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
+		}
 	}
 	
 	public void refreshLocalScopeAfterGlobalSelection()
@@ -772,17 +776,22 @@ public class AnalysisController extends Controller
 		dataspace.updateSelectedCoordinateMatrix();
 
 		// 4.	Refresh visualizations.
+		// 	Distances barchart:
 		distancesBarchart.refresh(		dataspace.getDiscardedIndices(), dataspace.getFilteredIndices(), dataspace.getSelectedFilteredIndices(),
 										dataspace.getDiscardedDistances(), dataspace.getFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
 										true);
+		// 	MDS scatterchart:
 		mdsScatterchart.refresh(		dataspace.getCoordinates(),
 										dataspace.getFilteredCoordinates(), dataspace.getFilteredIndices(), 
 										dataspace.getSelectedCoordinates(), dataspace.getSelectedFilteredIndices(), 
 										dataspace.getDiscardedCoordinates(), dataspace.getDiscardedIndices());
+		// 	Parameter space heatmap:
 		parameterspace_heatmap.refresh(	dataspace.getLDAConfigurations(),
 										paramSpaceHeatmap_dataBinding == HeatmapDataBinding.FILTERED ? dataspace.getFilteredLDAConfigurations() : dataspace.getSelectedLDAConfigurations(), 
 										combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), 
 										button_relativeView_paramDist.isSelected(), paramSpaceHeatmap_dataBinding);
+		//	Local scope:
+		localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
 	}
 	
 	/**
@@ -1023,7 +1032,7 @@ public class AnalysisController extends Controller
 			break;
 			
 			// Resize local scope element.
-			case "anchorpane_localScope":	
+			case "localScope_anchorPane":	
 				localScopeInstance.resize(width, height);
 			break;
 		}
@@ -1358,7 +1367,7 @@ public class AnalysisController extends Controller
 				settings_paramDist_icon.setVisible(true);
 			break;
 			
-			case "localScope_anchorPane":
+			case "localScope_containingAnchorPane":
 				settings_localScope_icon.setVisible(true);
 			break;
 			
@@ -1388,7 +1397,7 @@ public class AnalysisController extends Controller
 				settings_paramDist_icon.setVisible(false);
 			break;
 			
-			case "localScope_anchorPane":
+			case "localScope_containingAnchorPane":
 				settings_localScope_icon.setVisible(false);
 			break;
 			

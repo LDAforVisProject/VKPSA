@@ -122,7 +122,7 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 		// This type of visualization is reasonable for one LDA configuration
 		// at the same time only, therefore we use only one selected LDAConfiguration.
 		if (selectedFilteredLDAConfigurations.size() > 0)  {
-			
+			System.out.println("> 0");
 			// Get list (for this LDA configuration) of lists (of topics) of keyword/probability pairs.
 			if (updateData) {
 				// Load data from database.
@@ -130,6 +130,7 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 				
 				// Refresh control for number of topics.
 				localScope.setNumberOfTopicsMaximum(data.size());
+				
 			}
 			
 		    // Check if the actually available number of topics is smaller than the required one.
@@ -188,7 +189,7 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 			
 			VBox vbox = new VBox();
 			vbox.setLayoutX(canvas.getLayoutX() + i * intervalX + intervalX * 0.15);
-			vbox.setLayoutY(canvas.getLayoutY() + 55);
+			vbox.setLayoutY(canvas.getLayoutY() + 15);
 			tagCloudContainer.add(vbox);
 			
 			// Init labels to container.
@@ -362,9 +363,9 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 			currTagCloud.layout();
 			
 			double currBridgeOffsetX					= currTagCloud.getLayoutX();
-			double currBridgeOffsetY					= currTagCloud.getLayoutY() - 43 + defaultLineWidth;
+			double currBridgeOffsetY					= currTagCloud.getLayoutY() - 3 + defaultLineWidth;
 			double nextBridgeOffsetX					= nextTagCloud.getLayoutX();
-			double nextBridgeOffsetY					= nextTagCloud.getLayoutY() - 43 + defaultLineWidth;
+			double nextBridgeOffsetY					= nextTagCloud.getLayoutY() - 3 + defaultLineWidth;
 			
 			
 			// For all keywords in the current tag cloud: See if they exist in the next tagcloud too.
@@ -430,7 +431,7 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 		
 		// Adapt height.
 		if (height > 0) {
-			canvas.setHeight(height - 40 - 5);
+			canvas.setHeight(height - 5);
 			refresh(selectedFilteredLDAConfigurations, maxNumberOfTopics, numberOfTopics, maxNumberOfKeywords, numberOfKeywords, false);
 		}
 	}
@@ -451,7 +452,7 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 		}
 		
 		// Clear canvas.
-		canvas.getGraphicsContext2D().clearRect(0, 0, canvas.getWidth(), canvas.getHeight());;
+		canvas.getGraphicsContext2D().clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 		
 		// Update settings.
 		this.maxNumberOfTopics		= maxNumberOfTopics;

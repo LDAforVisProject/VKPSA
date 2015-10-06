@@ -52,7 +52,7 @@ public class LocalScopeInstance extends VisualizationComponent
 	/**
 	 * Collection storing all LDA configurations relevant for this local scope. 
 	 */
-	private ArrayList<LDAConfiguration> selectedFilteredLDAConfigurations;
+	private ArrayList<LDAConfiguration> selectedLDAConfigurations;
 	
 	// -----------------------------------------------
 	// 		Methods.
@@ -96,8 +96,8 @@ public class LocalScopeInstance extends VisualizationComponent
             	textfield_localScope_numTopicsToUse.setText(String.valueOf(roundedNumberOfTopics));
             	
             	// Update visualization.
-            	if (event.getEventType() == MouseEvent.MOUSE_RELEASED && selectedFilteredLDAConfigurations != null)
-            		controller.refresh(selectedFilteredLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), roundedNumberOfTopics, (int)slider_localScope_numKeywordsToUse.getMax(), (int) Math.round(slider_localScope_numKeywordsToUse.getValue()), false);
+            	if (event.getEventType() == MouseEvent.MOUSE_RELEASED && selectedLDAConfigurations != null)
+            		controller.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), roundedNumberOfTopics, (int)slider_localScope_numKeywordsToUse.getMax(), (int) Math.round(slider_localScope_numKeywordsToUse.getValue()), false);
             }
 		};
 		
@@ -111,8 +111,8 @@ public class LocalScopeInstance extends VisualizationComponent
             	textfield_localScope_numKeywordsToUse.setText(String.valueOf(roundedNumberOfKeywords));
             	
             	// Update visualization.
-            	if (event.getEventType() == MouseEvent.MOUSE_RELEASED && selectedFilteredLDAConfigurations != null)
-            		controller.refresh(selectedFilteredLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), (int) Math.round(slider_localScope_numTopicsToUse.getValue()), (int)slider_localScope_numKeywordsToUse.getMax(), roundedNumberOfKeywords, false);
+            	if (event.getEventType() == MouseEvent.MOUSE_RELEASED && selectedLDAConfigurations != null)
+            		controller.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), (int) Math.round(slider_localScope_numTopicsToUse.getValue()), (int)slider_localScope_numKeywordsToUse.getMax(), roundedNumberOfKeywords, false);
             }
 		};		
 		
@@ -151,10 +151,10 @@ public class LocalScopeInstance extends VisualizationComponent
 			anchorpane_localScope.getChildren().add(contentNode);
 			
 			// Ensure resizability of content.
-			AnchorPane.setTopAnchor(contentNode, 40.0);
-    		AnchorPane.setBottomAnchor(contentNode, 5.0);
-    		AnchorPane.setLeftAnchor(contentNode, 5.0);
-    		AnchorPane.setRightAnchor(contentNode, 5.0);
+			AnchorPane.setTopAnchor(contentNode, 0.0);
+    		AnchorPane.setBottomAnchor(contentNode, 0.0);
+    		AnchorPane.setLeftAnchor(contentNode, 0.0);
+    		AnchorPane.setRightAnchor(contentNode, 0.0);
     		
     		// Set visualization type labe.
     		controller.updateLabelWithVisualizationType(label_visType);
@@ -168,13 +168,13 @@ public class LocalScopeInstance extends VisualizationComponent
         }
 	}
 	
-	public void refresh(ArrayList<LDAConfiguration> selectedFilteredLDAConfigurations)
+	public void refresh(ArrayList<LDAConfiguration> selectedLDAConfigurations)
 	{
 		// Update reference.
-		this.selectedFilteredLDAConfigurations = selectedFilteredLDAConfigurations;
+		this.selectedLDAConfigurations = selectedLDAConfigurations;
 		
 		// Refresh visualization.
-		controller.refresh(selectedFilteredLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), (int)slider_localScope_numTopicsToUse.getValue(), (int)slider_localScope_numKeywordsToUse.getMax(), (int)slider_localScope_numKeywordsToUse.getValue(), true);
+		controller.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), (int)slider_localScope_numTopicsToUse.getValue(), (int)slider_localScope_numKeywordsToUse.getMax(), (int)slider_localScope_numKeywordsToUse.getValue(), true);
 	}
 
 	public void resize(double width, double height)

@@ -382,6 +382,7 @@ public class DBManagement
 			 * 1. Get number of topics for this LDA configuration.
 			 */
 			
+			// @todo Get number of topics info from corresponding Dataset instance.
 			PreparedStatement numKeywordsStmt	= connection.prepareStatement(query);
 			ResultSet rs						= numKeywordsStmt.executeQuery();
 			int numberOfTopics					= rs.getInt("topicCount");
