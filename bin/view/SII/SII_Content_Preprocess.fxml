@@ -40,7 +40,7 @@
                               <Insets left="10.0" />
                            </GridPane.margin>
                         </Label>
-                        <CheckBox fx:id="checkbox_appendToDistanceMatrix" disable="true" mnemonicParsing="false" GridPane.columnIndex="1">
+                        <CheckBox fx:id="checkbox_appendToDistanceMatrix" mnemonicParsing="false" selected="true" GridPane.columnIndex="1">
                            <GridPane.margin>
                               <Insets left="10.0" />
                            </GridPane.margin>

@@ -17,9 +17,9 @@ import model.workspace.WorkspaceAction;
 
 public class Task_GenerateData extends WorkspaceTask
 {
-	public Task_GenerateData(Workspace workspace, WorkspaceAction workspaceAction)
+	public Task_GenerateData(Workspace workspace, WorkspaceAction workspaceAction, final Map<String, Integer> additionalOptionSet)
 	{
-		super(workspace, workspaceAction);
+		super(workspace, workspaceAction, additionalOptionSet);
 	}
 	
 	@Override

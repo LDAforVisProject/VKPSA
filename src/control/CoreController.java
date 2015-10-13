@@ -372,4 +372,10 @@ public class CoreController extends Controller
 			controller.resizeContent(width, height);
 		}
 	}
+
+	@Override
+	protected Map<String, Integer> prepareOptionSet()
+	{
+		return null;
+	}
 }

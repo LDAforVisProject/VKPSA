@@ -22,9 +22,9 @@ import model.workspace.WorkspaceAction;
 public class Task_CalculateMDSCoordinates extends WorkspaceTask
 {
 
-	public Task_CalculateMDSCoordinates(Workspace workspace, WorkspaceAction workspaceAction)
+	public Task_CalculateMDSCoordinates(Workspace workspace, WorkspaceAction workspaceAction, final Map<String, Integer> additionalOptionSet)
 	{
-		super(workspace, workspaceAction);
+		super(workspace, workspaceAction, additionalOptionSet);
 	}
 
 	@Override

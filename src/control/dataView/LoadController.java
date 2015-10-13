@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import model.workspace.WorkspaceAction;
@@ -99,13 +100,13 @@ public class LoadController extends DataSubViewController
 			// Load data from new directory.
 			if (currentPath != workspace.getDirectory()) {
 				// 	Reset workspace.
-				workspace.executeWorkspaceAction(WorkspaceAction.SWITCH, null, this);
+				workspace.executeWorkspaceAction(WorkspaceAction.SWITCH, null, this, null);
 				
 				// Set new path.
 				workspace.setDirectory(currentPath);
 				
 				// Collect file metadata. Execute other actions once file metadata reading is complete.
-				workspace.executeWorkspaceAction(WorkspaceAction.COLLECT_METADATA, progressIndicator_load.progressProperty(), this);
+				workspace.executeWorkspaceAction(WorkspaceAction.COLLECT_METADATA, progressIndicator_load.progressProperty(), this, null);
 			}
 			
 			// Specified is current directory.
@@ -135,13 +136,13 @@ public class LoadController extends DataSubViewController
 				// If .dis exists: Load it.
 				if (workspace.getNumberOfDatasetsInDISTable() > 0) {
 					// Load distance data.
-					workspace.executeWorkspaceAction(WorkspaceAction.LOAD_DISTANCES, progressIndicator_load.progressProperty(), this);
+					workspace.executeWorkspaceAction(WorkspaceAction.LOAD_DISTANCES, progressIndicator_load.progressProperty(), this, null);
 				}
 				
 				// Otherwise: Execute and display integrity check, set summary as tooltip.
 				else {
 					// Load MDS coordinates.
-					workspace.executeWorkspaceAction(WorkspaceAction.LOAD_MDS_COORDINATES, progressIndicator_load.progressProperty(), this);
+					workspace.executeWorkspaceAction(WorkspaceAction.LOAD_MDS_COORDINATES, progressIndicator_load.progressProperty(), this, null);
 				}
 			break;
 			
@@ -151,7 +152,7 @@ public class LoadController extends DataSubViewController
 				// Once distance data is loaded: Check if .mds file exists. If so: load it.
 				if (workspace.containsMDSFile()) {
 					// Load MDS coordinates.
-					workspace.executeWorkspaceAction(WorkspaceAction.LOAD_MDS_COORDINATES, progressIndicator_load.progressProperty(), this);					
+					workspace.executeWorkspaceAction(WorkspaceAction.LOAD_MDS_COORDINATES, progressIndicator_load.progressProperty(), this, null);					
 				}
 				
 				// Otherwise: Execute and display integrity check, set summary as tooltip.
@@ -221,7 +222,7 @@ public class LoadController extends DataSubViewController
 			if (!workspace.checkIntegrity()) {
 				label_consistency.setText("No");
 				shape_integrity.setFill(Color.RED);
-				message = "Error: Workspace is not consistent. Check if .dis and .mds files match each "
+				message = "Error: Workspace is not consistent. Check if .dis and .mds data match each "
 						+ "other and datasets in this directory or preprocess raw topic data again.";
 			}
 
@@ -257,5 +258,11 @@ public class LoadController extends DataSubViewController
 	@Override
 	public void resizeContent(double width, double height)
 	{
+	}
+
+	@Override
+	protected Map<String, Integer> prepareOptionSet()
+	{
+		return null;
 	}
 }

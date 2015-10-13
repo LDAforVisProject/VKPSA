@@ -7,10 +7,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javafx.concurrent.Task;
 import javafx.util.Pair;
+import mdsj.Data;
 import model.LDAConfiguration;
 import model.topic.Topic;
 import model.topic.TopicKeywordAlignment;
@@ -455,13 +458,13 @@ public class DBManagement
 	 * Writes dataset distances to DB.
 	 * @param ldaConfigurations
 	 * @param distances
-	 * @param overwriteExistingValues
-	 * 	@param task
-	 * @todo Allow decision between whether or not existing values should be replaced.
+	 * @param storeAllDistances
+	 * @param listOfLDAConfigsWithoutDistances
+	 * @param task
 	 */
 	public void saveDatasetDistances(	final ArrayList<LDAConfiguration> ldaConfigurations,
 										final double[][] distances,
-										final boolean overwriteExistingValues,
+										boolean storeAllDistances, Set<Integer> listOfLDAConfigsWithoutDistances,
 										WorkspaceTask task)
 	{
 		// Keep track of processed rows.
@@ -477,13 +480,19 @@ public class DBManagement
 			// Iterate through distance matrix, create query, attach to batch.
 			for (int i = 0; i < ldaConfigurations.size(); i++) {
 				for (int j = i + 1; j < ldaConfigurations.size(); j++) {
-					// Set values for row.
-					statement.setInt(1, ldaConfigurations.get(i).getConfigurationID());
-					statement.setInt(2, ldaConfigurations.get(j).getConfigurationID());
-					statement.setDouble(3, distances[i][j]);
-
-					// Add row to batch.
-					statement.addBatch();
+					if (storeAllDistances || 
+						listOfLDAConfigsWithoutDistances.contains(ldaConfigurations.get(i).getConfigurationID()) || 
+						listOfLDAConfigsWithoutDistances.contains(ldaConfigurations.get(j).getConfigurationID()) ) {
+						
+						// Set values for row.
+						System.out.println("storing " + ldaConfigurations.get(i).getConfigurationID() + " to " + ldaConfigurations.get(j).getConfigurationID()); 
+						statement.setInt(1, ldaConfigurations.get(i).getConfigurationID());
+						statement.setInt(2, ldaConfigurations.get(j).getConfigurationID());
+						statement.setDouble(3, distances[i][j]);
+	
+						// Add row to batch.
+						statement.addBatch();
+					}
 				}
 				
 				// Update loading task, if provided.
@@ -504,11 +513,14 @@ public class DBManagement
 		catch (SQLException e) {
 			e.printStackTrace();
 		}
+		
+		System.out.println("finished");
 	}
 	
 	/**
 	 * Stores distances between topics in different LDA datsets.
 	 * @param topicDistances
+	 * @param listOfLDAConfigsWithoutDistances 
 	 * @param overwriteExistingValues
 	 * @param task
 	 */
@@ -582,19 +594,15 @@ public class DBManagement
 		double[][] distances			= new double[ldaConfigurations.size()][ldaConfigurations.size()];
 		final int totalNumberOfItems	= (ldaConfigurations.size() * ldaConfigurations.size() - ldaConfigurations.size()) / 2;
 		
-//		NEXT: 
-//			Test  if DB distance loading is working.
-//			Then: Remove file integrity check (and all other .dis-based methods and attributes).
-//			Then: Design system for topic distance data.
-		
 		// Init prepared statement with query template.
 		try {
-			PreparedStatement statement = connection.prepareStatement("SELECT * FROM datasetDistances");
+			PreparedStatement statement = connection.prepareStatement("SELECT * FROM datasetDistances order by ldaConfigurationID_1, ldaConfigurationID_2");
 			ResultSet rs				= statement.executeQuery();
 			
 			// Process distance data rows.
 			int processedRowCount		= 0;
 			while (rs.next()) {
+				-> Next: Adaptive saving works (test again -> doubt with #6, but should be working); but distance storing is wrong. Fix that.
 				int row		= processedRowCount / ldaConfigurations.size();
 				int column	= processedRowCount % ldaConfigurations.size();
 				
@@ -609,7 +617,7 @@ public class DBManagement
 				// Keep track of processed rows.
 				processedRowCount++;
 			}
-			
+			System.out.println(Data.format(distances));
 			if (totalNumberOfItems != processedRowCount)
 				System.out.println("mismatch");
 		}
@@ -630,12 +638,13 @@ public class DBManagement
 		int numberOfDatasets = -1;
 		
 		try {
-			PreparedStatement statement = connection.prepareStatement("	SELECT count(*) datasetCount FROM (" + 
-																		    "SELECT distinct ldaConfigurationID_1 from datasetDistances " +
+			PreparedStatement statement = connection.prepareStatement("	SELECT count(distinct ldaConfigID) datasetCount FROM (" + 
+																		    "SELECT distinct ldaConfigurationID_1 ldaConfigID from datasetDistances " +
 																		    "union " +
-																		    "SELECT distinct ldaConfigurationID_2 from datasetDistances" +
-																		    ")"
+																		    "SELECT distinct ldaConfigurationID_2 ldaConfigID  from datasetDistances" +
+																		")"
 																	);
+
 			ResultSet rs				= statement.executeQuery();
 			numberOfDatasets			= rs.getInt("datasetCount");
 		} 
@@ -646,5 +655,63 @@ public class DBManagement
 		
 		
 		return numberOfDatasets;
+	}
+	
+	/**
+	 * Loads configuration IDs of all LDA configurations for which distances have not been calculated yet.
+	 * @return
+	 */
+	public Set<Integer> loadLDAConfigIDsWithoutDistanceMatrixEntries()
+	{
+		int numberOfDatasets							= -1;
+		Set<Integer> ldaConfigIDsWithoutDistances		= null;
+		
+		try {
+			/*
+			 * 1. Get number of datasets for which distances have not been calculated yet. 
+			 */
+			PreparedStatement statement = connection.prepareStatement(	"	select count(distinct ldaConfigurationID) ldaConfigCount " +
+																		"	from ldaConfigurations ldac " +
+																		"	where " +
+																		"    	ldac.ldaConfigurationID not in ( " +
+																		"    		select distinct ldaConfigurationID_1 from datasetDistances " +
+																		"    		union " +
+																		"    		select distinct ldaConfigurationID_2 from datasetDistances " +
+																		"    	)"
+																	);
+			ResultSet rs					= statement.executeQuery();
+			numberOfDatasets				= rs.getInt("ldaConfigCount");
+			
+			/*
+			 *  2. Query for which datasets distances haven't been calculated yet.
+			 */
+			
+			// Init list of LDA config IDs.
+			ldaConfigIDsWithoutDistances	= new HashSet<Integer>(numberOfDatasets);
+
+			// Prepare statement.
+			statement = connection.prepareStatement(	"	select distinct ldaConfigurationID ldaConfigCount " +
+														"	from ldaConfigurations ldac " +
+														"	where " +
+														"    	ldac.ldaConfigurationID not in ( " +
+														"    		select distinct ldaConfigurationID_1 from datasetDistances " +
+														"    		union " +
+														"    		select distinct ldaConfigurationID_2 from datasetDistances " +
+														"    	)"
+													);
+			// Execute statement.
+			rs		= statement.executeQuery();
+			
+			// Process loaded data.
+			while (rs.next()) {
+				ldaConfigIDsWithoutDistances.add(rs.getInt("ldaConfigCount"));
+			}
+		} 
+		
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+	
+		return ldaConfigIDsWithoutDistances;
 	}
 }

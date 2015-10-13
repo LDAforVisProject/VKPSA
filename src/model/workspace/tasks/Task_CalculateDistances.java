@@ -3,6 +3,7 @@ package model.workspace.tasks;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javafx.util.Pair;
 import database.DBManagement;
@@ -22,9 +23,9 @@ import model.workspace.WorkspaceAction;
 public class Task_CalculateDistances extends WorkspaceTask
 {
 
-	public Task_CalculateDistances(Workspace workspace, WorkspaceAction workspaceAction)
+	public Task_CalculateDistances(Workspace workspace, WorkspaceAction workspaceAction, final Map<String, Integer> additionalOptionSet)
 	{
-		super(workspace, workspaceAction);
+		super(workspace, workspaceAction, additionalOptionSet);
 	}
 
 	@Override
@@ -44,10 +45,8 @@ public class Task_CalculateDistances extends WorkspaceTask
 		int n												= ldaConfigurations.size() - 1;
 		// Stores number of calculated distances to date.
 		int numberOfCalculatedDistances						= 0;
-		// Total number of distances to calculate.
-		int totalNumberOfDistances							= (n * n + n) / 2 + n; 
-		// Stores the factor needed to get all distances to >= 1 (workaround needed for MDSJ to work correctly). @deprecated
-		int normalizationFactor								= 0;
+		// Total number of distances to calculate (+ n since the distance of the topics of one model to itself have to be calculated also).
+		int totalNumberOfDistances							= (n * n + n) / 2 + n;
 		
 		// Holds distances between two topics of different datasets.
 		Map<Pair<LDAConfiguration, LDAConfiguration>, double[][]> topicDistances = new HashMap<Pair<LDAConfiguration,LDAConfiguration>, double[][]>();
@@ -55,7 +54,17 @@ public class Task_CalculateDistances extends WorkspaceTask
 		// Update task progress.
 		updateProgress(0, 1);
 		
-		System.out.println("Calculating dataset distances.");
+		// Fetch configuration IDs of all LDA configurations for which distances have not been calculated yet.
+		Set<Integer> listOfLDAConfigsWithoutDistances 		= db.loadLDAConfigIDsWithoutDistanceMatrixEntries();
+		
+		// Determine whether all distances should be calculated.
+		boolean calculateAllDistances = additionalOptionSet == null	|| 
+										additionalOptionSet != null && (additionalOptionSet.get("forceDistanceRecalculation") == 1);
+		
+	
+		for (int i : listOfLDAConfigsWithoutDistances)
+			System.out.println("\tblub - " + i);
+		
 		/*
 		 * Compare all datasets with each other, calculate distances.
 		 */
@@ -69,39 +78,39 @@ public class Task_CalculateDistances extends WorkspaceTask
 			// Calculate other distances.
 			for (int j = i; j < ldaConfigurations.size(); j++) {
 				// Update task progress.
-				updateProgress(numberOfCalculatedDistances, totalNumberOfDistances);
+				updateProgress(numberOfCalculatedDistances++, totalNumberOfDistances);
 				
-				// Get dataset 2.
-				Dataset dataset2 = datasetMap.get(ldaConfigurations.get(j));
-				
-				// Allocate topic distance matrix.
-				double currTopicDistances[][] = new double[dataset1.getTopics().size()][dataset2.getTopics().size()];
-				
-				// Assume symmetric distance calculations is done in .calculateDatasetDistance().
-				distances[i][j] = (float)dataset1.calculateDatasetDistance(dataset2, DatasetDistance.HausdorffDistance, currTopicDistances);
-				distances[j][i] = distances[i][j];
-				
-//				System.out.println(Data.format(currTopicDistances));
-				
-				// Store topic distance matrix for the current two datasets/topic models in map.
-				Pair<LDAConfiguration, LDAConfiguration> topicDistanceKey = new Pair<LDAConfiguration, LDAConfiguration>(ldaConfigurations.get(i),  ldaConfigurations.get(j));
-				topicDistances.put(topicDistanceKey, currTopicDistances);
-				
-				int tempNormalizationFactor = 1;
-				//for (; distances[i][j] * tempNormalizationFactor < 10; tempNormalizationFactor *= 10);
-				normalizationFactor			= tempNormalizationFactor > normalizationFactor ? tempNormalizationFactor : normalizationFactor;
-				
-				numberOfCalculatedDistances++;
+				// Adaptive distance calculation:
+				// Check if distances have to be calculated for this pairing of topic models.
+				if (	calculateAllDistances	||
+						(
+							listOfLDAConfigsWithoutDistances.contains(ldaConfigurations.get(i).getConfigurationID()) ||
+							listOfLDAConfigsWithoutDistances.contains(ldaConfigurations.get(j).getConfigurationID())
+						)
+				) {
+					System.out.println("Calculating " + ldaConfigurations.get(i).getConfigurationID() + " to " + ldaConfigurations.get(j).getConfigurationID());
+					// Get dataset 2.
+					Dataset dataset2 = datasetMap.get(ldaConfigurations.get(j));
+					
+					// Allocate topic distance matrix.
+					double currTopicDistances[][] = new double[dataset1.getTopics().size()][dataset2.getTopics().size()];
+					
+					// Assume symmetric distance calculations is done in .calculateDatasetDistance().
+					distances[i][j] = (float)dataset1.calculateDatasetDistance(dataset2, DatasetDistance.HausdorffDistance, currTopicDistances);
+					distances[j][i] = distances[i][j];
+					
+					// Store topic distance matrix for the current two datasets/topic models in map.
+					Pair<LDAConfiguration, LDAConfiguration> topicDistanceKey = new Pair<LDAConfiguration, LDAConfiguration>(ldaConfigurations.get(i),  ldaConfigurations.get(j));
+					topicDistances.put(topicDistanceKey, currTopicDistances);
+				}
 			}
 		}
-		
-		
 		
 		// Save topic distances to database.
 		db.saveTopicDistances(topicDistances, false, this);
 		
 		// Save dataset distances to database.
-		db.saveDatasetDistances(ldaConfigurations, distances, false, this);
+		db.saveDatasetDistances(ldaConfigurations, distances, calculateAllDistances, listOfLDAConfigsWithoutDistances, this);
 		
 		// Update task progress.
 		updateProgress(1, 1);
@@ -109,15 +118,11 @@ public class Task_CalculateDistances extends WorkspaceTask
 		// Transfer distance data to workspace instance.
 		workspace.setDistances(distances);
 		
-		// Notify workspace that distance data is loaded.
-		workspace.setDistanceDataLoaded(true);
+		// Notify workspace that distance data is loaded (if all distances were calculated).
+		workspace.setDistanceDataLoaded(calculateAllDistances);
 		
 		// Clear raw data.
 		workspace.getDatasetMap().clear();
-		
-//		catch (Exception e) {
-//			e.printStackTrace();
-//		}
 		
 		return 1;
 	}

@@ -1,5 +1,7 @@
 package control;
 
+import java.util.Map;
+
 import model.workspace.Workspace;
 import model.workspace.WorkspaceAction;
 import model.workspace.tasks.ITaskListener;
@@ -83,6 +85,13 @@ public abstract class Controller implements Initializable, ITaskListener
 	 * @param height
 	 */
 	public abstract void resizeContent(double width, double height);
+	
+	/**
+	 * Provides an option set holding all relevant information for workspace in order to execute
+	 * workspace actions intitated by the controller. 
+	 * @return
+	 */
+	protected abstract Map<String, Integer> prepareOptionSet();
 	
 	/**
 	 * Resizes one specific element of this view. Implementation is optional.

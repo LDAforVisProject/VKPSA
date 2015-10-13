@@ -1,6 +1,7 @@
 package model.workspace.tasks;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import model.workspace.Workspace;
 import model.workspace.WorkspaceAction;
@@ -13,12 +14,20 @@ public abstract class WorkspaceTask extends Task<Integer>
 	protected Workspace workspace;
 	protected WorkspaceAction workspaceAction;
 	protected ArrayList<ITaskListener> listeners;
+	protected Map<String, Integer> additionalOptionSet;
 	
-	public WorkspaceTask(Workspace workspace, WorkspaceAction workspaceAction)
+	/**
+	 * Initializes task with reference to the workspace, the desired WorkspaceAction and an additional (non-mandatory) option set. 
+	 * @param workspace
+	 * @param workspaceAction
+	 * @param additionalOptionSet
+	 */
+	public WorkspaceTask(Workspace workspace, WorkspaceAction workspaceAction, final Map<String, Integer> additionalOptionSet)
 	{
-		this.workspace			= workspace;
-		this.workspaceAction	= workspaceAction;
-		this.listeners			= new ArrayList<ITaskListener>();
+		this.workspace				= workspace;
+		this.workspaceAction		= workspaceAction;
+		this.additionalOptionSet	= additionalOptionSet;
+		this.listeners				= new ArrayList<ITaskListener>();
 		
 		// Set notification handle for successful and failed exit.
 		this.setOnSucceeded(new EventHandler<WorkerStateEvent>() {

@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 
 import model.workspace.Workspace;
 import model.workspace.WorkspaceAction;
@@ -15,9 +16,9 @@ import javafx.event.EventHandler;
 
 public class Task_LoadMDSCoordinates extends WorkspaceTask
 {
-	public Task_LoadMDSCoordinates(Workspace workspace, WorkspaceAction workspaceAction)
+	public Task_LoadMDSCoordinates(Workspace workspace, WorkspaceAction workspaceAction, final Map<String, Integer> additionalOptionSet)
 	{
-		super(workspace, workspaceAction);
+		super(workspace, workspaceAction, additionalOptionSet);
 	}
 	
 	/**

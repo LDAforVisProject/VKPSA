@@ -352,6 +352,13 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 		// Check if desired number of topics is feasible.
 		final int checkedNumberOfTopics = (numberOfTopics - 1) <= tagCloudContainer.size() ? numberOfTopics - 1 : tagCloudContainer.size() - 1; 
 		
+//		@todo Next up:
+//			- Review/adapt interface for local scope/parallel tag cloud refreshes (one dataset or many?).
+//			- Build webview localScope component.
+//			- Make prototype chord diagram Runnable.
+//			- Try to implement mouse listener in d3.js chord diagram.
+//			- Transfer real instead of test data. 
+		
 		for (int i = 0; i < checkedNumberOfTopics; i++) {
 			VBox currTagCloud							= tagCloudContainer.get(i);
 			VBox nextTagCloud							= tagCloudContainer.get(i + 1);
@@ -465,5 +472,11 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 	@Override
 	protected void updateData()
 	{	
+	}
+
+	@Override
+	protected Map<String, Integer> prepareOptionSet()
+	{
+		return null;
 	}
 }

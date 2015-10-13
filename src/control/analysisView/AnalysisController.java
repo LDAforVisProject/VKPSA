@@ -558,11 +558,11 @@ public class AnalysisController extends Controller
 		// 	MDS scatterchart:
 		mdsScatterchart.refresh(	dataspace.getCoordinates(),
 									dataspace.getFilteredCoordinates(), dataspace.getFilteredIndices(), 
-									dataspace.getSelectedCoordinates(), dataspace.getSelectedFilteredIndices(), 
+									dataspace.getSelectedCoordinates(), dataspace.getSelectedIndices(), 
 									dataspace.getDiscardedCoordinates(), dataspace.getDiscardedIndices());
 
 		//	Distance evaluation barchart:
-		distancesBarchart.refresh(	dataspace.getDiscardedIndices(), dataspace.getFilteredIndices(), dataspace.getSelectedFilteredIndices(),
+		distancesBarchart.refresh(	dataspace.getDiscardedIndices(), dataspace.getFilteredIndices(), dataspace.getSelectedIndices(),
 									dataspace.getDiscardedDistances(), dataspace.getFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
 									true);
 
@@ -607,7 +607,7 @@ public class AnalysisController extends Controller
 	 */
 	public void integrateMDSSelection(Set<Integer> selectedIndices, boolean includeLocalScope)
 	{
-		boolean changeDetected = !( selectedIndices.containsAll(dataspace.getSelectedFilteredIndices()) && dataspace.getSelectedFilteredIndices().containsAll(selectedIndices) );
+		boolean changeDetected = !( selectedIndices.containsAll(dataspace.getSelectedIndices()) && dataspace.getSelectedIndices().containsAll(selectedIndices) );
 
 		// Update set of filtered and selected indices.
 		if (changeDetected) {
@@ -620,7 +620,7 @@ public class AnalysisController extends Controller
 			
 			// Refresh other (than MDSScatterchart) visualizations.
 			//	Distances barchart:
-			distancesBarchart.refresh(	dataspace.getDiscardedIndices(), dataspace.getFilteredIndices(), dataspace.getSelectedFilteredIndices(),
+			distancesBarchart.refresh(	dataspace.getDiscardedIndices(), dataspace.getFilteredIndices(), dataspace.getSelectedIndices(),
 										dataspace.getDiscardedDistances(), dataspace.getFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
 										true);
 	//		mdsScatterchart.refresh(	dataspace.getCoordinates(),
@@ -633,8 +633,11 @@ public class AnalysisController extends Controller
 											combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), 
 											button_relativeView_paramDist.isSelected(), paramSpaceHeatmap_dataBinding);
 			
-	//		if (includeLocalScope) 
+	//		if (includeLocalScope)
+			// 	Local scope:
 			localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
+			// 	Parameter histograms:
+			refreshParameterHistograms(50);
 		}
 	}
 	
@@ -681,7 +684,7 @@ public class AnalysisController extends Controller
 					
 					// Check if this LDA configuration is part of the set of newly selected LDA configurations. 
 					if ( newlySelectedLDAConfigIDs.contains(ldaConfiguration.getConfigurationID()) )
-						dataspace.getSelectedFilteredIndices().add(ldaConfigIndex);
+						dataspace.getSelectedIndices().add(ldaConfigIndex);
 				}
 			}
 		}
@@ -693,7 +696,7 @@ public class AnalysisController extends Controller
 			
 			// Check if any of the newly selected IDs are contained in global selection.
 			// If so: Remove them.
-			for (final int ldaConfigIndex : dataspace.getSelectedFilteredIndices()) {
+			for (final int ldaConfigIndex : dataspace.getSelectedIndices()) {
 				// Get LDA configuration for this index.
 				final LDAConfiguration ldaConfiguration = this.dataspace.getLDAConfigurations().get(ldaConfigIndex); 
 				
@@ -709,7 +712,7 @@ public class AnalysisController extends Controller
 			}
 			
 			// Remove set of indices to delete from set of selected indices.
-			dataspace.getSelectedFilteredIndices().removeAll(indicesToDeleteFromSelection);
+			dataspace.getSelectedIndices().removeAll(indicesToDeleteFromSelection);
 		}
 		
 		// 2. 	Update related (i.e. dependent on the set of selected entities) datasets and visualization, if there were any changes made.
@@ -734,9 +737,9 @@ public class AnalysisController extends Controller
 		if (isAddition) {
 			// Translate local indices to global indices.
 			for (int i = 0; i < newlySelectedLocalIndices.size(); i++) {
-				if (!dataspace.getSelectedFilteredIndices().contains( newlySelectedLocalIndices.get(i)) ) {
+				if (!dataspace.getSelectedIndices().contains( newlySelectedLocalIndices.get(i)) ) {
 					// Add to collection of selected indices.
-					dataspace.getSelectedFilteredIndices().add( newlySelectedLocalIndices.get(i) );
+					dataspace.getSelectedIndices().add( newlySelectedLocalIndices.get(i) );
 					
 					// Change detected.
 					changeDetected = true;
@@ -748,8 +751,8 @@ public class AnalysisController extends Controller
 			// Translate local indices to global indices.
 			for (int i = 0; i < newlySelectedLocalIndices.size(); i++) {
 				// Add to set of selected, translated indices. 
-				if (dataspace.getSelectedFilteredIndices().contains( newlySelectedLocalIndices.get(i)) ) {
-					dataspace.getSelectedFilteredIndices().remove( newlySelectedLocalIndices.get(i) );
+				if (dataspace.getSelectedIndices().contains( newlySelectedLocalIndices.get(i)) ) {
+					dataspace.getSelectedIndices().remove( newlySelectedLocalIndices.get(i) );
 					
 					// Change detected.
 					changeDetected = true;
@@ -777,13 +780,13 @@ public class AnalysisController extends Controller
 
 		// 4.	Refresh visualizations.
 		// 	Distances barchart:
-		distancesBarchart.refresh(		dataspace.getDiscardedIndices(), dataspace.getFilteredIndices(), dataspace.getSelectedFilteredIndices(),
+		distancesBarchart.refresh(		dataspace.getDiscardedIndices(), dataspace.getFilteredIndices(), dataspace.getSelectedIndices(),
 										dataspace.getDiscardedDistances(), dataspace.getFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
 										true);
 		// 	MDS scatterchart:
 		mdsScatterchart.refresh(		dataspace.getCoordinates(),
 										dataspace.getFilteredCoordinates(), dataspace.getFilteredIndices(), 
-										dataspace.getSelectedCoordinates(), dataspace.getSelectedFilteredIndices(), 
+										dataspace.getSelectedCoordinates(), dataspace.getSelectedIndices(), 
 										dataspace.getDiscardedCoordinates(), dataspace.getDiscardedIndices());
 		// 	Parameter space heatmap:
 		parameterspace_heatmap.refresh(	dataspace.getLDAConfigurations(),
@@ -792,6 +795,8 @@ public class AnalysisController extends Controller
 										button_relativeView_paramDist.isSelected(), paramSpaceHeatmap_dataBinding);
 		//	Local scope:
 		localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
+		// 	Parameter histograms:
+		refreshParameterHistograms(50);
 	}
 	
 	/**
@@ -896,12 +901,15 @@ public class AnalysisController extends Controller
 	{
 		// Map storing one bin list for each parameter, counting only filtered datasets.
 		Map<String, int[]> parameterBinLists_filtered	= new HashMap<String, int[]>();
+		// Map storing one bin list for each parameter, counting only selected datasets.
+		Map<String, int[]> parameterBinLists_selected	= new HashMap<String, int[]>();
 		// Map storing one bin list for each parameter, counting only discarded datasets.
 		Map<String, int[]> parameterBinLists_discarded	= new HashMap<String, int[]>();
 		
 		// Add parameters to map of bin lists. 
 		for (String supportedParameter : LDAConfiguration.SUPPORTED_PARAMETERS) {
 			parameterBinLists_filtered.put(supportedParameter, new int[numberOfBins]);
+			parameterBinLists_selected.put(supportedParameter, new int[numberOfBins]);
 			parameterBinLists_discarded.put(supportedParameter, new int[numberOfBins]);
 		}
 		
@@ -909,6 +917,7 @@ public class AnalysisController extends Controller
 		for (int i = 0; i < dataspace.getLDAConfigurations().size(); i++) {
 			// Check if dataset is filtered (as opposed to discarded).
 			boolean isFilteredDataset = dataspace.getFilteredIndices().contains(i);
+			boolean isSelectedDataset = dataspace.getSelectedIndices().contains(i);
 			
 			// Evaluate bin counts for this dataset for each parameter.
 			for (String param : rangeSliders.keySet()) {
@@ -918,9 +927,15 @@ public class AnalysisController extends Controller
 				// Check if element is highest allowed entry.
 				index_key			= index_key < numberOfBins ? index_key : numberOfBins - 1;
 				
-				// Check if this dataset fits all boundaries / is filtered - then increment content of corresponding bin.
-				if (isFilteredDataset)
-					parameterBinLists_filtered.get(param)[index_key]++;
+				// Check if this dataset fits all boundaries / is filtered, selected or discarded - then increment content of corresponding bin.
+				if (isFilteredDataset) {
+					// Filtered dataset:
+					if (!isSelectedDataset)
+						parameterBinLists_filtered.get(param)[index_key]++;
+					// Selected dataset:
+					else 
+						parameterBinLists_selected.get(param)[index_key]++;
+				}
 				else
 					parameterBinLists_discarded.get(param)[index_key]++;
 			}
@@ -934,12 +949,7 @@ public class AnalysisController extends Controller
 			// Clear old data.
 			parameterBarchartEntry.getValue().getData().clear();
 
-			// Add filtered data series to barcharts.
-			parameterBarchartEntry.getValue().getData().add(
-					generateParameterHistogramDataSeries(parameterBarchartEntry.getKey(), parameterBinLists_filtered, numberOfBins)
-			);
-			// Color filtered data.
-			colorParameterHistogramBarchart(parameterBarchartEntry.getValue(), 0);
+			generateParameterHistogramDataSeries(parameterBarchartEntry, parameterBinLists_filtered, numberOfBins, 0);
 			
 			// Add discarded data series to barcharts.
 			parameterBarchartEntry.getValue().getData().add(
@@ -947,7 +957,33 @@ public class AnalysisController extends Controller
 			);
 			// Color discarded data.
 			colorParameterHistogramBarchart(parameterBarchartEntry.getValue(), 1);
+			
+			// Add selected data series to barcharts.
+			parameterBarchartEntry.getValue().getData().add(
+					generateParameterHistogramDataSeries(parameterBarchartEntry.getKey(), parameterBinLists_selected, numberOfBins)
+			);
+			// Color selected data.
+			colorParameterHistogramBarchart(parameterBarchartEntry.getValue(), 2);
 		}
+	}
+	
+	/**
+	 * Generates parameter histogram in/for specified barcharts.
+	 * @param parameterBarchartEntry
+	 * @param paramterBinLists
+	 * @param numberOfBins
+	 * @param seriesIndex
+	 */
+	private void generateParameterHistogramDataSeries(	Map.Entry<String, StackedBarChart<String, Integer>> parameterBarchartEntry, 
+														Map<String, int[]> paramterBinLists,
+														final int numberOfBins, final int seriesIndex)
+	{
+		// Add data series to barcharts.
+		parameterBarchartEntry.getValue().getData().add(
+				generateParameterHistogramDataSeries(parameterBarchartEntry.getKey(), paramterBinLists, numberOfBins)
+		);
+		// Color data.
+		colorParameterHistogramBarchart(parameterBarchartEntry.getValue(), seriesIndex);
 	}
 	
 	/**
@@ -961,6 +997,14 @@ public class AnalysisController extends Controller
 		for (Node node : barchart.lookupAll(".chart-bar")) {
 			switch (seriesIndex)
 			{
+				// Selectede data.
+				case 2:
+					if (node.getUserData() == null || node.getUserData().toString() == "selected") {
+						node.setUserData("selected");
+						node.setStyle("-fx-bar-fill: red;");
+					}
+				break;
+				
 				// Discarded data.
 				case 1:
 					if (node.getUserData() == null || node.getUserData().toString() == "discarded") {
@@ -1405,5 +1449,11 @@ public class AnalysisController extends Controller
 				settings_paramDistCorr_icon.setVisible(false);
 			break;			
 		}		
+	}
+
+	@Override
+	protected Map<String, Integer> prepareOptionSet()
+	{
+		return null;
 	}
 }

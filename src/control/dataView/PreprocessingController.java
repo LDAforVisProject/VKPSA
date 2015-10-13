@@ -1,6 +1,8 @@
 package control.dataView;
 
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import model.workspace.WorkspaceAction;
@@ -54,10 +56,27 @@ public class PreprocessingController extends DataSubViewController
 	private @FXML ProgressIndicator progressIndicator_calculateMDSCoordinates;
 	private @FXML ProgressIndicator progressIndicator_distanceCalculation;
 	
+	// Option set.
+	private Map<String, Integer> optionSet;
+	
+	
 	@Override
 	public void initialize(URL location, ResourceBundle resources)
 	{
 		System.out.println("Initializing SII_PreprocessingController.");
+	}
+	
+	@Override
+	protected Map<String, Integer> prepareOptionSet()
+	{
+		Map<String, Integer> optionSet = new HashMap<String, Integer>();
+		
+		// Add option for appending to existing distance matrix.
+		optionSet.put("forceDistanceRecalculation", checkbox_appendToDistanceMatrix.isSelected() ? 0 : 1);
+		// Add option for appending for loading only topics without an existing distance matrix.
+		optionSet.put("loadOnlyDataNecessaryForDistanceCalculation", optionSet.get("forceDistanceRecalculation"));
+		
+		return optionSet;
 	}
 	
 	@FXML
@@ -69,18 +88,26 @@ public class PreprocessingController extends DataSubViewController
         // Get event source.
 		Button source = (Button) event.getSource();
 		
+		// Prepare option set.
+		optionSet = prepareOptionSet();
+		
+		// Act according to used button.
 		switch (source.getId()) {
 			case "button_calculateDistances":
 				// Check if raw data has already been loaded. If not: Load it.
 				if (!workspace.isRawDataLoaded()) {
 					System.out.println("Loading raw data.");
-					workspace.executeWorkspaceAction(WorkspaceAction.LOAD_RAW_DATA, progressIndicator_distanceCalculation.progressProperty(), this);
+					log("Loading raw data.");
+					
+					workspace.executeWorkspaceAction(WorkspaceAction.LOAD_RAW_DATA, progressIndicator_distanceCalculation.progressProperty(), this, optionSet);
 				}
 				
 				// Raw data has already been loaded: Calculate distances.
 				else {
-					System.out.println("Calculating distances");
-					workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_DISTANCES, progressIndicator_distanceCalculation.progressProperty(), this);
+					System.out.println("Calculating distances.");
+					log("Calculating distances.");
+					
+					workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_DISTANCES, progressIndicator_distanceCalculation.progressProperty(), this, optionSet);
 				}
 				
 			break;
@@ -89,16 +116,20 @@ public class PreprocessingController extends DataSubViewController
 				// If distance is already loaded: Calculate MDS coordinates.
 				if (workspace.isDistanceDataLoaded()) {
 					System.out.println("Calculating MDS coordinates");
-					workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_MDS_COORDINATES, progressIndicator_calculateMDSCoordinates.progressProperty(), this);
+					log("Calculating MDS coordinates");
+					
+					workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_MDS_COORDINATES, progressIndicator_calculateMDSCoordinates.progressProperty(), this, null);
 				}
 				
 				// Otherwise: Load distance data, then calculate MDS coordinates.
 				else {
 					// If .dis data exists: Load it, then calculate MDS data.
 					if (workspace.getNumberOfDatasetsInDISTable() > 0 &&
-						workspace.getNumberOfDatasetsInDISTable() == workspace.getNumberOfDatasetsInWS()) {
+						workspace.readNumberOfDatasetsInDISTable() == workspace.getNumberOfDatasetsInWS()) {
 						System.out.println("Loading distance data.");
-						workspace.executeWorkspaceAction(WorkspaceAction.LOAD_DISTANCES, progressIndicator_calculateMDSCoordinates.progressProperty(), this);
+						log("Loading distance data.");
+						
+						workspace.executeWorkspaceAction(WorkspaceAction.LOAD_DISTANCES, progressIndicator_calculateMDSCoordinates.progressProperty(), this, null);
 					}
 					
 					// Otherwise: Prompt user to calculate distance data first.
@@ -122,16 +153,21 @@ public class PreprocessingController extends DataSubViewController
 		switch (workspaceAction) {
 			case LOAD_RAW_DATA:
 				System.out.println("Finished loading raw data. Calculating distances.");
-				workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_DISTANCES, progressIndicator_distanceCalculation.progressProperty(), this);
+				log("Finished loading raw data. Calculating distances.");
+				
+				workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_DISTANCES, progressIndicator_distanceCalculation.progressProperty(), this, optionSet);
 			break;
 			
 			case LOAD_DISTANCES:
 				System.out.println("Finished loading distance data. Calculating MDS coordinates.");
-				workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_MDS_COORDINATES, progressIndicator_distanceCalculation.progressProperty(), this);
+				log("Finished loading distance data. Calculating MDS coordinates.");
+				
+				workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_MDS_COORDINATES, progressIndicator_distanceCalculation.progressProperty(), this, null);
 			break;
 			
 			case CALCULATE_DISTANCES:
 				System.out.println("Finished calculating distances.");
+				log("Finished calculating distances.");
 				
 				// Check if all data is avaible and analysis view may be used.
 				dataViewController.checkOnDataAvailability();
@@ -139,6 +175,7 @@ public class PreprocessingController extends DataSubViewController
 			
 			case CALCULATE_MDS_COORDINATES:
 				System.out.println("Finished calculating MDS coordinates.");
+				log("Finished calculating MDS coordinates.");
 				
 				// Check if all data is avaible and analysis view may be used.
 				dataViewController.checkOnDataAvailability();

@@ -588,7 +588,7 @@ public class AnalysisDataspace
 		return discardedLDAConfigurations;
 	}
 
-	public Set<Integer> getSelectedFilteredIndices()
+	public Set<Integer> getSelectedIndices()
 	{
 		return selectedFilteredIndices;
 	}

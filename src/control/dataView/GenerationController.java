@@ -543,7 +543,7 @@ public class GenerationController extends DataSubViewController
 		workspace.setConfigurationsToGenerate(LDAConfiguration.generateLDAConfigurations( numberOfDivisions, numberOfDatasetsToGenerate, sampling_combobox.getValue(), parameterValues ));
 		
 		// Write list to file.
-		workspace.executeWorkspaceAction(WorkspaceAction.GENERATE_PARAMETER_LIST, generate_progressIndicator.progressProperty(), this);
+		workspace.executeWorkspaceAction(WorkspaceAction.GENERATE_PARAMETER_LIST, generate_progressIndicator.progressProperty(), this, null);
 	}
 	
 	@Override
@@ -556,7 +556,7 @@ public class GenerationController extends DataSubViewController
 
 				// Call Python script and execute data.
 				generate_progressIndicator.progressProperty().unbind();
-				workspace.executeWorkspaceAction(WorkspaceAction.GENERATE_DATA, generate_progressIndicator.progressProperty(), this);
+				workspace.executeWorkspaceAction(WorkspaceAction.GENERATE_DATA, generate_progressIndicator.progressProperty(), this, null);
 			break;
 			
 			case GENERATE_DATA:
@@ -567,10 +567,10 @@ public class GenerationController extends DataSubViewController
 				generate_progressIndicator.progressProperty().set(1);
 
 				// Reset workspace data.
-				workspace.executeWorkspaceAction(WorkspaceAction.RESET, null, this);
+				workspace.executeWorkspaceAction(WorkspaceAction.RESET, null, this, null);
 				
 				// Collect metadata from raw topic files.
-				workspace.executeWorkspaceAction(WorkspaceAction.COLLECT_METADATA, generate_progressIndicator.progressProperty(), this);
+				workspace.executeWorkspaceAction(WorkspaceAction.COLLECT_METADATA, generate_progressIndicator.progressProperty(), this, null);
 			break;
 			
 			// After workspace variables are resetted and file metadata was parsed anew: Preprocess data if desired.
@@ -581,7 +581,7 @@ public class GenerationController extends DataSubViewController
 				if (includePreprocessing_checkbox.isSelected()) {
 					// Load raw data.
 					generate_progressIndicator.progressProperty().unbind();
-					workspace.executeWorkspaceAction(WorkspaceAction.LOAD_RAW_DATA, generate_progressIndicator.progressProperty(), this);
+					workspace.executeWorkspaceAction(WorkspaceAction.LOAD_RAW_DATA, generate_progressIndicator.progressProperty(), this, null);
 				}
 				
 				// Else: Display warning (workspace is inconsistent). Refresh not necessary, since - apart from the already collected
@@ -596,20 +596,22 @@ public class GenerationController extends DataSubViewController
 			
 			case LOAD_RAW_DATA:
 				System.out.println("[Post-generation] Loaded raw topic data.");
+				log("[Post-generation] Loaded raw topic data.");
 				
 				// Calculate distances.
-				workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_DISTANCES, dataViewController.getProgressIndicator_distanceCalculation().progressProperty(), this);
+				workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_DISTANCES, dataViewController.getProgressIndicator_distanceCalculation().progressProperty(), this, null);
 			break;
 			
 			case CALCULATE_DISTANCES:
 				System.out.println("[Post-generation] Calculated distance data.");
 				
 				// Calculate distances.
-				workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_MDS_COORDINATES, dataViewController.getProgressIndicator_calculateMDSCoordinates().progressProperty(), this);
+				workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_MDS_COORDINATES, dataViewController.getProgressIndicator_calculateMDSCoordinates().progressProperty(), this, null);
 			break;
 			
 			case CALCULATE_MDS_COORDINATES:
 				System.out.println("[Post-generation] Calculated MDS data.");
+				log("[Post-generation] Calculated MDS data.");
 				
 				// Data generation and preprocessing finished - unfreeze controls.
 				dataViewController.unfreezeControls();
@@ -666,5 +668,11 @@ public class GenerationController extends DataSubViewController
 	{
 		// Update number of datasets.
 		updateNumberOfDatasets(e);
+	}
+
+	@Override
+	protected Map<String, Integer> prepareOptionSet()
+	{
+		return null;
 	}
 }

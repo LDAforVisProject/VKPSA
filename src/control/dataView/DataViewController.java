@@ -242,4 +242,10 @@ public class DataViewController extends Controller
 	public void resizeContent(double width, double height)
 	{
 	}
+
+	@Override
+	protected Map<String, Integer> prepareOptionSet()
+	{
+		return null;
+	}
 }
