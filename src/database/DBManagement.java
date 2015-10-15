@@ -594,6 +594,16 @@ public class DBManagement
 		double[][] distances			= new double[ldaConfigurations.size()][ldaConfigurations.size()];
 		final int totalNumberOfItems	= (ldaConfigurations.size() * ldaConfigurations.size() - ldaConfigurations.size()) / 2;
 		
+		// Create a configID-to-row/-column association map.
+		Map<Integer, Integer> ldaConfigIDToDistanceCell = new HashMap<Integer, Integer>(ldaConfigurations.size());  
+		// Fill association map.
+		for (int i = 0; i < ldaConfigurations.size(); i++) {
+			// Get current LDA configuration.
+			LDAConfiguration ldaConfig = ldaConfigurations.get(i);
+			// Add config ID as key to association map.
+			ldaConfigIDToDistanceCell.put(ldaConfig.getConfigurationID(), i);
+		}
+		
 		// Init prepared statement with query template.
 		try {
 			PreparedStatement statement = connection.prepareStatement("SELECT * FROM datasetDistances order by ldaConfigurationID_1, ldaConfigurationID_2");
@@ -602,9 +612,16 @@ public class DBManagement
 			// Process distance data rows.
 			int processedRowCount		= 0;
 			while (rs.next()) {
-				-> Next: Adaptive saving works (test again -> doubt with #6, but should be working); but distance storing is wrong. Fix that.
-				int row		= processedRowCount / ldaConfigurations.size();
-				int column	= processedRowCount % ldaConfigurations.size();
+				final int ldaConfigID1 = rs.getInt("ldaConfigurationID_1");
+				final int ldaConfigID2 = rs.getInt("ldaConfigurationID_2");
+				
+				if (!ldaConfigIDToDistanceCell.containsKey(ldaConfigID1))
+					System.out.println("~~~~~~~~~~ ERROR - " + ldaConfigID1 + " not in loaded metadata.");
+				if (!ldaConfigIDToDistanceCell.containsKey(ldaConfigID1))
+					System.out.println("~~~~~~~~~~ ERROR - " + ldaConfigID2 + " not in loaded metadata.");
+				
+				int row		= ldaConfigIDToDistanceCell.get(ldaConfigID1);//processedRowCount / ldaConfigurations.size();
+				int column	= ldaConfigIDToDistanceCell.get(ldaConfigID2);//processedRowCount % ldaConfigurations.size();
 				
 				// Symmetric distance matrix - [row][column] = [column][row].
 				distances[row][column] = rs.getDouble("distance");
@@ -617,9 +634,10 @@ public class DBManagement
 				// Keep track of processed rows.
 				processedRowCount++;
 			}
-			System.out.println(Data.format(distances));
-			if (totalNumberOfItems != processedRowCount)
-				System.out.println("mismatch");
+			
+//			System.out.println(Data.format(distances));
+//			if (totalNumberOfItems != processedRowCount)
+//				System.out.println("mismatch");
 		}
 		
 		catch (SQLException e) {

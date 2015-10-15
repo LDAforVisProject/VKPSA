@@ -122,7 +122,6 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 		// This type of visualization is reasonable for one LDA configuration
 		// at the same time only, therefore we use only one selected LDAConfiguration.
 		if (selectedFilteredLDAConfigurations.size() > 0)  {
-			System.out.println("> 0");
 			// Get list (for this LDA configuration) of lists (of topics) of keyword/probability pairs.
 			if (updateData) {
 				// Load data from database.

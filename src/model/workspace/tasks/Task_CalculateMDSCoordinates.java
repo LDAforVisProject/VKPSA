@@ -34,10 +34,16 @@ public class Task_CalculateMDSCoordinates extends WorkspaceTask
 		final ArrayList<LDAConfiguration> ldaConfigurations	= workspace.getLDAConfigurations();
 		final double[][] distances							= workspace.getDistances();
 		
+		// Create copy of distances, since MDSJ seems to change the input matrix.
+		double[][] distancesCopy							= new double[distances.length][distances.length];
+		for (int i = 0; i < distances.length; i++)
+			for (int j = 0; j < distances.length; j++)
+				distancesCopy[i][j] = distances[i][j];
+		
 		// Apply MDS on topic distance matrix.
 		double[][] output									= new double[2][distances.length]; 
 		
-		ClassicalScaling.fullmds(distances, output);
+		ClassicalScaling.fullmds(distancesCopy, output);
 		//MDSJ.classicalScaling(distances, 2);
 	
 		// @todo Check why delta is not zero.

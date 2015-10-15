@@ -62,13 +62,13 @@ public class Task_CalculateDistances extends WorkspaceTask
 										additionalOptionSet != null && (additionalOptionSet.get("forceDistanceRecalculation") == 1);
 		
 	
-		for (int i : listOfLDAConfigsWithoutDistances)
-			System.out.println("\tblub - " + i);
+//		for (int i : listOfLDAConfigsWithoutDistances)
+//			System.out.println("\tblub - " + i);
 		
 		/*
 		 * Compare all datasets with each other, calculate distances.
 		 */
-
+		double delta = 0;
 		for (int i = 0; i < ldaConfigurations.size(); i++) {
 			distances[i][i] = 0;
 			
@@ -98,6 +98,7 @@ public class Task_CalculateDistances extends WorkspaceTask
 					// Assume symmetric distance calculations is done in .calculateDatasetDistance().
 					distances[i][j] = (float)dataset1.calculateDatasetDistance(dataset2, DatasetDistance.HausdorffDistance, currTopicDistances);
 					distances[j][i] = distances[i][j];
+					delta += Math.abs(distances[i][j] - distances[j][i]); 
 					
 					// Store topic distance matrix for the current two datasets/topic models in map.
 					Pair<LDAConfiguration, LDAConfiguration> topicDistanceKey = new Pair<LDAConfiguration, LDAConfiguration>(ldaConfigurations.get(i),  ldaConfigurations.get(j));
@@ -105,6 +106,8 @@ public class Task_CalculateDistances extends WorkspaceTask
 				}
 			}
 		}
+		
+		System.out.println("delta_source = " + delta);
 		
 		// Save topic distances to database.
 		db.saveTopicDistances(topicDistances, false, this);
@@ -121,7 +124,7 @@ public class Task_CalculateDistances extends WorkspaceTask
 		// Notify workspace that distance data is loaded (if all distances were calculated).
 		workspace.setDistanceDataLoaded(calculateAllDistances);
 		
-		// Clear raw data.
+		// Clear raw data (don't wanna use memory without a good reason to).
 		workspace.getDatasetMap().clear();
 		
 		return 1;

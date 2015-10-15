@@ -115,8 +115,8 @@ public class PreprocessingController extends DataSubViewController
 			case "button_calculateMDSCoordinates":
 				// If distance is already loaded: Calculate MDS coordinates.
 				if (workspace.isDistanceDataLoaded()) {
-					System.out.println("Calculating MDS coordinates");
-					log("Calculating MDS coordinates");
+					System.out.println("Calculating MDS coordinates.");
+					log("Calculating MDS coordinates.");
 					
 					workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_MDS_COORDINATES, progressIndicator_calculateMDSCoordinates.progressProperty(), this, null);
 				}
@@ -124,8 +124,8 @@ public class PreprocessingController extends DataSubViewController
 				// Otherwise: Load distance data, then calculate MDS coordinates.
 				else {
 					// If .dis data exists: Load it, then calculate MDS data.
-					if (workspace.getNumberOfDatasetsInDISTable() > 0 &&
-						workspace.readNumberOfDatasetsInDISTable() == workspace.getNumberOfDatasetsInWS()) {
+					if (workspace.readNumberOfDatasetsInDISTable() > 0 &&
+						workspace.getNumberOfDatasetsInDISTable() == workspace.getNumberOfDatasetsInWS()) {
 						System.out.println("Loading distance data.");
 						log("Loading distance data.");
 						
@@ -134,7 +134,7 @@ public class PreprocessingController extends DataSubViewController
 					
 					// Otherwise: Prompt user to calculate distance data first.
 					else {
-						System.out.println("### WARNING ### Distance data is required, but not consistent or not existent.");
+						System.out.println("### WARNING ### Distance data is required, but not consistent or not existent. " + workspace.getNumberOfDatasetsInDISTable() + "; " + workspace.readNumberOfDatasetsInDISTable()  + ", " + workspace.getNumberOfDatasetsInWS());
 					}
 				}
 			break;			
