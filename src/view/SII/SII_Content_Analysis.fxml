@@ -527,11 +527,6 @@
                                                             <Font name="System Bold" size="12.0" />
                                                          </font>
                                                       </Label>
-                                                      <Label fx:id="label_visType" layoutX="221.0" layoutY="6.0" text="Parallel Text Blocks" AnchorPane.rightAnchor="10.0">
-                                                         <font>
-                                                            <Font name="System Italic" size="12.0" />
-                                                         </font>
-                                                      </Label>
                                                       <ImageView fx:id="settings_localScope_icon" fitHeight="15.0" fitWidth="15.0" layoutX="91.0" layoutY="6.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="92.0" AnchorPane.topAnchor="7.0">
                                                          <image>
                                                             <Image url="@icons/cog.png" />
@@ -542,8 +537,8 @@
                                                       </ImageView>
                                                       <SplitPane dividerPositions="0.29797979797979796" layoutY="31.0" prefHeight="228.0" prefWidth="562.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
                                                         <items>
-                                                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
-                                                          <AnchorPane fx:id="localScope_anchorPane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
+                                                          <AnchorPane fx:id="localscope_cd_anchorPane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
+                                                          <AnchorPane fx:id="localScope_ptc_anchorPane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
                                                         </items>
                                                       </SplitPane>
                                                    </children>

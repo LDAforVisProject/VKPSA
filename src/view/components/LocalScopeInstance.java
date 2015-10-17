@@ -16,10 +16,11 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import control.analysisView.AnalysisController;
 import control.analysisView.localScope.LocalScopeVisualizationController;
+import control.analysisView.localScope.LocalScopeVisualizationType;
 
 /**
- * Wrapper for local scope instance.
- * May be one of several visualizations (currently supported: Parallel tag clouds).
+ * Administers usage of two visualizations: The chord diagram (for the comparison of multiple topic models)
+ * and the parallel tag cloud (for the comparison of multiple topics).
  * @author RM
  *
  */
@@ -29,10 +30,16 @@ public class LocalScopeInstance extends VisualizationComponent
 	 * GUI elements.
 	 */
 	
-	private AnchorPane anchorpane_localScope;
-	private Label label_visType;
-
-	// Options.
+	/**
+	 * AnchorPane holding parallel tag clouds visualization.
+	 */
+	private AnchorPane ptc_anchorpane;
+	/**
+	 * AnchorPane holding chord diagram visualization.
+	 */
+	private AnchorPane cd_anchorpane;
+	
+	// Option controls.
 	private Slider slider_localScope_numTopicsToUse;
 	private TextField textfield_localScope_numTopicsToUse;
 	private Slider slider_localScope_numKeywordsToUse;
@@ -47,6 +54,9 @@ public class LocalScopeInstance extends VisualizationComponent
 	 */
 	private LocalScopeVisualizationController controller;
 
+	/**
+	 * Reference to workspace.
+	 */
 	private Workspace workspace;
 	
 	/**
@@ -59,14 +69,15 @@ public class LocalScopeInstance extends VisualizationComponent
 	// -----------------------------------------------
 
 	
-	public LocalScopeInstance(	AnalysisController analysisController, AnchorPane anchorpane_localScope, 
-								Label label_visType, Slider slider_localScope_numTopicsToUse, TextField textfield_localScope_numTopicsToUse,
+	public LocalScopeInstance(	AnalysisController analysisController,
+								AnchorPane ptc_anchorpane, AnchorPane cd_anchorpane, 
+								Slider slider_localScope_numTopicsToUse, TextField textfield_localScope_numTopicsToUse,
 								Slider slider_localScope_numKeywordsToUse, TextField textfield_localScope_numKeywordsToUse)
 	{
 		super(analysisController);
 		
-		this.anchorpane_localScope					= anchorpane_localScope;
-		this.label_visType							= label_visType;
+		this.ptc_anchorpane							= ptc_anchorpane;
+		this.cd_anchorpane							= cd_anchorpane;
 		this.slider_localScope_numTopicsToUse		= slider_localScope_numTopicsToUse;
 		this.textfield_localScope_numTopicsToUse	= textfield_localScope_numTopicsToUse;
 		this.slider_localScope_numKeywordsToUse		= slider_localScope_numKeywordsToUse;
@@ -145,19 +156,16 @@ public class LocalScopeInstance extends VisualizationComponent
 			// Init controller.
 			controller	= (LocalScopeVisualizationController)fxmlLoader.getController();
 			controller.setWorkspace(workspace);
-			controller.setAnchorPane(anchorpane_localScope);
+			controller.setAnchorPane(ptc_anchorpane);
 			
 			// Add to parent pane.
-			anchorpane_localScope.getChildren().add(contentNode);
+			ptc_anchorpane.getChildren().add(contentNode);
 			
 			// Ensure resizability of content.
 			AnchorPane.setTopAnchor(contentNode, 0.0);
     		AnchorPane.setBottomAnchor(contentNode, 0.0);
     		AnchorPane.setLeftAnchor(contentNode, 0.0);
     		AnchorPane.setRightAnchor(contentNode, 0.0);
-    		
-    		// Set visualization type labe.
-    		controller.updateLabelWithVisualizationType(label_visType);
     		
     		// Set reference to component.
     		controller.setLocalScopeInstance(this);
@@ -168,18 +176,30 @@ public class LocalScopeInstance extends VisualizationComponent
         }
 	}
 	
+	/**
+	 * Refreshes this local scope instance.
+	 * @param selectedLDAConfigurations
+	 */
 	public void refresh(ArrayList<LDAConfiguration> selectedLDAConfigurations)
 	{
 		// Update reference.
 		this.selectedLDAConfigurations = selectedLDAConfigurations;
-		
+		System.out.println("refreshing ls");
 		// Refresh visualization.
 		controller.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), (int)slider_localScope_numTopicsToUse.getValue(), (int)slider_localScope_numKeywordsToUse.getMax(), (int)slider_localScope_numKeywordsToUse.getValue(), true);
 	}
 
-	public void resize(double width, double height)
+	/**
+	 * Resizes visualizations according to given width and height.
+	 */
+	public void resize(double width, double height, LocalScopeVisualizationType type)
 	{
-		controller.resize(width, height);
+		System.out.println("resizing: " + type.toString());
+		if (type == LocalScopeVisualizationType.PARALLEL_TAG_CLOUDS)
+			controller.resize(width, height);
+		
+		else if (type == LocalScopeVisualizationType.CHORD_DIAGRAM)
+			;
 	}
 
 	@Override

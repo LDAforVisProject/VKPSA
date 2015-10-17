@@ -443,7 +443,6 @@ public class Workspace implements ITaskListener
 		boolean isIntegrous			= true;
 		int numberOfDatasetsInWS	= getNumberOfDatasetsInWS();
 		
-		// @todo Adapt integrity check.
 		// Check for integrity of pre-calculated distance data.
 		if (numberOfDatasetsInWS != numberOfDatasetsInDISTable) {
 			isIntegrous = false;

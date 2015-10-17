@@ -82,18 +82,6 @@ public abstract class LocalScopeVisualizationController extends Controller
 	 * @param height
 	 */
 	public abstract void resize(double width, double height);
-
-	public void updateLabelWithVisualizationType(Label label)
-	{
-		switch (visualizationType) {
-			case PARALLEL_TAG_CLOUDS:
-				label.setText("Parallel Tag Clouds");
-			break;
-			
-			default:
-				label.setText("Unknown");
-		}
-	}
 	
 	public LocalScopeVisualizationType getVisualizationType()
 	{

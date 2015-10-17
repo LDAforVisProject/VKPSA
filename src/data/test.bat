@@ -1,0 +1,1 @@
+"D:\Programme\Python27\python.exe" "D:\Workspace\LDA\analysis\Nexus.py" -p 15 -m sample -i "D:\Workspace\Scientific Computing\VKPSA\src\data\toGenerate.lda" -o "D:\Workspace\Scientific Computing\VKPSA\src\data"

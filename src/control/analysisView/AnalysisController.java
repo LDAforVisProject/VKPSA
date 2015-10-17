@@ -15,6 +15,7 @@ import model.workspace.Workspace;
 import org.controlsfx.control.RangeSlider;
 
 import control.Controller;
+import control.analysisView.localScope.LocalScopeVisualizationType;
 import view.components.DistanceDifferenceCorrelationLinechart;
 import view.components.DistancesBarchart;
 import view.components.LocalScopeInstance;
@@ -91,9 +92,13 @@ public class AnalysisController extends Controller
 	 */
 	private @FXML AnchorPane paramSpace_distribution_anchorPane;
 	/**
-	 * For local scope visualization(s).
+	 * For local scope visualization(s): Parallel Tag Cloud.
 	 */
-	private @FXML AnchorPane localScope_anchorPane;
+	private @FXML AnchorPane localScope_ptc_anchorPane;
+	/**
+	 * For local scope visualization(s): Chord diagram.
+	 */
+	private @FXML AnchorPane localscope_cd_anchorPane;
 	/**
 	 * For distance correlation linechart.
 	 */
@@ -199,12 +204,9 @@ public class AnalysisController extends Controller
 	 */
 	
 	/**
-	 * Local scope instance component.
-	 * At the moment: Only one local scope instance supported (parallel tag clouds).
+	 * Parallel tag bloud in local scope.
 	 */
 	private LocalScopeInstance localScopeInstance;
-	
-	private @FXML Label label_visType;
 	
 	// Local scope options.
 	 
@@ -338,21 +340,40 @@ public class AnalysisController extends Controller
 		});
 		
 		/*
-		 * Add resize listeners for local scope anchor pane.
+		 * Add resize listeners for local scope / chord diagram anchor pane.
 		 */
-		localScope_anchorPane.widthProperty().addListener(new ChangeListener<Number>() {
+		localscope_cd_anchorPane.widthProperty().addListener(new ChangeListener<Number>() {
 		    @Override 
 		    public void changed(ObservableValue<? extends Number> observableValue, Number oldWidth, Number newWidth)
 		    {
-		        resizeElement(localScope_anchorPane, newWidth.doubleValue(), 0);
+		        resizeElement(localscope_cd_anchorPane, newWidth.doubleValue(), 0);
 		    }
 		});
 		
-		localScope_anchorPane.heightProperty().addListener(new ChangeListener<Number>() {
+		localscope_cd_anchorPane.heightProperty().addListener(new ChangeListener<Number>() {
 		    @Override 
 		    public void changed(ObservableValue<? extends Number> observableValue, Number oldHeight, Number newHeight) 
 		    {
-		    	resizeElement(localScope_anchorPane, 0, newHeight.doubleValue());
+		    	resizeElement(localscope_cd_anchorPane, 0, newHeight.doubleValue());
+		    }
+		});
+		
+		/*
+		 * Add resize listeners for local scope / parallel tag clouds anchor pane.
+		 */
+		localScope_ptc_anchorPane.widthProperty().addListener(new ChangeListener<Number>() {
+		    @Override 
+		    public void changed(ObservableValue<? extends Number> observableValue, Number oldWidth, Number newWidth)
+		    {
+		        resizeElement(localScope_ptc_anchorPane, newWidth.doubleValue(), 0);
+		    }
+		});
+		
+		localScope_ptc_anchorPane.heightProperty().addListener(new ChangeListener<Number>() {
+		    @Override 
+		    public void changed(ObservableValue<? extends Number> observableValue, Number oldHeight, Number newHeight) 
+		    {
+		    	resizeElement(localScope_ptc_anchorPane, 0, newHeight.doubleValue());
 		    }
 		});
 	}
@@ -377,9 +398,9 @@ public class AnalysisController extends Controller
 		String fxmlPath = "/view/SII/localScope/SII_Content_Analysis_LocalScope_ParallelTagCloud.fxml";
 		
 		// Create new instance of local scope.
-		localScopeInstance = new LocalScopeInstance(this, localScope_anchorPane, label_visType, 
-													slider_localScope_numTopicsToUse, textfield_localScope_numTopicsToUse,
-													slider_localScope_numKeywordsToUse, textfield_localScope_numKeywordsToUse);
+		localScopeInstance = new LocalScopeInstance(this, localScope_ptc_anchorPane, localscope_cd_anchorPane,
+															slider_localScope_numTopicsToUse, textfield_localScope_numTopicsToUse,
+															slider_localScope_numKeywordsToUse, textfield_localScope_numKeywordsToUse);
 		localScopeInstance.load(fxmlPath);
 	}
 	
@@ -1051,6 +1072,7 @@ public class AnalysisController extends Controller
 	@Override
 	protected void resizeElement(Node node, double width, double height)
 	{
+		System.out.println("resizing " + node.getId());
 		switch (node.getId()) {
 			case "paramSpace_distribution_anchorPane":
 				// Adapt width.
@@ -1068,6 +1090,7 @@ public class AnalysisController extends Controller
 				}
 			break;
 			
+			// Resize scatter plot.
 			case "mds_anchorPane":
 	        	// Update MDS heatmap position/indentation.
 				mdsScatterchart.updateHeatmapPosition();
@@ -1075,9 +1098,14 @@ public class AnalysisController extends Controller
 				mdsScatterchart.refreshHeatmapAfterResize();
 			break;
 			
-			// Resize local scope element.
-			case "localScope_anchorPane":	
-				localScopeInstance.resize(width, height);
+			// Resize local scope element: Chord diagram.
+			case "localscope_cd_anchorPane":
+				localScopeInstance.resize(width, height, LocalScopeVisualizationType.CHORD_DIAGRAM);
+			break;
+			
+			// Resize local scope element: Parallel tag clouds.
+			case "localScope_ptc_anchorPane":
+				localScopeInstance.resize(width, height, LocalScopeVisualizationType.PARALLEL_TAG_CLOUDS);
 			break;
 		}
 	}

@@ -471,7 +471,7 @@ public class DBManagement
 		int processedRowCount = 0;
 		
 		try {
-			// Init prepepard statement with query template.
+			// Init prepared statement with query template.
 			PreparedStatement statement = connection.prepareStatement("INSERT INTO datasetDistances(ldaConfigurationID_1, ldaConfigurationID_2, distance) VALUES(?, ?, ?)");
 			
 			// Set auto-commit to false.

@@ -2,5 +2,5 @@ package control.analysisView.localScope;
 
 public enum LocalScopeVisualizationType
 {
-	PARALLEL_TAG_CLOUDS
+	PARALLEL_TAG_CLOUDS, CHORD_DIAGRAM
 }

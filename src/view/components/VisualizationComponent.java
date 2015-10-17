@@ -1,7 +1,5 @@
 package view.components;
 
-import java.util.Set;
-
 import control.analysisView.AnalysisController;
 
 /**
