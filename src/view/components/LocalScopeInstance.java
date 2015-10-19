@@ -238,7 +238,7 @@ public class LocalScopeInstance extends VisualizationComponent
 		this.selectedLDAConfigurations = selectedLDAConfigurations;
 		
 		// Refresh parallel tag clouds.
-		ptcController.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), (int)slider_localScope_numTopicsToUse.getValue(), (int)slider_localScope_numKeywordsToUse.getMax(), (int)slider_localScope_numKeywordsToUse.getValue(), true);
+		//ptcController.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), (int)slider_localScope_numTopicsToUse.getValue(), (int)slider_localScope_numKeywordsToUse.getMax(), (int)slider_localScope_numKeywordsToUse.getValue(), true);
 		
 		// Refresh chord diagram.
 		cdController.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), (int)slider_localScope_numTopicsToUse.getValue(), (int)slider_localScope_numKeywordsToUse.getMax(), (int)slider_localScope_numKeywordsToUse.getValue(), true);
@@ -250,7 +250,7 @@ public class LocalScopeInstance extends VisualizationComponent
 	public void resize(double width, double height, LocalScopeVisualizationType type)
 	{
 		if (type == LocalScopeVisualizationType.PARALLEL_TAG_CLOUDS && ptcController != null)
-			ptcController.resize(width, height);
+			;//ptcController.resize(width, height);
 		
 		else if (type == LocalScopeVisualizationType.CHORD_DIAGRAM && cdController != null)
 			cdController.resize(width, height);;
@@ -270,8 +270,9 @@ public class LocalScopeInstance extends VisualizationComponent
 	{
 		this.workspace = workspace;
 		
-		// Pass reference on to controller.
+		// Pass reference on to controllers.
 		ptcController.setWorkspace(workspace);
+		cdController.setWorkspace(workspace);
 	}
 	
 	/**

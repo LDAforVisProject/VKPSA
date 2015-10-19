@@ -24,7 +24,7 @@ public class Task_GenerateParameterList extends WorkspaceTask
 		try {
 			String path			= Paths.get(workspace.getDirectory(), Workspace.FILENAME_TOGENERATE).toString();
 			PrintWriter writer	= new PrintWriter(path, "UTF-8");
-
+			System.out.println("blubl");
 			// Init task progress.
 			updateProgress(0, 1);
 			

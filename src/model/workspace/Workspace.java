@@ -18,6 +18,7 @@ import java.util.Map;
 
 
 
+
 import database.DBManagement;
 import javafx.beans.property.DoubleProperty;
 import javafx.scene.control.ProgressIndicator;
@@ -34,6 +35,7 @@ import model.workspace.tasks.Task_LoadDistanceData;
 import model.workspace.tasks.Task_LoadMDSCoordinates;
 import model.workspace.tasks.Task_LoadRawData;
 import model.workspace.tasks.Task_LoadSpecificDatasets;
+import model.workspace.tasks.Task_LoadTopicDistancesForSelection;
 import model.workspace.tasks.WorkspaceTask;
 
 // -----------------------------------------------
@@ -44,8 +46,6 @@ import model.workspace.tasks.WorkspaceTask;
 // @todo Idea for optimization: Truncate parameter file list / instruct Python script to process only a defined part of it. Execute parallel script instances.
 
 // FRONTEND / analysis view:
-
-// @todo Add boxplot for quantiles (and average)?
 
 /**
  * Encompasses:

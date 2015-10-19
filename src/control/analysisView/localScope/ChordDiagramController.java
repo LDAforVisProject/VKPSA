@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
+
+import com.sun.javafx.tk.Toolkit.Task;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -18,13 +21,17 @@ import javafx.fxml.FXML;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import model.LDAConfiguration;
+import model.workspace.WorkspaceAction;
+import model.workspace.tasks.ITaskListener;
+import model.workspace.tasks.Task_GenerateParameterList;
+import model.workspace.tasks.Task_LoadTopicDistancesForSelection;
 
 /**
  * Controller for chord diagram in local scope instance.
  * @author RM
  *
  */
-public class ChordDiagramController extends LocalScopeVisualizationController
+public class ChordDiagramController extends LocalScopeVisualizationController 
 {
 	/**
 	 * WebView rendering the d3.js visualization.
@@ -45,19 +52,31 @@ public class ChordDiagramController extends LocalScopeVisualizationController
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1)
 	{
-		System.out.println(templateHTMLCode);
-		
 		// Load adapted HTML.
 		content_webview.getEngine().loadContent(adaptHTMLTemplate(templateHTMLCode));
 	}
 
 	@Override
-	public void refresh(ArrayList<LDAConfiguration> selectedFilteredLDAConfigurations,
+	public void refresh(ArrayList<LDAConfiguration> selectedLDAConfigurations,
 						int maxNumberOfTopics, int numberOfTopics, int maxNumberOfKeywords,
 						int numberOfKeywords, boolean updateData)
 	{
-		System.out.println("refresh");
-		next step: get own data in there.
+		System.out.println("refresh - loading topic distances");
+		
+		if (selectedLDAConfigurations.size() > 0) {
+			// Load topic distance data for selection.
+			Task_LoadTopicDistancesForSelection task = new Task_LoadTopicDistancesForSelection(workspace, WorkspaceAction.LOAD_SPECIFIC_TOPIC_DISTANCES, null, selectedLDAConfigurations);
+			task.addListener(this);
+			
+			// Write list to file.
+			(new Thread(task)).start();
+		}
+	}
+	
+	@Override
+	public void notifyOfTaskCompleted(final WorkspaceAction workspaceAction)
+	{
+		System.out.println("task completed - " + workspaceAction);
 	}
 
 	/**
@@ -71,8 +90,7 @@ public class ChordDiagramController extends LocalScopeVisualizationController
 		// Adapt size.
 		adaptedHTMLCode = adaptedHTMLCode.replaceAll("var w = x, h = y", "var w = " + content_webview.getWidth() + ", h = " + content_webview.getHeight());
 		
-		System.out.println("adapted code = ");
-		System.out.println(adaptedHTMLCode);
+		// @todo Adapt data.
 		
 		return adaptedHTMLCode;
 	}
@@ -116,7 +134,7 @@ public class ChordDiagramController extends LocalScopeVisualizationController
 			content_webview.setPrefHeight(height);
 		}
 		
-		content_webview.getEngine().setJavaScriptEnabled(true	);
+		content_webview.getEngine().setJavaScriptEnabled(true);
 		// Load adapted HTML.
 		content_webview.getEngine().loadContent(adaptHTMLTemplate(templateHTMLCode));
 	}
