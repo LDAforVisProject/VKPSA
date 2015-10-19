@@ -45,15 +45,28 @@ public class LocalScopeInstance extends VisualizationComponent
 	private Slider slider_localScope_numKeywordsToUse;
 	private TextField textfield_localScope_numKeywordsToUse;
 	
+	/**
+	 * Path to .fxml for parallel tag clouds.
+	 */
+	private final String ptcPath 	= "/view/SII/localScope/SII_Content_Analysis_LocalScope_ParallelTagCloud.fxml";
+	/**
+	 * Path to .fxml for chord diagram.
+	 */
+	private final String cdPath		= "/view/SII/localScope/SII_Content_Analysis_LocalScope_ChordDiagram.fxml";
+	
 	/*
 	 * Other data.
 	 */
 	
 	/**
-	 * Reference to instance of local scope controller actually manipulating the local scope visualization.
+	 * Reference to instance of local scope controller manipulating the parallel tag clouds visualization.
 	 */
-	private LocalScopeVisualizationController controller;
-
+	private LocalScopeVisualizationController ptcController;
+	/**
+	 * Reference to instance of local scope controller manipulating the chord diagram visualization.
+	 */
+	private LocalScopeVisualizationController cdController;
+	
 	/**
 	 * Reference to workspace.
 	 */
@@ -108,7 +121,8 @@ public class LocalScopeInstance extends VisualizationComponent
             	
             	// Update visualization.
             	if (event.getEventType() == MouseEvent.MOUSE_RELEASED && selectedLDAConfigurations != null)
-            		controller.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), roundedNumberOfTopics, (int)slider_localScope_numKeywordsToUse.getMax(), (int) Math.round(slider_localScope_numKeywordsToUse.getValue()), false);
+            		ptcController.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), roundedNumberOfTopics, (int)slider_localScope_numKeywordsToUse.getMax(), (int) Math.round(slider_localScope_numKeywordsToUse.getValue()), false);
+            		cdController.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), roundedNumberOfTopics, (int)slider_localScope_numKeywordsToUse.getMax(), (int) Math.round(slider_localScope_numKeywordsToUse.getValue()), false);
             }
 		};
 		
@@ -123,7 +137,8 @@ public class LocalScopeInstance extends VisualizationComponent
             	
             	// Update visualization.
             	if (event.getEventType() == MouseEvent.MOUSE_RELEASED && selectedLDAConfigurations != null)
-            		controller.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), (int) Math.round(slider_localScope_numTopicsToUse.getValue()), (int)slider_localScope_numKeywordsToUse.getMax(), roundedNumberOfKeywords, false);
+            		ptcController.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), (int) Math.round(slider_localScope_numTopicsToUse.getValue()), (int)slider_localScope_numKeywordsToUse.getMax(), roundedNumberOfKeywords, false);
+            		cdController.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), (int) Math.round(slider_localScope_numTopicsToUse.getValue()), (int)slider_localScope_numKeywordsToUse.getMax(), roundedNumberOfKeywords, false);
             }
 		};		
 		
@@ -144,11 +159,40 @@ public class LocalScopeInstance extends VisualizationComponent
 		slider_localScope_numKeywordsToUse.addEventHandler(MouseEvent.MOUSE_DRAGGED, numKeywordsHandler);
 	}
 
-	public void load(String fxmlPath)
+	/**
+	 * Load/create visualizations from .fxml files.
+	 */
+	public void load()
 	{
-		FXMLLoader fxmlLoader	= new FXMLLoader();
-        Node contentNode		= null;
+		// Load parallel tag clouds.
+		load(LocalScopeVisualizationType.PARALLEL_TAG_CLOUDS);
+		// Load chord diagram.
+		load(LocalScopeVisualizationType.CHORD_DIAGRAM);
+	}
+	
+	/**
+	 * Load specific visualization from .fxml file.
+	 * @param type
+	 */
+	private void load(LocalScopeVisualizationType type)
+	{
+		FXMLLoader fxmlLoader							= new FXMLLoader();
+        Node contentNode								= null;
+        String fxmlPath									= null;
+        AnchorPane anchorPane							= null;
+        LocalScopeVisualizationController controller 	= null;
         
+        // Set corresponding values.
+        if (type == LocalScopeVisualizationType.PARALLEL_TAG_CLOUDS) {
+        	fxmlPath	= ptcPath;
+        	anchorPane	= ptc_anchorpane;
+        }
+        else if (type == LocalScopeVisualizationType.CHORD_DIAGRAM) {
+        	fxmlPath	= cdPath;
+        	anchorPane	= cd_anchorpane;
+        }
+        
+        // Load .fxml files.
         try {
 	      	// Here: Support for several local scope visualizations, if reasonable.
 			contentNode	= (Node) fxmlLoader.load(getClass().getResource(fxmlPath).openStream());
@@ -156,10 +200,10 @@ public class LocalScopeInstance extends VisualizationComponent
 			// Init controller.
 			controller	= (LocalScopeVisualizationController)fxmlLoader.getController();
 			controller.setWorkspace(workspace);
-			controller.setAnchorPane(ptc_anchorpane);
+			controller.setAnchorPane(anchorPane);
 			
 			// Add to parent pane.
-			ptc_anchorpane.getChildren().add(contentNode);
+			anchorPane.getChildren().add(contentNode);
 			
 			// Ensure resizability of content.
 			AnchorPane.setTopAnchor(contentNode, 0.0);
@@ -174,6 +218,14 @@ public class LocalScopeInstance extends VisualizationComponent
         catch (Exception e) {
         	e.printStackTrace();
         }
+        
+        // Update controller references.
+        if (type == LocalScopeVisualizationType.PARALLEL_TAG_CLOUDS) {
+        	ptcController = controller;
+        }
+        else if (type == LocalScopeVisualizationType.CHORD_DIAGRAM) {
+        	cdController = controller;
+        }
 	}
 	
 	/**
@@ -184,9 +236,12 @@ public class LocalScopeInstance extends VisualizationComponent
 	{
 		// Update reference.
 		this.selectedLDAConfigurations = selectedLDAConfigurations;
-		System.out.println("refreshing ls");
-		// Refresh visualization.
-		controller.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), (int)slider_localScope_numTopicsToUse.getValue(), (int)slider_localScope_numKeywordsToUse.getMax(), (int)slider_localScope_numKeywordsToUse.getValue(), true);
+		
+		// Refresh parallel tag clouds.
+		ptcController.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), (int)slider_localScope_numTopicsToUse.getValue(), (int)slider_localScope_numKeywordsToUse.getMax(), (int)slider_localScope_numKeywordsToUse.getValue(), true);
+		
+		// Refresh chord diagram.
+		cdController.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), (int)slider_localScope_numTopicsToUse.getValue(), (int)slider_localScope_numKeywordsToUse.getMax(), (int)slider_localScope_numKeywordsToUse.getValue(), true);
 	}
 
 	/**
@@ -194,12 +249,11 @@ public class LocalScopeInstance extends VisualizationComponent
 	 */
 	public void resize(double width, double height, LocalScopeVisualizationType type)
 	{
-		System.out.println("resizing: " + type.toString());
-		if (type == LocalScopeVisualizationType.PARALLEL_TAG_CLOUDS)
-			controller.resize(width, height);
+		if (type == LocalScopeVisualizationType.PARALLEL_TAG_CLOUDS && ptcController != null)
+			ptcController.resize(width, height);
 		
-		else if (type == LocalScopeVisualizationType.CHORD_DIAGRAM)
-			;
+		else if (type == LocalScopeVisualizationType.CHORD_DIAGRAM && cdController != null)
+			cdController.resize(width, height);;
 	}
 
 	@Override
@@ -217,7 +271,7 @@ public class LocalScopeInstance extends VisualizationComponent
 		this.workspace = workspace;
 		
 		// Pass reference on to controller.
-		controller.setWorkspace(workspace);
+		ptcController.setWorkspace(workspace);
 	}
 	
 	/**

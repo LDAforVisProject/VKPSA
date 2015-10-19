@@ -122,7 +122,7 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 	{
 		// Reset visualization.
 		reset(selectedFilteredLDAConfigurations, maxNumberOfTopics, numberOfTopics, maxNumberOfKeywords, numberOfKeywords);
-		System.out.println("canvas.size = " + canvas.getWidth() + ", " + canvas.getHeight());
+		
 		// This type of visualization is reasonable for one LDA configuration
 		// at the same time only, therefore we use only one selected LDAConfiguration.
 		if (selectedFilteredLDAConfigurations.size() > 0)  {
@@ -434,7 +434,6 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 	@Override
 	public void resize(double width, double height)
 	{
-		System.out.println("ls.resizing");
 		// Adapt width.
 		if (width > 0) {
 			canvas.setWidth(width - 5 - 5);

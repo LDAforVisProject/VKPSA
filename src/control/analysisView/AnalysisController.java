@@ -394,14 +394,11 @@ public class AnalysisController extends Controller
 
 	private void initLocalScopeView()
 	{
-		// Determine path to visualization to be loaded.
-		String fxmlPath = "/view/SII/localScope/SII_Content_Analysis_LocalScope_ParallelTagCloud.fxml";
-		
 		// Create new instance of local scope.
-		localScopeInstance = new LocalScopeInstance(this, localScope_ptc_anchorPane, localscope_cd_anchorPane,
+		localScopeInstance = new LocalScopeInstance(this, 	localScope_ptc_anchorPane, localscope_cd_anchorPane,
 															slider_localScope_numTopicsToUse, textfield_localScope_numTopicsToUse,
 															slider_localScope_numKeywordsToUse, textfield_localScope_numKeywordsToUse);
-		localScopeInstance.load(fxmlPath);
+		localScopeInstance.load();
 	}
 	
 	private void initDDCLineChart()
@@ -1072,7 +1069,6 @@ public class AnalysisController extends Controller
 	@Override
 	protected void resizeElement(Node node, double width, double height)
 	{
-		System.out.println("resizing " + node.getId());
 		switch (node.getId()) {
 			case "paramSpace_distribution_anchorPane":
 				// Adapt width.
