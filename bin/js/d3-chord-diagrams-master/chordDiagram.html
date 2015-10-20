@@ -1,3 +1,4 @@
+<!-- Written by: https://github.com/sghall/d3-chord-diagrams -->
 <!DOCTYPE html>
 <html>
   <head>
@@ -34,55 +35,37 @@
       }
     </style>
 	
+	<base href="file:///D:/Workspace/Scientific Computing/VKPSA/src/js/d3-chord-diagrams-master/" />
   </head>
+  
   <body>
-	<div id="info">info</div>
     <div id="tooltip"></div>
-    <script src="file:///D:/Workspace/Scientific Computing/VKPSA/src/js/d3-chord-diagrams-master/lib/d3.js"></script>
-    <script src="file:///D:/Workspace/Scientific Computing/VKPSA/src/js/d3-chord-diagrams-master/lib/queue.js"></script>
-    <script src="file:///D:/Workspace/Scientific Computing/VKPSA/src/js/d3-chord-diagrams-master/lib/underscore.js"></script>
-    <script src="file:///D:/Workspace/Scientific Computing/VKPSA/src/js/d3-chord-diagrams-master/js/mapper.js"></script>
+    <script src="lib/d3.js"></script>
+    <script src="lib/queue.js"></script>
+    <script src="lib/underscore.js"></script>
+    <script src="js/mapper.js"></script>
     <script>
 		
 		//*******************************************************************
 		//  CREATE MATRIX AND MAP
 		//*******************************************************************
 	  
-		document.getElementById("info").innerHTML = "start";
-	  
-	     d3.csv("file:///D:/Workspace/Scientific Computing/VKPSA/src/js/d3-chord-diagrams-master/data/uber-cities.csv", function(d) {
-			document.getElementById("info").innerHTML = "one";
-		  }, function(error, rows) {
-			document.getElementById("info").innerHTML = "two";
-		  });
-
-	
-		//var mmap 		= d3.csv('data/uber-cities.csv');
-	  /*
-	  queue()
-        .defer(d3.json, 'file:///D:/Workspace/Scientific Computing/VKPSA/src/js/d3-chord-diagrams-master/data/uber-matrix.json')
-        .defer(d3.csv, 'file:///D:/Workspace/Scientific Computing/VKPSA/src/js/d3-chord-diagrams-master/data/uber-cities.csv')
-        .await(function(err, matrix, mmap) { 
-          //if (err) console.log(err);
-			document.getElementById("info").innerHTML = "loadedx";
-          //_.each(mmap, function (d, i) { d.id=i; d.data=d.color })
-          //drawChords(matrix, mmap);
-        });
-		*/
+		var mmap = x;
+		var matrix = y;
 		
-		//document.getElementById("info").innerHTML = "still working";
-		//document.getElementById("info").innerHTML = matrix.length;
+		// Map data.
+		_.each(mmap, function (d, i) { d.id=i; d.data=d.color });
+		
+		// Draw chord diagram.
+		drawChords (matrix, mmap);
 		
 		//*******************************************************************
 		//  DRAW THE CHORD DIAGRAM
 		//*******************************************************************
 		
-		/*
 		function drawChords (matrix, mmap) 
 		{
-			
-			document.getElementById("info").innerHTML = "test";
-			var w = 980, h = 800, r1 = h / 2, r0 = r1 - 110;
+			var w = x, h = y, r1 = h / 2, r0 = r1 - 90;
 
 			var chord = d3.layout.chord()
 				.padding(.02)
@@ -98,7 +81,7 @@
 				.attr("height", h)
 			  .append("svg:g")
 				.attr("id", "circle")
-				.attr("transform", "translate(" + w / 2 + "," + h / 2 + ")");
+				.attr("transform", "translate(" + w / 2 + "," + (h / 2 - 10) + ")");
 
 				svg.append("circle")
 					.attr("r", r0 + 20);
@@ -142,33 +125,29 @@
 					  d3.select("#tooltip")
 						.style("visibility", "visible")
 						.html(chordTip(rdr(d)))
-						.style("top", function () { return (d3.event.pageY - 100)+"px"})
-						.style("left", function () { return (d3.event.pageX - 100)+"px";})
+						.style("top", function () { return (d3.event.pageY - 0)+"px"})
+						.style("left", function () { return (d3.event.pageX - 0)+"px";})
 					})
 					.on("mouseout", function (d) { d3.select("#tooltip").style("visibility", "hidden") });
 
 			function chordTip (d) 
 			{
 				var p = d3.format(".1%"), q = d3.format(",.2r")
-					return "Chord Info:<br/>"
-					+  d.sname + " ? " + d.tname
-					+ ": " + p(d.svalue) + "<br/>"
-					+ d.tname + " ? " + d.sname
-					+ ": " + p(d.tvalue) + "<br/>";
+					return d.sname + " to " + d.tname
+							+ ": " + d.svalue;
 				  }
 
 			function groupTip (d) {
 				var p = d3.format(".1%"), q = d3.format(",.2r")
-				return "Group Info:<br/>"
-					+ d.gname + " : " + p(d.gvalue) + "<br/>";
+				return "LDA #" + d.gname + " : " + d.gdisSum + "<br/>";
 				}
 
 			function mouseover(d, i) {
 				d3.select("#tooltip")
 				  .style("visibility", "visible")
 				  .html(groupTip(rdr(d)))
-				  .style("top", function () { return (d3.event.pageY - 80)+"px"})
-				  .style("left", function () { return (d3.event.pageX - 130)+"px";})
+				  .style("top", function () { return (d3.event.pageY - 0)+"px"})
+				  .style("left", function () { return (d3.event.pageX - 0)+"px";})
 
 				chordPaths.classed("fade", function(p) {
 				  return p.source.index != i
@@ -176,7 +155,7 @@
 			});
 		  }
       }
-	  */
+	  
 	  
     </script>
   </body>

@@ -120,9 +120,10 @@ public class LocalScopeInstance extends VisualizationComponent
             	textfield_localScope_numTopicsToUse.setText(String.valueOf(roundedNumberOfTopics));
             	
             	// Update visualization.
-            	if (event.getEventType() == MouseEvent.MOUSE_RELEASED && selectedLDAConfigurations != null)
+            	if (event.getEventType() == MouseEvent.MOUSE_RELEASED && selectedLDAConfigurations != null) {
             		ptcController.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), roundedNumberOfTopics, (int)slider_localScope_numKeywordsToUse.getMax(), (int) Math.round(slider_localScope_numKeywordsToUse.getValue()), false);
             		cdController.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), roundedNumberOfTopics, (int)slider_localScope_numKeywordsToUse.getMax(), (int) Math.round(slider_localScope_numKeywordsToUse.getValue()), false);
+            	}
             }
 		};
 		
@@ -136,9 +137,10 @@ public class LocalScopeInstance extends VisualizationComponent
             	textfield_localScope_numKeywordsToUse.setText(String.valueOf(roundedNumberOfKeywords));
             	
             	// Update visualization.
-            	if (event.getEventType() == MouseEvent.MOUSE_RELEASED && selectedLDAConfigurations != null)
+            	if (event.getEventType() == MouseEvent.MOUSE_RELEASED && selectedLDAConfigurations != null) {
             		ptcController.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), (int) Math.round(slider_localScope_numTopicsToUse.getValue()), (int)slider_localScope_numKeywordsToUse.getMax(), roundedNumberOfKeywords, false);
             		cdController.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), (int) Math.round(slider_localScope_numTopicsToUse.getValue()), (int)slider_localScope_numKeywordsToUse.getMax(), roundedNumberOfKeywords, false);
+            	}
             }
 		};		
 		

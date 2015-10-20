@@ -1,8 +1,6 @@
 package control.analysisView.localScope;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,19 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.concurrent.ExecutorService;
 
-import com.sun.javafx.tk.Toolkit.Task;
-
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import model.LDAConfiguration;
 import model.workspace.WorkspaceAction;
-import model.workspace.tasks.ITaskListener;
-import model.workspace.tasks.Task_GenerateParameterList;
 import model.workspace.tasks.Task_LoadTopicDistancesForSelection;
 
 /**
@@ -41,13 +31,17 @@ public class ChordDiagramController extends LocalScopeVisualizationController
 	/**
 	 * Path to HTML template for chord diagram visualization.
 	 */
-	private final Path templatePath			=  Paths.get("src/js/d3-chord-diagrams-master/testUber.html");
+	private final Path templatePath			=  Paths.get("src/js/d3-chord-diagrams-master/chordDiagram.html");
 	
 	/**
 	 * Holds original, unchanged HTML code.
 	 */
 	private final String templateHTMLCode	= readHTMLTemplate(templatePath);
 	
+	/**
+	 * Task executing the loading of the current topic data (and holding the results).
+	 */
+	private Task_LoadTopicDistancesForSelection topicLoadingTask;
 	
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1)
@@ -61,22 +55,21 @@ public class ChordDiagramController extends LocalScopeVisualizationController
 						int maxNumberOfTopics, int numberOfTopics, int maxNumberOfKeywords,
 						int numberOfKeywords, boolean updateData)
 	{
-		System.out.println("refresh - loading topic distances");
-		
 		if (selectedLDAConfigurations.size() > 0) {
 			// Load topic distance data for selection.
-			Task_LoadTopicDistancesForSelection task = new Task_LoadTopicDistancesForSelection(workspace, WorkspaceAction.LOAD_SPECIFIC_TOPIC_DISTANCES, null, selectedLDAConfigurations);
-			task.addListener(this);
+			topicLoadingTask = new Task_LoadTopicDistancesForSelection(workspace, WorkspaceAction.LOAD_SPECIFIC_TOPIC_DISTANCES, null, selectedLDAConfigurations);
+			topicLoadingTask.addListener(this);
 			
 			// Write list to file.
-			(new Thread(task)).start();
+			(new Thread(topicLoadingTask)).start();
 		}
 	}
 	
 	@Override
 	public void notifyOfTaskCompleted(final WorkspaceAction workspaceAction)
 	{
-		System.out.println("task completed - " + workspaceAction);
+		System.out.println("Reloading with updated data.");
+		content_webview.getEngine().loadContent(adaptHTMLTemplate(templateHTMLCode));
 	}
 
 	/**
@@ -90,7 +83,18 @@ public class ChordDiagramController extends LocalScopeVisualizationController
 		// Adapt size.
 		adaptedHTMLCode = adaptedHTMLCode.replaceAll("var w = x, h = y", "var w = " + content_webview.getWidth() + ", h = " + content_webview.getHeight());
 		
-		// @todo Adapt data.
+		// Adapt data.
+		if (topicLoadingTask != null) {
+			final String mmap	= topicLoadingTask.getJSONTopicsMMap();
+			final String matrix = topicLoadingTask.gettJSONTopicDistancesString();
+			
+			// Insert topic metadata.
+			adaptedHTMLCode = adaptedHTMLCode.replaceAll("mmap = x", "mmap = " + mmap);
+			// Insert topic distance matrix.
+			adaptedHTMLCode = adaptedHTMLCode.replaceAll("matrix = y", "matrix = " + matrix);
+			
+//			System.out.println(adaptedHTMLCode);
+		}
 		
 		return adaptedHTMLCode;
 	}
@@ -136,7 +140,8 @@ public class ChordDiagramController extends LocalScopeVisualizationController
 		
 		content_webview.getEngine().setJavaScriptEnabled(true);
 		// Load adapted HTML.
-		content_webview.getEngine().loadContent(adaptHTMLTemplate(templateHTMLCode));
+//		content_webview.getEngine().loadContent(adaptHTMLTemplate(templateHTMLCode));
+		content_webview.getEngine().loadContent(adaptHTMLTemplate(readHTMLTemplate(templatePath)));
 	}
 
 	@Override

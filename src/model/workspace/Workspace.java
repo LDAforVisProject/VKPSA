@@ -86,7 +86,7 @@ public class Workspace implements ITaskListener
 	/**
 	 * Name of file database.
 	 */
-	public static final String DBNAME					= "workspace.db";
+	public static final String DBNAME					= "vkpsa.db";
 	
 	// -----------------------------------------------
 	// 		Variables storing configuration data

@@ -36,7 +36,7 @@
                                                          <children>
                                                             <GridPane fx:id="gridpane_parameterConfiguration" hgap="10.0" layoutX="1.0" prefHeight="318.0" prefWidth="338.0" style="-fx-background-color: #ffffff;" vgap="5.0" AnchorPane.bottomAnchor="10.0" AnchorPane.topAnchor="5.0">
                                                                <children>
-                                                                  <Label text="a">
+                                                                  <Label text="α">
                                                                      <font>
                                                                         <Font name="System Bold" size="14.0" />
                                                                      </font>
@@ -44,7 +44,7 @@
                                                                         <Insets left="5.0" />
                                                                      </GridPane.margin>
                                                                   </Label>
-                                                                  <Label text="? " GridPane.rowIndex="1">
+                                                                  <Label text="η " GridPane.rowIndex="1">
                                                                      <font>
                                                                         <Font name="System Bold" size="14.0" />
                                                                      </font>
@@ -52,7 +52,7 @@
                                                                         <Insets left="5.0" />
                                                                      </GridPane.margin>
                                                                   </Label>
-                                                                  <Label text="?" GridPane.rowIndex="2">
+                                                                  <Label text="κ" GridPane.rowIndex="2">
                                                                      <font>
                                                                         <Font name="System Bold" size="14.0" />
                                                                      </font>

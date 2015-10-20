@@ -50,8 +50,8 @@
 		//  CREATE MATRIX AND MAP
 		//*******************************************************************
 	  
-		var mmap = [{"name": "12#0","color": "#5703be",},{"name": "12#1","color": "#5703be",},{"name": "12#2","color": "#5703be",},{"name": "12#3","color": "#5703be",},{"name": "12#4","color": "#5703be",},{"name": "12#5","color": "#5703be",},{"name": "12#6","color": "#5703be",},{"name": "12#7","color": "#5703be",},{"name": "12#8","color": "#5703be",},{"name": "12#9","color": "#5703be",},{"name": "12#10","color": "#5703be",},{"name": "12#11","color": "#5703be",},{"name": "12#12","color": "#5703be",}];
-		var matrix = [[2,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1],[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1],[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1],[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1],[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1],[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1],[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1],[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1],[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1],[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1],[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1],[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1],[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1]];
+		var mmap = x;
+		var matrix = y;
 		
 		// Map data.
 		_.each(mmap, function (d, i) { d.id=i; d.data=d.color });
@@ -65,7 +65,7 @@
 		
 		function drawChords (matrix, mmap) 
 		{
-			var w = 424.0, h = 381.0, r1 = h / 2, r0 = r1 - 110;
+			var w = x, h = y, r1 = h / 2, r0 = r1 - 90;
 
 			var chord = d3.layout.chord()
 				.padding(.02)
@@ -81,7 +81,7 @@
 				.attr("height", h)
 			  .append("svg:g")
 				.attr("id", "circle")
-				.attr("transform", "translate(" + w / 2 + "," + h / 2 + ")");
+				.attr("transform", "translate(" + w / 2 + "," + (h / 2 - 10) + ")");
 
 				svg.append("circle")
 					.attr("r", r0 + 20);
@@ -133,25 +133,21 @@
 			function chordTip (d) 
 			{
 				var p = d3.format(".1%"), q = d3.format(",.2r")
-					return "Chord Info:<br/>"
-					+  d.sname + " ? " + d.tname
-					+ ": " + d.svalue + "<br/>"
-					+ d.tname + " ? " + d.sname
-					+ ": " + d.tvalue + "<br/>";
+					return d.sname + " to " + d.tname
+							+ ": " + d.svalue;
 				  }
 
 			function groupTip (d) {
 				var p = d3.format(".1%"), q = d3.format(",.2r")
-				return "Group Info:<br/>"
-					+ d.gname + " : " + p(d.gvalue) + "<br/>";
+				return "LDA #" + d.gname + " : " + d.gdisSum + "<br/>";
 				}
 
 			function mouseover(d, i) {
 				d3.select("#tooltip")
 				  .style("visibility", "visible")
 				  .html(groupTip(rdr(d)))
-				  .style("top", function () { return (d3.event.pageY - 80)+"px"})
-				  .style("left", function () { return (d3.event.pageX - 130)+"px";})
+				  .style("top", function () { return (d3.event.pageY - 0)+"px"})
+				  .style("left", function () { return (d3.event.pageX - 0)+"px";})
 
 				chordPaths.classed("fade", function(p) {
 				  return p.source.index != i

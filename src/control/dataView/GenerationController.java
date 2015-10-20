@@ -253,10 +253,9 @@ public class GenerationController extends DataSubViewController
 			
 			rs.setMaxWidth(337);
 			rs.setPrefWidth(337);
-			rs.setMax(25);
+			rs.setMax(15);
 			rs.setMajorTickUnit(5);
 			rs.setMinorTickCount(4);
-//			rs.setSnapToTicks(true);
 			rs.setShowTickLabels(true);
 			rs.setShowTickMarks(true);
 			rs.setLowValue(0);

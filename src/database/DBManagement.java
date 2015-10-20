@@ -590,7 +590,7 @@ public class DBManagement
 	 * @param ldaConfigurations
 	 * @return
 	 */
-	private Map<Integer, Integer> generateLDAConfigIDToArrayEntry(ArrayList<LDAConfiguration> ldaConfigurations)
+	private Map<Integer, Integer> generateLDAConfigIDToArrayEntryMap(ArrayList<LDAConfiguration> ldaConfigurations)
 	{
 		// Create a configID-to-row/-column association map.
 		Map<Integer, Integer> ldaConfigIDToArrayEntry = new HashMap<Integer, Integer>(ldaConfigurations.size());  
@@ -618,7 +618,7 @@ public class DBManagement
 		final int totalNumberOfItems	= (ldaConfigurations.size() * ldaConfigurations.size() - ldaConfigurations.size()) / 2;
 		
 		// Create a configID-to-row/-column association map.
-		Map<Integer, Integer> ldaConfigIDToDistanceCell = generateLDAConfigIDToArrayEntry(ldaConfigurations);
+		Map<Integer, Integer> ldaConfigIDToDistanceCell = generateLDAConfigIDToArrayEntryMap(ldaConfigurations);
 		
 		// Init prepared statement with query template.
 		try {
@@ -752,23 +752,21 @@ public class DBManagement
 	/**
 	 * Loads topic distances for selected set of LDA configurations.
 	 * @param selectedLDAConfigurations
-	 * @return Map translating row/column number to the corresponding LDA configuration; the actual topic distance matrix.
+	 * @return Map translating LDA config ID and topic ID to to the corresponding spatial ID (i.e. row/topic number).
 	 */
-	public Pair<Map<Integer, LDAConfiguration>, double[][]> loadTopicDistances(ArrayList<LDAConfiguration> selectedLDAConfigurations)
+	public Pair<Map<Pair<Integer, Integer>, Integer>, double[][]> loadTopicDistances(ArrayList<LDAConfiguration> selectedLDAConfigurations)
 	{
 		// Distances of each topic to every other topic. 
-		double[][] topicDistances									= null;
-		
-		// Translation map for information about which LDA configuration is associated with which rows/columns. 
-		Map<LDAConfiguration, ArrayList<Integer>> ldaConfigIDToRows	= new HashMap<LDAConfiguration, ArrayList<Integer>>(selectedLDAConfigurations.size());
+		double[][] topicDistances												= null;
 
-		// Create a configID-to-row/-column association map.
-		Map<Integer, Integer> ldaConfigIDToDistanceCell				= generateLDAConfigIDToArrayEntry(selectedLDAConfigurations);
-				
-				
+		// Map containing the topic counts for each LDA configuration.
+		LinkedHashMap<Integer, Integer> topicCountsByLDAConfiguration			= new LinkedHashMap<Integer, Integer>();
+		
+		// Map translating the LDA configuration ID / topic ID combination to a corresponding row number.
+		Map<Pair<Integer, Integer>, Integer> spatialIDsForLDATopicConfiguration = null;
+		
 		try {
 			// Prepare config IDs for query.
-			System.out.println(selectedLDAConfigurations.toArray().toString());
 			String configIDsForQuery = "";
 			// Add configuration IDs to query.
 			for (LDAConfiguration ldaConfig : selectedLDAConfigurations) {
@@ -780,60 +778,58 @@ public class DBManagement
 			 * 1. Get number of topics involved.
 			 */
 			
-			String statementString 		= 	"select count(*) topicCount from topics " +
-											"where " + 
-											"ldaConfigurationID in (" + configIDsForQuery + ")";
-	    	System.out.println(statementString);
+			final int numberOfTopics 			= getNumberOfTopics(configIDsForQuery, topicCountsByLDAConfiguration);
 			
-	    	// Prepare statement.
-			PreparedStatement statement = connection.prepareStatement(statementString);
-
-			// Execute statement.
-			ResultSet rs				= statement.executeQuery();
-			// Read number of datasets.
-			final int numberOfTopics	= rs.getInt("topicCount");
+			// 1. a. Associate LDA config ID/topic ID combinations with row numbers; i.e.: Assign one row/column number to each topic.
+			spatialIDsForLDATopicConfiguration 	= generateLDATopicConfigToSpatialIDMap(topicCountsByLDAConfiguration);
 			
-			// Allocate memory for topic distance matrix.
-			topicDistances				= new double[numberOfTopics][numberOfTopics];
+			// 1. b. Allocate memory for topic distance matrix.
+			topicDistances						= new double[numberOfTopics][numberOfTopics];
 			
 			/*
 			 * 2. Read topic distances.
 			 */
 			
-			statement					= connection.prepareStatement(	"select * from topicDistances " + 
+			PreparedStatement statement	= connection.prepareStatement(	"select * from topicDistances " + 
 																		"where " +  
-																		"ldaConfigurationID_1 in " + configIDsForQuery + " and " + 
-																		"ldaConfigurationID_2 in " + configIDsForQuery +  " " +  
+																		"ldaConfigurationID_1 in (" + configIDsForQuery + ") and " + 
+																		"ldaConfigurationID_2 in (" + configIDsForQuery + ") " +  
 																		"order by ldaConfigurationID_1, ldaConfigurationID_2, topicID_1, topicID_2;) "
 																	);
+			
 			// Execute statement.
-			rs							= statement.executeQuery();
+			ResultSet rs				= statement.executeQuery();
+
 			// Process topic distances.
-			int currLDAConfigCount 	= 0;
-			int currTopicCount		= 0;
-			int currLDAConfigID		= rs.getInt("ldaConfigurationID_1");
-			System.out.println("*: " + currLDAConfigID);
 			while (rs.next()) {
-				
+				// Fetch data.
 				final int ldaConfigID1 	= rs.getInt("ldaConfigurationID_1");
 				final int ldaConfigID2 	= rs.getInt("ldaConfigurationID_2");
 				final int topicID1		= rs.getInt("topicID_1");
 				final int topicID2 		= rs.getInt("topicID_2");
 				final double distance	= rs.getDouble("distance");
-				System.out.println("*: " + ldaConfigID1);
 				
-				Continue here:
-					1. Place topic distance values in matrix (write beginning from diagonale, then copy to swapped row/column (symmetric!).).
-					2. Construct metadata (LDA config ID -> row numbers).
-					3. Jsonify data.
-					4. Write jsonified data into d3.js code.
-					5. Insert callbacks from javascript to Java (-> selection of a pair of topics is to update PTC).
+				// Get spatial IDs for the current LDA config ID/topic ID combinations.
+				int spatialID_topic1	= spatialIDsForLDATopicConfiguration.get(new Pair<Integer, Integer>(ldaConfigID1, topicID1));
+				int spatialID_topic2	= spatialIDsForLDATopicConfiguration.get(new Pair<Integer, Integer>(ldaConfigID2, topicID2));
 				
-				// Prepare collections.
-				//if(!ldaConfigIDToRows.containsKey(arg0))
+				// Store topic distance in matrix (symmetrically).
+				if (topicID1 != topicID2 || ldaConfigID1 != ldaConfigID2) {
+					topicDistances[spatialID_topic1][spatialID_topic2] = distance;
+					topicDistances[spatialID_topic2][spatialID_topic1] = distance;
+				}
+				else {
+					topicDistances[spatialID_topic1][spatialID_topic2] = -1;
+					topicDistances[spatialID_topic2][spatialID_topic1] = -1;
+				}
 				
-				// Keep track of processed datasets.
-				currTopicCount++;
+//				@todo Continue here:
+//					x. Place topic distance values in matrix (write beginning from diagonale, then copy to swapped row/column (symmetric!).).
+//					x. Construct metadata (LDA config ID -> row numbers).
+//					x. Jsonify data.
+//					x. Write jsonified data into d3.js code.
+//					5. Insert callbacks from javascript to Java (-> selection of a pair of topics is to update PTC).
+//				
 			}
 		} 
     	
@@ -842,6 +838,66 @@ public class DBManagement
 		}
 		
 		// Return results.
-		return new Pair<Map<Integer, LDAConfiguration>, double[][]>(topicToLDAConfigurationIDMap, topicDistances);
+		return new Pair<Map<Pair<Integer, Integer>, Integer>, double[][]>(spatialIDsForLDATopicConfiguration, topicDistances);
+	}
+	
+
+	/**
+	 * Generates spatial IDs (i.e., row/column numbers) for each combination of LDA config ID and topic ID (i.e.: for each individual topic).
+	 * @param topicCountsByLDAConfiguration
+	 * @return
+	 */
+	private LinkedHashMap<Pair<Integer, Integer>, Integer> generateLDATopicConfigToSpatialIDMap(LinkedHashMap<Integer, Integer> topicCountsByLDAConfiguration)
+	{
+		LinkedHashMap<Pair<Integer, Integer>, Integer> spatialIDsForLDATopicConfiguration = new LinkedHashMap<Pair<Integer,Integer>, Integer>();
+		
+		int rowNumber = 0;
+		for (Map.Entry<Integer, Integer> entry : topicCountsByLDAConfiguration.entrySet()) {
+			// Get total number of topics for this LDA configuration (the latter is to be found in entry.getKey()).
+			final int numberOfTopics = entry.getValue();
+
+			// Add one entry per topic.
+			for (int i = 0; i < numberOfTopics; i++) {
+				spatialIDsForLDATopicConfiguration.put(new Pair<Integer, Integer>(entry.getKey(), i), rowNumber++);
+			}
+		}
+		
+		return spatialIDsForLDATopicConfiguration;	
+	}
+	
+	/**
+	 * Determines the number of topics for each LDA configuration. 
+	 * @param ldaConfigIDString
+	 * @param numberOfTopicsByLDAConfiguration
+	 * @return The total number of topics.
+	 * @throws SQLException 
+	 */
+	private int getNumberOfTopics(String ldaConfigIDsString, Map<Integer, Integer> topicCountsByLDAConfiguration) throws SQLException
+	{
+		int numberOfTopics = 0;
+		
+		String statementString 		= 	"select ldaConfigurationID, count(*) topicCount from topics " +
+										"where " + 
+										"ldaConfigurationID in (" + ldaConfigIDsString + ") " + 
+										"group by ldaConfigurationID " + 
+										"order by ldaConfigurationID";
+
+		// Prepare statement.
+		PreparedStatement statement = connection.prepareStatement(statementString);
+		
+		// Execute statement.
+		ResultSet rs				= statement.executeQuery();
+		// Read total and grouped number of topics.
+		while (rs.next()) {
+			final int ldaConfigID 	= rs.getInt("ldaConfigurationID");
+			final int topicCount	= rs.getInt("topicCount");
+			
+			topicCountsByLDAConfiguration.put(ldaConfigID, topicCount);
+			
+			// Keep track of total number of topics.
+			numberOfTopics += topicCount;
+		}
+
+		return numberOfTopics;
 	}
 }
