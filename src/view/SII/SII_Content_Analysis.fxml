@@ -407,17 +407,17 @@
                                                             <Label text="Parameters to fixed" />
                                                             <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1">
                                                                <children>
-                                                                  <CheckBox fx:id="checkbox_ddc_alpha" mnemonicParsing="false" onAction="#ddcButtonStateChanged" selected="true" text="a">
+                                                                  <CheckBox fx:id="checkbox_ddc_alpha" mnemonicParsing="false" onAction="#ddcButtonStateChanged" selected="true" text="α">
                                                                      <VBox.margin>
                                                                         <Insets top="15.0" />
                                                                      </VBox.margin>
                                                                   </CheckBox>
-                                                                  <CheckBox fx:id="checkbox_ddc_eta" mnemonicParsing="false" onAction="#ddcButtonStateChanged" text="? ">
+                                                                  <CheckBox fx:id="checkbox_ddc_eta" mnemonicParsing="false" onAction="#ddcButtonStateChanged" text="η ">
                                                                      <VBox.margin>
                                                                         <Insets top="5.0" />
                                                                      </VBox.margin>
                                                                   </CheckBox>
-                                                                  <CheckBox fx:id="checkbox_ddc_kappa" mnemonicParsing="false" onAction="#ddcButtonStateChanged" text="?">
+                                                                  <CheckBox fx:id="checkbox_ddc_kappa" mnemonicParsing="false" onAction="#ddcButtonStateChanged" text="κ">
                                                                      <VBox.margin>
                                                                         <Insets top="5.0" />
                                                                      </VBox.margin>
@@ -543,68 +543,49 @@
                                                       </SplitPane>
                                                    </children>
                                                 </AnchorPane>
-                                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                                              <AnchorPane fx:id="paramSpace_distribution_anchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff;">
                                                    <children>
-                                                      <SplitPane dividerPositions="0.48256880733944957" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                        <items>
-                                                          <AnchorPane fx:id="paramSpace_distribution_anchorPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" style="-fx-background-color: #ffffff;">
+                                                      <SplitPane dividerPositions="0.5" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
+                                                         <items>
+                                                          <AnchorPane fx:id="paramSpace_distribution_anchorPane_filtered" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" style="-fx-background-color: #ffffff;">
                                                                <children>
-                                                                  <Label layoutX="12.0" layoutY="5.0" text="Parameter | Distribution" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="7.0">
-                                                                     <font>
-                                                                        <Font name="System Bold" size="12.0" />
-                                                                     </font>
-                                                                  </Label>
-                                                                  <Canvas fx:id="paramSpaceHeatmap_canvas" height="164.0" layoutX="68.0" layoutY="45.0" width="150.0" AnchorPane.bottomAnchor="47.0" AnchorPane.leftAnchor="67.0" AnchorPane.rightAnchor="49.0" AnchorPane.topAnchor="45.0" />
-                                                                  <NumberAxis fx:id="numberaxis_parameterSpace_xaxis" label="key1" layoutX="67.0" layoutY="196.0" prefHeight="41.0" prefWidth="150.0" side="BOTTOM" tickLength="5.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="67.0" AnchorPane.rightAnchor="50.0" />
-                                                                  <NumberAxis fx:id="numberaxis_parameterSpace_yaxis" label="key2" layoutX="1.0" layoutY="45.0" prefHeight="150.0" prefWidth="67.0" side="LEFT" tickLength="5.0" AnchorPane.bottomAnchor="47.0" AnchorPane.leftAnchor="1.0" AnchorPane.topAnchor="45.0" />
-                                                                  <ToggleButton fx:id="button_relativeView_paramDist" layoutX="183.0" layoutY="2.0" mnemonicParsing="false" onAction="#changeVisualizationViewMode" text="Relative view" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                                                  <Canvas fx:id="paramSpaceHeatmap_canvas_filtered" height="135.0" layoutX="68.0" layoutY="45.0" width="164.0" AnchorPane.bottomAnchor="47.0" AnchorPane.leftAnchor="68.0" AnchorPane.topAnchor="45.0" />
+                                                                  <NumberAxis fx:id="numberaxis_parameterSpace_xaxis_filtered" label="key1" layoutX="67.0" layoutY="196.0" prefHeight="41.0" prefWidth="150.0" side="BOTTOM" tickLength="5.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="67.0" AnchorPane.rightAnchor="50.0" />
+                                                                  <NumberAxis fx:id="numberaxis_parameterSpace_yaxis_filtered" label="key2" layoutX="1.0" layoutY="45.0" prefHeight="150.0" prefWidth="67.0" side="LEFT" tickLength="5.0" AnchorPane.bottomAnchor="47.0" AnchorPane.leftAnchor="1.0" AnchorPane.topAnchor="45.0" />
+                                                                  <ToggleButton fx:id="button_relativeView_paramDist_filtered" layoutX="183.0" layoutY="2.0" mnemonicParsing="false" onAction="#changeVisualizationViewMode" text="Relative view" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
                                                                      <font>
                                                                         <Font size="10.0" />
                                                                      </font>
                                                                   </ToggleButton>
-                                                                  <ImageView fx:id="settings_paramDist_icon" fitHeight="15.0" fitWidth="15.0" layoutX="156.0" layoutY="9.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="155.0" AnchorPane.topAnchor="8.0">
-                                                                     <image>
-                                                                        <Image url="@icons/cog.png" />
-                                                                     </image>
-                                                                     <cursor>
-                                                                        <Cursor fx:constant="HAND" />
-                                                                     </cursor>
-                                                                  </ImageView>
                                                                </children>
                                                             </AnchorPane>
-                                                          <AnchorPane fx:id="paramSpace_correlation_anchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="160.0" prefWidth="100.0" style="-fx-background-color: #ffffff;">
+                                                            <AnchorPane fx:id="paramSpace_distribution_anchorPane_selected" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" style="-fx-background-color: #ffffff;">
                                                                <children>
-                                                                  <Label fx:id="settings_distCorrelation_icon" layoutX="14.0" layoutY="5.0" text="Parameter | Dist. Correlation" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="7.0">
-                                                                     <font>
-                                                                        <Font name="System Bold" size="12.0" />
-                                                                     </font>
-                                                                  </Label>
-                                                                  <LineChart fx:id="linechart_distanceCorrelation" createSymbols="false" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="30.0">
-                                                                    <xAxis>
-                                                                      <NumberAxis fx:id="numberAxis_distanceCorrelation_xAxis" animated="false" side="BOTTOM" />
-                                                                    </xAxis>
-                                                                    <yAxis>
-                                                                      <NumberAxis fx:id="numberAxis_distanceCorrelation_yAxis" animated="false" minorTickCount="4" side="LEFT" />
-                                                                    </yAxis>
-                                                                  </LineChart>
-                                                                  <VBox fx:id="vbox_ddcHoverInformation" layoutX="52.0" layoutY="42.0" prefHeight="50.0" prefWidth="100.0" AnchorPane.leftAnchor="52.0" AnchorPane.topAnchor="45.0" />
-                                                                  <ToggleButton fx:id="button_relativeView_paramDC" layoutX="194.0" layoutY="2.0" mnemonicParsing="false" onAction="#changeVisualizationViewMode" text="Relative view" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                                                  <Canvas fx:id="paramSpaceHeatmap_canvas_selected" height="135.0" layoutX="68.0" layoutY="45.0" width="164.0" AnchorPane.bottomAnchor="47.0" AnchorPane.leftAnchor="68.0" AnchorPane.topAnchor="45.0" />
+                                                                  <NumberAxis fx:id="numberaxis_parameterSpace_xaxis_selected" label="key1" layoutX="67.0" layoutY="196.0" prefHeight="41.0" prefWidth="150.0" side="BOTTOM" tickLength="5.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="67.0" AnchorPane.rightAnchor="50.0" />
+                                                                  <NumberAxis fx:id="numberaxis_parameterSpace_yaxis_selected" label="key2" layoutX="1.0" layoutY="45.0" prefHeight="150.0" prefWidth="67.0" side="LEFT" tickLength="5.0" AnchorPane.bottomAnchor="47.0" AnchorPane.leftAnchor="1.0" AnchorPane.topAnchor="45.0" />
+                                                                  <ToggleButton fx:id="button_relativeView_paramDist_selected" layoutX="183.0" layoutY="2.0" mnemonicParsing="false" onAction="#changeVisualizationViewMode" text="Relative view" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
                                                                      <font>
                                                                         <Font size="10.0" />
                                                                      </font>
                                                                   </ToggleButton>
-                                                                  <ImageView fx:id="settings_paramDistCorr_icon" fitHeight="15.0" fitWidth="15.0" layoutX="180.0" layoutY="10.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="179.0" AnchorPane.topAnchor="8.0">
-                                                                     <image>
-                                                                        <Image url="@icons/cog.png" />
-                                                                     </image>
-                                                                     <cursor>
-                                                                        <Cursor fx:constant="HAND" />
-                                                                     </cursor>
-                                                                  </ImageView>
                                                                </children>
                                                             </AnchorPane>
-                                                        </items>
+                                                         </items>
                                                       </SplitPane>
+                                                      <Label layoutX="70.0" layoutY="15.0" text="Parameter | Distribution" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="7.0">
+                                                         <font>
+                                                            <Font name="System Bold" size="12.0" />
+                                                         </font>
+                                                      </Label>
+                                                      <ImageView fx:id="settings_paramDist_icon" fitHeight="15.0" fitWidth="15.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="155.0" AnchorPane.topAnchor="8.0">
+                                                         <image>
+                                                            <Image url="@icons/cog.png" />
+                                                         </image>
+                                                         <cursor>
+                                                            <Cursor fx:constant="HAND" />
+                                                         </cursor>
+                                                      </ImageView>
                                                    </children>
                                                 </AnchorPane>
                                             </items>
@@ -651,7 +632,42 @@
                         <ComboBox layoutX="142.0" layoutY="120.0" prefHeight="25.0" prefWidth="140.0" />
                      </children>
                   </AnchorPane>
-                  <ScrollPane hbarPolicy="ALWAYS" layoutX="300.0" layoutY="6.0" vbarPolicy="NEVER" AnchorPane.bottomAnchor="-6.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="6.0" />
+                  <SplitPane dividerPositions="0.5" layoutX="300.0" layoutY="6.0" prefHeight="149.0" prefWidth="1062.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <items>
+                        <ScrollPane hbarPolicy="ALWAYS" layoutX="300.0" layoutY="6.0" vbarPolicy="NEVER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="6.0" />
+                      <AnchorPane fx:id="paramSpace_correlation_anchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="160.0" prefWidth="100.0" style="-fx-background-color: #ffffff;">
+                           <children>
+                              <Label fx:id="settings_distCorrelation_icon" layoutX="14.0" layoutY="5.0" text="Parameter | Dist. Correlation" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="7.0">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                              </Label>
+                              <LineChart fx:id="linechart_distanceCorrelation" animated="false" createSymbols="false" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="100.0" AnchorPane.topAnchor="30.0">
+                                <xAxis>
+                                  <NumberAxis fx:id="numberAxis_distanceCorrelation_xAxis" animated="false" side="BOTTOM" />
+                                </xAxis>
+                                <yAxis>
+                                  <NumberAxis fx:id="numberAxis_distanceCorrelation_yAxis" animated="false" minorTickCount="4" side="LEFT" />
+                                </yAxis>
+                              </LineChart>
+                              <VBox fx:id="vbox_ddcHoverInformation" layoutX="418.0" layoutY="40.0" prefHeight="50.0" prefWidth="100.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="40.0" />
+                              <ToggleButton fx:id="button_relativeView_paramDC" layoutX="194.0" layoutY="2.0" mnemonicParsing="false" onAction="#changeVisualizationViewMode" text="Relative view" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                 <font>
+                                    <Font size="10.0" />
+                                 </font>
+                              </ToggleButton>
+                              <ImageView fx:id="settings_paramDistCorr_icon" fitHeight="15.0" fitWidth="15.0" layoutX="180.0" layoutY="10.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="179.0" AnchorPane.topAnchor="8.0">
+                                 <image>
+                                    <Image url="@icons/cog.png" />
+                                 </image>
+                                 <cursor>
+                                    <Cursor fx:constant="HAND" />
+                                 </cursor>
+                              </ImageView>
+                           </children>
+                        </AnchorPane>
+                     </items>
+                  </SplitPane>
                </children>
             </AnchorPane>
         </items>

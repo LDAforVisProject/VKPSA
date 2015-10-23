@@ -98,15 +98,15 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 	/**
 	 * Stores index of an cell (key is in form of rowIndex * 10 + columnIndex) and the IDs of the corresponding/contained LDA configurations.
 	 */
-	private Map<Integer, Set<Integer>> cellsToConfigurationIDs;
+	private Map<Pair<Integer, Integer>, Set<Integer>> cellsToConfigurationIDs;
 	/**
 	 * Stores index of an cell (key is in form of rowIndex * 10 + columnIndex) and the coordinates (minX, minY, maxX, maxY) of this cell.
 	 */
-	private Map<Integer, double[]> cellsToCoordinates;
+	private Map<Pair<Integer, Integer>, double[]> cellsToCoordinates;
 	/**
 	 * Store which cells were selected.
 	 */
-	Set<Integer> selectedCellIDs;
+	Set<Pair<Integer, Integer>> selectedCellsCoordinates;
 	
 	/**
 	 * Type of heatmap data used with this instance.
@@ -154,9 +154,9 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 		this.granularity					= -1;
 		
 		// Init metadata collections.
-		cellsToConfigurationIDs				= new HashMap<Integer, Set<Integer>>();
-		cellsToCoordinates					= new HashMap<Integer, double[]>();
-		selectedCellIDs						= new HashSet<Integer>();
+		cellsToConfigurationIDs				= new HashMap<Pair<Integer,Integer>, Set<Integer>>();
+		cellsToCoordinates					= new HashMap<Pair<Integer, Integer>, double[]>();
+		selectedCellsCoordinates			= new HashSet<Pair<Integer,Integer>>();
 		
 		// Init axis settings.
 		initAxes();
@@ -220,7 +220,7 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
     	// Reset metadata collections.
     	cellsToConfigurationIDs.clear();
     	cellsToCoordinates.clear();
-    	selectedCellIDs.clear();
+    	selectedCellsCoordinates.clear();
     	
     	// Bin LDA configuration parameter frequency data and draw it.
     	binnedData = examineLDAConfigurations();
@@ -255,11 +255,14 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
     	// Re-examine LDA configurations, if desired (e.g. after changing the granularity settings).
     	if (reexamineData) {
     		binnedData = dataType == HeatmapDataType.LDAConfiguration ? examineLDAConfigurations() : examineMDSCoordinateData();
+    		this.refresh(allLDAConfigurations, chosenLDAConfigurations, key1, key2, false, dataBinding);
     	}
     	
-    	// Draw data.
-    	boolean useBorders = dataType == HeatmapDataType.LDAConfiguration ? false : true;
-    	draw(binnedData, useBorders);
+    	else {
+	    	// Draw data.
+	    	boolean useBorders = dataType == HeatmapDataType.LDAConfiguration ? false : true;
+	    	draw(binnedData, useBorders);
+    	}
     }
     
     /**
@@ -304,13 +307,13 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 			binMatrix[index_key1][index_key2]++;
 			
 			// Store references from cells to actual data.
-			final int mapCellKey = index_key1 * 10 + index_key2;
+			final Pair<Integer, Integer> mapCellKey = new Pair<Integer, Integer>(index_key1, index_key2);
 			// 	Add entry in map, if it doesn't exist already.
 			if (!cellsToConfigurationIDs.containsKey(mapCellKey)) {
 				cellsToConfigurationIDs.put(mapCellKey, new HashSet<Integer>());
 			}
 			// 	Add to collection of datasets in this cell.
-			cellsToConfigurationIDs.get(index_key1 * 10 + index_key2).add(ldaConfig.getConfigurationID());
+			cellsToConfigurationIDs.get(mapCellKey).add(ldaConfig.getConfigurationID());
 		}
 		
 		// 3. Determine minimal and maximal occurence count.
@@ -453,7 +456,7 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 					gc.strokeRect(cellCoordinates[0], cellCoordinates[1] + 1, cellWidth - 1, cellHeight - 1);
 				
 				// Add coordinate metadata to collection.
-				cellsToCoordinates.put(i * 10 + j, cellCoordinates);
+				cellsToCoordinates.put(new Pair<Integer, Integer>(i, j), cellCoordinates);
 			}	
 		}
     }
@@ -463,8 +466,9 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
     	this.adjustGranularityDynamically	= adjustGranularityDynamically;
     	this.granularity					= granularity;
     	
-    	if (update)
+    	if (update) {
     		this.refresh(true);
+    	}
     }
 
 	@Override
@@ -495,14 +499,14 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
     	gc.setFill(highlightColor);
     	
 		// Check which cells are in selected area, highlight them.
-		for (Map.Entry<Integer, double[]> cellCoordinateEntry : cellsToCoordinates.entrySet()) {
+		for (Map.Entry<Pair<Integer, Integer>, double[]> cellCoordinateEntry : cellsToCoordinates.entrySet()) {
 			double cellMinX = cellCoordinateEntry.getValue()[0];
 			double cellMinY = cellCoordinateEntry.getValue()[1];
 			double cellMaxX = cellCoordinateEntry.getValue()[2];
 			double cellMaxY = cellCoordinateEntry.getValue()[3];
 			
 			// Get cell ID/location.
-			final int cellID = cellCoordinateEntry.getKey();
+			final Pair<Integer, Integer> cellCoordinates = cellCoordinateEntry.getKey();
 			
 			if (	cellMinX > minX && cellMaxX < maxX &&
 					cellMinY > minY && cellMaxY < maxY) {
@@ -512,21 +516,21 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 				// Add cell content to collection (if there is any).
 				if (cellContentSet != null) {
 					// Check if cell('s content) was already selected. If not: Highlight it, add content to selection.  
-					if (!selectedCellIDs.contains(cellID)) {
+					if (!selectedCellsCoordinates.contains(cellCoordinates)) {
 						// Highlight cell.
 						gc.fillRect(cellMinX, cellMinY, cellMaxX - cellMinX, cellMaxY - cellMinY);
 						
 						// Add to collection of selected cells.
-						selectedCellIDs.add(cellID);
+						selectedCellsCoordinates.add(cellCoordinates);
 					}
 				}
 			}
 			
 			// If not in selected area anymore: Paint in original color, remove from selection.
-			else if (selectedCellIDs.contains(cellID)) {
+			else if (selectedCellsCoordinates.contains(cellCoordinates)) {
 				// Get row and column.
-				final int cellRow		= cellID / 10;
-				final int cellColumn	= cellID % 10;
+				final int cellRow		= cellCoordinateEntry.getKey().getKey();
+				final int cellColumn 	= cellCoordinateEntry.getKey().getValue();
 				
 				// Calculate original color.
 				Color cellColor = ColorScale.getColorForValue(binMatrix[cellRow][cellColumn], minOccurenceCount, maxOccurenceCount);
@@ -536,7 +540,7 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 				gc.fillRect(cellMinX, cellMinY, cellMaxX - cellMinX, cellMaxY - cellMinY);
 				
 				// Remove from selection.
-				selectedCellIDs.remove(cellID);
+				selectedCellsCoordinates.remove(cellCoordinates);
 			}
 		}
 	}
@@ -547,8 +551,8 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 		// Collect content in all selected cells.
 		Set<Integer> selectedLDAConfigIDs = new HashSet<Integer>();
 		
-		for (int cellID : selectedCellIDs) {
-			selectedLDAConfigIDs.addAll(cellsToConfigurationIDs.get(cellID));
+		for (Pair<Integer, Integer> cellCoordinates : selectedCellsCoordinates) {
+			selectedLDAConfigIDs.addAll(cellsToConfigurationIDs.get(cellCoordinates));
 		}
 		
 		// Pass references to selected data onward to AnalysisController.
@@ -558,7 +562,7 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 	@Override
 	public Pair<Integer, Integer> provideOffsets()
 	{
-		return new Pair<Integer, Integer>(67, 45);
+		return new Pair<Integer, Integer>(68, 45);
 	}
 
 	@Override
@@ -576,6 +580,7 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 	/**
 	 * Translates ComboBox item string to HeatmapDataBinding instance. 
 	 * @param item
+	 * @deprecated
 	 */
 	public static HeatmapDataBinding translateItemstringToDataBindingType(String item)
 	{

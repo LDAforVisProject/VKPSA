@@ -68,52 +68,60 @@ public class Task_CalculateDistances extends WorkspaceTask
 		/*
 		 * Compare all datasets with each other, calculate distances.
 		 */
-		double delta = 0;
-		for (int i = 0; i < ldaConfigurations.size(); i++) {
-			distances[i][i] = 0;
-			
-			// Get dataset 1.
-			Dataset dataset1 = datasetMap.get(ldaConfigurations.get(i));
-			
-			// Calculate other distances.
-			for (int j = i; j < ldaConfigurations.size(); j++) {
-				// Update task progress.
-				updateProgress(numberOfCalculatedDistances++, totalNumberOfDistances);
+		try {	
+			double delta = 0;
+			for (int i = 0; i < ldaConfigurations.size(); i++) {
+				distances[i][i] = 0;
 				
-				// Adaptive distance calculation:
-				// Check if distances have to be calculated for this pairing of topic models.
-				if (	calculateAllDistances	||
-						(
-							listOfLDAConfigsWithoutDistances.contains(ldaConfigurations.get(i).getConfigurationID()) ||
-							listOfLDAConfigsWithoutDistances.contains(ldaConfigurations.get(j).getConfigurationID())
-						)
-				) {
-					System.out.println("Calculating " + ldaConfigurations.get(i).getConfigurationID() + " to " + ldaConfigurations.get(j).getConfigurationID());
-					// Get dataset 2.
-					Dataset dataset2 = datasetMap.get(ldaConfigurations.get(j));
+				// Get dataset 1.
+				Dataset dataset1 = datasetMap.get(ldaConfigurations.get(i));
+				
+				// Calculate other distances.
+				for (int j = i; j < ldaConfigurations.size(); j++) {
+					// Update task progress.
+					updateProgress(numberOfCalculatedDistances++, totalNumberOfDistances);
 					
-					// Allocate topic distance matrix.
-					double currTopicDistances[][] = new double[dataset1.getTopics().size()][dataset2.getTopics().size()];
-					
-					// Assume symmetric distance calculations is done in .calculateDatasetDistance().
-					distances[i][j] = (float)dataset1.calculateDatasetDistance(dataset2, DatasetDistance.HausdorffDistance, currTopicDistances);
-					distances[j][i] = distances[i][j];
-					delta += Math.abs(distances[i][j] - distances[j][i]); 
-					
-					// Store topic distance matrix for the current two datasets/topic models in map.
-					Pair<LDAConfiguration, LDAConfiguration> topicDistanceKey = new Pair<LDAConfiguration, LDAConfiguration>(ldaConfigurations.get(i),  ldaConfigurations.get(j));
-					topicDistances.put(topicDistanceKey, currTopicDistances);
+					// Adaptive distance calculation:
+					// Check if distances have to be calculated for this pairing of topic models.
+					if (	calculateAllDistances	||
+							(
+								listOfLDAConfigsWithoutDistances.contains(ldaConfigurations.get(i).getConfigurationID()) ||
+								listOfLDAConfigsWithoutDistances.contains(ldaConfigurations.get(j).getConfigurationID())
+							)
+					) {
+						System.out.println("Calculating " + ldaConfigurations.get(i).getConfigurationID() + " to " + ldaConfigurations.get(j).getConfigurationID());
+						// Get dataset 2.
+						Dataset dataset2 = datasetMap.get(ldaConfigurations.get(j));
+						
+						// Allocate topic distance matrix.
+						double currTopicDistances[][] = new double[dataset1.getTopics().size()][dataset2.getTopics().size()];
+						
+						// Assume symmetric distance calculations is done in .calculateDatasetDistance().
+						distances[i][j] = (float)dataset1.calculateDatasetDistance(dataset2, DatasetDistance.HausdorffDistance, currTopicDistances);
+						distances[j][i] = distances[i][j];
+						delta += Math.abs(distances[i][j] - distances[j][i]); 
+						
+						// Store topic distance matrix for the current two datasets/topic models in map.
+						Pair<LDAConfiguration, LDAConfiguration> topicDistanceKey = new Pair<LDAConfiguration, LDAConfiguration>(ldaConfigurations.get(i),  ldaConfigurations.get(j));
+						topicDistances.put(topicDistanceKey, currTopicDistances);
+					}
 				}
 			}
+			
+			if (delta > 0)
+				System.out.println("delta_source = " + delta);
+		
+			// Save topic distances to database.
+			db.saveTopicDistances(topicDistances, false, this);
+
+			// Save dataset distances to database.
+			db.saveDatasetDistances(ldaConfigurations, distances, calculateAllDistances, listOfLDAConfigsWithoutDistances, this);
 		}
 		
-		System.out.println("delta_source = " + delta);
-		
-		// Save topic distances to database.
-		db.saveTopicDistances(topicDistances, false, this);
-		
-		// Save dataset distances to database.
-		db.saveDatasetDistances(ldaConfigurations, distances, calculateAllDistances, listOfLDAConfigsWithoutDistances, this);
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		
 		// Update task progress.
 		updateProgress(1, 1);

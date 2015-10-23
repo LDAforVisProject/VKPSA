@@ -102,6 +102,8 @@ public class Task_LoadTopicDistancesForSelection extends WorkspaceTask
 //		System.out.println("topicData = ");
 //		System.out.println(Data.format(topicDistances));
 		
+		normalizeDistances(topicDistances);
+		
 		// Iterate over all topics.
 		for (Map.Entry<Pair<Integer, Integer>, Integer> entry : spatialIDsForLDATopicConfiguration.entrySet()) {
 			// Get relevant data.
@@ -110,12 +112,14 @@ public class Task_LoadTopicDistancesForSelection extends WorkspaceTask
 			final int spatialID				= entry.getValue();
 			final String color				= ldaConfigColors.get(ldaConfigurationID);
 			
+			// Record sum of distance values in this topic.
+			double distanceSum				= 0;
+			
 			// Append to distance data JSON.
-			double distanceSum = 0;
 			json_topicDistancesString += "[";
 			for (int i = 0; i < topicDistances.length; i++) {
 				// Grab and append distance from this topic to all other topics - to be found in row spatialID / column i.
-				double adaptedDistanceValue 	 = topicDistances[spatialID][i] < 0 ? 0 : 1 / topicDistances[spatialID][i];
+				double adaptedDistanceValue 	 	 = topicDistances[spatialID][i] <= 0 ? 0 : Math.pow(1 / topicDistances[spatialID][i], 1.5);
 				json_topicDistancesString 			+= adaptedDistanceValue + ",";
 				distanceSum 						+= adaptedDistanceValue;
 			}
@@ -140,6 +144,31 @@ public class Task_LoadTopicDistancesForSelection extends WorkspaceTask
 		return 1;
 	}
 
+	/**
+	 * "Normalize" distance data to emphasize differences in distance values. 
+	 * @param topicDistances
+	 */
+	private void normalizeDistances(double[][] topicDistances)
+	{
+		// Find minimal distance.
+		double minDistance	= Double.MAX_VALUE;
+		
+		for (int i = 0; i < topicDistances.length; i++) {
+			for (int j = 0; j < topicDistances.length; j++) {
+				if (topicDistances[i][j] > 0)
+					minDistance = topicDistances[i][j] < minDistance ? topicDistances[i][j] : minDistance;
+			}	
+		}
+		
+		// Subtract minimal distance from all values.
+		for (int i = 0; i < topicDistances.length; i++) {
+			for (int j = 0; j < topicDistances.length; j++) {
+				if (topicDistances[i][j] > 0)
+					topicDistances[i][j] -= minDistance;
+			}
+		}
+	}
+	
 	/**
 	 * Generates one color hex string for each LDA configuration.
 	 * @param ldaConfigurations

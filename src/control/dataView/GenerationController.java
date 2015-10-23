@@ -268,7 +268,7 @@ public class GenerationController extends DataSubViewController
 		}
 		
 		// Set variable-specific minima and maxima.
-		rangeSliders.get("kappa").setMin(1);
+		rangeSliders.get("kappa").setMin(2);
 		rangeSliders.get("kappa").setMax(50);
 		rangeSliders.get("kappa").setHighValue(50);
 		

@@ -71,9 +71,6 @@ public class Task_GenerateData extends WorkspaceTask
 			
 			// Consume messages from input stream.
 			consumeProcessOutputStreams(process, configurationsToGenerate.size());
-
-			// Cancel timer.
-//			uploadCheckerTimer.cancel();
 			
 	      	// Finish only after child process(es) has/have finished.
 	      	//process.waitFor();

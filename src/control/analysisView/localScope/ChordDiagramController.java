@@ -92,8 +92,6 @@ public class ChordDiagramController extends LocalScopeVisualizationController
 			adaptedHTMLCode = adaptedHTMLCode.replaceAll("mmap = x", "mmap = " + mmap);
 			// Insert topic distance matrix.
 			adaptedHTMLCode = adaptedHTMLCode.replaceAll("matrix = y", "matrix = " + matrix);
-			
-//			System.out.println(adaptedHTMLCode);
 		}
 		
 		return adaptedHTMLCode;

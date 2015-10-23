@@ -56,7 +56,7 @@ public class DBManagement
 	    }
 	    
 	    // Get number of keywords.
-	    readNumberOfKeywords(false);
+	    //readNumberOfKeywords(false);
 	}
 	
 	/**
@@ -153,8 +153,6 @@ public class DBManagement
 								"order by lda.ldaConfigurationID";
 		
 		try {
-			
-			
 			// Prepare statement for selection of raw data and fetch results.
 			PreparedStatement stmt	= connection.prepareStatement(query);
 			rs						= stmt.executeQuery();
@@ -185,7 +183,7 @@ public class DBManagement
 	{
 		// Check if number of keywords was determined correctly. If not, try again.
 		if (numberOfKeywordsPerTopic < 0) {
-			readNumberOfKeywords(false);
+			readNumberOfKeywords(true);
 			
 			// If failing again: No data available, return.
 			if (numberOfKeywordsPerTopic < 0) {
@@ -470,7 +468,7 @@ public class DBManagement
 										WorkspaceTask task)
 	{
 		// Keep track of processed rows.
-		int processedRowCount = 0;
+		int processedLDAConfigurationCount = 0;
 		
 		try {
 			// Init prepared statement with query template.
@@ -499,7 +497,7 @@ public class DBManagement
 				
 				// Update loading task, if provided.
 				if (task != null)
-					task.updateTaskProgress(processedRowCount, ldaConfigurations.size());
+					task.updateTaskProgress(processedLDAConfigurationCount++, ldaConfigurations.size());
 			}
 			
 			// Execute batch.
@@ -531,7 +529,9 @@ public class DBManagement
 									WorkspaceTask task)
 	{
 		// Keep track of processed rows.		
-		int processedRowCount = 0;
+		int processedLDAConfigurationCount	= 0;
+		// Define how many statements should be packed into one batch (statement).
+		final int statementsPerBatch		= 10000;
 		
 		try {
 			// Init prepepard statement with query template.
@@ -539,6 +539,9 @@ public class DBManagement
 			
 			// Set auto-commit to false.
 			connection.setAutoCommit(false);
+			
+			// Count how many statements are in this batch.
+			int statementsInBatch = 0;
 			
 			// Iterate through pairs of LDA configurations, store respective distances.
 			for (Pair<LDAConfiguration, LDAConfiguration> ldaConfigurationPair : topicDistances.keySet()) {
@@ -552,25 +555,39 @@ public class DBManagement
 				// Iterate through topic distances for this pair of LDA configurations.
 				for (int i = 0; i < topicDistanceMatrix.length; i++) {
 					for (int j = 0; j < topicDistanceMatrix[i].length; j++) {
-						// Set values for row.
-						statement.setInt(1, ldaConfigID_1);
-						statement.setInt(2, ldaConfigID_2);
-						statement.setInt(3, i);
-						statement.setInt(4, j);
-						statement.setDouble(5, topicDistanceMatrix[i][j]);
+						// Set values for row, if distance is not between the same topic.
+						if ( !( (ldaConfigID_1 == ldaConfigID_2) && (i == j) ) ) {
+							statement.setInt(1, ldaConfigID_1);
+							statement.setInt(2, ldaConfigID_2);
+							statement.setInt(3, i);
+							statement.setInt(4, j);
+							statement.setDouble(5, topicDistanceMatrix[i][j]);
 
-						// Add row to batch.
-						statement.addBatch();
+							// Add row to batch.
+							statement.addBatch();
+							
+							// Keep track of how many statements are in this batch.
+							statementsInBatch++;
+						}
 					}	
+				}
+				
+				// Execute batch, if more than 10000 statements are in it.
+				if (statementsInBatch > statementsPerBatch) {
+					// Reset counter.
+					statementsInBatch = 0;
+					
+					// Execute and clear batch.
+					statement.executeBatch();
+					statement.clearBatch();
 				}
 				
 				// Update loading task, if provided.
 				if (task != null)
-					task.updateTaskProgress(processedRowCount, topicDistances.size());
+					task.updateTaskProgress(processedLDAConfigurationCount++, topicDistances.size());
 			}
 			
-			
-			// Execute batch.
+			// Execute batch with remaining statements.
 			statement.executeBatch();
 			
 			// Commit transaction.

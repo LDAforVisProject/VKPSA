@@ -116,12 +116,12 @@ public class DistanceDifferenceCorrelationLinechart extends	VisualizationCompone
 	 * Updates y-axis boundaries and ticks dependent on the extreama
 	 * in the sampled dataset.
 	 */
-	private void updateYAxisOptions()
+	private void updateYAxis()
 	{
 		// Set y-axis range.
-		yAxis_numberAxis.setLowerBound(valueExtrema.getKey() * 1.2);
+		yAxis_numberAxis.setLowerBound(valueExtrema.getKey() * 3);
 		yAxis_numberAxis.setUpperBound(valueExtrema.getValue() * 1.2);
-		
+
 		// Configure tick options.
     	final int numberOfTicks = 4;
     	double diff				= valueExtrema.getValue() * 1.2 - valueExtrema.getKey() * 1.2;
@@ -271,7 +271,7 @@ public class DistanceDifferenceCorrelationLinechart extends	VisualizationCompone
 				}
 				
 				// Update y-axis range.
-				updateYAxisOptions();
+				updateYAxis();
 			}
 			
 		}

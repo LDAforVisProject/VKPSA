@@ -87,10 +87,20 @@ public class AnalysisController extends Controller
 	 * For distance evaluation barchart.
 	 */
 	private @FXML AnchorPane distEval_anchorPane;
+	
 	/**
-	 * For the parameter spae distribution heatmap.
+	 * For both parameter space distribution heatmaps.
 	 */
 	private @FXML AnchorPane paramSpace_distribution_anchorPane;
+	/**
+	 * For the parameter space distribution heatmap (using filtered data).
+	 */
+	private @FXML AnchorPane paramSpace_distribution_anchorPane_filtered;
+	/**
+	 * For the parameter space distribution heatmap (using selected data).
+	 */
+	private @FXML AnchorPane paramSpace_distribution_anchorPane_selected;
+	
 	/**
 	 * For local scope visualization(s): Parallel Tag Cloud.
 	 */
@@ -99,6 +109,7 @@ public class AnalysisController extends Controller
 	 * For local scope visualization(s): Chord diagram.
 	 */
 	private @FXML AnchorPane localscope_cd_anchorPane;
+	
 	/**
 	 * For distance correlation linechart.
 	 */
@@ -153,21 +164,29 @@ public class AnalysisController extends Controller
 	 */
 	
 	private @FXML ToggleButton button_relativeView_distEval;
-	private @FXML ToggleButton button_relativeView_paramDist;
 	private @FXML ToggleButton button_relativeView_paramDC;
 	
 	/*
 	 * Parameter Space - Distribution.
 	 */
 	
-	/**
-	 * Heatmap component.
-	 */
-	private HeatMap parameterspace_heatmap;
+	// Components for heatmap showing filtered data:
 	
-	private @FXML Canvas paramSpaceHeatmap_canvas;
-	private @FXML NumberAxis numberaxis_parameterSpace_xaxis;
-	private @FXML NumberAxis numberaxis_parameterSpace_yaxis;
+	private HeatMap parameterspace_heatmap_filtered;
+	
+	private @FXML Canvas paramSpaceHeatmap_canvas_filtered;
+	private @FXML NumberAxis numberaxis_parameterSpace_xaxis_filtered;
+	private @FXML NumberAxis numberaxis_parameterSpace_yaxis_filtered;
+	private @FXML ToggleButton button_relativeView_paramDist_filtered;
+	
+	// Components for heatmap showing selected data:
+	
+	private HeatMap parameterspace_heatmap_selected;
+	
+	private @FXML Canvas paramSpaceHeatmap_canvas_selected;
+	private @FXML NumberAxis numberaxis_parameterSpace_xaxis_selected;
+	private @FXML NumberAxis numberaxis_parameterSpace_yaxis_selected;
+	private @FXML ToggleButton button_relativeView_paramDist_selected;
 	
 	// Heatmap setting controls (and metadata).
 	
@@ -303,19 +322,35 @@ public class AnalysisController extends Controller
 		 * Add resize listeners for parameter space anchor pane.
 		 */
 		
-		paramSpace_distribution_anchorPane.widthProperty().addListener(new ChangeListener<Number>() {
+		paramSpace_distribution_anchorPane_filtered.widthProperty().addListener(new ChangeListener<Number>() {
 		    @Override 
 		    public void changed(ObservableValue<? extends Number> observableValue, Number oldWidth, Number newWidth)
 		    {
-		        resizeElement(paramSpace_distribution_anchorPane, newWidth.doubleValue(), 0);
+		        resizeElement(paramSpace_distribution_anchorPane_filtered, newWidth.doubleValue(), 0);
 		    }
 		});
 		
-		paramSpace_distribution_anchorPane.heightProperty().addListener(new ChangeListener<Number>() {
+		paramSpace_distribution_anchorPane_filtered.heightProperty().addListener(new ChangeListener<Number>() {
 		    @Override 
 		    public void changed(ObservableValue<? extends Number> observableValue, Number oldHeight, Number newHeight) 
 		    {
-		    	resizeElement(paramSpace_distribution_anchorPane, 0, newHeight.doubleValue());
+		    	resizeElement(paramSpace_distribution_anchorPane_filtered, 0, newHeight.doubleValue());
+		    }
+		});
+		
+		paramSpace_distribution_anchorPane_selected.widthProperty().addListener(new ChangeListener<Number>() {
+		    @Override 
+		    public void changed(ObservableValue<? extends Number> observableValue, Number oldWidth, Number newWidth)
+		    {
+		        resizeElement(paramSpace_distribution_anchorPane_selected, newWidth.doubleValue(), 0);
+		    }
+		});
+		
+		paramSpace_distribution_anchorPane_selected.heightProperty().addListener(new ChangeListener<Number>() {
+		    @Override 
+		    public void changed(ObservableValue<? extends Number> observableValue, Number oldHeight, Number newHeight) 
+		    {
+		    	resizeElement(paramSpace_distribution_anchorPane_selected, 0, newHeight.doubleValue());
 		    }
 		});
 		
@@ -388,7 +423,7 @@ public class AnalysisController extends Controller
 		initMDSScatterchart();
 		initDistanceBarchart();
 		initDDCLineChart();
-		initParameterSpaceHeatmap();
+		initParameterSpaceHeatmaps();
 		initLocalScopeView();
 	}
 
@@ -499,7 +534,7 @@ public class AnalysisController extends Controller
 													button_relativeView_distEval, checkbox_logarithmicDistanceBarchart);
 	}
 	
-	private void initParameterSpaceHeatmap()
+	private void initParameterSpaceHeatmaps()
 	{
 		combobox_parameterSpace_distribution_xAxis.getItems().clear();
 		combobox_parameterSpace_distribution_yAxis.getItems().clear();
@@ -523,9 +558,10 @@ public class AnalysisController extends Controller
 		combobox_parameterSpace_distribution_xAxis.setValue("alpha");
 		combobox_parameterSpace_distribution_yAxis.setValue("eta");
 		
-		// Init heatmap.
-		parameterspace_heatmap = new HeatMap(this, paramSpaceHeatmap_canvas, numberaxis_parameterSpace_xaxis, numberaxis_parameterSpace_yaxis, HeatmapDataType.LDAConfiguration);
-		
+		// Init heatmaps.
+		parameterspace_heatmap_filtered = new HeatMap(this, paramSpaceHeatmap_canvas_filtered, numberaxis_parameterSpace_xaxis_filtered, numberaxis_parameterSpace_yaxis_filtered, HeatmapDataType.LDAConfiguration);
+		parameterspace_heatmap_selected	= new HeatMap(this, paramSpaceHeatmap_canvas_selected, numberaxis_parameterSpace_xaxis_selected, numberaxis_parameterSpace_yaxis_selected, HeatmapDataType.LDAConfiguration);
+
 		/*
 		 * Init option controls.
 		 */
@@ -534,7 +570,9 @@ public class AnalysisController extends Controller
 		slider_parameterSpace_distribution_granularity.addEventHandler(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) 
             {
-            	parameterspace_heatmap.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
+            	parameterspace_heatmap_filtered.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
+            	parameterspace_heatmap_selected.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
+            	
             }
         });
 		
@@ -542,7 +580,8 @@ public class AnalysisController extends Controller
 		slider_parameterSpace_distribution_granularity.addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) 
             {
-            	parameterspace_heatmap.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
+            	parameterspace_heatmap_filtered.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
+            	parameterspace_heatmap_selected.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
             };
         });
 	}
@@ -587,11 +626,8 @@ public class AnalysisController extends Controller
 		// 	Parameter dataset distance correlation: 
 		parameterspace_ddc_linechart.refresh(dataspace.getFilteredLDAConfigurations(), dataspace.getFilteredDistances(), true);
 		
-		// 	Heatmap:
-		parameterspace_heatmap.refresh(	dataspace.getLDAConfigurations(),
-										paramSpaceHeatmap_dataBinding == HeatmapDataBinding.FILTERED ? dataspace.getFilteredLDAConfigurations() : dataspace.getSelectedLDAConfigurations(), 
-										combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), 
-										button_relativeView_paramDist.isSelected(), paramSpaceHeatmap_dataBinding);
+		// 	Heatmaps:
+		refreshParameterspaceHeatmaps();
 		
 		//	Local scope:
 		localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
@@ -637,23 +673,18 @@ public class AnalysisController extends Controller
 			dataspace.updateSelectedCoordinateMatrix();
 			
 			// Refresh other (than MDSScatterchart) visualizations.
+			
 			//	Distances barchart:
 			distancesBarchart.refresh(	dataspace.getDiscardedIndices(), dataspace.getFilteredIndices(), dataspace.getSelectedIndices(),
 										dataspace.getDiscardedDistances(), dataspace.getFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
 										true);
-	//		mdsScatterchart.refresh(	dataspace.getCoordinates(),
-	//				dataspace.getFilteredCoordinates(), dataspace.getFilteredIndices(), 
-	//				dataspace.getSelectedCoordinates(), dataspace.getSelectedFilteredIndices(), 
-	//				dataspace.getDiscardedCoordinates(), dataspace.getDiscardedIndices());
-			//	Paramer space heatmap:
-			parameterspace_heatmap.refresh(	dataspace.getLDAConfigurations(),
-											paramSpaceHeatmap_dataBinding == HeatmapDataBinding.FILTERED ? dataspace.getFilteredLDAConfigurations() : dataspace.getSelectedLDAConfigurations(), 
-											combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), 
-											button_relativeView_paramDist.isSelected(), paramSpaceHeatmap_dataBinding);
 			
-	//		if (includeLocalScope)
+			//	Paramer space heatmaps:
+			refreshParameterspaceHeatmaps();
+			
 			// 	Local scope:
 			localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
+			
 			// 	Parameter histograms:
 			refreshParameterHistograms(50);
 		}
@@ -807,14 +838,28 @@ public class AnalysisController extends Controller
 										dataspace.getSelectedCoordinates(), dataspace.getSelectedIndices(), 
 										dataspace.getDiscardedCoordinates(), dataspace.getDiscardedIndices());
 		// 	Parameter space heatmap:
-		parameterspace_heatmap.refresh(	dataspace.getLDAConfigurations(),
-										paramSpaceHeatmap_dataBinding == HeatmapDataBinding.FILTERED ? dataspace.getFilteredLDAConfigurations() : dataspace.getSelectedLDAConfigurations(), 
-										combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), 
-										button_relativeView_paramDist.isSelected(), paramSpaceHeatmap_dataBinding);
+		refreshParameterspaceHeatmaps();
+
 		//	Local scope:
-		localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
+		//localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
 		// 	Parameter histograms:
 		refreshParameterHistograms(50);
+	}
+	
+	/**
+	 * Refreshes both heatmaps in parameter space using the current default values.
+	 */
+	private void refreshParameterspaceHeatmaps()
+	{
+		// Refresh heatmap using filtered data:
+		parameterspace_heatmap_filtered.refresh(dataspace.getLDAConfigurations(), dataspace.getFilteredLDAConfigurations(), 
+												combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), 
+												button_relativeView_paramDist_filtered.isSelected(), HeatmapDataBinding.FILTERED);
+
+		// Refresh heatmap using selected data:
+		parameterspace_heatmap_selected.refresh(dataspace.getLDAConfigurations(), dataspace.getSelectedLDAConfigurations(), 
+												combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), 
+												button_relativeView_paramDist_selected.isSelected(), HeatmapDataBinding.SELECTED);
 	}
 	
 	/**
@@ -1070,19 +1115,35 @@ public class AnalysisController extends Controller
 	protected void resizeElement(Node node, double width, double height)
 	{
 		switch (node.getId()) {
-			case "paramSpace_distribution_anchorPane":
+			case "paramSpace_distribution_anchorPane_filtered":
 				// Adapt width.
 				if (width > 0) {	
 					// Update width of parameter distribution heatmap.
-					paramSpaceHeatmap_canvas.setWidth(width - 59 - 57);
-					parameterspace_heatmap.refresh(false);
+					paramSpaceHeatmap_canvas_filtered.setWidth(width - 59 - 57);
+					parameterspace_heatmap_filtered.refresh(false);
 				}
 				
 				// Adapt height.
 				if (height > 0) {
 					// Update width of parameter distribution heatmap.
-					paramSpaceHeatmap_canvas.setHeight(height - 45 - 45);
-					parameterspace_heatmap.refresh(false);
+					paramSpaceHeatmap_canvas_filtered.setHeight(height - 45 - 45);
+					parameterspace_heatmap_filtered.refresh(false);
+				}
+			break;
+			
+			case "paramSpace_distribution_anchorPane_selected":
+				// Adapt width.
+				if (width > 0) {	
+					// Update width of parameter distribution heatmap.
+					paramSpaceHeatmap_canvas_selected.setWidth(width - 59 - 57);
+					parameterspace_heatmap_selected.refresh(false);
+				}
+				
+				// Adapt height.
+				if (height > 0) {
+					// Update width of parameter distribution heatmap.
+					paramSpaceHeatmap_canvas_selected.setHeight(height - 45 - 45);
+					parameterspace_heatmap_selected.refresh(false);
 				}
 			break;
 			
@@ -1144,14 +1205,12 @@ public class AnalysisController extends Controller
 			filteredLDAConfigurations.add(dataspace.getLDAConfigurations().get(selectedIndex));
 		}
 		
-		if (	parameterspace_heatmap != null 						&& 
+		if (	parameterspace_heatmap_filtered != null 			&&
+				parameterspace_heatmap_selected != null 			&&
 				combobox_parameterSpace_distribution_xAxis != null 	&& 
 				combobox_parameterSpace_distribution_yAxis != null) {
-			// Refresh heatmap.
-			parameterspace_heatmap.refresh(	dataspace.getLDAConfigurations(),
-											paramSpaceHeatmap_dataBinding == HeatmapDataBinding.FILTERED ? dataspace.getFilteredLDAConfigurations() : dataspace.getSelectedLDAConfigurations(), 
-											combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), 
-											button_relativeView_paramDist.isSelected(), paramSpaceHeatmap_dataBinding);
+			// Refresh heatmaps.
+			refreshParameterspaceHeatmaps();
 		}
 	}
 	
@@ -1178,7 +1237,8 @@ public class AnalysisController extends Controller
 				distancesBarchart.changeViewMode();
 			break;
 
-			case "button_relativeView_paramDist":
+			case "button_relativeView_paramDist_filtered":
+			case "button_relativeView_paramDist_selected":
 				updateHeatmap(e);
 			break;
 			
@@ -1202,7 +1262,10 @@ public class AnalysisController extends Controller
 	public void changeParameterDistributionGranularityMode(ActionEvent e)
 	{
 		slider_parameterSpace_distribution_granularity.setDisable(checkbox_parameterSpace_distribution_dynAdjustment.isSelected());
-		parameterspace_heatmap.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
+
+		// Propagate information to heatmaps.
+		parameterspace_heatmap_filtered.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
+		parameterspace_heatmap_selected.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
 	}
 	
 	/**
@@ -1229,21 +1292,22 @@ public class AnalysisController extends Controller
 	/**
 	 * Changes which dataset the parameter distribution heatmap is bound to (filtered or selected datasets). 
 	 * @param e
+	 * @deprecated
 	 */
 	@FXML
 	public void changeParamDistributionHeatmapDataBinding(ActionEvent e)
 	{
-		// Translate control value into valid HeatmapDataBinding entitiy.
-		final String selectedDataBindingString	= paramDistributionHeatmap_datasetBinding_combobox.getSelectionModel().getSelectedItem();
-		this.paramSpaceHeatmap_dataBinding		= HeatMap.translateItemstringToDataBindingType(selectedDataBindingString);
-
-		// Refresh heatmap.
-		if (dataspace.getLDAConfigurations() != null) {
-			parameterspace_heatmap.refresh(	dataspace.getLDAConfigurations(),
-											paramSpaceHeatmap_dataBinding == HeatmapDataBinding.FILTERED ? dataspace.getFilteredLDAConfigurations() : dataspace.getSelectedLDAConfigurations(), 
-											combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), 
-											button_relativeView_paramDist.isSelected(), paramSpaceHeatmap_dataBinding);
-		}
+//		// Translate control value into valid HeatmapDataBinding entitiy.
+//		final String selectedDataBindingString	= paramDistributionHeatmap_datasetBinding_combobox.getSelectionModel().getSelectedItem();
+//		this.paramSpaceHeatmap_dataBinding		= HeatMap.translateItemstringToDataBindingType(selectedDataBindingString);
+//
+//		// Refresh heatmap.
+//		if (dataspace.getLDAConfigurations() != null) {
+//			parameterspace_heatmap_filtered.refresh(	dataspace.getLDAConfigurations(),
+//											paramSpaceHeatmap_dataBinding == HeatmapDataBinding.FILTERED ? dataspace.getFilteredLDAConfigurations() : dataspace.getSelectedLDAConfigurations(), 
+//											combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), 
+//											button_relativeView_paramDist_filtered.isSelected(), paramSpaceHeatmap_dataBinding);
+//		}
 	}
 	
 	/**
@@ -1284,7 +1348,7 @@ public class AnalysisController extends Controller
             {
             	mdsScatterchart.processKeyPressedEvent(ke);
             	distancesBarchart.processKeyPressedEvent(ke);
-            	parameterspace_heatmap.processKeyPressedEvent(ke);
+            	parameterspace_heatmap_filtered.processKeyPressedEvent(ke);
             }
 		});
 		
@@ -1293,7 +1357,7 @@ public class AnalysisController extends Controller
             {
             	mdsScatterchart.processKeyReleasedEvent(ke);
             	distancesBarchart.processKeyReleasedEvent(ke);
-            	parameterspace_heatmap.processKeyReleasedEvent(ke);
+            	parameterspace_heatmap_filtered.processKeyReleasedEvent(ke);
             }
 		});
 	}
