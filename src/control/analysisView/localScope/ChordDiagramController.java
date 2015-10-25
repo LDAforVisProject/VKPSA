@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import netscape.javascript.JSObject;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Worker.State;
 import javafx.fxml.FXML;
 import javafx.scene.web.WebView;
 import model.LDAConfiguration;
@@ -31,7 +35,7 @@ public class ChordDiagramController extends LocalScopeVisualizationController
 	/**
 	 * Path to HTML template for chord diagram visualization.
 	 */
-	private final Path templatePath			=  Paths.get("src/js/d3-chord-diagrams-master/chordDiagram.html");
+	private final Path templatePath				= Paths.get("src/js/chordDiagram.html");
 	
 	/**
 	 * Holds original, unchanged HTML code.
@@ -46,14 +50,48 @@ public class ChordDiagramController extends LocalScopeVisualizationController
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1)
 	{
-		// Load adapted HTML.
-		content_webview.getEngine().loadContent(adaptHTMLTemplate(templateHTMLCode));
+		// Init JS -> Java callbacks.
+		initCallbackInjection();
+	}
+	
+	/**
+	 * Sets up controllers for monitoring and processing of callbacks from .js file to Java.
+	 */
+	private void initCallbackInjection()
+	{
+		// Instantiate callback monitor.
+		JSCallbackMonitor jsCallbackMonitor = new JSCallbackMonitor(this);
+		
+		// Initialize web controller injection for JS -> Java callbacks.
+		content_webview.getEngine().getLoadWorker().stateProperty().addListener(new ChangeListener<State>() {
+	          @Override
+	          public void changed(ObservableValue<? extends State> ov, State oldState, State newState) {
+	              if (newState == State.SUCCEEDED) {
+	            	  JSObject window = (JSObject) content_webview.getEngine().executeScript("window");
+	                  window.setMember("callbackMonitor", jsCallbackMonitor);
+	              }
+	          }
+	      }
+		);
+	}
+	
+	/**
+	 * Propagates information about the selected connection.
+	 * @param ldaID1
+	 * @param ldaID2
+	 * @param topicID1
+	 * @param topicID2
+	 */
+	public void propagateSelectedDistanceInformation(final int ldaID1, final int ldaID2, final int topicID1, final int topicID2)
+	{
+		localScope.refreshPTC(ldaID1, ldaID2, topicID1, topicID2);
 	}
 
 	@Override
 	public void refresh(ArrayList<LDAConfiguration> selectedLDAConfigurations,
-						int maxNumberOfTopics, int numberOfTopics, int maxNumberOfKeywords,
-						int numberOfKeywords, boolean updateData)
+						int maxNumberOfTopics, int numberOfTopics,
+						int maxNumberOfKeywords, int numberOfKeywords,
+						boolean updateData)
 	{
 		if (selectedLDAConfigurations.size() > 0) {
 			// Load topic distance data for selection.
@@ -82,6 +120,10 @@ public class ChordDiagramController extends LocalScopeVisualizationController
 		
 		// Adapt size.
 		adaptedHTMLCode = adaptedHTMLCode.replaceAll("var w = x, h = y", "var w = " + content_webview.getWidth() + ", h = " + content_webview.getHeight());
+		
+		// Adapt workspace path.
+		String jsPath	= (System.getProperty("user.dir") + "\\src\\js\\").replace("\\", "/");
+		adaptedHTMLCode = adaptedHTMLCode.replace("workspacePath", jsPath);
 		
 		// Adapt data.
 		if (topicLoadingTask != null) {

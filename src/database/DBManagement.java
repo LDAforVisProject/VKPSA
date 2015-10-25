@@ -365,6 +365,70 @@ public class DBManagement
 			e.printStackTrace();
 		}
 	}
+
+	/**
+	 * Load raw data for this topic. Limited to the specified number of keywords. 
+	 * @param ldaConfigID
+	 * @param topicID
+	 * @param maxNumberOfKeywords
+	 * @return
+	 */
+	public ArrayList<Pair<String, Double>> getRawDataForTopic(final int ldaConfigID, final int topicID, final int maxNumberOfKeywords)
+	{
+		// Allocate memory for raw data.
+		ArrayList<Pair<String, Double>> data = null;
+
+		try {
+			/*
+			 * 1. Init collections.
+			 */
+			
+			// Init collection holding data.
+			data = new ArrayList<Pair<String, Double>>(maxNumberOfKeywords);
+
+			// Calculate total number of keywords.
+			final int totalNumberOfKeywords = maxNumberOfKeywords;
+			
+			/*
+			 * 2. Get data for all topics.
+			 */
+			
+			String query = 	"select keyword, probability " + 
+							"from keywordInTopic kit " +
+							"join keywords kw on kw.keywordID 						= kit.keywordID " +
+							"join ldaConfigurations lda on lda.ldaConfigurationID 	= kit.ldaConfigurationID " +
+							"where " +
+							"	lda.ldaConfigurationID 	= " + ldaConfigID + " and " +
+							"	topicID 				= " + topicID + " " + 
+							"order by probability desc";
+			
+			PreparedStatement topicKeywordDataStmt	= connection.prepareStatement(query);
+			ResultSet rs							= topicKeywordDataStmt.executeQuery();
+			
+			boolean allRelevantRowsProcessed 	= false;
+			int processedRowCount				= 0;
+			while (rs.next() && !allRelevantRowsProcessed) {
+				// Check if the numberOfKeywords most relevant keywords for this topic have already been stored. 
+				if (processedRowCount < maxNumberOfKeywords) {
+					// Get data from row and add it to list.
+					Pair<String, Double> keywordProbabilityPair = new Pair<String, Double>(rs.getString("keyword"), rs.getDouble("probability"));
+					data.add(keywordProbabilityPair);
+					
+					// Increment counter.
+					processedRowCount++;
+					
+					// Check if all relevant data rows were processed.
+					allRelevantRowsProcessed = processedRowCount == totalNumberOfKeywords;
+				}
+			}
+		}
+		
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return data;
+	}
 	
 	/**
 	 * Load keyword in topic data from database.
@@ -385,7 +449,6 @@ public class DBManagement
 			 * 1. Get number of topics for this LDA configuration.
 			 */
 			
-			// @todo Get number of topics info from corresponding Dataset instance.
 			PreparedStatement numKeywordsStmt	= connection.prepareStatement(query);
 			ResultSet rs						= numKeywordsStmt.executeQuery();
 			int numberOfTopics					= rs.getInt("topicCount");

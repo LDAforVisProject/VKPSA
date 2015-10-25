@@ -65,13 +65,19 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 	 * displayed in this local scope. 
 	 */
 	private int currentIndex;
+	
 	/**
 	 * Collection containing all LDA configurations to display.
 	 */
 	private ArrayList<LDAConfiguration> selectedFilteredLDAConfigurations;
+	
 	/**
-	 * List (for this LDA configuration) of lists (of topics) of keyword/probability pairs.
-	 * To be adapted for multiple LDA configurations (? - how?). 
+	 * Collection of selected topic configurations (LDA configuration ID, topic ID).
+	 */
+	private ArrayList<Pair<Integer, Integer>> selectedTopicConfigurations;
+	
+	/**
+	 * List (for this LDA configuration) of lists (of topics) of keyword/probability pairs. 
 	 */
 	private ArrayList<ArrayList<Pair<String, Double>>> data;
 	
@@ -109,6 +115,7 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 
 		// Init collections.
 		keywordProbabilitySumsOverTopics	= new HashMap<String, Double>();
+		selectedTopicConfigurations			= new ArrayList<Pair<Integer,Integer>>();
 		
 		// Set inital scalar values.
 		currentIndex						= 0;
@@ -116,16 +123,86 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 		keywordProbabilitySumOverTopicsMin	= Double.MAX_VALUE;
 		selectedKeyword						= "";
 	}
-
-	@Override
-	public void refresh(ArrayList<LDAConfiguration> selectedFilteredLDAConfigurations, int maxNumberOfTopics, int numberOfTopics, int maxNumberOfKeywords, int numberOfKeywords, boolean updateData)
+			
+	/**
+	 * Refreshes PTC using exactly two specified topics. 
+	 * @param ldaConfigID1
+	 * @param ldaConfigID2
+	 * @param topicID1
+	 * @param topicID2
+	 * @param maxNumberOfKeywords
+	 * @param numberOfKeywords
+	 * @param updateData
+	 */
+	public void refresh(final int ldaConfigID1, final int ldaConfigID2, final int topicID1, final int topicID2,   
+						int maxNumberOfKeywords, int numberOfKeywords, 
+						boolean updateData)
 	{
 		// Reset visualization.
 		reset(selectedFilteredLDAConfigurations, maxNumberOfTopics, numberOfTopics, maxNumberOfKeywords, numberOfKeywords);
+	
+		// Get list (for this LDA configuration) of lists (of topics) of keyword/probability pairs.
+		if (updateData) {
+			// Update configuration collection.
+			selectedTopicConfigurations.clear();
+			selectedTopicConfigurations.add(new Pair<Integer, Integer>(ldaConfigID1, topicID1));
+			selectedTopicConfigurations.add(new Pair<Integer, Integer>(ldaConfigID2, topicID2));
+			
+			// Load data from database.
+			data = new ArrayList<ArrayList<Pair<String,Double>>>(2);
+			data.add( workspace.getDatabaseManagement().getRawDataForTopic(ldaConfigID1, topicID1, maxNumberOfKeywords) );
+			data.add( workspace.getDatabaseManagement().getRawDataForTopic(ldaConfigID2, topicID2, maxNumberOfKeywords) );
+			
+			// Refresh control for number of topics.
+			localScope.setNumberOfTopicsMaximum(data.size());
+		}
+		System.out.println("updated PTC data");
 		
-		// This type of visualization is reasonable for one LDA configuration
-		// at the same time only, therefore we use only one selected LDAConfiguration.
-		if (selectedFilteredLDAConfigurations.size() > 0)  {
+	    this.numberOfTopics = 2;
+		    
+	    // Probability sums for each topic.
+	    ArrayList<Double> probabilitySums = new ArrayList<Double>(numberOfTopics);
+	    
+	    System.out.println("canvas = " + canvas.getWidth() + ", " + canvas.getHeight());
+	    /*
+		 * 1. Create tag clouds, fill them with data.
+		 */
+	    
+	    createTagClouds(numberOfTopics, probabilitySums);
+
+		/*
+		 * 2. Adjust tag font sizes. 
+		 */
+	    
+	    adjustTagFontSizes(numberOfTopics, numberOfKeywords, probabilitySums);
+	    
+	    /*
+	     * 3. Draw connections between tags with same content in different topics. 
+	     */
+	    
+	    Continue here:
+	    	1. PTC
+	    		a. Left and right the same topic?
+	    		b. Bridges not drawn after refresh?
+	    	2. Highlight LDA config in MDS plot when hovered over in CD.
+	    	3. CD - group-hover: Update radar plot with actual data.
+	    
+	    //@todo Why are bridges only drawn for the first few (five?) keywords?
+	    drawBridges(data, numberOfTopics, numberOfKeywords);
+	 
+	}
+	
+	@Override
+	public void refresh(ArrayList<LDAConfiguration> selectedFilteredLDAConfigurations, 
+						int maxNumberOfTopics, int numberOfTopics, 
+						int maxNumberOfKeywords, int numberOfKeywords, 
+						boolean updateData)
+	{
+		// Reset visualization.
+		reset(selectedFilteredLDAConfigurations, maxNumberOfTopics, numberOfTopics, maxNumberOfKeywords, numberOfKeywords);
+	
+		// For now: Allow only if exactly two LDA configurations are specified.
+		if (selectedFilteredLDAConfigurations.size() == 2)  {
 			// Get list (for this LDA configuration) of lists (of topics) of keyword/probability pairs.
 			if (updateData) {
 				// Load data from database.
@@ -133,7 +210,6 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 				
 				// Refresh control for number of topics.
 				localScope.setNumberOfTopicsMaximum(data.size());
-				
 			}
 			
 		    // Check if the actually available number of topics is smaller than the required one.
@@ -162,6 +238,7 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 		    
 		    //@todo Why are bridges only drawn for the first few (five?) keywords?
 		    drawBridges(data, numberOfTopics, numberOfKeywords);
+		    
 		}
 	}
 
@@ -430,13 +507,21 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 		// Adapt width.
 		if (width > 0) {
 			canvas.setWidth(width - 5 - 5);
-			refresh(selectedFilteredLDAConfigurations, maxNumberOfTopics, numberOfTopics, maxNumberOfKeywords, numberOfKeywords, false);
+			if (selectedTopicConfigurations.size() == 2) {
+				refresh(selectedTopicConfigurations.get(0).getKey(), 	selectedTopicConfigurations.get(1).getKey(), 
+						selectedTopicConfigurations.get(0).getValue(), 	selectedTopicConfigurations.get(1).getValue(),
+						maxNumberOfKeywords, numberOfKeywords, false);
+			}
 		}
 		
 		// Adapt height.
 		if (height > 0) {
 			canvas.setHeight(height - 5);
-			refresh(selectedFilteredLDAConfigurations, maxNumberOfTopics, numberOfTopics, maxNumberOfKeywords, numberOfKeywords, false);
+			if (selectedTopicConfigurations.size() == 2) {
+				refresh(selectedTopicConfigurations.get(0).getKey(), 	selectedTopicConfigurations.get(1).getKey(), 
+						selectedTopicConfigurations.get(0).getValue(), 	selectedTopicConfigurations.get(1).getValue(),
+						maxNumberOfKeywords, numberOfKeywords, false);
+			}
 		}
 	}
 

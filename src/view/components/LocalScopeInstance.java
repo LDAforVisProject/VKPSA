@@ -17,6 +17,7 @@ import javafx.scene.layout.VBox;
 import control.analysisView.AnalysisController;
 import control.analysisView.localScope.LocalScopeVisualizationController;
 import control.analysisView.localScope.LocalScopeVisualizationType;
+import control.analysisView.localScope.ParallelTagCloudsController;
 
 /**
  * Administers usage of two visualizations: The chord diagram (for the comparison of multiple topic models)
@@ -245,6 +246,21 @@ public class LocalScopeInstance extends VisualizationComponent
 		// Refresh chord diagram.
 		cdController.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), (int)slider_localScope_numTopicsToUse.getValue(), (int)slider_localScope_numKeywordsToUse.getMax(), (int)slider_localScope_numKeywordsToUse.getValue(), true);
 	}
+	
+	/**
+	 * Loads raw data for two topics, updates parallel tag clouds visualization with this data.
+	 * @param ldaID1
+	 * @param ldaID2
+	 * @param topicID1
+	 * @param topicID2
+	 */
+	public void refreshPTC(final int ldaID1, final int ldaID2, final int topicID1, final int topicID2)
+	{
+		// Refresh parallel tag clouds controller using the specified topic identification data.
+		((ParallelTagCloudsController)ptcController).refresh(	ldaID1, ldaID2, topicID1, topicID2, 
+														 		(int)slider_localScope_numKeywordsToUse.getMax(), (int)slider_localScope_numKeywordsToUse.getValue(), 
+														 		true);
+	}
 
 	/**
 	 * Resizes visualizations according to given width and height.
@@ -252,7 +268,7 @@ public class LocalScopeInstance extends VisualizationComponent
 	public void resize(double width, double height, LocalScopeVisualizationType type)
 	{
 		if (type == LocalScopeVisualizationType.PARALLEL_TAG_CLOUDS && ptcController != null)
-			;//ptcController.resize(width, height);
+			ptcController.resize(width, height);
 		
 		else if (type == LocalScopeVisualizationType.CHORD_DIAGRAM && cdController != null)
 			cdController.resize(width, height);;
@@ -261,7 +277,6 @@ public class LocalScopeInstance extends VisualizationComponent
 	@Override
 	public void changeViewMode()
 	{
-		
 	}
 	
 	/**
@@ -286,6 +301,8 @@ public class LocalScopeInstance extends VisualizationComponent
 	public void setNumberOfTopicsMaximum(int maxNumberOfTopics)
 	{
 		slider_localScope_numTopicsToUse.setMax(maxNumberOfTopics);
+		textfield_localScope_numTopicsToUse.setText(String.valueOf( slider_localScope_numTopicsToUse.getValue() > maxNumberOfTopics ? maxNumberOfTopics : slider_localScope_numTopicsToUse.getValue() ));
+
 		slider_localScope_numTopicsToUse.setMajorTickUnit(maxNumberOfTopics / 5 >= 1 ? maxNumberOfTopics / 5 : 1);
 		slider_localScope_numTopicsToUse.setMinorTickCount(4);
 	}

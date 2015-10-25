@@ -85,8 +85,6 @@ public class Task_LoadTopicDistancesForSelection extends WorkspaceTask
 		// Fetch topic distance matrix.
 		this.topicDistances						= topicDistancesDataset.getValue();
 
-		// Generate translation from rowID
-		
 		// Prepare one color for each topic.
 		Map<Integer, String> ldaConfigColors	= generateRandomColorsForLDAConfigurations(this.ldaConfigurationsToLoad); 
 		
@@ -98,10 +96,8 @@ public class Task_LoadTopicDistancesForSelection extends WorkspaceTask
 		json_topicsMMap 			= "[";
 		// Start JSON object for topic distances.
 		json_topicDistancesString	= "[";
-//		
-//		System.out.println("topicData = ");
-//		System.out.println(Data.format(topicDistances));
-		
+
+		// "Normalize" distances by subtracting the minimum.
 		normalizeDistances(topicDistances);
 		
 		// Iterate over all topics.
@@ -138,7 +134,6 @@ public class Task_LoadTopicDistancesForSelection extends WorkspaceTask
 		// Remove last comma, add final closure bracket.
 		json_topicsMMap				= json_topicsMMap.substring(0, json_topicsMMap.length() - 1) + "]";
 		// Remove last comma, add final closure bracket.
-//		json_topicDistancesString 	= json_topicDistancesString.substring(0, json_topicDistancesString.length() - 1) + "\n]";
 		json_topicDistancesString 	= json_topicDistancesString.substring(0, json_topicDistancesString.length() - 1) + "]";
 		
 		return 1;
