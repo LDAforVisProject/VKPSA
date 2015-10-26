@@ -74,8 +74,15 @@
 		//*******************************************************************
 		
 		var distanceChordClicked = function (fromID, toID) {
-			d3.select("#tooltip").html(fromID + " .... " + toID);
 			callbackMonitor.processChordData(fromID, toID);
+		};
+		
+		var groupHover = function(groupName) {
+			callbackMonitor.processLDAConfigHover(groupName);
+		};
+		
+		var groupHoverExited = function() {
+			callbackMonitor.processLDAConfigHoverExited();
 		};
 		
 		//*******************************************************************
@@ -126,7 +133,7 @@
 			  .enter().append("svg:g")
 				.attr("class", "group")
 				.on("mouseover", mouseover)
-				.on("mouseout", function (d) { d3.select("#tooltip").style("visibility", "hidden") });
+				.on("mouseout", function (d) { d3.select("#tooltip").style("visibility", "hidden"); groupHoverExited(); });
 
 			g.append("svg:path")
 				.style("stroke", "grey")
@@ -166,15 +173,18 @@
 			function chordTip (d) 
 			{
 				var p = d3.format(".1%"), q = d3.format(",.2r")
-					return d.sname + " to " + d.tname
-							+ ": " + d.svalue;
+					return d.sname + " to " + d.tname;
 			}
 
 			function groupTip (d) 
 			{
+				// Callback to Java.
+				groupHover(d.gname);
+				
+				// Create tooltip.
 				var p = d3.format(".1%"), q = d3.format(",.2r")
 				return 	"<div class='tooltipTitle' style='color:#fff;'><b>#" + d.gname + "</b></div>" +
-						"<div class='radar' style='background:#fff;color:#333;'>" + generateRadarChart() + "</div>";
+						"<div class='radar' style='background:#fff;color:#333;'>" + generateRadarChart(d.gAlpha, d.gEta, d.gKappa) + "</div>";
 			}
 
 			function mouseover(d, i) 
@@ -196,14 +206,14 @@
 		//  DRAW THE RADAR CHART
 		//*******************************************************************
 	  
-		function generateRadarChart()
+		function generateRadarChart(alpha, eta, kappa)
 		{
 			////////////////////////////////////////////////////////////// 
 			//////////////////////// Set-Up ////////////////////////////// 
 			////////////////////////////////////////////////////////////// 
 
-			var margin = {top: 30, right: 30, bottom: 30, left: 30},
-				width = Math.min(200, window.innerWidth - 10) - margin.left - margin.right,
+			var margin = {top: 20, right: 12, bottom: 6, left: 12},
+				width = Math.min(rcWidth, window.innerWidth - 10) - margin.left - margin.right,
 				height = Math.min(width, window.innerHeight - margin.top - margin.bottom - 20);
 					
 			////////////////////////////////////////////////////////////// 
@@ -212,9 +222,9 @@
 
 			var data = [
 					  [
-						{axis:"alpha",value:0.22},
-						{axis:"eta",value:0.28},
-						{axis:"kappa",value:0.29}
+						{axis:"_alpha",value:alpha},
+						{axis:"_eta",value:eta},
+						{axis:"_kappa",value:kappa}
 					  ]
 					];
 			////////////////////////////////////////////////////////////// 
@@ -229,7 +239,7 @@
 			  h: height,
 			  margin: margin,
 			  maxValue: 1,
-			  levels: 5,
+			  levels: 3,
 			  roundStrokes: true,
 			  color: color
 			};

@@ -8,21 +8,12 @@ import java.util.ResourceBundle;
 
 import view.components.ColorScale;
 import model.LDAConfiguration;
-import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.geometry.Bounds;
-import javafx.geometry.Insets;
-import javafx.scene.Group;
-import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -42,7 +33,7 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 	/**
 	 * Container holding VBoxes of labels.
 	 */
-	private ArrayList<VBox> tagCloudContainer;
+	private ArrayList<VBox> tagCloudContainer; 
 	
 	/**
 	 * Font size used as default - if all lables have this font size, they fit exactly in the space
@@ -98,7 +89,7 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 	 * Exponent applied to each keyword's probability.
 	 * Goal: Improve visibility of (small) differences in keyword probability.
 	 */
-	private final double keywordProbabilityExponent = 6; 
+	private final double keywordProbabilityExponent = 2.5; 
 	
 	
 	// -----------------------------------------------
@@ -121,20 +112,18 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 		currentIndex						= 0;
 		keywordProbabilitySumOverTopicsMax	= 0;
 		keywordProbabilitySumOverTopicsMin	= Double.MAX_VALUE;
-		selectedKeyword						= "";
+		selectedKeyword						= "";		
 	}
 			
 	/**
-	 * Refreshes PTC using exactly two specified topics. 
-	 * @param ldaConfigID1
-	 * @param ldaConfigID2
-	 * @param topicID1
-	 * @param topicID2
+	 * Refreshes PTC using exactly two specified topics. Called after distance chord in
+	 * chord diagram was selected.
+	 * @param selectedTopicConfigurations
 	 * @param maxNumberOfKeywords
 	 * @param numberOfKeywords
 	 * @param updateData
 	 */
-	public void refresh(final int ldaConfigID1, final int ldaConfigID2, final int topicID1, final int topicID2,   
+	public void refresh(ArrayList<Pair<Integer, Integer>> selectedTopicConfigurations,
 						int maxNumberOfKeywords, int numberOfKeywords, 
 						boolean updateData)
 	{
@@ -144,26 +133,22 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 		// Get list (for this LDA configuration) of lists (of topics) of keyword/probability pairs.
 		if (updateData) {
 			// Update configuration collection.
-			selectedTopicConfigurations.clear();
-			selectedTopicConfigurations.add(new Pair<Integer, Integer>(ldaConfigID1, topicID1));
-			selectedTopicConfigurations.add(new Pair<Integer, Integer>(ldaConfigID2, topicID2));
+			this.selectedTopicConfigurations = selectedTopicConfigurations;
 			
 			// Load data from database.
 			data = new ArrayList<ArrayList<Pair<String,Double>>>(2);
-			data.add( workspace.getDatabaseManagement().getRawDataForTopic(ldaConfigID1, topicID1, maxNumberOfKeywords) );
-			data.add( workspace.getDatabaseManagement().getRawDataForTopic(ldaConfigID2, topicID2, maxNumberOfKeywords) );
+			data.add( workspace.getDatabaseManagement().getRawDataForTopic(selectedTopicConfigurations.get(0).getKey(), selectedTopicConfigurations.get(0).getValue(), maxNumberOfKeywords) );
+			data.add( workspace.getDatabaseManagement().getRawDataForTopic(selectedTopicConfigurations.get(1).getKey(), selectedTopicConfigurations.get(1).getValue(), maxNumberOfKeywords) );
 			
 			// Refresh control for number of topics.
 			localScope.setNumberOfTopicsMaximum(data.size());
 		}
-		System.out.println("updated PTC data");
 		
 	    this.numberOfTopics = 2;
 		    
 	    // Probability sums for each topic.
 	    ArrayList<Double> probabilitySums = new ArrayList<Double>(numberOfTopics);
 	    
-	    System.out.println("canvas = " + canvas.getWidth() + ", " + canvas.getHeight());
 	    /*
 		 * 1. Create tag clouds, fill them with data.
 		 */
@@ -179,17 +164,8 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 	    /*
 	     * 3. Draw connections between tags with same content in different topics. 
 	     */
-	    
-	    Continue here:
-	    	1. PTC
-	    		a. Left and right the same topic?
-	    		b. Bridges not drawn after refresh?
-	    	2. Highlight LDA config in MDS plot when hovered over in CD.
-	    	3. CD - group-hover: Update radar plot with actual data.
-	    
-	    //@todo Why are bridges only drawn for the first few (five?) keywords?
+	   
 	    drawBridges(data, numberOfTopics, numberOfKeywords);
-	 
 	}
 	
 	@Override
@@ -236,9 +212,7 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 		     * 3. Draw connections between tags with same content in different topics. 
 		     */
 		    
-		    //@todo Why are bridges only drawn for the first few (five?) keywords?
 		    drawBridges(data, numberOfTopics, numberOfKeywords);
-		    
 		}
 	}
 
@@ -250,7 +224,7 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 	private void createTagClouds(final int numberOfTopics, ArrayList<Double> probabilitySums)
 	{
 	    // Init tag cloud container.
-	    double intervalX					= canvas.getWidth() / numberOfTopics;
+	    double intervalX					= canvas.getWidth() / (numberOfTopics);
 	    tagCloudContainer					= new ArrayList<VBox>(numberOfTopics);
 	    
 		// For exit from local scope instance: Reset selected label.
@@ -269,7 +243,7 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 			ArrayList<Pair<String, Double>> topicKeywordProbabilityPairs = data.get(i);
 			
 			VBox vbox = new VBox();
-			vbox.setLayoutX(canvas.getLayoutX() + i * intervalX + intervalX * 0.15);
+			vbox.setLayoutX(canvas.getLayoutX() + i * intervalX + intervalX / (numberOfTopics * 2));
 			vbox.setLayoutY(canvas.getLayoutY() + 15);
 			tagCloudContainer.add(vbox);
 			
@@ -291,11 +265,17 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 		            	Label label = (Label)event.getSource();
 		            	
 		            	if (!selectedKeyword.equals(label.getText())) {
-			            	selectedKeyword	= label.getText();
-
+		            		selectedKeyword	= label.getText();
+		            		
 			            	// Update visualizations.
 			            	drawBridges();
 		            	}
+		            }
+		        });
+				// For exit from label:
+				label.addEventHandler(MouseEvent.MOUSE_ENTERED, new EventHandler<MouseEvent>() {
+		            public void handle(MouseEvent event) 
+		            {
 		            }
 		        });
 				
@@ -430,10 +410,7 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 		gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 		gc.setFill(Color.BLACK);
 		
-		// Check if desired number of topics is feasible.
-		final int checkedNumberOfTopics = (numberOfTopics - 1) <= tagCloudContainer.size() ? numberOfTopics - 1 : tagCloudContainer.size() - 1; 
-		
-		for (int i = 0; i < checkedNumberOfTopics; i++) {
+		for (int i = 0; i < numberOfTopics - 1; i++) {
 			VBox currTagCloud							= tagCloudContainer.get(i);
 			VBox nextTagCloud							= tagCloudContainer.get(i + 1);
 			ArrayList<Pair<String, Double>> currData	= data.get(i);
@@ -448,53 +425,56 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 			double nextBridgeOffsetX					= nextTagCloud.getLayoutX();
 			double nextBridgeOffsetY					= nextTagCloud.getLayoutY() - 3 + defaultLineWidth;
 			
-			
 			// For all keywords in the current tag cloud: See if they exist in the next tagcloud too.
 			for (int keywordIndex = 0; keywordIndex < numberOfKeywords; keywordIndex++) {
 				String keyword		= currData.get(keywordIndex).getKey();
 				double probability	= currData.get(keywordIndex).getValue();
 				Label currLabel		= (Label)currTagCloud.getChildren().get(keywordIndex);
 				
-				// Calculate positions of connecting line on left side.				
-				double currBridgeX	= currBridgeOffsetX + currLabel.getBoundsInParent().getMaxX(); 
-				double currBridgeY	= currBridgeOffsetY + (currLabel.getBoundsInParent().getMinY() + currLabel.getBoundsInParent().getMaxY()) / 2;
+				// Proceed iff (1) no keyword is hovered over right now or (2) the current keyword is hovered over.
+				boolean noKeywordSelected 		= selectedKeyword.equals("");
+				boolean isThisKeywordSelected	= !selectedKeyword.equals("") && keyword.equals(selectedKeyword);
 				
-				// Initialize flag to indicate whether a keyword was found in the next tag cloud.
-				boolean wasFound		= false;
-				// Search in next tag cloud for this word.
-				for (int nextKeywordIndex = 0; nextKeywordIndex < numberOfKeywords && !wasFound; nextKeywordIndex++) {
-					String nextKeyword		= nextData.get(nextKeywordIndex).getKey();
-					double nextProbability	= nextData.get(nextKeywordIndex).getValue();
-					Label nextLabel			= (Label)nextTagCloud.getChildren().get(nextKeywordIndex); 
+				if ( noKeywordSelected || isThisKeywordSelected ) {
+					// Calculate positions of connecting line on left side.				
+					double currBridgeX	= currBridgeOffsetX + currLabel.getBoundsInParent().getMaxX() + 5; 
+					double currBridgeY	= currBridgeOffsetY + (currLabel.getBoundsInParent().getMinY() + currLabel.getBoundsInParent().getMaxY()) / 2;
 					
-					// Calculate positions of connecting line on right side.
-					double nextBridgeX	= nextBridgeOffsetX + nextLabel.getBoundsInParent().getMinX() - 10; 
-					double nextBridgeY	= nextBridgeOffsetY + (nextLabel.getBoundsInParent().getMinY() + nextLabel.getBoundsInParent().getMaxY()) / 2;
+					// Initialize flag to indicate whether a keyword was found in the next tag cloud.
+					boolean wasFound		= false;
+					// Search in next tag cloud for this word.
+					for (int nextKeywordIndex = 0; nextKeywordIndex < numberOfKeywords && !wasFound; nextKeywordIndex++) {
+						String nextKeyword		= nextData.get(nextKeywordIndex).getKey();
+						double nextProbability	= nextData.get(nextKeywordIndex).getValue();
+						Label nextLabel			= (Label)nextTagCloud.getChildren().get(nextKeywordIndex); 
 					
-					if (nextKeyword.equals(keyword)) {
-						wasFound			= true;
-						// Calculate proportion from current to next probability.
-						double proportion	= probability > nextProbability ? nextProbability / probability : probability / nextProbability; 
+						// Calculate positions of connecting line on right side.
+						double nextBridgeX	= nextBridgeOffsetX + nextLabel.getBoundsInParent().getMinX() - 10; 
+						double nextBridgeY	= nextBridgeOffsetY + (nextLabel.getBoundsInParent().getMinY() + nextLabel.getBoundsInParent().getMaxY()) / 2;
 						
-						// Line width is proportional to the difference in probability between these two topics.
-						gc.setLineWidth(defaultLineWidth * Math.pow(proportion, 2));
-						
-						// Line color is dependent on the overall importance of this keyword.
-						final int colorExponent					= 3;
-						double adjustedKeywordProbabilityValue 	= Math.pow(keywordProbabilitySumsOverTopics.get(keyword), colorExponent);
-						Color color								= ColorScale.getColorForValue(	adjustedKeywordProbabilityValue, 
-																								Math.pow(keywordProbabilitySumOverTopicsMin, colorExponent), 
-																								Math.pow(keywordProbabilitySumOverTopicsMax, colorExponent), 
-																								Color.YELLOW, Color.RED);
-						// Adapt colors if a keyword is currently selected.
-						if (!selectedKeyword.equals("")) {
-							color = keyword.equals(selectedKeyword) ? color : Color.WHITE;	
+						if (nextKeyword.equals(keyword)) {
+							wasFound			= true;
+							
+							// Calculate proportion from current to next probability.
+							double proportion	= probability > nextProbability ? nextProbability / probability : probability / nextProbability; 
+							
+							// Line width is proportional to the difference in probability between these two topics.
+							gc.setLineWidth(defaultLineWidth * Math.pow(proportion, 2));
+							
+							// Line color is dependent on the overall importance of this keyword.
+							final int colorExponent					= 3;
+							double adjustedKeywordProbabilityValue 	= Math.pow(keywordProbabilitySumsOverTopics.get(keyword), colorExponent);
+							Color color								= ColorScale.getColorForValue(	adjustedKeywordProbabilityValue, 
+																									Math.pow(keywordProbabilitySumOverTopicsMin, colorExponent), 
+																									Math.pow(keywordProbabilitySumOverTopicsMax, colorExponent), 
+																									Color.BLUE, Color.DARKRED);
+							
+							// Set color.
+							gc.setStroke(color); 
+							
+							// Draw line.
+							gc.strokeLine(currBridgeX, currBridgeY, nextBridgeX, nextBridgeY);
 						}
-						 
-						gc.setStroke(color);
-						
-						// Draw line.
-						gc.strokeLine(currBridgeX, currBridgeY, nextBridgeX, nextBridgeY);
 					}
 				}
 			}
@@ -508,9 +488,7 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 		if (width > 0) {
 			canvas.setWidth(width - 5 - 5);
 			if (selectedTopicConfigurations.size() == 2) {
-				refresh(selectedTopicConfigurations.get(0).getKey(), 	selectedTopicConfigurations.get(1).getKey(), 
-						selectedTopicConfigurations.get(0).getValue(), 	selectedTopicConfigurations.get(1).getValue(),
-						maxNumberOfKeywords, numberOfKeywords, false);
+				refresh(selectedTopicConfigurations, maxNumberOfKeywords, numberOfKeywords, false);
 			}
 		}
 		
@@ -518,9 +496,7 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 		if (height > 0) {
 			canvas.setHeight(height - 5);
 			if (selectedTopicConfigurations.size() == 2) {
-				refresh(selectedTopicConfigurations.get(0).getKey(), 	selectedTopicConfigurations.get(1).getKey(), 
-						selectedTopicConfigurations.get(0).getValue(), 	selectedTopicConfigurations.get(1).getValue(),
-						maxNumberOfKeywords, numberOfKeywords, false);
+				refresh(selectedTopicConfigurations, maxNumberOfKeywords, numberOfKeywords, false);
 			}
 		}
 	}
@@ -549,6 +525,32 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 		// Temporary solution: 
 		this.maxNumberOfKeywords	= maxNumberOfKeywords;
 		this.numberOfKeywords		= numberOfKeywords;
+	}
+	
+	@Override
+	public void clear()
+	{
+		// Reset LDA configuration collection.
+		this.selectedFilteredLDAConfigurations = null;
+		
+		// Clear tag clouds.
+		if (tagCloudContainer != null) {
+			for (VBox vbox : tagCloudContainer) {
+				anchorPane.getChildren().remove(vbox);
+			}
+			
+			tagCloudContainer.clear();
+		}
+		
+		// Clear canvas.
+		canvas.getGraphicsContext2D().clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+		
+		// Update settings.
+		this.maxNumberOfTopics		= 0;
+		this.numberOfTopics			= 0;
+		// Temporary solution: 
+		this.maxNumberOfKeywords	= 0;
+		this.numberOfKeywords		= 0;
 	}
 
 	@Override

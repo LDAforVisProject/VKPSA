@@ -13,6 +13,8 @@ import java.util.Set;
 
 
 
+
+
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -23,12 +25,14 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Slider;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.util.Pair;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import control.analysisView.AnalysisController;
 import view.components.VisualizationComponent;
 import view.components.heatmap.HeatMap;
@@ -286,6 +290,36 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
         
         // Initialize zooming capabiliy.
         initZoom();
+	}
+	
+	/**
+	 * Highlights one particular LDA configuration.
+	 * @param index 
+	 */
+	public void highlightLDAConfiguration(int index)
+	{
+		for (XYChart.Data<Number, Number> data : selectedDataSeries.getData()) {
+			if (index == ((int) data.getExtraValue()) ) {
+				 // Setting the uniform variable for the glow width and height
+				int depth = 20;
+				
+				DropShadow borderGlow= new DropShadow();
+				borderGlow.setOffsetY(0f);
+				borderGlow.setOffsetX(0f);
+				
+				borderGlow.setRadius(2);
+				borderGlow.setColor(Color.RED);
+				borderGlow.setWidth(depth);
+				borderGlow.setHeight(depth); 
+				
+				// Apply the borderGlow effect to the JavaFX node.
+				data.getNode().setEffect(borderGlow);
+			}
+			
+			else {
+				data.getNode().setEffect(null);
+			}
+		}
 	}
 	
 	private void initHeatmap()
@@ -915,10 +949,11 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 		
 		// Update local scope.
 		if (changeInSelectionDetected_localScope) {
+			// Reset dirty flag.
+			changeInSelectionDetected_localScope = false;
+			
 			// Refresh local scope visualization.
-//			analysisController.refreshLocalScopeAfterGlobalSelection();
-//			// Reset dirty flag.
-//			changeInSelectionDetected_localScope = false;
+			analysisController.integrateMDSSelection(selectedMDSPoints.keySet(), true);
 		}
 	}
 	

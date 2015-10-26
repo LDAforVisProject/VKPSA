@@ -1,19 +1,18 @@
 package view.components;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import model.LDAConfiguration;
 import model.workspace.Workspace;
 import javafx.event.EventHandler;
-import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.VBox;
+import javafx.util.Pair;
 import control.analysisView.AnalysisController;
 import control.analysisView.localScope.LocalScopeVisualizationController;
 import control.analysisView.localScope.LocalScopeVisualizationType;
@@ -78,6 +77,11 @@ public class LocalScopeInstance extends VisualizationComponent
 	 */
 	private ArrayList<LDAConfiguration> selectedLDAConfigurations;
 	
+	/**
+	 * Collection of selected topic configurations (LDA configuration ID, topic ID).
+	 */
+	private ArrayList<Pair<Integer, Integer>> selectedTopicConfigurations;
+	
 	// -----------------------------------------------
 	// 		Methods.
 	// -----------------------------------------------
@@ -100,6 +104,9 @@ public class LocalScopeInstance extends VisualizationComponent
 		// Deactive snap-to-tick functionality in sliders.
 		slider_localScope_numTopicsToUse.setSnapToTicks(false);
 		slider_localScope_numKeywordsToUse.setSnapToTicks(false);
+		
+		// Init container for currently selected topic configurations (used in PCT.)
+		selectedTopicConfigurations = new ArrayList<Pair<Integer,Integer>>(2);
 		
 		// Set up control listeners.
 		initControlListener();
@@ -139,8 +146,9 @@ public class LocalScopeInstance extends VisualizationComponent
             	
             	// Update visualization.
             	if (event.getEventType() == MouseEvent.MOUSE_RELEASED && selectedLDAConfigurations != null) {
-            		ptcController.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), (int) Math.round(slider_localScope_numTopicsToUse.getValue()), (int)slider_localScope_numKeywordsToUse.getMax(), roundedNumberOfKeywords, false);
-            		cdController.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), (int) Math.round(slider_localScope_numTopicsToUse.getValue()), (int)slider_localScope_numKeywordsToUse.getMax(), roundedNumberOfKeywords, false);
+            		((ParallelTagCloudsController)ptcController).refresh(	selectedTopicConfigurations,
+																	 		(int)slider_localScope_numKeywordsToUse.getMax(), (int)slider_localScope_numKeywordsToUse.getValue(), 
+																	 		true);
             	}
             }
 		};		
@@ -240,11 +248,16 @@ public class LocalScopeInstance extends VisualizationComponent
 		// Update reference.
 		this.selectedLDAConfigurations = selectedLDAConfigurations;
 		
-		// Refresh parallel tag clouds.
-		//ptcController.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), (int)slider_localScope_numTopicsToUse.getValue(), (int)slider_localScope_numKeywordsToUse.getMax(), (int)slider_localScope_numKeywordsToUse.getValue(), true);
+		// Clear PTC.
+		ptcController.clear();
 		
-		// Refresh chord diagram.
-		cdController.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), (int)slider_localScope_numTopicsToUse.getValue(), (int)slider_localScope_numKeywordsToUse.getMax(), (int)slider_localScope_numKeywordsToUse.getValue(), true);
+		// Refresh CD.
+		if (selectedLDAConfigurations.size() > 0)
+			cdController.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), (int)slider_localScope_numTopicsToUse.getValue(), (int)slider_localScope_numKeywordsToUse.getMax(), (int)slider_localScope_numKeywordsToUse.getValue(), true);
+		
+		else {
+			cdController.clear();
+		}
 	}
 	
 	/**
@@ -256,10 +269,29 @@ public class LocalScopeInstance extends VisualizationComponent
 	 */
 	public void refreshPTC(final int ldaID1, final int ldaID2, final int topicID1, final int topicID2)
 	{
+		// Store currently selected topic configurations.
+		selectedTopicConfigurations.clear();
+		selectedTopicConfigurations.add(new Pair<Integer, Integer>(ldaID1, topicID1));
+		selectedTopicConfigurations.add(new Pair<Integer, Integer>(ldaID2, topicID2));
+		
 		// Refresh parallel tag clouds controller using the specified topic identification data.
-		((ParallelTagCloudsController)ptcController).refresh(	ldaID1, ldaID2, topicID1, topicID2, 
+		((ParallelTagCloudsController)ptcController).refresh(	selectedTopicConfigurations,
 														 		(int)slider_localScope_numKeywordsToUse.getMax(), (int)slider_localScope_numKeywordsToUse.getValue(), 
 														 		true);
+	}
+	
+	/**
+	 * Propagates information about hover over a LDA config.
+	 * @param ldaID
+	 */
+	public void propagateLDAHoverInformation(final int ldaID)
+	{
+		analysisController.induceCrossChartHighlighting(ldaID);
+	}
+	
+	public void propagateLDAHoverExitedInformation()
+	{
+		analysisController.removeCrossChartHighlighting();
 	}
 
 	/**
@@ -271,7 +303,7 @@ public class LocalScopeInstance extends VisualizationComponent
 			ptcController.resize(width, height);
 		
 		else if (type == LocalScopeVisualizationType.CHORD_DIAGRAM && cdController != null)
-			cdController.resize(width, height);;
+			cdController.resize(width, height);
 	}
 
 	@Override
@@ -305,5 +337,14 @@ public class LocalScopeInstance extends VisualizationComponent
 
 		slider_localScope_numTopicsToUse.setMajorTickUnit(maxNumberOfTopics / 5 >= 1 ? maxNumberOfTopics / 5 : 1);
 		slider_localScope_numTopicsToUse.setMinorTickCount(4);
+	}
+	
+	/**
+	 * Returns current filter thresholds for all currently supported parameters.
+	 * @return
+	 */
+	public Map<String, Pair<Double, Double>> getFilterThresholds()
+	{
+		return analysisController.getParamExtrema();
 	}
 }

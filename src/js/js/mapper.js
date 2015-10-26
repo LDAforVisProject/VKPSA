@@ -73,6 +73,9 @@ function chordRdr (matrix, mmap) {
       m.gname = g[0].name;
       m.gdata = g[0].data;
 	  m.gdisSum = g[0].disSum;
+	  m.gAlpha = g[0].alpha;
+	  m.gEta = g[0].eta;
+	  m.gKappa = g[0].kappa;
       m.gvalue = d.value;
     }
     m.mtotal = _.reduce(matrix, function (m1, n1) { 

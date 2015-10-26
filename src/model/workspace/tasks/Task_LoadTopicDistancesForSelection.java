@@ -7,7 +7,6 @@ import java.util.Random;
 
 import javafx.util.Pair;
 import database.DBManagement;
-import mdsj.Data;
 import model.LDAConfiguration;
 import model.workspace.Workspace;
 import model.workspace.WorkspaceAction;
@@ -26,11 +25,6 @@ public class Task_LoadTopicDistancesForSelection extends WorkspaceTask
 	private double[][] topicDistances;
 	
 	/**
-	 * Map translating row/column number to the corresponding LDA configuration; the actual topic distance matrix.
-	 */
-	private Map<Integer, LDAConfiguration> topicToLDAConfigurationIDMap;
-	
-	/**
 	 * Map translating the combination of LDA configuration ID/topic ID to spatial IDs (e.g. row and column number in topic distance matrix).
 	 */
 	private Map<Pair<Integer, Integer>, Integer> spatialIDsForLDATopicConfiguration;
@@ -39,6 +33,11 @@ public class Task_LoadTopicDistancesForSelection extends WorkspaceTask
 	 * Set of LDA configurations to load.
 	 */
 	private ArrayList<LDAConfiguration> ldaConfigurationsToLoad;
+	
+	/**
+	 * Filter thresholds for all currently supported parameter. 
+	 */
+	Map<String, Pair<Double, Double>> parameterFilterThresholds;
 	
 	/*
 	 * Here: Strings directly used for chord diagram JS.
@@ -59,13 +58,13 @@ public class Task_LoadTopicDistancesForSelection extends WorkspaceTask
 	 * --------------------------------------------------------------
 	 */
 	
-	public Task_LoadTopicDistancesForSelection(	Workspace workspace, WorkspaceAction workspaceAction, 
-												final Map<String, Integer> additionalOptionSet,
-												ArrayList<LDAConfiguration> ldaConfigurationsToLoad)
+	public Task_LoadTopicDistancesForSelection(	Workspace workspace, WorkspaceAction workspaceAction, final Map<String, Integer> additionalOptionSet,
+												ArrayList<LDAConfiguration> ldaConfigurationsToLoad, Map<String, Pair<Double, Double>> parameterFilterThresholds)
 	{
 		super(workspace, workspaceAction, additionalOptionSet);
 		
-		this.ldaConfigurationsToLoad = ldaConfigurationsToLoad;
+		this.ldaConfigurationsToLoad	= ldaConfigurationsToLoad;
+		this.parameterFilterThresholds	= parameterFilterThresholds;
 	}
 
 	@Override
@@ -108,6 +107,13 @@ public class Task_LoadTopicDistancesForSelection extends WorkspaceTask
 			final int spatialID				= entry.getValue();
 			final String color				= ldaConfigColors.get(ldaConfigurationID);
 			
+			// Pick current LDA configuration.
+			LDAConfiguration currentLDAConfig = null;
+			for (LDAConfiguration ldaConfig : ldaConfigurationsToLoad) {
+				if (ldaConfig.getConfigurationID() == ldaConfigurationID)
+					currentLDAConfig = ldaConfig;
+			}
+			
 			// Record sum of distance values in this topic.
 			double distanceSum				= 0;
 			
@@ -126,6 +132,14 @@ public class Task_LoadTopicDistancesForSelection extends WorkspaceTask
 			json_topicsMMap += "{";
 			json_topicsMMap += "\"name\": \"" + String.valueOf(ldaConfigurationID) + "#" + String.valueOf(topicID) + "\",";
 			json_topicsMMap += "\"color\": \"" + color + "\",";
+			// Append relative parameter values for this LDA/topic configuration.
+			for (Map.Entry<String, Pair<Double, Double>> filterThresholdEntry : parameterFilterThresholds.entrySet()) {
+				final String param					= filterThresholdEntry.getKey();
+				final double adjustedFilteredMax	= filterThresholdEntry.getValue().getValue() - filterThresholdEntry.getValue().getKey();
+				final double adjustedCurrValue		= currentLDAConfig.getParameter(param) - filterThresholdEntry.getValue().getKey();
+				
+				json_topicsMMap += "\"" + param + "\": \"" + (adjustedCurrValue / adjustedFilteredMax) + "\",";
+			}
 			json_topicsMMap += "\"disSum\": \"" + distanceSum + "\"";
 			json_topicsMMap += "},";
 		}

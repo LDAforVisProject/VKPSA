@@ -683,16 +683,16 @@ public class AnalysisController extends Controller
 			refreshParameterspaceHeatmaps();
 			
 			// 	Local scope:
-			localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
+			if (includeLocalScope)
+				localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
 			
 			// 	Parameter histograms:
 			refreshParameterHistograms(50);
 		}
-	}
-	
-	public void refreshLocalScopeAfterGlobalSelection()
-	{
-		localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
+		
+		// Even if no change on global scope detected: Update local scope, if requested. 
+		else if (includeLocalScope)
+			localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
 	}
 	
 	/**
@@ -841,7 +841,8 @@ public class AnalysisController extends Controller
 		refreshParameterspaceHeatmaps();
 
 		//	Local scope:
-		//localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
+		localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
+		
 		// 	Parameter histograms:
 		refreshParameterHistograms(50);
 	}
@@ -1349,6 +1350,7 @@ public class AnalysisController extends Controller
             	mdsScatterchart.processKeyPressedEvent(ke);
             	distancesBarchart.processKeyPressedEvent(ke);
             	parameterspace_heatmap_filtered.processKeyPressedEvent(ke);
+            	parameterspace_heatmap_selected.processKeyPressedEvent(ke);
             }
 		});
 		
@@ -1358,6 +1360,7 @@ public class AnalysisController extends Controller
             	mdsScatterchart.processKeyReleasedEvent(ke);
             	distancesBarchart.processKeyReleasedEvent(ke);
             	parameterspace_heatmap_filtered.processKeyReleasedEvent(ke);
+            	parameterspace_heatmap_selected.processKeyReleasedEvent(ke);
             }
 		});
 	}
@@ -1543,5 +1546,46 @@ public class AnalysisController extends Controller
 	protected Map<String, Integer> prepareOptionSet()
 	{
 		return null;
+	}
+	
+	/**
+	 * Returns extrema for all currently supported parameters.
+	 * @return
+	 */
+	public Map<String, Pair<Double, Double>> getParamExtrema()
+	{
+		Map<String, Pair<Double, Double>> parameterFilterThresholds = new HashMap<String, Pair<Double, Double>>();
+		
+		for (Map.Entry<String, RangeSlider> entry : rangeSliders.entrySet()) {
+			parameterFilterThresholds.put(entry.getKey(), new Pair<Double, Double>(entry.getValue().getMin(), entry.getValue().getMax()));
+		}
+		
+		return parameterFilterThresholds;
+	}
+	
+	/**
+	 * Induces cross-visualization highlighting of one particular LDA configuration.
+	 * @param ldaConfigurationID
+	 */
+	public void induceCrossChartHighlighting(final int ldaConfigurationID)
+	{
+		// Find index of this LDA configuration (remark: data structure not appropriate for this task).
+		int index = -1;
+		for (int i : dataspace.getSelectedIndices()) {
+			LDAConfiguration ldaConfig = dataspace.getLDAConfigurations().get(i);
+			
+			if (ldaConfig.getConfigurationID() == ldaConfigurationID)
+				index = i;
+		}
+		
+		mdsScatterchart.highlightLDAConfiguration(index);
+	}
+
+	/**
+	 * Removes all highlighting from charts (used e.g. after user doesn't hover over group/LDA info in CD anymore). 
+	 */
+	public void removeCrossChartHighlighting()
+	{
+		mdsScatterchart.highlightLDAConfiguration(-1);
 	}
 }

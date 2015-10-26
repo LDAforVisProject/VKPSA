@@ -86,6 +86,29 @@ public class ChordDiagramController extends LocalScopeVisualizationController
 	{
 		localScope.refreshPTC(ldaID1, ldaID2, topicID1, topicID2);
 	}
+	
+	/**
+	 * Propagates information about hover over a LDA config.
+	 * @param ldaID
+	 */
+	public void propagateLDAHoverInformation(final int ldaID)
+	{
+		localScope.propagateLDAHoverInformation(ldaID);
+	}
+	
+    /**
+     * Process information that no group is hovered anymore.
+     */
+	public void propagateLDAHoverExitedInformation()
+	{
+		localScope.propagateLDAHoverExitedInformation();
+	}
+	
+	@Override
+	public void clear()
+	{
+		content_webview.getEngine().load("about:blank");
+	}
 
 	@Override
 	public void refresh(ArrayList<LDAConfiguration> selectedLDAConfigurations,
@@ -95,7 +118,7 @@ public class ChordDiagramController extends LocalScopeVisualizationController
 	{
 		if (selectedLDAConfigurations.size() > 0) {
 			// Load topic distance data for selection.
-			topicLoadingTask = new Task_LoadTopicDistancesForSelection(workspace, WorkspaceAction.LOAD_SPECIFIC_TOPIC_DISTANCES, null, selectedLDAConfigurations);
+			topicLoadingTask = new Task_LoadTopicDistancesForSelection(workspace, WorkspaceAction.LOAD_SPECIFIC_TOPIC_DISTANCES, null, selectedLDAConfigurations, localScope.getFilterThresholds());
 			topicLoadingTask.addListener(this);
 			
 			// Write list to file.
@@ -106,7 +129,6 @@ public class ChordDiagramController extends LocalScopeVisualizationController
 	@Override
 	public void notifyOfTaskCompleted(final WorkspaceAction workspaceAction)
 	{
-		System.out.println("Reloading with updated data.");
 		content_webview.getEngine().loadContent(adaptHTMLTemplate(templateHTMLCode));
 	}
 
@@ -118,14 +140,23 @@ public class ChordDiagramController extends LocalScopeVisualizationController
 	{
 		String adaptedHTMLCode = templateCode;
 		
-		// Adapt size.
+		// Adapt size of chord diagram.
 		adaptedHTMLCode = adaptedHTMLCode.replaceAll("var w = x, h = y", "var w = " + content_webview.getWidth() + ", h = " + content_webview.getHeight());
+		
+		// Adapt size of mouseover radar chart.
+		double higherSizeValue = content_webview.getWidth() > content_webview.getHeight() ? content_webview.getWidth() : content_webview.getHeight();
+		adaptedHTMLCode = adaptedHTMLCode.replaceAll("rcWidth", String.valueOf((higherSizeValue / 3)) );
+		
+		// Rename parameters with greek letters. 
+		adaptedHTMLCode = adaptedHTMLCode.replaceAll("_alpha", "α");
+		adaptedHTMLCode = adaptedHTMLCode.replaceAll("_eta", "η");
+		adaptedHTMLCode = adaptedHTMLCode.replaceAll("_kappa", "κ");
 		
 		// Adapt workspace path.
 		String jsPath	= (System.getProperty("user.dir") + "\\src\\js\\").replace("\\", "/");
 		adaptedHTMLCode = adaptedHTMLCode.replace("workspacePath", jsPath);
 		
-		// Adapt data.
+		// Adapt chord diagram data.
 		if (topicLoadingTask != null) {
 			final String mmap	= topicLoadingTask.getJSONTopicsMMap();
 			final String matrix = topicLoadingTask.gettJSONTopicDistancesString();

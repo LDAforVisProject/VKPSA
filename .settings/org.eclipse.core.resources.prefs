@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
+encoding//src/control/analysisView/localScope/ChordDiagramController.java=UTF-8
 encoding//src/model/LDAConfiguration.java=UTF-8
 encoding//src/view/components/DistancesBarchart.java=UTF-8
 encoding//src/view/components/HoveredThresholdNode.java=UTF-8

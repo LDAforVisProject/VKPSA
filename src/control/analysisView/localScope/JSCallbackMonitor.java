@@ -28,7 +28,7 @@ public class JSCallbackMonitor
     public void processChordData(Object fromID, Object toID)
     {
     	final String[] fromValues	= ((String) fromID).split("#");
-    	final String[] toValues		= ((String) fromID).split("#");
+    	final String[] toValues		= ((String) toID).split("#");
     	
     	final int ldaID1	= Integer.parseInt(fromValues[0]);
     	final int topicID1	= Integer.parseInt(fromValues[1]);
@@ -37,5 +37,24 @@ public class JSCallbackMonitor
     	
     	// Propagate information.
     	controller.propagateSelectedDistanceInformation(ldaID1, ldaID2, topicID1, topicID2);
+    }
+    
+    /**
+     * Processes hovering over group/LDA config info.
+     * @param groupName
+     */
+    public void processLDAConfigHover(Object groupName)
+    {
+    	final String[] values	= ((String) groupName).split("#");
+    	
+    	controller.propagateLDAHoverInformation(Integer.parseInt(values[0]));
+    }
+    
+    /**
+     * Process information that no group is hovered anymore.
+     */
+    public void processLDAConfigHoverExited()
+    {
+    	controller.propagateLDAHoverExitedInformation();
     }
 }

@@ -902,14 +902,6 @@ public class DBManagement
 					topicDistances[spatialID_topic1][spatialID_topic2] = -1;
 					topicDistances[spatialID_topic2][spatialID_topic1] = -1;
 				}
-				
-//				@todo Continue here:
-//					x. Place topic distance values in matrix (write beginning from diagonale, then copy to swapped row/column (symmetric!).).
-//					x. Construct metadata (LDA config ID -> row numbers).
-//					x. Jsonify data.
-//					x. Write jsonified data into d3.js code.
-//					5. Insert callbacks from javascript to Java (-> selection of a pair of topics is to update PTC).
-//				
 			}
 		} 
     	

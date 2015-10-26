@@ -444,7 +444,6 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 				cellCoordinates[3] 			= cellCoordinates[1] + cellHeight;
 				
 				// Set color for this cell.
-//				Color cellColor = ColorScale.getColorForValue(binMatrix[i][j], minOccurenceCount, maxOccurenceCount);
 				Color cellColor = ColorScale.getColorForValue(binMatrix[i][j], minOccurenceCount, maxOccurenceCount, minColor, maxColor);
 				gc.setFill(cellColor);
 				
@@ -488,16 +487,18 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 		final int minOccurenceCount			= binnedData.getMinOccurenceCount();
 		final int maxOccurenceCount			= binnedData.getMaxOccurenceCount();
     	
+		// Define color spectrum.
+		// Set highlight color (red for additional selection, blue for subtractive).
+		final Color highlightColor 	= isCtrlDown ? new Color(0.0, 0.0, 1.0, 0.5) : new Color(1.0, 0.0, 0.0, 0.5); 
+		final Color minColor 		= dataBinding == HeatmapDataBinding.FILTERED ? Color.LIGHTBLUE 	: Color.RED;
+		final Color maxColor 		= dataBinding == HeatmapDataBinding.FILTERED ? Color.DARKBLUE	: Color.DARKRED;
+    	
 		// Check if settings icon was used. Workaround due to problems with selection's mouse event handling. 
 		if (minX == maxX && minY == maxY) {
 			final Pair<Integer, Integer> offsets = provideOffsets();
 			analysisController.checkIfSettingsIconWasClicked(minX + offsets.getKey(), minY + offsets.getValue(), "settings_paramDist_icon");
 		}
 		
-		// Set highlight color (red for additional selection, blue for subtractive).
-		final Color highlightColor = isCtrlDown ? new Color(0.0, 0.0, 1.0, 0.5) : new Color(1.0, 0.0, 0.0, 0.5); 
-    	gc.setFill(highlightColor);
-    	
 		// Check which cells are in selected area, highlight them.
 		for (Map.Entry<Pair<Integer, Integer>, double[]> cellCoordinateEntry : cellsToCoordinates.entrySet()) {
 			double cellMinX = cellCoordinateEntry.getValue()[0];
@@ -505,12 +506,15 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 			double cellMaxX = cellCoordinateEntry.getValue()[2];
 			double cellMaxY = cellCoordinateEntry.getValue()[3];
 			
+			// Set color.
+			gc.setFill(highlightColor);
+			
 			// Get cell ID/location.
 			final Pair<Integer, Integer> cellCoordinates = cellCoordinateEntry.getKey();
 			
 			if (	cellMinX > minX && cellMaxX < maxX &&
 					cellMinY > minY && cellMaxY < maxY) {
-				// Get cell's cell of contents.
+				// Get cell's contents.
 				final Set<Integer> cellContentSet	= cellsToConfigurationIDs.get(cellCoordinateEntry.getKey()); 
 
 				// Add cell content to collection (if there is any).
@@ -533,7 +537,7 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 				final int cellColumn 	= cellCoordinateEntry.getKey().getValue();
 				
 				// Calculate original color.
-				Color cellColor = ColorScale.getColorForValue(binMatrix[cellRow][cellColumn], minOccurenceCount, maxOccurenceCount);
+				Color cellColor = ColorScale.getColorForValue(binMatrix[cellRow][cellColumn], minOccurenceCount, maxOccurenceCount, minColor, maxColor);
 				gc.setFill(cellColor);
 				
 				// Paint cell in original color.
@@ -575,28 +579,5 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 	public void processKeyReleasedEvent(KeyEvent ke)
 	{
 		isCtrlDown = ke.isControlDown();
-	}
-	
-	/**
-	 * Translates ComboBox item string to HeatmapDataBinding instance. 
-	 * @param item
-	 * @deprecated
-	 */
-	public static HeatmapDataBinding translateItemstringToDataBindingType(String item)
-	{
-		HeatmapDataBinding dataBinding = null;
-		
-		switch (item) 
-		{
-			case "Filtered data":
-				dataBinding = HeatmapDataBinding.FILTERED;
-			break;
-			
-			case "Selected data":
-				dataBinding = HeatmapDataBinding.SELECTED;
-			break;
-		}
-		
-		return dataBinding;
 	}
 }
