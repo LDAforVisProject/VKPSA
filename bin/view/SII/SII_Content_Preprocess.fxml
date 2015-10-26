@@ -19,7 +19,7 @@
           <RowConstraints maxHeight="218.0" minHeight="10.0" prefHeight="175.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="354.0" prefWidth="82.0">
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="334.0" prefWidth="516.0">
                <children>
                   <GridPane gridLinesVisible="true" layoutX="14.0" layoutY="44.0" prefHeight="227.0" prefWidth="500.0">
                     <columnConstraints>
@@ -120,19 +120,7 @@
                   </Label>
                   <Button fx:id="button_calculateDistances" layoutX="310.0" layoutY="-1.0" mnemonicParsing="false" onAction="#calculate" prefWidth="150.0" text="(Re-)Calculate distances" />
                   <ProgressIndicator fx:id="progressIndicator_distanceCalculation" layoutX="481.0" layoutY="-5.0" progress="0.0" />
-                  <Label layoutX="24.0" layoutY="283.0" text="INFO: Number of datasets in working directory">
-                     <font>
-                        <Font name="System Italic" size="12.0" />
-                     </font>
-                  </Label>
-                  <Label layoutX="24.0" layoutY="310.0" text="INFO: Number of necessary distance calculations">
-                     <font>
-                        <Font name="System Italic" size="12.0" />
-                     </font>
-                  </Label>
-                  <Label fx:id="label_numberOfDatasets" layoutX="320.0" layoutY="283.0" text="Label" />
-                  <Label fx:id="label_numberOfDistanceCalculations" layoutX="320.0" layoutY="310.0" text="Label" />
-                  <Separator layoutX="8.0" layoutY="354.0" prefHeight="3.0" prefWidth="516.0" />
+                  <Separator layoutX="8.0" layoutY="334.0" prefHeight="3.0" prefWidth="516.0" />
                </children>
             </AnchorPane>
         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="181.0" prefWidth="516.0" GridPane.rowIndex="1">
@@ -147,7 +135,7 @@
                               <Insets left="10.0" />
                            </padding>
                         </Label>
-                        <CheckBox fx:id="checkbox_appendToMDSCoordinateMatrix" disable="true" mnemonicParsing="false" GridPane.columnIndex="1">
+                        <CheckBox fx:id="checkbox_appendToMDSCoordinateMatrix" disable="true" mnemonicParsing="false" selected="true" GridPane.columnIndex="1">
                            <GridPane.margin>
                               <Insets left="10.0" />
                            </GridPane.margin>

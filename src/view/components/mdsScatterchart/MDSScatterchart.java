@@ -303,11 +303,11 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 				 // Setting the uniform variable for the glow width and height
 				int depth = 20;
 				
-				DropShadow borderGlow= new DropShadow();
+				DropShadow borderGlow = new DropShadow();
 				borderGlow.setOffsetY(0f);
 				borderGlow.setOffsetX(0f);
 				
-				borderGlow.setRadius(2);
+				borderGlow.setRadius(5);
 				borderGlow.setColor(Color.RED);
 				borderGlow.setWidth(depth);
 				borderGlow.setHeight(depth); 

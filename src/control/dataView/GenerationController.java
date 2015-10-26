@@ -60,7 +60,6 @@ public class GenerationController extends DataSubViewController
 	
 	@FXML private Button generate_button;
 	
-	@FXML private CheckBox parameterCoupling_checkbox;
 	@FXML private CheckBox includePreprocessing_checkbox;
 	
 	@FXML private ComboBox<String> sampling_combobox;
@@ -323,38 +322,22 @@ public class GenerationController extends DataSubViewController
 			parameterValues_high.put(param, rs.getHighValue() <= rangeSliders.get(param).getMax() ? rs.getHighValue() : rangeSliders.get(param).getMax());
 		}
 		
-		if (!parameterCoupling_checkbox.isSelected()) {
-        	switch (parameter) 
-        	{
-        		case "alpha":
-        			alpha_min_textfield.setText(String.valueOf(parameterValues_low.get("alpha")));
-                	alpha_max_textfield.setText(String.valueOf(parameterValues_high.get("alpha")));
-        		break;
+    	switch (parameter) 
+    	{
+    		case "alpha":
+    			alpha_min_textfield.setText(String.valueOf(parameterValues_low.get("alpha")));
+            	alpha_max_textfield.setText(String.valueOf(parameterValues_high.get("alpha")));
+    		break;
+    		
+    		case "eta":
+    	       	eta_min_textfield.setText(String.valueOf(parameterValues_low.get("eta")));
+            	eta_max_textfield.setText(String.valueOf(parameterValues_high.get("eta")));
+        	break;
         		
-        		case "eta":
-        	       	eta_min_textfield.setText(String.valueOf(parameterValues_low.get("eta")));
-                	eta_max_textfield.setText(String.valueOf(parameterValues_high.get("eta")));
-            	break;
-            		
-        		case "kappa":
-        			kappa_min_textfield.setText(String.valueOf(parameterValues_low.get("kappa")));
-                	kappa_max_textfield.setText(String.valueOf(parameterValues_high.get("kappa")));
-            	break;	
-        	}            		
-    	}
-    	
-    	else {
-			alpha_min_textfield.setText(String.valueOf(parameterValues_low.get(parameter)));
-        	alpha_max_textfield.setText(String.valueOf(parameterValues_high.get(parameter)));
-		 	eta_min_textfield.setText(String.valueOf(parameterValues_low.get(parameter)));
-        	eta_max_textfield.setText(String.valueOf(parameterValues_high.get(parameter)));
-    		kappa_min_textfield.setText(String.valueOf(parameterValues_low.get(parameter)));
-        	kappa_max_textfield.setText(String.valueOf(parameterValues_high.get(parameter)));
-        	
-        	for (RangeSlider rangeSlider : rangeSliders.values()) {
-        		rangeSlider.setLowValue(parameterValues_low.get(parameter));
-        		rangeSlider.setHighValue(parameterValues_high.get(parameter));
-        	}
+    		case "kappa":
+    			kappa_min_textfield.setText(String.valueOf(parameterValues_low.get("kappa")));
+            	kappa_max_textfield.setText(String.valueOf(parameterValues_high.get("kappa")));
+        	break;	
     	}
 	}
 	
@@ -604,8 +587,12 @@ public class GenerationController extends DataSubViewController
 			case CALCULATE_DISTANCES:
 				System.out.println("[Post-generation] Calculated distance data.");
 				
+				// Don't force recalculation of existing distances.
+				Map<String, Integer> additionalOptionSet = new HashMap<String, Integer>();
+				additionalOptionSet.put("forceDistanceRecalculation", 0);
+				
 				// Calculate distances.
-				workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_MDS_COORDINATES, dataViewController.getProgressIndicator_calculateMDSCoordinates().progressProperty(), this, null);
+				workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_MDS_COORDINATES, dataViewController.getProgressIndicator_calculateMDSCoordinates().progressProperty(), this, additionalOptionSet);
 			break;
 			
 			case CALCULATE_MDS_COORDINATES:
@@ -631,7 +618,6 @@ public class GenerationController extends DataSubViewController
 			rs.setDisable(true);
 		}
 		
-		parameterCoupling_checkbox.setDisable(true);
 		sampling_combobox.setDisable(true);
 		numberOfDatasets_textfield.setDisable(true);
 		numberOfDivisions_textfield.setDisable(true);
@@ -649,7 +635,6 @@ public class GenerationController extends DataSubViewController
 			rs.setDisable(false);
 		}
 		
-		parameterCoupling_checkbox.setDisable(false);
 		sampling_combobox.setDisable(false);
 		numberOfDatasets_textfield.setDisable(false);
 		numberOfDivisions_textfield.setDisable(false);

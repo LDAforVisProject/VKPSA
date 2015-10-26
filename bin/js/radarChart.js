@@ -220,7 +220,7 @@ function RadarChart(id, data, options) {
 			newX =  parseFloat(d3.select(this).attr('cx')) - 10;
 			newY =  parseFloat(d3.select(this).attr('cy')) - 10;
 					
-			tooltip
+			tooltipRC
 				.attr('x', newX)
 				.attr('y', newY)
 				.text(Format(d.value))
@@ -228,13 +228,13 @@ function RadarChart(id, data, options) {
 				.style('opacity', 1);
 		})
 		.on("mouseout", function(){
-			tooltip.transition().duration(200)
+			tooltipRC.transition().duration(200)
 				.style("opacity", 0);
 		});
 		
 	//Set up the small tooltip for when you hover over a circle
-	var tooltip = g.append("text")
-		.attr("class", "tooltip")
+	var tooltipRC = g.append("text")
+		.attr("class", "tooltipRC")
 		.style("opacity", 0);
 	
 	/////////////////////////////////////////////////////////

@@ -46,11 +46,6 @@ public class PreprocessingController extends DataSubViewController
 	
 	private @FXML ComboBox<String> combobox_scalingAlgorithm;
 	
-	// Labels.
-	
-	private @FXML Label label_numberOfDatasets;
-	private @FXML Label label_numberOfDistanceCalculations;
-	
 	// Progress indicators.
 	
 	private @FXML ProgressIndicator progressIndicator_calculateMDSCoordinates;

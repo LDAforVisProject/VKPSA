@@ -5,46 +5,85 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-      #tooltip {
-        color: white;
-        opacity: .9;
-        background: #333;
-        padding: 5px;
-        border: 1px solid lightgrey;
-        border-radius: 5px;
-        position: absolute;
-        z-index: 10;
-        visibility: hidden;
-        white-space: nowrap;
-        pointer-events: none;
-      }
-      #circle circle {
-        fill: none;
-        pointer-events: all;
-      }
-      path.group {
-        fill-opacity: .8;
-      }
-      path.chord {
-        fill-opacity: .8;
-        stroke: #000;
-        stroke-width: .25px;
-      }
-      #circle:hover path.fade {
-        display: none;
-      }
+		#tooltip {
+			color: white;
+			opacity: .9;
+			background: #333;
+			padding: 5px;
+			border: 1px solid lightgrey;
+			border-radius: 5px;
+			position: absolute;
+			z-index: 10;
+			visibility:hidden;
+			white-space: nowrap;
+			pointer-events: none;
+		}
+		
+		#circle circle {
+			fill: none;
+			pointer-events: all;
+		}
+		path.group {
+			fill-opacity: .8;
+		}
+		path.chord {
+			fill-opacity: .8;
+			stroke: #000;
+			stroke-width: .25px;
+		}
+		#circle:hover path.fade {
+			display: none;
+		}
+		
+		body {
+			font-family: 'Open Sans', sans-serif;
+			font-size: 11px;
+			font-weight: 300;
+			fill: #242424;
+			text-align: center;
+			cursor: default;
+		}
+		
+		.legend {
+			font-family: 'Raleway', sans-serif;
+			fill: #333333;
+		}
+		
+		.tooltipRC {
+			fill: #fff;
+		}
     </style>
-	
-	<base href="file:///D:/Workspace/Scientific Computing/VKPSA/src/js/d3-chord-diagrams-master/" />
+
+	<base href="file:///workspacePath" />	
   </head>
   
   <body>
     <div id="tooltip"></div>
+	<div id="radarChart"></div>
+	
     <script src="lib/d3.js"></script>
     <script src="lib/queue.js"></script>
     <script src="lib/underscore.js"></script>
     <script src="js/mapper.js"></script>
+	<script src="radarChart.js"></script>
+	
     <script>
+
+		//*******************************************************************
+		//  CREATE LISTENERS
+		//*******************************************************************
+		
+		var distanceChordClicked = function (fromID, toID) {
+			callbackMonitor.processChordData(fromID, toID);
+		};
+		
+		var groupHover = function(groupName) {
+			callbackMonitor.processLDAConfigHover(groupName);
+		};
+		
+		var groupHoverExited = function() {
+			callbackMonitor.processLDAConfigHoverExited();
+		};
 		
 		//*******************************************************************
 		//  CREATE MATRIX AND MAP
@@ -66,7 +105,7 @@
 		function drawChords (matrix, mmap) 
 		{
 			var w = x, h = y, r1 = h / 2, r0 = r1 - 90;
-
+			
 			var chord = d3.layout.chord()
 				.padding(.02)
 				.sortSubgroups(d3.descending)
@@ -94,7 +133,7 @@
 			  .enter().append("svg:g")
 				.attr("class", "group")
 				.on("mouseover", mouseover)
-				.on("mouseout", function (d) { d3.select("#tooltip").style("visibility", "hidden") });
+				.on("mouseout", function (d) { d3.select("#tooltip").style("visibility", "hidden"); groupHoverExited(); });
 
 			g.append("svg:path")
 				.style("stroke", "grey")
@@ -128,21 +167,28 @@
 						.style("top", function () { return (d3.event.pageY - 0)+"px"})
 						.style("left", function () { return (d3.event.pageX - 0)+"px";})
 					})
-					.on("mouseout", function (d) { d3.select("#tooltip").style("visibility", "hidden") });
+					.on("mouseout", function (d) { d3.select("#tooltip").style("visibility", "hidden") })
+					.on("click", function (d) { distanceChordClicked(rdr(d).sname, rdr(d).tname) });
 
 			function chordTip (d) 
 			{
 				var p = d3.format(".1%"), q = d3.format(",.2r")
-					return d.sname + " to " + d.tname
-							+ ": " + d.svalue;
-				  }
+					return d.sname + " to " + d.tname;
+			}
 
-			function groupTip (d) {
+			function groupTip (d) 
+			{
+				// Callback to Java.
+				groupHover(d.gname);
+				
+				// Create tooltip.
 				var p = d3.format(".1%"), q = d3.format(",.2r")
-				return "LDA #" + d.gname + " : " + d.gdisSum + "<br/>";
-				}
+				return 	"<div class='tooltipTitle' style='color:#fff;'><b>#" + d.gname + "</b></div>" +
+						"<div class='radar' style='background:#fff;color:#333;'>" + generateRadarChart(d.gAlpha, d.gEta, d.gKappa) + "</div>";
+			}
 
-			function mouseover(d, i) {
+			function mouseover(d, i) 
+			{
 				d3.select("#tooltip")
 				  .style("visibility", "visible")
 				  .html(groupTip(rdr(d)))
@@ -152,11 +198,64 @@
 				chordPaths.classed("fade", function(p) {
 				  return p.source.index != i
 					  && p.target.index != i;
-			});
-		  }
-      }
+				});
+			}
+		}
 	  
+		//*******************************************************************
+		//  DRAW THE RADAR CHART
+		//*******************************************************************
 	  
+		function generateRadarChart(alpha, eta, kappa)
+		{
+			////////////////////////////////////////////////////////////// 
+			//////////////////////// Set-Up ////////////////////////////// 
+			////////////////////////////////////////////////////////////// 
+
+			var margin = {top: 20, right: 12, bottom: 6, left: 12},
+				width = Math.min(rcWidth, window.innerWidth - 10) - margin.left - margin.right,
+				height = Math.min(width, window.innerHeight - margin.top - margin.bottom - 20);
+					
+			////////////////////////////////////////////////////////////// 
+			////////////////////////// Data ////////////////////////////// 
+			////////////////////////////////////////////////////////////// 
+
+			var data = [
+					  [
+						{axis:"_alpha",value:alpha},
+						{axis:"_eta",value:eta},
+						{axis:"_kappa",value:kappa}
+					  ]
+					];
+			////////////////////////////////////////////////////////////// 
+			//////////////////// Draw the Chart ////////////////////////// 
+			////////////////////////////////////////////////////////////// 
+
+			var color = d3.scale.ordinal()
+				.range(["#EDC951","#CC333F","#00A0B0"]);
+				
+			var radarChartOptions = {
+			  w: width,
+			  h: height,
+			  margin: margin,
+			  maxValue: 1,
+			  levels: 3,
+			  roundStrokes: true,
+			  color: color
+			};
+			
+			// Call function to draw the Radar chart
+			RadarChart("#radarChart", data, radarChartOptions);
+			
+			// Copy content of #radarChart.
+			var radarChartCode = document.getElementById("radarChart").innerHTML;
+			
+			// Empty #radarChart.
+			document.getElementById("radarChart").innerHTML = "";
+			
+			// Return code for radar chart.
+			return radarChartCode;
+		}
     </script>
   </body>
 </html>

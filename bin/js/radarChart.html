@@ -5,12 +5,12 @@
 		<title>Smoothed D3.js Radar Chart</title>
 
 		<!-- Google fonts -->
-		<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300' rel='stylesheet' type='text/css'>
-		<link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
+		<!--<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300' rel='stylesheet' type='text/css'> -->
+		<!--<link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'> -->
 
 		<!-- D3.js -->
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
-		
+		<script src="lib/d3.js" charset="utf-8"></script> 
+		https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js
 		<style>
 			body {
 				font-family: 'Open Sans', sans-serif;
@@ -27,7 +27,7 @@
 				fill: #333333;
 			}
 			
-			.tooltip {
+			.tooltipRC {
 				fill: #333333;
 			}
 		</style>
@@ -92,7 +92,7 @@
 			  w: width,
 			  h: height,
 			  margin: margin,
-			  maxValue: 0.5,
+			  maxValue: 1,
 			  levels: 5,
 			  roundStrokes: true,
 			  color: color

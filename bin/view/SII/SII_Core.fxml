@@ -63,14 +63,6 @@
                               <Insets top="5.0" />
                            </HBox.margin>
                         </ImageView>
-                        <ImageView fx:id="icon_settings" fitHeight="25.0" fitWidth="22.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@icons/cog.png" />
-                           </image>
-                           <HBox.margin>
-                              <Insets left="15.0" top="5.0" />
-                           </HBox.margin>
-                        </ImageView>
                         <ImageView fx:id="icon_dataview" fitHeight="25.0" fitWidth="25.0" onMouseClicked="#actionButtonClicked" onMouseEntered="#enableActiveCursor" onMouseExited="#disableActiveCursor" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@icons/data_small.jpg" />

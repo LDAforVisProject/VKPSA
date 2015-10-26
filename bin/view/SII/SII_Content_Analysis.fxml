@@ -174,7 +174,7 @@
                                              <children>
                                                 <VBox prefHeight="354.0" prefWidth="376.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                    <children>
-                                                      <Label text="Distance Functions">
+                                                      <Label text="Distance Metrics &amp; Calculation">
                                                          <font>
                                                             <Font name="System Bold" size="12.0" />
                                                          </font>
@@ -195,8 +195,8 @@
                                                          <children>
                                                             <Label text="Topic distance function" />
                                                             <Label text="Dataset distance function" GridPane.rowIndex="1" />
-                                                            <ComboBox prefWidth="150.0" GridPane.columnIndex="1" />
-                                                            <ComboBox prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                            <ComboBox disable="true" prefWidth="150.0" GridPane.columnIndex="1" />
+                                                            <ComboBox disable="true" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                                             <Label text="Enable logarithmic scaling" GridPane.rowIndex="2" />
                                                             <CheckBox fx:id="checkbox_logarithmicDistanceBarchart" mnemonicParsing="false" onAction="#changeScalingType" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                                          </children>
@@ -226,8 +226,8 @@
                                                          <children>
                                                             <Label text="Algorithm" />
                                                             <Label text="k" GridPane.rowIndex="1" />
-                                                            <ComboBox prefWidth="150.0" GridPane.columnIndex="1" />
-                                                            <TextField maxWidth="150.0" prefHeight="25.0" prefWidth="136.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                            <ComboBox disable="true" prefWidth="150.0" GridPane.columnIndex="1" />
+                                                            <TextField disable="true" maxWidth="150.0" prefHeight="25.0" prefWidth="136.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                                          </children>
                                                       </GridPane>
                                                       <Separator prefWidth="200.0">
@@ -310,13 +310,13 @@
                                                         </rowConstraints>
                                                          <children>
                                                             <Label text="Max. number of topics" GridPane.rowIndex="1" />
-                                                            <Slider fx:id="slider_localScope_numTopicsToUse" maxWidth="120.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="50.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                                            <Slider fx:id="slider_localScope_numTopicsToUse" disable="true" maxWidth="120.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="50.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                                                <GridPane.margin>
                                                                   <Insets top="10.0" />
                                                                </GridPane.margin>
                                                             </Slider>
-                                                            <TextField fx:id="textfield_localScope_numTopicsToUse" maxWidth="40.0" text="50" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                                                            <Label text="Max. number of keywords" />
+                                                            <TextField fx:id="textfield_localScope_numTopicsToUse" disable="true" maxWidth="40.0" text="50" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                                            <Label text="Number of keywords" />
                                                             <Slider fx:id="slider_localScope_numKeywordsToUse" maxWidth="120.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="10.0" GridPane.columnIndex="1" />
                                                             <TextField fx:id="textfield_localScope_numKeywordsToUse" maxWidth="40.0" text="10" GridPane.columnIndex="2" />
                                                          </children>
@@ -387,7 +387,7 @@
                                                             <Insets bottom="10.0" top="10.0" />
                                                          </padding>
                                                       </Separator>
-                                                      <Label text="Dataset distance correlation">
+                                                      <Label text="Distance Difference Correlation">
                                                          <font>
                                                             <Font name="System Bold" size="12.0" />
                                                          </font>
@@ -404,7 +404,7 @@
                                                           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                         </rowConstraints>
                                                          <children>
-                                                            <Label text="Parameters to fixed" />
+                                                            <Label text="Fixed Parameters" />
                                                             <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1">
                                                                <children>
                                                                   <CheckBox fx:id="checkbox_ddc_alpha" mnemonicParsing="false" onAction="#ddcButtonStateChanged" selected="true" text="α">
@@ -637,7 +637,7 @@
                         <ScrollPane hbarPolicy="ALWAYS" layoutX="300.0" layoutY="6.0" vbarPolicy="NEVER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="6.0" />
                       <AnchorPane fx:id="paramSpace_correlation_anchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="160.0" prefWidth="100.0" style="-fx-background-color: #ffffff;">
                            <children>
-                              <Label fx:id="settings_distCorrelation_icon" layoutX="14.0" layoutY="5.0" text="Parameter | Dist. Correlation" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="7.0">
+                              <Label fx:id="settings_distCorrelation_icon" layoutX="14.0" layoutY="5.0" text="Parameter | Distance Difference Correlation" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="7.0">
                                  <font>
                                     <Font name="System Bold" size="12.0" />
                                  </font>
@@ -656,7 +656,7 @@
                                     <Font size="10.0" />
                                  </font>
                               </ToggleButton>
-                              <ImageView fx:id="settings_paramDistCorr_icon" fitHeight="15.0" fitWidth="15.0" layoutX="180.0" layoutY="10.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="179.0" AnchorPane.topAnchor="8.0">
+                              <ImageView fx:id="settings_paramDistCorr_icon" fitHeight="15.0" fitWidth="15.0" layoutX="180.0" layoutY="10.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="270.0" AnchorPane.topAnchor="8.0">
                                  <image>
                                     <Image url="@icons/cog.png" />
                                  </image>

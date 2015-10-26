@@ -165,22 +165,19 @@
               </columnConstraints>
               <rowConstraints>
                 <RowConstraints maxHeight="28.0" minHeight="10.0" prefHeight="26.0" vgrow="SOMETIMES" />
-                <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="21.0" vgrow="SOMETIMES" />
                 <RowConstraints maxHeight="35.0" minHeight="10.0" prefHeight="33.0" vgrow="SOMETIMES" />
                   <RowConstraints maxHeight="27.0" minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
                   <RowConstraints maxHeight="27.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
                   <Label text="Generate only non-available data" />
-                  <Label text="Append to working directory" GridPane.rowIndex="1" />
-                  <Label text="Number of divisions  for each parameter" GridPane.rowIndex="2" />
+                  <Label text="Number of divisions  for each parameter" GridPane.rowIndex="1" />
                   <CheckBox disable="true" mnemonicParsing="false" GridPane.columnIndex="1" />
-                  <CheckBox disable="true" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <Label text="Sampling method" GridPane.rowIndex="4" />
-                  <ComboBox fx:id="sampling_combobox" onAction="#changeSamplingMethod" prefWidth="150.0" promptText="Random" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                  <TextField fx:id="numberOfDivisions_textfield" maxWidth="50.0" minWidth="40.0" onAction="#updateNumberOfDivisions" prefHeight="25.0" prefWidth="50.0" text="1000" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                  <Label text="Number of datasets" GridPane.rowIndex="3" />
-                  <TextField fx:id="numberOfDatasets_textfield" maxWidth="50.0" onAction="#updateNumberOfDatasets" prefHeight="25.0" text="1000" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <Label text="Sampling method" GridPane.rowIndex="3" />
+                  <ComboBox fx:id="sampling_combobox" onAction="#changeSamplingMethod" prefWidth="150.0" promptText="Random" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <TextField fx:id="numberOfDivisions_textfield" maxWidth="50.0" minWidth="40.0" onAction="#updateNumberOfDivisions" prefHeight="25.0" prefWidth="50.0" text="1000" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Label text="Number of datasets" GridPane.rowIndex="2" />
+                  <TextField fx:id="numberOfDatasets_textfield" maxWidth="50.0" onAction="#updateNumberOfDatasets" prefHeight="25.0" text="1000" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                </children>
             </GridPane>
             <Button fx:id="generate_button" layoutX="280.0" layoutY="624.0" mnemonicParsing="false" onAction="#generateData" text="Generate topic models">
@@ -194,7 +191,6 @@
                   <Font name="System Bold" size="14.0" />
                </font>
             </Label>
-            <CheckBox fx:id="parameterCoupling_checkbox" layoutX="80.0" layoutY="351.0" mnemonicParsing="false" text="Couple parameter intervals" />
             <Separator layoutX="39.0" layoutY="56.0" prefHeight="3.0" prefWidth="614.0" />
             <Separator layoutX="39.0" layoutY="404.0" prefHeight="3.0" prefWidth="614.0" />
             <Separator layoutX="39.0" layoutY="596.0" prefHeight="3.0" prefWidth="614.0" />

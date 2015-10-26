@@ -32,7 +32,6 @@ public class CoreController extends Controller
 {
 	private @FXML Node root;
 	
-	private @FXML ImageView icon_settings;
 	private @FXML ImageView icon_help;
 	private @FXML ImageView icon_lock;
 	
@@ -85,7 +84,6 @@ public class CoreController extends Controller
 		workspace		= new Workspace("");
 		
 		blockAnalysisView();
-		blockSettingsView();
 		blockHelpView();
 		
 		// Enable logging in workspace.
@@ -330,12 +328,6 @@ public class CoreController extends Controller
 	{
 		icon_analyze.setDisable(true);
 		icon_analyze.setEffect(new ColorAdjust(0, 0, 0.75, 0));
-	}
-	
-	public void blockSettingsView()
-	{
-		icon_settings.setDisable(true);
-		icon_settings.setEffect(new ColorAdjust(0, 0, 0.75, 0));
 	}
 	
 	public void blockHelpView()
