@@ -467,7 +467,7 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 							Color color								= ColorScale.getColorForValue(	adjustedKeywordProbabilityValue, 
 																									Math.pow(keywordProbabilitySumOverTopicsMin, colorExponent), 
 																									Math.pow(keywordProbabilitySumOverTopicsMax, colorExponent), 
-																									Color.BLUE, Color.DARKRED);
+																									Color.RED, Color.DARKRED);
 							
 							// Set color.
 							gc.setStroke(color); 

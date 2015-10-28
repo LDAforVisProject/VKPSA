@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import model.workspace.Workspace;
 import model.workspace.WorkspaceAction;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -44,8 +45,7 @@ public class LoadController extends DataSubViewController
 		directoryChooser = new DirectoryChooser();
 
 		// Set default directory, if specified.
-		// @todo Read from settings file.
-		directoryChooser.setInitialDirectory(new File("D:\\Workspace\\Scientific Computing\\VKPSA\\src\\data"));	
+		directoryChooser.setInitialDirectory(new File("D:\\Workspace\\Scientific Computing\\VKPSA_data"));	
 		
 		directoryChooser.setTitle("Choose Workspace");
 		
@@ -259,7 +259,7 @@ public class LoadController extends DataSubViewController
 	public void resizeContent(double width, double height)
 	{
 	}
-
+	
 	@Override
 	protected Map<String, Integer> prepareOptionSet()
 	{

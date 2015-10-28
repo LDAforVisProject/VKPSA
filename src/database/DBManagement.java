@@ -182,20 +182,20 @@ public class DBManagement
 	public Map<LDAConfiguration, Dataset> loadRawData(WorkspaceTask task)
 	{
 		// Check if number of keywords was determined correctly. If not, try again.
-		if (numberOfKeywordsPerTopic < 0) {
+		if (numberOfKeywordsPerTopic <= 0) {
 			readNumberOfKeywords(true);
-			
+
 			// If failing again: No data available, return.
 			if (numberOfKeywordsPerTopic < 0) {
 				System.out.println("### WARNING ### No keyword/topic associations in database. Returning empty collection.");
 				return new HashMap<LDAConfiguration, Dataset>();
 			}
 		}
-		
+
 		// Init auxiliary variables.
-		int count			= 0;
-		ResultSet rs		= null;
-		int numberOfResults	= readNumberOfKeywordInTopicDatasets();
+		int count					= 0;
+		ResultSet rs				= null;
+		final int numberOfResults	= readNumberOfKeywordInTopicDatasets();
 		
 		// Init primary collection.
 		Map<LDAConfiguration, Dataset> datasetMap = new HashMap<LDAConfiguration, Dataset>();
@@ -205,7 +205,7 @@ public class DBManagement
 								"join keywords kw on kw.keywordID = kit.keywordID " +
 								"join ldaConfigurations lda on lda.ldaConfigurationID = kit.ldaConfigurationID " +
 								"order by lda.ldaConfigurationID, topicID";
-		
+
 		try {
 			// Store all created topics for each dataset/LDA configuration in here.
 			Map<LDAConfiguration, ArrayList<Topic>> ldaConfigTopics	= new HashMap<LDAConfiguration, ArrayList<Topic>>();
@@ -266,12 +266,15 @@ public class DBManagement
 				task.updateTaskProgress(count++, numberOfResults);
 			}
 			
+			System.out.println("4");
 			// For last dataset: Flush data, create last dataset.
         	// 	1. Create new topic out of collected keyword/probability pairs.
         	ldaConfigTopics.get(currLDAConfig).add(new Topic(currTopicID, keywordProbabilityMap));
         	// 	2. Create new dataset out of collected topics.
         	Dataset test = new Dataset(currLDAConfig, ldaConfigTopics.get(currLDAConfig));
         	datasetMap.put( currLDAConfig, test );
+        	
+        	System.out.println("5");
         	
 //			System.out.println(count + " rows.");
 		}
@@ -306,17 +309,24 @@ public class DBManagement
 		return -1;
 	}
 	
+	/**
+	 * Read number of keywords in all topics.
+	 * @return
+	 */
 	private int readNumberOfKeywordInTopicDatasets()
 	{
-		String query = 	"select count(*) as resCount from keywordInTopic kit " +
-						"join keywords kw on kw.keywordID = kit.keywordID " +
-						"join ldaConfigurations lda on lda.ldaConfigurationID = kit.ldaConfigurationID " +
-						"order by lda.ldaConfigurationID, topicID";
+		// Original, exact query:
+//		String query = 	"select count(*) as resCount from keywordInTopic kit " +
+//						"join keywords kw on kw.keywordID = kit.keywordID " +
+//						"join ldaConfigurations lda on lda.ldaConfigurationID = kit.ldaConfigurationID " +
+//						"order by lda.ldaConfigurationID, topicID";
+		// Approximate, faster query:
+		String query = "select count(*) * " + numberOfKeywordsPerTopic + " resCount from topics";
 		
 		try {
 			// Parse statement.
 			PreparedStatement stmt	= connection.prepareStatement(query);
-			
+
 			// Fetch results.
 			ResultSet rs			= stmt.executeQuery();
 			

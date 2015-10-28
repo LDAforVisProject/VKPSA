@@ -379,7 +379,7 @@
                                                                </children>
                                                             </GridPane>
                                                             <Label text="Bind to" GridPane.rowIndex="3" />
-                                                            <ComboBox fx:id="paramDistributionHeatmap_datasetBinding_combobox" onAction="#changeParamDistributionHeatmapDataBinding" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                                            <ComboBox fx:id="paramDistributionHeatmap_datasetBinding_combobox" disable="true" onAction="#changeParamDistributionHeatmapDataBinding" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                                                          </children>
                                                       </GridPane>
                                                       <Separator prefWidth="200.0">

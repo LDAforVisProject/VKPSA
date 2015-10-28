@@ -41,18 +41,15 @@ public class Task_GenerateData extends WorkspaceTask
 			 * Pattern:
 			 *  	PYTHON_PATH LDA_SCRIPT_PATH -p PASS_COUNT -m MODE -i INPUT_PATH -o OUTPUT_PATH
 			 * Example:
-			 * 		D:\Programme\Python27\python.exe D:\Workspace\LDA\analysis\Nexus.py -p 1 -m 'sample' -i 'D:\Workspace\Scientific Computing\VKPSA\src\data\toGenerate.lda' -o 'D:\Workspace\Scientific Computing\VKPSA\src\data'
+			 * 		"D:\Programme\Python27\python.exe" "D:\Workspace\LDA\analysis\Nexus.py" -p 15 -m sample -i "D:\Workspace\Scientific Computing\VKPSA_data\toGenerate.lda" -o "D:\Workspace\Scientific Computing\VKPSA_data\vkpsa.db"
+
 			 */ 
 
 			String python_path	= configurationOptions.get("python_path");
 			String lda_path		= configurationOptions.get("lda_path");
-			// @todo Add pass count as option to interface (?).
 			int pass_count		= Integer.parseInt(configurationOptions.get("pass_count"));
 			String input_path	= Paths.get(workspace.getDirectory(), Workspace.FILENAME_TOGENERATE).toString();
-			String output_path	= workspace.getDirectory();
-			
-			// Get current time (before starting the execution of the LDA script).
-//			long beforeGeneration = new Date().getTime();
+			String output_path	= workspace.getDirectory() + "\\" + workspace.DBNAME;
 			
 			/*
 			 * Start multiple threads each processing a part of the parameter file list.
@@ -60,18 +57,18 @@ public class Task_GenerateData extends WorkspaceTask
 			
 			// Close DB connection before Python script is using it.
 			workspace.closeDB();
-			
+
 			// Put command in quotation marks to account for space-containing paths.
 			String command = "\"" + python_path + "\" \"" + lda_path + "\" -p " + pass_count + " -m sample -i \"" + input_path + "\" -o \"" + output_path + "\"";
 			System.out.println("Executing LDA with command\n\t" + command);
 			
 			// Execute system call with command.
-			// Be careful: Only tested on a Windows 7 / 64-bit environment.
+			// Be careful, hic sunt dragones: Only tested on a Windows 7 / 64-bit environment.
 			Process process = Runtime.getRuntime().exec(command);
 			
 			// Consume messages from input stream.
 			consumeProcessOutputStreams(process, configurationsToGenerate.size());
-			
+				
 	      	// Finish only after child process(es) has/have finished.
 	      	//process.waitFor();
 

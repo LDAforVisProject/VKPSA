@@ -70,10 +70,6 @@ public class Workspace implements ITaskListener
 	/**
 	 * Name of file containing already calculated MDS coordinates.
 	 */
-	public static final String FILENAME_DISTANCES		= "workspace.dis";	 
-	/**
-	 * Name of file containing already calculated MDS coordinates.
-	 */
 	public static final String FILENAME_MDSCOORDINATES	= "workspace.mds";
 	/**
 	 * Name of file containing parameters that have yet to be calculated.
@@ -423,16 +419,6 @@ public class Workspace implements ITaskListener
 	}
 	
 	/**
-	 * Checks if .dis file exists.
-	 * @deprecated
-	 * @return
-	 */
-	public boolean containsDISFile()
-	{
-		return Files.exists(Paths.get(directory, Workspace.FILENAME_DISTANCES));
-	}
-	
-	/**
 	 * Checks whether or not the .dis and .mds files are consistent with the data files contained in the workspace.
 	 * Executed after all available metadata was loaded.
 	 * Does check for integrity, does not check for completeness.
@@ -763,11 +749,6 @@ public class Workspace implements ITaskListener
 	public void setConfigurationsToGenerate(ArrayList<LDAConfiguration> parameterValuesToGenerate)
 	{
 		this.configurationsToGenerate = parameterValuesToGenerate;
-	}
-
-	public static String getFilenameDistances()
-	{
-		return FILENAME_DISTANCES;
 	}
 
 	public static String getFilenameMdscoordinates()

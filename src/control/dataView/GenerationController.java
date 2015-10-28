@@ -7,18 +7,11 @@ import java.util.Map;
 import java.util.Random;
 import java.util.ResourceBundle;
 
-import javax.xml.ws.handler.MessageContext.Scope;
-
 import model.LDAConfiguration;
 import model.workspace.WorkspaceAction;
-import model.workspace.tasks.Task_CollectMetadata;
 
 import org.controlsfx.control.RangeSlider;
 
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -31,7 +24,6 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
