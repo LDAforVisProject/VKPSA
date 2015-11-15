@@ -15,8 +15,15 @@ import java.util.Set;
 
 
 
+
+
+import com.sun.javafx.charts.Legend;
+
+import javafx.collections.ListChangeListener;
+import javafx.collections.ListChangeListener.Change;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.chart.NumberAxis;
@@ -24,6 +31,7 @@ import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyCode;
@@ -63,6 +71,10 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 	 * NumberAxis on y-axis. 
 	 */
 	private NumberAxis scatterchart_yAxis;
+	/**
+	 * Contains references to labels in scatterchart legend.
+	 */
+	private Map<String, Label> scatterchartLegendLabels;
 	
 	/**
 	 * Component enabling rubberband-type selection of points in scatterchart.
@@ -248,21 +260,62 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 		selectionMode							= SelectionMode.GROUP;
 		pointsManipulatedInCurrSelectionStep	= new HashSet<Integer>();
 		
+		// Init data series.
+		initDataSeries();
+		
 		// Init scatterchart.
 		initScatterchart();
 		
 		// Init heatmap.
 		initHeatmap();
-		
-		// Init data series.
-		initDataSeries();
 	}
 
+	/**
+	 * Updates references to lables in scatterchart legend.
+	 * Sets color according to data series.
+	 */
+	@SuppressWarnings("restriction")
+	private void updateLegendLabels()
+	{
+		for (Node n : scatterchart.getChildrenUnmodifiable()) { 
+			if (n instanceof Legend) { 
+				final Legend legend = (Legend) n;
+				
+				for (Node legendNode : legend.getChildren()) {
+					if (legendNode instanceof Label) {
+						Label label = (Label)legendNode;
+						
+						String txt = "";
+                		if (label.getText().contains("Discarded") && discardedIndices != null) {
+                			txt = "Discarded (" + discardedIndices.size() + ")";
+	            		}
+	            		
+	            		else if (label.getText().contains("Filtered") && filteredIndices != null) {
+	            			txt = "Filtered (" + (filteredIndices.size() - selectedMDSPoints.size()) + ")";
+	            		}
+	            		
+	            		else if (label.getText().contains("Selected") && selectedIndices != null) {
+	            			txt = "Selected (" + selectedMDSPoints.size() + ")";
+	            		}
+                		
+            			label.setText(txt);
+					}
+					
+				}
+	        }
+	    }	
+	}
+	
 	private void initDataSeries()
 	{
 		discardedDataSeries.setName("Discarded");
 		filteredDataSeries.setName("Filtered");
 		selectedDataSeries.setName("Selected");
+		
+		scatterchartLegendLabels = new HashMap<String, Label>(3);
+		scatterchartLegendLabels.put("Discarded", null);
+		scatterchartLegendLabels.put("Filtered", null);
+		scatterchartLegendLabels.put("Selected", null);
 		
 		scatterchart.getData().add(discardedDataSeries);
         scatterchart.getData().add(filteredDataSeries);
@@ -284,6 +337,9 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 		scatterchart_yAxis.setForceZeroInRange(false);
 		
         scatterchart.setVerticalGridLinesVisible(true);
+        
+        // Init automatic update of references to labels in legend.
+        updateLegendLabels();
         
         // Add rubberband selection tool.
         rubberbandSelection = new RubberBandSelection((Pane) scatterchart.getParent(), this);
@@ -585,6 +641,11 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 		this.selectedIndices		= selectedIndices;
 		this.discardedCoordinates	= discardedCoordinates;
 		this.discardedIndices		= discardedIndices;
+		
+		// Update information about number of datapoints.
+		discardedDataSeries.setName("Discarded (" + discardedIndices.size() + ")");
+		filteredDataSeries.setName("Filtered (" + filteredIndices.size() + ")");
+		selectedDataSeries.setName("Selected (" + selectedIndices.size() + ")");
 		
 		// Clear scatterchart.
 		scatterchart.getData().clear();
@@ -900,6 +961,9 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
     		
     		// Reset flag.
     		changeInSelectionDetected = false;
+    		
+    		// Update data series names with number of datasets.
+    		updateLegendLabels();
 		}
 	}
 	

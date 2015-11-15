@@ -43,10 +43,6 @@ public class LoadController extends DataSubViewController
 		
 		// Init file chooser.
 		directoryChooser = new DirectoryChooser();
-
-		// Set default directory, if specified.
-		directoryChooser.setInitialDirectory(new File("D:\\Workspace\\Scientific Computing\\VKPSA_data"));	
-		
 		directoryChooser.setTitle("Choose Workspace");
 		
 		// Set progress value.
@@ -61,6 +57,9 @@ public class LoadController extends DataSubViewController
 	public void setDataViewController(DataViewController dataViewController)
 	{
 		this.dataViewController = dataViewController;
+		
+		// Set default directory, if specified.
+		directoryChooser.setInitialDirectory(new File(dataViewController.getInitialWorkspaceDirectory()));	
 	}
 	
 	@FXML

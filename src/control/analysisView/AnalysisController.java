@@ -195,28 +195,6 @@ public class AnalysisController extends Controller
 	private @FXML Slider slider_parameterSpace_distribution_granularity;
 	private @FXML CheckBox checkbox_parameterSpace_distribution_dynAdjustment;
 	private @FXML ComboBox<String> paramDistributionHeatmap_datasetBinding_combobox;
-	/**
-	 * Stores heatmap's current data binding (filtered or selected data).
-	 */
-	private HeatmapDataBinding paramSpaceHeatmap_dataBinding;
-	
-	/*
-	 * Parameter Space - Distance correlation.
-	 */
-	
-	/**
-	 * DDCLinechart component.
-	 */
-	private DistanceDifferenceCorrelationLinechart parameterspace_ddc_linechart;
-	
-	private @FXML LineChart<Float, Double> linechart_distanceCorrelation;
-	private @FXML NumberAxis numberAxis_distanceCorrelation_xAxis;
-	private @FXML NumberAxis numberAxis_distanceCorrelation_yAxis;
-	private @FXML VBox vbox_ddcHoverInformation;
-	
-	private @FXML CheckBox checkbox_ddc_alpha;
-	private @FXML CheckBox checkbox_ddc_kappa;
-	private @FXML CheckBox checkbox_ddc_eta;
 	
 	/*
 	 * Local scope.
@@ -422,7 +400,6 @@ public class AnalysisController extends Controller
 		initFilterControls();
 		initMDSScatterchart();
 		initDistanceBarchart();
-		initDDCLineChart();
 		initParameterSpaceHeatmaps();
 		initLocalScopeView();
 	}
@@ -434,15 +411,6 @@ public class AnalysisController extends Controller
 															slider_localScope_numTopicsToUse, textfield_localScope_numTopicsToUse,
 															slider_localScope_numKeywordsToUse, textfield_localScope_numKeywordsToUse);
 		localScopeInstance.load();
-	}
-	
-	private void initDDCLineChart()
-	{
-		parameterspace_ddc_linechart = new DistanceDifferenceCorrelationLinechart(
-											this, linechart_distanceCorrelation, 
-											numberAxis_distanceCorrelation_xAxis, numberAxis_distanceCorrelation_yAxis,
-											vbox_ddcHoverInformation, button_relativeView_paramDC,
-											checkbox_ddc_alpha, checkbox_ddc_eta, checkbox_ddc_kappa);
 	}
 
 	private void initFilterControls()
@@ -619,13 +587,11 @@ public class AnalysisController extends Controller
 									dataspace.getDiscardedCoordinates(), dataspace.getDiscardedIndices());
 
 		//	Distance evaluation barchart:
+		System.out.println("tst: " + dataspace.getReductiveFilteredDistances());
 		distancesBarchart.refresh(	dataspace.getDiscardedIndices(), dataspace.getFilteredIndices(), dataspace.getSelectedIndices(),
 									dataspace.getDiscardedDistances(), dataspace.getFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
 									true);
 
-		// 	Parameter dataset distance correlation: 
-		parameterspace_ddc_linechart.refresh(dataspace.getFilteredLDAConfigurations(), dataspace.getFilteredDistances(), true);
-		
 		// 	Heatmaps:
 		refreshParameterspaceHeatmaps();
 		
@@ -671,6 +637,7 @@ public class AnalysisController extends Controller
 			dataspace.updateSelectedDistanceMatrix();
 			dataspace.updateSelectedLDAConfigurations();
 			dataspace.updateSelectedCoordinateMatrix();
+			dataspace.updateReductiveFilteredDistanceMatrix();
 			
 			// Refresh other (than MDSScatterchart) visualizations.
 			
@@ -826,11 +793,12 @@ public class AnalysisController extends Controller
 		dataspace.updateSelectedDistanceMatrix();
 		dataspace.updateSelectedLDAConfigurations();
 		dataspace.updateSelectedCoordinateMatrix();
+		dataspace.updateReductiveFilteredDistanceMatrix();
 
 		// 4.	Refresh visualizations.
 		// 	Distances barchart:
 		distancesBarchart.refresh(		dataspace.getDiscardedIndices(), dataspace.getFilteredIndices(), dataspace.getSelectedIndices(),
-										dataspace.getDiscardedDistances(), dataspace.getFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
+										dataspace.getDiscardedDistances(), dataspace.getReductiveFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
 										true);
 		// 	MDS scatterchart:
 		mdsScatterchart.refresh(		dataspace.getCoordinates(),
@@ -1189,10 +1157,6 @@ public class AnalysisController extends Controller
 			
 			count++;
 		}
-		
-		
-		// Refresh line chart.
-		parameterspace_ddc_linechart.refresh(filteredLDAConfigurations, filteredDistances, true);
 	}
 	
 	@FXML
@@ -1215,19 +1179,6 @@ public class AnalysisController extends Controller
 		}
 	}
 	
-	public void updateLinechartInfo(boolean show, ArrayList<Label> labels)
-	{
-		if (show) {
-			vbox_ddcHoverInformation.getChildren().clear();
-			vbox_ddcHoverInformation.setVisible(true);
-			vbox_ddcHoverInformation.getChildren().addAll(labels);
-		}
-		
-		else {
-			vbox_ddcHoverInformation.setVisible(false);
-		}
-	}
-	
 	@FXML
 	public void changeVisualizationViewMode(ActionEvent e)
 	{
@@ -1241,10 +1192,6 @@ public class AnalysisController extends Controller
 			case "button_relativeView_paramDist_filtered":
 			case "button_relativeView_paramDist_selected":
 				updateHeatmap(e);
-			break;
-			
-			case "button_relativeView_paramDC":
-				parameterspace_ddc_linechart.changeViewMode();
 			break;
 		}
 	}

@@ -56,6 +56,10 @@ public class AnalysisDataspace
 	 */
 	private double filteredDistances[][];
 	/**
+	 * Stores filtered distances - without distances from and to selected datapoints.
+	 */
+	private double reductiveFilteredDistances[][];
+	/**
 	 * List of filtered LDA configurations.
 	 */
 	private ArrayList<LDAConfiguration> filteredLDAConfigurations;
@@ -327,6 +331,15 @@ public class AnalysisDataspace
 	 * Updates selected distance matrix.
 	 * @param selectedFilteredIndices
 	 */
+	public void updateReductiveFilteredDistanceMatrix()
+	{
+		this.reductiveFilteredDistances = createReductiveFilteredDistanceMatrix(this.filteredIndices, this.selectedFilteredIndices);
+	}
+	
+	/**
+	 * Updates selected distance matrix.
+	 * @param selectedFilteredIndices
+	 */
 	public void updateSelectedDistanceMatrix()
 	{
 		this.selectedFilteredDistances = createSelectedDistanceMatrix(this.selectedFilteredIndices);
@@ -355,6 +368,38 @@ public class AnalysisDataspace
 		}
 		
 		return filteredSelectedDistances;
+	}
+	
+	/**
+	 * Creates distance matrix for all datapoints part of the filtered, but not of the selected dataset.
+	 * @param filteredIndices
+	 * @param selectedIndices
+	 * @return
+	 */
+	public double[][] createReductiveFilteredDistanceMatrix(Set<Integer> filteredIndices, Set<Integer> selectedIndices)
+	{
+		// Copy actual distance data in array.
+		final int size = filteredIndices.size() - selectedIndices.size();
+		double[][] reductiveFilteredDistances = new double[size][size];
+		
+		System.out.println("size = " + size + ", " + filteredIndices.size() + "; " + selectedIndices.size());
+		int count = 0;
+		
+		for (int index : filteredIndices) {
+			if (!selectedIndices.contains(index)) {
+				int innerCount = 0;
+				for (int innerIndex : filteredIndices) {
+					if (!selectedIndices.contains(innerIndex)) {
+						reductiveFilteredDistances[count][innerCount] = distances[index][innerIndex];
+						innerCount++;
+					}
+				}
+				
+				count++;
+			}
+		}
+		
+		return reductiveFilteredDistances;
 	}
 	
 	/**
@@ -526,7 +571,8 @@ public class AnalysisDataspace
 		// Update set of filtered and selected values.
 		selectedCoordinates					= createSelectedCoordinateMatrix(selectedFilteredIndices);
 		selectedFilteredDistances			= createSelectedDistanceMatrix(selectedFilteredIndices);
-		selectedLDAConfigurations	= createSelectedLDAConfigurations(selectedFilteredIndices);
+		selectedLDAConfigurations			= createSelectedLDAConfigurations(selectedFilteredIndices);
+		reductiveFilteredDistances			= createReductiveFilteredDistanceMatrix(filteredIndices, selectedFilteredIndices);
 	}
 	
 	// -----------------------------------------------
@@ -598,6 +644,12 @@ public class AnalysisDataspace
 		return selectedFilteredDistances;
 	}
 
+	public double[][] getReductiveFilteredDistances()
+	{
+		return reductiveFilteredDistances;
+	}
+
+	
 	public ArrayList<LDAConfiguration> getSelectedLDAConfigurations()
 	{
 		return selectedLDAConfigurations;

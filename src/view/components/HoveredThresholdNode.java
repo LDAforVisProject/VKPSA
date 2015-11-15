@@ -15,8 +15,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
 /** 
- * A node which displays a value on hover, but is otherwise empty.
+ * A node which displays a value on hover, but is otherwise empty. Used in DistanceDifferenceCorrelationLinechart.
  * Source: https://gist.github.com/jewelsea/4681797 (modified)
+ * @deprecated
  */
 public class HoveredThresholdNode extends StackPane
 {
@@ -45,7 +46,7 @@ public class HoveredThresholdNode extends StackPane
 					vbox_lables.getChildren().addAll(labels);
 					vbox_lables.getStyleClass().addAll("chart-line-symbol");
 					
-					analysisController.updateLinechartInfo(true, labels);
+//					analysisController.updateLinechartInfo(true, labels);
 					
 					HoveredThresholdNode target = (HoveredThresholdNode)mouseEvent.getSource();
 					target.setScaleX(2.25);
@@ -60,7 +61,7 @@ public class HoveredThresholdNode extends StackPane
 				@Override
 				public void handle(MouseEvent mouseEvent)
 				{
-					analysisController.updateLinechartInfo(false, null);
+//					analysisController.updateLinechartInfo(false, null);
 					getChildren().clear();
 					
 					HoveredThresholdNode target = (HoveredThresholdNode)mouseEvent.getSource();

@@ -566,7 +566,7 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 	@Override
 	public Pair<Integer, Integer> provideOffsets()
 	{
-		return new Pair<Integer, Integer>(68, 45);
+		return new Pair<Integer, Integer>(66, 45);
 	}
 
 	@Override

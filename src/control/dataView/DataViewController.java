@@ -248,4 +248,13 @@ public class DataViewController extends Controller
 	{
 		return null;
 	}
+	
+	/**
+	 * Fetches initial workspace directory.
+	 * @return
+	 */
+	public String getInitialWorkspaceDirectory()
+	{
+		return coreController.getInitialWorkspaceDirectory();
+	}
 }

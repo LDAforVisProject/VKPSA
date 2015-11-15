@@ -53,10 +53,6 @@ public class Task_CalculateMDSCoordinates extends WorkspaceTask
 			}	
 		}
 		System.out.println("delta = " + delta);
-		
-//		System.out.println(Data.format(distances));
-//		System.out.println("------");
-		System.out.println(Data.format(output));
 			
 		try {
 			String path			= Paths.get(workspace.getDirectory(), Workspace.FILENAME_MDSCOORDINATES).toString();

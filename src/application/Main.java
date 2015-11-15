@@ -17,6 +17,11 @@ import control.CoreController;
 
 public class Main extends Application
 {
+	/**
+	 * Holds all command line arguments.
+	 */
+	private static String args[];
+	
 	@Override
 	public void start(Stage primaryStage)
 	{	
@@ -73,7 +78,8 @@ public class Main extends Application
 			Scene scene						= new Scene(root);
 			
 			coreController.setScene(scene);
-	        primaryStage.setTitle("VKPSA");
+			coreController.setInitialWorkspaceDirectory(args[0]);
+			primaryStage.setTitle("VKPSA");
 	        primaryStage.setScene(scene);
 	        primaryStage.show();
 	        
@@ -110,6 +116,9 @@ public class Main extends Application
 	
 	public static void main(String[] args)
 	{
+		// Copy CLI arguments.
+		Main.args = args;
+		// Launch application.
 		launch(args);
 	}
 

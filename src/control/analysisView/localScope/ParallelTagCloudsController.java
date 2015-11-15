@@ -10,13 +10,17 @@ import view.components.ColorScale;
 import model.LDAConfiguration;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
 import javafx.util.Pair;
 
 public class ParallelTagCloudsController extends LocalScopeVisualizationController
@@ -29,6 +33,15 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 	 * Canvas used to paint connections between words.
 	 */
 	protected @FXML Canvas canvas;
+	
+	/**
+	 * Label for ID of topic 1.
+	 */
+	private Label topic1ID_label;
+	/**
+	 * Label for ID of topic 2.
+	 */
+	private Label topic2ID_label;
 	
 	/**
 	 * Container holding VBoxes of labels.
@@ -112,7 +125,14 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 		currentIndex						= 0;
 		keywordProbabilitySumOverTopicsMax	= 0;
 		keywordProbabilitySumOverTopicsMin	= Double.MAX_VALUE;
-		selectedKeyword						= "";		
+		selectedKeyword						= "";
+		
+		// Init GUI elements.
+		topic1ID_label						= new Label();
+		topic2ID_label						= new Label();
+		topic1ID_label.setId("topic1ID_label");
+		topic1ID_label.setId("topic2ID_label");
+		topic1ID_label.setFont(Font.font("Verdana", FontPosture.ITALIC, 10));
 	}
 			
 	/**
@@ -150,11 +170,21 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 	    ArrayList<Double> probabilitySums = new ArrayList<Double>(numberOfTopics);
 	    
 	    /*
+	     *	0. Place labels. 
+	     */
+	    AnchorPane node = (AnchorPane) canvas.getParent(); 
+	    // Add, if not already added.
+	    if (!node.getChildren().contains(topic1ID_label)) {
+	    	node.getChildren().add(topic1ID_label);
+	    	node.getChildren().add(topic2ID_label);
+	    }
+	    
+	    /*
 		 * 1. Create tag clouds, fill them with data.
 		 */
 	    
 	    createTagClouds(numberOfTopics, probabilitySums);
-
+    	
 		/*
 		 * 2. Adjust tag font sizes. 
 		 */
@@ -166,6 +196,14 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 	     */
 	   
 	    drawBridges(data, numberOfTopics, numberOfKeywords);
+	    
+	    /*
+	     * 4. Place labels above tag clouds, set text.
+	     */
+    	topic1ID_label.setLayoutX(canvas.getWidth() / 2 - 86 / 2 - 10);
+    	topic1ID_label.setText(	selectedTopicConfigurations.get(0).getKey() + "#" + selectedTopicConfigurations.get(0).getValue() +
+    							" ⇔ " + 
+    							selectedTopicConfigurations.get(1).getKey() + "#" + selectedTopicConfigurations.get(1).getValue());
 	}
 	
 	@Override

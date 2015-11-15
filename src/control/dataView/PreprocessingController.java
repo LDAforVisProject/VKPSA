@@ -206,18 +206,18 @@ public class PreprocessingController extends DataSubViewController
 		button_calculateMDSCoordinates.setDisable(false);
 		
 		checkbox_appendToDistanceMatrix.setDisable(false);
-		checkbox_appendToMDSCoordinateMatrix.setDisable(false);
+//		checkbox_appendToMDSCoordinateMatrix.setDisable(false);
 
-		 checkbox_bhattacharyya.setDisable(false);
-		 checkbox_hellinger.setDisable(false);
-		 checkbox_jensenshannon.setDisable(false);
-		 checkbox_kullbackleibler.setDisable(false);
-		 checkbox_l2.setDisable(false);
+//		 checkbox_bhattacharyya.setDisable(false);
+//		 checkbox_hellinger.setDisable(false);
+//		 checkbox_jensenshannon.setDisable(false);
+//		 checkbox_kullbackleibler.setDisable(false);
+//		 checkbox_l2.setDisable(false);
 		
-		 checkbox_hausdorff.setDisable(false);
-		 checkbox_avgmin.setDisable(false);
+//		 checkbox_hausdorff.setDisable(false);
+//		 checkbox_avgmin.setDisable(false);
 		 
-		 combobox_scalingAlgorithm.setDisable(false);
+//		 combobox_scalingAlgorithm.setDisable(false);
 	}
 
 

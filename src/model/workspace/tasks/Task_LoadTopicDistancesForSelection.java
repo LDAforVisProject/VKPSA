@@ -7,6 +7,7 @@ import java.util.Random;
 
 import javafx.util.Pair;
 import database.DBManagement;
+import mdsj.Data;
 import model.LDAConfiguration;
 import model.workspace.Workspace;
 import model.workspace.WorkspaceAction;
@@ -96,7 +97,7 @@ public class Task_LoadTopicDistancesForSelection extends WorkspaceTask
 		// Start JSON object for topic distances.
 		json_topicDistancesString	= "[";
 
-		// "Normalize" distances by subtracting the minimum.
+		// Normalize distances.
 		normalizeDistances(topicDistances);
 		
 		// Iterate over all topics.
@@ -121,7 +122,7 @@ public class Task_LoadTopicDistancesForSelection extends WorkspaceTask
 			json_topicDistancesString += "[";
 			for (int i = 0; i < topicDistances.length; i++) {
 				// Grab and append distance from this topic to all other topics - to be found in row spatialID / column i.
-				double adaptedDistanceValue 	 	 = topicDistances[spatialID][i] <= 0 ? 0 : Math.pow(1 / topicDistances[spatialID][i], 1.5);
+				double adaptedDistanceValue 	 	 = topicDistances[spatialID][i] <= 0 ? 0 : 1 / Math.pow(topicDistances[spatialID][i], 2);
 				json_topicDistancesString 			+= adaptedDistanceValue + ",";
 				distanceSum 						+= adaptedDistanceValue;
 			}
@@ -161,19 +162,21 @@ public class Task_LoadTopicDistancesForSelection extends WorkspaceTask
 	{
 		// Find minimal distance.
 		double minDistance	= Double.MAX_VALUE;
+		double maxDistance	= Double.MIN_VALUE;
 		
 		for (int i = 0; i < topicDistances.length; i++) {
 			for (int j = 0; j < topicDistances.length; j++) {
 				if (topicDistances[i][j] > 0)
 					minDistance = topicDistances[i][j] < minDistance ? topicDistances[i][j] : minDistance;
+					maxDistance = topicDistances[i][j] > maxDistance ? topicDistances[i][j] : maxDistance;
 			}	
 		}
 		
-		// Subtract minimal distance from all values.
+		// Subtract minimal distance from all values, normalize to values (between 0 and 1) * 10.
 		for (int i = 0; i < topicDistances.length; i++) {
 			for (int j = 0; j < topicDistances.length; j++) {
 				if (topicDistances[i][j] > 0)
-					topicDistances[i][j] -= minDistance;
+					topicDistances[i][j] = 10 * (topicDistances[i][j] - minDistance) / (maxDistance - minDistance);
 			}
 		}
 	}

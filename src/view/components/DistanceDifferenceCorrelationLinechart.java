@@ -20,6 +20,11 @@ import javafx.util.Pair;
 import control.analysisView.AnalysisController;
 import view.components.HoveredThresholdNode;
 
+/**
+ * 
+ * @author RM
+ * @deprecated
+ */
 public class DistanceDifferenceCorrelationLinechart extends	VisualizationComponent
 {
 	/*

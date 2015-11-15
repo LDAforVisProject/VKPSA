@@ -70,6 +70,14 @@ public class CoreController extends Controller
 	 */
 	private Map<String, Node> viewNodeMap;
 	
+	/**
+	 * Inital workspace directory (suggestion) in file chooser dialogue.
+	 */
+	private String initialWorkspaceDirectory;
+	
+	// ----------------------------------------------------
+	//					Methods
+	// ----------------------------------------------------
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources)
@@ -369,5 +377,23 @@ public class CoreController extends Controller
 	protected Map<String, Integer> prepareOptionSet()
 	{
 		return null;
+	}
+
+	/**
+	 * Sets intial workspace directory when file browser is used.
+	 * @param string
+	 */
+	public void setInitialWorkspaceDirectory(String initialWorkspaceDirectory)
+	{
+		this.initialWorkspaceDirectory = initialWorkspaceDirectory; 
+	}
+	
+	/**
+	 * Fetches initial workspace directory.
+	 * @return
+	 */
+	public String getInitialWorkspaceDirectory()
+	{
+		return initialWorkspaceDirectory;
 	}
 }
