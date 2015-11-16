@@ -21,7 +21,7 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.ImageView;
 
-public class PreprocessingController extends DataSubViewController
+public class PostprocessingController extends DataSubViewController
 {
 	// Buttons.
 	
@@ -58,7 +58,7 @@ public class PreprocessingController extends DataSubViewController
 	@Override
 	public void initialize(URL location, ResourceBundle resources)
 	{
-		System.out.println("Initializing SII_PreprocessingController.");
+		System.out.println("Initializing SII_PostprocessingController.");
 	}
 	
 	@Override

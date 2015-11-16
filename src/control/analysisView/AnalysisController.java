@@ -587,7 +587,6 @@ public class AnalysisController extends Controller
 									dataspace.getDiscardedCoordinates(), dataspace.getDiscardedIndices());
 
 		//	Distance evaluation barchart:
-		System.out.println("tst: " + dataspace.getReductiveFilteredDistances());
 		distancesBarchart.refresh(	dataspace.getDiscardedIndices(), dataspace.getFilteredIndices(), dataspace.getSelectedIndices(),
 									dataspace.getDiscardedDistances(), dataspace.getFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
 									true);
@@ -798,7 +797,7 @@ public class AnalysisController extends Controller
 		// 4.	Refresh visualizations.
 		// 	Distances barchart:
 		distancesBarchart.refresh(		dataspace.getDiscardedIndices(), dataspace.getFilteredIndices(), dataspace.getSelectedIndices(),
-										dataspace.getDiscardedDistances(), dataspace.getReductiveFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
+										dataspace.getDiscardedDistances(), dataspace.getFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
 										true);
 		// 	MDS scatterchart:
 		mdsScatterchart.refresh(		dataspace.getCoordinates(),

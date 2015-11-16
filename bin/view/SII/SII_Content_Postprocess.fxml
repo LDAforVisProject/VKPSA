@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="695.0" prefWidth="605.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.dataView.PreprocessingController">
+<AnchorPane prefHeight="695.0" prefWidth="605.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.dataView.PostprocessingController">
    <children>
       <GridPane layoutX="37.0" layoutY="100.0" prefHeight="548.0" prefWidth="516.0" vgap="5.0">
         <columnConstraints>
@@ -174,7 +174,7 @@
             </AnchorPane>
          </children>
       </GridPane>
-      <Label layoutX="228.0" layoutY="24.0" text="Preprocessing Options">
+      <Label layoutX="228.0" layoutY="24.0" text="Postprocessing Options">
          <font>
             <Font name="System Bold" size="14.0" />
          </font>

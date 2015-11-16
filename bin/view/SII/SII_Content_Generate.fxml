@@ -194,7 +194,7 @@
             <Separator layoutX="39.0" layoutY="56.0" prefHeight="3.0" prefWidth="614.0" />
             <Separator layoutX="39.0" layoutY="404.0" prefHeight="3.0" prefWidth="614.0" />
             <Separator layoutX="39.0" layoutY="596.0" prefHeight="3.0" prefWidth="614.0" />
-            <CheckBox fx:id="includePreprocessing_checkbox" layoutX="76.0" layoutY="630.0" mnemonicParsing="false" selected="true" text="Include preprocessing" />
+            <CheckBox fx:id="includePostprocessing_checkbox" layoutX="76.0" layoutY="630.0" mnemonicParsing="false" selected="true" text="Include postprocessing" />
          </children>
       </AnchorPane>
    </children>

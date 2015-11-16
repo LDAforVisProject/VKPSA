@@ -12,7 +12,7 @@
       <SplitPane dividerPositions="0.525" prefHeight="748.0" prefWidth="1440.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
           <AnchorPane fx:id="generation_anchorpane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
-          <AnchorPane fx:id="preprocessing_anchorpane" minHeight="0.0" minWidth="0.0" prefHeight="517.0" prefWidth="714.0" />
+          <AnchorPane fx:id="postprocessing_anchorpane" minHeight="0.0" minWidth="0.0" prefHeight="517.0" prefWidth="714.0" />
         </items>
       </SplitPane>
    </children>

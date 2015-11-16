@@ -26,7 +26,7 @@ public class DataViewController extends Controller
 	
 	private @FXML AnchorPane root;
 	private @FXML AnchorPane loading_anchorpane;
-	private @FXML AnchorPane preprocessing_anchorpane;
+	private @FXML AnchorPane postprocessing_anchorpane;
 	private @FXML AnchorPane generation_anchorpane;
 	
 	private PopOver workspaceChooser_popover;
@@ -194,7 +194,7 @@ public class DataViewController extends Controller
 			break;
 			
 			case "preprocess":
-				result = preprocessing_anchorpane;
+				result = postprocessing_anchorpane;
 			break;
 				
 			case "generate":
@@ -225,12 +225,12 @@ public class DataViewController extends Controller
 	
 	public ProgressIndicator getProgressIndicator_calculateMDSCoordinates()
 	{
-		return ((PreprocessingController)dataSubViewControllers.get("preprocess")).getProgressIndicator_calculateMDSCoordinates();
+		return ((PostprocessingController)dataSubViewControllers.get("preprocess")).getProgressIndicator_calculateMDSCoordinates();
 	}
 
 	public ProgressIndicator getProgressIndicator_distanceCalculation()
 	{
-		return ((PreprocessingController)dataSubViewControllers.get("preprocess")).getProgressIndicator_distanceCalculation();
+		return ((PostprocessingController)dataSubViewControllers.get("preprocess")).getProgressIndicator_distanceCalculation();
 	}
 	
 	public void setCoreController(CoreController coreController)

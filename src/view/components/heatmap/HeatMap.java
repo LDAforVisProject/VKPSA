@@ -207,7 +207,6 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
 		// If in relative view mode: allLDAConfigurations -> selectedLDAConfigurations.
 		this.allLDAConfigurations		= relativeViewMode ? chosenLDAConfigurations : allLDAConfigurations;
     	this.chosenLDAConfigurations	= chosenLDAConfigurations;
-    	
     	this.key1						= key1;
     	this.key2						= key2;
     	
@@ -254,8 +253,15 @@ public class HeatMap extends VisualizationComponent implements ISelectableCompon
     {
     	// Re-examine LDA configurations, if desired (e.g. after changing the granularity settings).
     	if (reexamineData) {
-    		binnedData = dataType == HeatmapDataType.LDAConfiguration ? examineLDAConfigurations() : examineMDSCoordinateData();
-    		this.refresh(allLDAConfigurations, chosenLDAConfigurations, key1, key2, false, dataBinding);
+    		if (dataType == HeatmapDataType.LDAConfiguration) {
+    			binnedData = examineLDAConfigurations();
+    			this.refresh(allLDAConfigurations, chosenLDAConfigurations, key1, key2, false, dataBinding);
+    		}
+    		
+    		else if (dataType == HeatmapDataType.MDSCoordinates) {
+    			binnedData = examineMDSCoordinateData();
+    			this.refresh(coordinates, coordinateExtrema);
+    		}
     	}
     	
     	else {

@@ -655,30 +655,34 @@ public class MDSScatterchart extends VisualizationComponent implements ISelectab
 		pointsManipulatedInCurrSelectionStep.clear();
 		selectedMDSPoints.clear();
 		
-        // Add filtered points points to scatterchart.
-        addFilteredDataPoints();
-        // Add selected data points to scatterchart.
-        addSelectedDataPoints();
-        // Add discarded data points (greyed out) to scatterchart.
-        addDiscardedDataPoints();
-        
-        // Add data in scatterchart.
-        scatterchart.getData().add(discardedDataSeries);
-        scatterchart.getData().add(filteredDataSeries);
-        scatterchart.getData().add(0, selectedDataSeries);
-        
-        // Redraw scatterchart.
-        scatterchart.layout();
-        scatterchart.applyCss();
-        
-        // Add mouse listeners.
-        addMouseListenersToMDSScatterchart();
-        
+		// Draw only if heatmap is currently not shown. 
+		if (!heatmap_canvas.isVisible()) {
+	        // Add filtered points points to scatterchart.
+	        addFilteredDataPoints();
+	        // Add selected data points to scatterchart.
+	        addSelectedDataPoints();
+	        // Add discarded data points (greyed out) to scatterchart.
+	        addDiscardedDataPoints();
+	        
+	        // Add data in scatterchart.
+	        scatterchart.getData().add(discardedDataSeries);
+	        scatterchart.getData().add(filteredDataSeries);
+	        scatterchart.getData().add(0, selectedDataSeries);
+	        
+	        // Redraw scatterchart.
+	        scatterchart.layout();
+	        scatterchart.applyCss();
+	        
+	        // Add mouse listeners.
+	        addMouseListenersToMDSScatterchart();
+		}    
+		
         // Update heatmap.
         heatmap.refresh(this.filteredCoordinates, globalCoordinateExtrema);
 
         // Update scatterchart ranges.
         updateMDSScatterchartRanges();
+	
 	}
 	
 	/**

@@ -382,9 +382,7 @@ public class AnalysisDataspace
 		final int size = filteredIndices.size() - selectedIndices.size();
 		double[][] reductiveFilteredDistances = new double[size][size];
 		
-		System.out.println("size = " + size + ", " + filteredIndices.size() + "; " + selectedIndices.size());
 		int count = 0;
-		
 		for (int index : filteredIndices) {
 			if (!selectedIndices.contains(index)) {
 				int innerCount = 0;

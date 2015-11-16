@@ -236,7 +236,7 @@ public class CoreController extends Controller
 		 */
 		
         String[] viewIDs				= {"load", "preprocess", "generate"};
-        String[] fxmlFilePaths			= {"/view/SII/SII_Content_Load.fxml", "/view/SII/SII_Content_Preprocess.fxml", "/view/SII/SII_Content_Generate.fxml"};
+        String[] fxmlFilePaths			= {"/view/SII/SII_Content_Load.fxml", "/view/SII/SII_Content_Postprocess.fxml", "/view/SII/SII_Content_Generate.fxml"};
         
         try {
         	// Add all relevant sub-views to DataView.

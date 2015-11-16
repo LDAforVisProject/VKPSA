@@ -52,7 +52,7 @@ public class GenerationController extends DataSubViewController
 	
 	@FXML private Button generate_button;
 	
-	@FXML private CheckBox includePreprocessing_checkbox;
+	@FXML private CheckBox includePostprocessing_checkbox;
 	
 	@FXML private ComboBox<String> sampling_combobox;
 
@@ -551,8 +551,8 @@ public class GenerationController extends DataSubViewController
 			case COLLECT_METADATA:
 				System.out.println("[Post-generation] Collected file metadata.");
 				
-				// If "Include preprocessing" is enabled: Start preprocessing.
-				if (includePreprocessing_checkbox.isSelected()) {
+				// If "Include postprocessing" is enabled: Start preprocessing.
+				if (includePostprocessing_checkbox.isSelected()) {
 					// Load raw data.
 					generate_progressIndicator.progressProperty().unbind();
 					workspace.executeWorkspaceAction(WorkspaceAction.LOAD_RAW_DATA, generate_progressIndicator.progressProperty(), this, null);
@@ -561,7 +561,7 @@ public class GenerationController extends DataSubViewController
 				// Else: Display warning (workspace is inconsistent). Refresh not necessary, since - apart from the already collected
 				// topic file metadata - no new metadata was generated. 
 				else {
-					System.out.println("### WARNING ### Workspace is inconsistent - data has to be preprocessed. Apply preprocessing manually.");
+					System.out.println("### WARNING ### Workspace is inconsistent - data has to be preprocessed. Apply postprocessing manually.");
 					
 					// Unfreeeze controls.
 					dataViewController.unfreezeControls();
@@ -591,7 +591,7 @@ public class GenerationController extends DataSubViewController
 				System.out.println("[Post-generation] Calculated MDS data.");
 				log("[Post-generation] Calculated MDS data.");
 				
-				// Data generation and preprocessing finished - unfreeze controls.
+				// Data generation and postprocessing finished - unfreeze controls.
 				dataViewController.unfreezeControls();
 				
 				// Check if all data is avaible and analysis view may be used.
@@ -603,7 +603,7 @@ public class GenerationController extends DataSubViewController
 	@Override
 	public void freezeOptionControls()
 	{
-		includePreprocessing_checkbox.setDisable(true);
+		includePostprocessing_checkbox.setDisable(true);
 		parameterConfiguration_gridPane.setDisable(true);
 		
 		for (RangeSlider rs : rangeSliders.values()) {
@@ -620,7 +620,7 @@ public class GenerationController extends DataSubViewController
 	@Override
 	public void unfreezeOptionControls()
 	{
-		includePreprocessing_checkbox.setDisable(false);
+		includePostprocessing_checkbox.setDisable(false);
 		parameterConfiguration_gridPane.setDisable(false);
 		
 		for (RangeSlider rs : rangeSliders.values()) {

@@ -206,7 +206,7 @@ public class LoadController extends DataSubViewController
 			shape_integrity.setFill(Color.ORANGE);
 			
 			if (workspace.getNumberOfDatasetsInWS() > 0) {
-				message = "Warning: .mds file doesn't exist in this workspace. Run preprocessing on "
+				message = "Warning: .mds file doesn't exist in this workspace. Run postprocessing on "
 						+ "the raw topic data in this workspace.";
 			}
 			
