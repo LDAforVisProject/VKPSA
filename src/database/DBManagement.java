@@ -1,5 +1,8 @@
 package database;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -10,6 +13,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -37,6 +41,7 @@ public class DBManagement
 	{
 		this.dbPath = dbPath;
 		
+		// Init DB connection.
 		initConnection();
 	}
 	
@@ -105,6 +110,107 @@ public class DBManagement
 		}
 	}
 
+	/**
+	 * Imports reference topic model data from .csv file.
+	 * Keyword probabilities are assigned uniformly.
+	 * @param filepath
+	 */
+	public void importReferenceTopicModel(String filepath)
+	{
+		// Map of all keywords in DB.
+		Map<String, Double> keywordProbabilities	= readKeywordsAsMap();
+		// Allocate collection for reference topic model. 
+		ArrayList<Map<String, Double>> topicModel	= new ArrayList<Map<String,Double>>();
+		
+		// 1. Insert new reference topic model.
+		// @todo
+		
+		try {
+			// 2. Process new topic data.
+			List<String> lines = Files.readAllLines(new File(filepath).toPath());
+			
+			for (String line : lines) {
+				// Allocate memory for this topic.
+				Map<String, Double> topic = new HashMap<String, Double>(keywordProbabilities);
+				
+				// Replace whitespace with _.
+				line = line.replace(" ", "_");
+				
+				String[] keywords = line.split(",");
+				for (String kw : keywords) {
+					if(!keywordProbabilities.containsKey(kw)) {
+						System.out.println("Missing: " + kw);
+					}
+				}
+				
+				System.out.println();
+				
+				// Add to topic collection.
+				topicModel.add(topic);
+			}
+			
+			// 3. Insert new topic.
+			// @todo
+		}
+		
+		catch (Exception e) {
+		}
+		
+//		Missing: isosurfaces							-> isosurface
+//		Missing: time-varying_data						-> time_varying dataset
+//
+//		Missing: focus+context_techniques				-> focus+context
+//
+//		Missing: visualization_systems					-> visualization_system
+//		Missing: unstructured_grids						-> unstructured_grid
+//
+//		Missing: coordinated_&_multiple_views			-> multiple_coordinated_view, multiple-coordinated_view
+//		Missing: interactive_visual_analysis			-> ? 
+//
+//		Missing: multiple_views							-> multiple_view, multiple-view
+//		Missing: time_series_data						-> ?
+//		Missing: social_networks						-> social_network
+//
+//		Missing: geovisualization 						-> ?
+//		Missing: spatio-temporal_data 					-> ?
+//
+//		Missing: treemaps 								-> tree-map, treemap
+//		Missing: node-link_diagrams 					-> node_link
+//		Missing: hierarchies 							-> ?
+//
+//		Missing: parallel_coordinates 					-> parallel_coordinate
+//		Missing: multi-variate_data 					-> multi-variate_datum
+//		Missing: user_interfaces 						-> ?
+//		Missing: high-dimensional_data 					-> ?
+//		Missing: scatterplots 							-> scatter-plot, scatterplot
+//
+//
+//		Missing: visual_analysis 						-> ?
+//		Missing: principal_component_analysis			-> principal_component_analysi
+//
+//		Missing: medical_visualization					-> ?
+//		Missing: linked_views							-> ?
+//		Missing: tiled_displays							-> tiled_display, tiled-display
+//		Missing: social_data_analysis					-> social_data_analysi, social_data_mining
+//		Missing: bioinformatics							-> bioinformatic
+//		Missing: applications_of_visualizations			-> ?
+//		Missing: glyphs									-> ?
+//		Missing: intelligence_analysis					-> intelligence_analysi
+//		Missing: geographic_visualiziation				-> ?
+//
+//
+//		Missing: quality_evaluation						-> qualitative_evaluation
+//
+//		Missing: vector_fields							-> ?
+//		Missing: streamlines							-> ?
+//		Missing: 3d_vector_field_visualization			-> vector_field_visualization
+
+	
+	}
+	
+	/**
+	 * Reopen database.
+	 */
 	public void reopen()
 	{
 		try {
@@ -361,8 +467,7 @@ public class DBManagement
 				// Simplified request:
 				String stmtString					= 	"select count(*) as actualKWCount from keywordInTopic kit " +
 														"join ldaConfigurations lda on lda.ldaConfigurationID = kit.ldaConfigurationID " +
-														"group by lda.ldaConfigurationID, topicID " +
-														"order by lda.ldaConfigurationID, topicID";
+														"group by lda.ldaConfigurationID, topicID";
 				
 				PreparedStatement numKeywordsStmt	= connection.prepareStatement(stmtString);
 				ResultSet rs						= numKeywordsStmt.executeQuery();
@@ -438,6 +543,38 @@ public class DBManagement
 		}
 		
 		return data;
+	}
+	
+	/**
+	 * Reads and returns map of keywords (and a respective probability of 0) in dedicated keyword table.
+	 * @return
+	 */
+	private Map<String, Double> readKeywordsAsMap()
+	{
+		// Read number of keywords.
+		if (numberOfKeywordsPerTopic <= 0) {
+			readNumberOfKeywords(true);
+		}
+		
+		// Allocate memory.
+		Map<String, Double> keywords = new HashMap<String, Double>(numberOfKeywordsPerTopic);
+		
+		// Get keywords.
+		try {
+			PreparedStatement pstmt = connection.prepareStatement("select keyword from keywords");
+			ResultSet rs			= pstmt.executeQuery();
+			
+			// Loop through result set.
+			while (rs.next()) {
+				keywords.put(rs.getString("keyword"), 0.0);
+			}
+		}
+		
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return keywords;
 	}
 	
 	/**

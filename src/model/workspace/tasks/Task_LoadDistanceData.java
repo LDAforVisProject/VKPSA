@@ -1,23 +1,8 @@
 package model.workspace.tasks;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import database.DBManagement;
-import javafx.util.Pair;
-import mdsj.MDSJ;
-import model.LDAConfiguration;
-import model.topic.Topic;
-import model.topic.TopicKeywordAlignment;
-import model.workspace.Dataset;
 import model.workspace.Workspace;
 import model.workspace.WorkspaceAction;
 
