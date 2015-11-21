@@ -15,15 +15,15 @@ public interface ISelectableComponent
 	public void processSelectionManipulationRequest(double minX, double minY, double maxX, double maxY);
 	
 	/**
-	 * Provide the necessary offsets from this component to the parent node.
-	 * @return
-	 */
-	public Pair<Integer, Integer> provideOffsets();
-	
-	/**
 	 * Signals end of selection manipulation.
 	 */
 	public void processEndOfSelectionManipulation();
+	
+	/**
+	 * Provide the necessary offsets from this component to the parent node.
+	 * @return
+	 */
+	public Pair<Integer, Integer> provideOffsets();	
 	
 	/**
 	 * Process KeyPressedEvent captured by controller.

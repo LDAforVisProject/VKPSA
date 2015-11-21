@@ -4,7 +4,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
-import view.components.LocalScopeInstance;
+import view.components.legacy.LocalScopeInstance;
 import model.LDAConfiguration;
 import model.workspace.Workspace;
 import javafx.scene.control.Label;

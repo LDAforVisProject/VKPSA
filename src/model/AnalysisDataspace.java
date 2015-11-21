@@ -7,6 +7,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javafx.scene.chart.XYChart;
 import javafx.util.Pair;
 import control.analysisView.AnalysisController;
 
@@ -572,6 +573,26 @@ public class AnalysisDataspace
 		selectedLDAConfigurations			= createSelectedLDAConfigurations(selectedFilteredIndices);
 		reductiveFilteredDistances			= createReductiveFilteredDistanceMatrix(filteredIndices, selectedFilteredIndices);
 	}
+
+	/**
+	 * Generates data series for histograms in scented widgets controlling the selected parameter boundaries.
+	 * @param key
+	 * @param parameterBinLists
+	 * @param numberOfBins
+	 * @return
+	 */
+	public XYChart.Series<String, Integer> generateParameterHistogramDataSeries(String key, Map<String, int[]> parameterBinLists, final int numberOfBins)
+	{
+		final XYChart.Series<String, Integer> data_series = new XYChart.Series<String, Integer>();
+		
+		for (int i = 0; i < numberOfBins; i++) {
+			final int binContent = parameterBinLists.get(key)[i];
+			data_series.getData().add( new XYChart.Data<String, Integer>(String.valueOf(i), binContent ));
+		}
+		
+		return data_series;
+	}
+
 	
 	// -----------------------------------------------
 	// 				Getter and Setter

@@ -1,4 +1,4 @@
-package view.components;
+package view.components.legacy;
 
 import java.util.ArrayList;
 import java.util.Map;

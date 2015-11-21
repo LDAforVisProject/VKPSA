@@ -2,6 +2,7 @@ package control;
 
 import java.util.Map;
 
+import control.analysisView.AnalysisController;
 import model.workspace.Workspace;
 import model.workspace.WorkspaceAction;
 import model.workspace.tasks.ITaskListener;
@@ -37,23 +38,18 @@ public abstract class Controller implements Initializable, ITaskListener
 	// -----------------------------------------------------
 	
 	/**
-	 * Set reference to workspace.
+	 * Sets reference to the current workspace and elements needed for logging.
+	 * @param analysisController
 	 * @param workspace
-	 */
-	public void setWorkspace(Workspace workspace)
-	{
-		this.workspace = workspace;
-	}
-	
-	/**
-	 * Set references to protocol UI elements.
 	 * @param log_protocol_progressindicator
 	 * @param log_protocol_textarea
 	 */
-	public void setProtocolElements(ProgressIndicator log_protocol_progressindicator, TextArea log_protocol_textarea)
+	public void setReferences(Workspace workspace, ProgressIndicator logPI, TextArea logTA)
 	{
-		this.log_protocol_progressindicator = log_protocol_progressindicator;
-		this.log_protocol_textarea			= log_protocol_textarea;
+		this.workspace						= workspace;
+		
+		this.log_protocol_progressindicator = logPI;
+		this.log_protocol_textarea			= logTA;
 	}
 	
 	/**

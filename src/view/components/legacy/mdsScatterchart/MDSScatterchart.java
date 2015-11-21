@@ -1,10 +1,16 @@
-package view.components.mdsScatterchart;
+package view.components.legacy.mdsScatterchart;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+
+
+
+
+
 
 
 
@@ -42,9 +48,9 @@ import javafx.util.Pair;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import control.analysisView.AnalysisController;
-import view.components.VisualizationComponent;
-import view.components.heatmap.HeatMap;
-import view.components.heatmap.HeatmapDataType;
+import view.components.legacy.VisualizationComponent_Legacy;
+import view.components.legacy.heatmap.HeatMap;
+import view.components.legacy.heatmap.HeatmapDataType;
 import view.components.rubberbandselection.ISelectableComponent;
 import view.components.rubberbandselection.RubberBandSelection;
 
@@ -53,7 +59,7 @@ enum SelectionMode
 	SINGULAR, GROUP
 };
 
-public class MDSScatterchart extends VisualizationComponent implements ISelectableComponent
+public class MDSScatterchart extends VisualizationComponent_Legacy implements ISelectableComponent
 {
 	/*
 	 * GUI elements.

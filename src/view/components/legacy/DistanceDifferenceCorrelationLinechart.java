@@ -1,4 +1,4 @@
-package view.components;
+package view.components.legacy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,14 +18,13 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.VBox;
 import javafx.util.Pair;
 import control.analysisView.AnalysisController;
-import view.components.HoveredThresholdNode;
 
 /**
  * 
  * @author RM
  * @deprecated
  */
-public class DistanceDifferenceCorrelationLinechart extends	VisualizationComponent
+public class DistanceDifferenceCorrelationLinechart extends	VisualizationComponent_Legacy
 {
 	/*
 	 * UI elements.

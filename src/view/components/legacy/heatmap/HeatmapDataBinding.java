@@ -1,4 +1,4 @@
-package view.components.heatmap;
+package view.components.legacy.heatmap;
 
 public enum HeatmapDataBinding
 {

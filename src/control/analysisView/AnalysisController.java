@@ -16,13 +16,17 @@ import org.controlsfx.control.RangeSlider;
 
 import control.Controller;
 import control.analysisView.localScope.LocalScopeVisualizationType;
-import view.components.DistanceDifferenceCorrelationLinechart;
-import view.components.DistancesBarchart;
-import view.components.LocalScopeInstance;
-import view.components.heatmap.HeatMap;
-import view.components.heatmap.HeatmapDataBinding;
-import view.components.heatmap.HeatmapDataType;
-import view.components.mdsScatterchart.MDSScatterchart;
+import view.components.VisualizationComponent;
+import view.components.VisualizationComponentType;
+import view.components.heatmap.Heatmap;
+import view.components.heatmap.HeatmapDataset;
+import view.components.heatmap.HeatmapOptionset;
+import view.components.legacy.DistancesBarchart;
+import view.components.legacy.LocalScopeInstance;
+import view.components.legacy.heatmap.HeatMap;
+import view.components.legacy.heatmap.HeatmapDataBinding;
+import view.components.legacy.heatmap.HeatmapDataType;
+import view.components.legacy.mdsScatterchart.MDSScatterchart;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -43,8 +47,10 @@ import javafx.scene.control.Accordion;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
@@ -54,6 +60,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.util.Pair;
 
 public class AnalysisController extends Controller
@@ -106,9 +113,9 @@ public class AnalysisController extends Controller
 	 */
 	private @FXML AnchorPane localScope_ptc_anchorPane;
 	/**
-	 * For local scope visualization(s): Chord diagram.
+	 * For local scope visualization(s): Comparison of topic models.
 	 */
-	private @FXML AnchorPane localscope_cd_anchorPane;
+	private @FXML AnchorPane localscope_tmc_anchorPane;
 	
 	/**
 	 * For distance correlation linechart.
@@ -170,14 +177,8 @@ public class AnalysisController extends Controller
 	 * Parameter Space - Distribution.
 	 */
 	
-	// Components for heatmap showing filtered data:
-	
-	private HeatMap parameterspace_heatmap_filtered;
-	
-	private @FXML Canvas paramSpaceHeatmap_canvas_filtered;
-	private @FXML NumberAxis numberaxis_parameterSpace_xaxis_filtered;
-	private @FXML NumberAxis numberaxis_parameterSpace_yaxis_filtered;
-	private @FXML ToggleButton button_relativeView_paramDist_filtered;
+	// Component for heatmap showing filtered data:
+	private Heatmap parameterspace_heatmap_filtered;
 	
 	// Components for heatmap showing selected data:
 	
@@ -201,7 +202,12 @@ public class AnalysisController extends Controller
 	 */
 	
 	/**
-	 * Parallel tag bloud in local scope.
+	 * Heatmap for comparison of topic models.
+	 */
+	Heatmap tmcHeatmap;
+	
+	/**
+	 * Parallel tag cloud in local scope.
 	 */
 	private LocalScopeInstance localScopeInstance;
 	
@@ -296,99 +302,35 @@ public class AnalysisController extends Controller
 	
 	private void addResizeListeners()
 	{
-		/*
-		 * Add resize listeners for parameter space anchor pane.
-		 */
+		// Define list of anchor panes / other elements to add resize listeners to.
+		ArrayList<AnchorPane> anchorPanesToResize = new ArrayList<AnchorPane>();
 		
-		paramSpace_distribution_anchorPane_filtered.widthProperty().addListener(new ChangeListener<Number>() {
-		    @Override 
-		    public void changed(ObservableValue<? extends Number> observableValue, Number oldWidth, Number newWidth)
-		    {
-		        resizeElement(paramSpace_distribution_anchorPane_filtered, newWidth.doubleValue(), 0);
-		    }
-		});
+		anchorPanesToResize.add(paramSpace_distribution_anchorPane_filtered);
+		anchorPanesToResize.add(paramSpace_distribution_anchorPane_selected);
+		anchorPanesToResize.add(mds_anchorPane);
+		anchorPanesToResize.add(localscope_tmc_anchorPane);
+		anchorPanesToResize.add(localScope_ptc_anchorPane);
 		
-		paramSpace_distribution_anchorPane_filtered.heightProperty().addListener(new ChangeListener<Number>() {
-		    @Override 
-		    public void changed(ObservableValue<? extends Number> observableValue, Number oldHeight, Number newHeight) 
-		    {
-		    	resizeElement(paramSpace_distribution_anchorPane_filtered, 0, newHeight.doubleValue());
-		    }
-		});
-		
-		paramSpace_distribution_anchorPane_selected.widthProperty().addListener(new ChangeListener<Number>() {
-		    @Override 
-		    public void changed(ObservableValue<? extends Number> observableValue, Number oldWidth, Number newWidth)
-		    {
-		        resizeElement(paramSpace_distribution_anchorPane_selected, newWidth.doubleValue(), 0);
-		    }
-		});
-		
-		paramSpace_distribution_anchorPane_selected.heightProperty().addListener(new ChangeListener<Number>() {
-		    @Override 
-		    public void changed(ObservableValue<? extends Number> observableValue, Number oldHeight, Number newHeight) 
-		    {
-		    	resizeElement(paramSpace_distribution_anchorPane_selected, 0, newHeight.doubleValue());
-		    }
-		});
-		
-		/*
-		 *  Add resize listeners for MDS anchor pane (needed for correct resizing of heatmap's anchor pane).
-		 */
-		
-		mds_anchorPane.widthProperty().addListener(new ChangeListener<Number>() {
-		    @Override 
-		    public void changed(ObservableValue<? extends Number> observableValue, Number oldWidth, Number newWidth)
-		    {
-		        resizeElement(mds_anchorPane, newWidth.doubleValue(), 0);
-		    }
-		});
-		
-		mds_anchorPane.heightProperty().addListener(new ChangeListener<Number>() {
-		    @Override 
-		    public void changed(ObservableValue<? extends Number> observableValue, Number oldHeight, Number newHeight) 
-		    {
-		    	resizeElement(mds_anchorPane, 0, newHeight.doubleValue());
-		    }
-		});
-		
-		/*
-		 * Add resize listeners for local scope / chord diagram anchor pane.
-		 */
-		localscope_cd_anchorPane.widthProperty().addListener(new ChangeListener<Number>() {
-		    @Override 
-		    public void changed(ObservableValue<? extends Number> observableValue, Number oldWidth, Number newWidth)
-		    {
-		        resizeElement(localscope_cd_anchorPane, newWidth.doubleValue(), 0);
-		    }
-		});
-		
-		localscope_cd_anchorPane.heightProperty().addListener(new ChangeListener<Number>() {
-		    @Override 
-		    public void changed(ObservableValue<? extends Number> observableValue, Number oldHeight, Number newHeight) 
-		    {
-		    	resizeElement(localscope_cd_anchorPane, 0, newHeight.doubleValue());
-		    }
-		});
-		
-		/*
-		 * Add resize listeners for local scope / parallel tag clouds anchor pane.
-		 */
-		localScope_ptc_anchorPane.widthProperty().addListener(new ChangeListener<Number>() {
-		    @Override 
-		    public void changed(ObservableValue<? extends Number> observableValue, Number oldWidth, Number newWidth)
-		    {
-		        resizeElement(localScope_ptc_anchorPane, newWidth.doubleValue(), 0);
-		    }
-		});
-		
-		localScope_ptc_anchorPane.heightProperty().addListener(new ChangeListener<Number>() {
-		    @Override 
-		    public void changed(ObservableValue<? extends Number> observableValue, Number oldHeight, Number newHeight) 
-		    {
-		    	resizeElement(localScope_ptc_anchorPane, 0, newHeight.doubleValue());
-		    }
-		});
+		// Add width and height resize listeners to all panes.
+		for (AnchorPane ap : anchorPanesToResize) {
+			// Add listener to width property.
+			ap.widthProperty().addListener(new ChangeListener<Number>() {
+			    @Override 
+			    public void changed(ObservableValue<? extends Number> observableValue, Number oldWidth, Number newWidth)
+			    {
+			        resizeElement(ap, newWidth.doubleValue(), 0);
+			    }
+			});
+			
+			// Add listener to height property.
+			ap.heightProperty().addListener(new ChangeListener<Number>() {
+			    @Override 
+			    public void changed(ObservableValue<? extends Number> observableValue, Number oldHeight, Number newHeight) 
+			    {
+			    	resizeElement(ap, 0, newHeight.doubleValue());
+			    }
+			});
+		}
 	}
 	
 	/**
@@ -402,12 +344,20 @@ public class AnalysisController extends Controller
 		initDistanceBarchart();
 		initParameterSpaceHeatmaps();
 		initLocalScopeView();
+		initComparisonHeatmaps();
+	}
+	
+	private void initComparisonHeatmaps()
+	{
+		tmcHeatmap = (Heatmap)VisualizationComponent.generateInstance(VisualizationComponentType.HEATMAP, this, null, null, null);
+		System.out.println("intialized comparison heatmap");
+		tmcHeatmap.embedIn(localscope_tmc_anchorPane);
 	}
 
 	private void initLocalScopeView()
 	{
 		// Create new instance of local scope.
-		localScopeInstance = new LocalScopeInstance(this, 	localScope_ptc_anchorPane, localscope_cd_anchorPane,
+		localScopeInstance = new LocalScopeInstance(this, 	localScope_ptc_anchorPane, localscope_tmc_anchorPane,
 															slider_localScope_numTopicsToUse, textfield_localScope_numTopicsToUse,
 															slider_localScope_numKeywordsToUse, textfield_localScope_numKeywordsToUse);
 		localScopeInstance.load();
@@ -527,9 +477,11 @@ public class AnalysisController extends Controller
 		combobox_parameterSpace_distribution_yAxis.setValue("eta");
 		
 		// Init heatmaps.
-		parameterspace_heatmap_filtered = new HeatMap(this, paramSpaceHeatmap_canvas_filtered, numberaxis_parameterSpace_xaxis_filtered, numberaxis_parameterSpace_yaxis_filtered, HeatmapDataType.LDAConfiguration);
 		parameterspace_heatmap_selected	= new HeatMap(this, paramSpaceHeatmap_canvas_selected, numberaxis_parameterSpace_xaxis_selected, numberaxis_parameterSpace_yaxis_selected, HeatmapDataType.LDAConfiguration);
-
+		parameterspace_heatmap_filtered	= (Heatmap) VisualizationComponent.generateInstance(VisualizationComponentType.HEATMAP, this, null, null, null);
+		// Embed heatmap in parent.
+		parameterspace_heatmap_filtered.embedIn(paramSpace_distribution_anchorPane_filtered);
+		
 		/*
 		 * Init option controls.
 		 */
@@ -538,9 +490,8 @@ public class AnalysisController extends Controller
 		slider_parameterSpace_distribution_granularity.addEventHandler(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) 
             {
-            	parameterspace_heatmap_filtered.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
             	parameterspace_heatmap_selected.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
-            	
+            	parameterspace_heatmap_filtered.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
             }
         });
 		
@@ -548,8 +499,8 @@ public class AnalysisController extends Controller
 		slider_parameterSpace_distribution_granularity.addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) 
             {
-            	parameterspace_heatmap_filtered.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
             	parameterspace_heatmap_selected.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
+            	parameterspace_heatmap_filtered.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
             };
         });
 	}
@@ -593,6 +544,9 @@ public class AnalysisController extends Controller
 
 		// 	Heatmaps:
 		refreshParameterspaceHeatmaps();
+		
+		// TM comparison heatmap:
+		refreshTMCHeatmap();
 		
 		//	Local scope:
 		localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
@@ -820,14 +774,30 @@ public class AnalysisController extends Controller
 	private void refreshParameterspaceHeatmaps()
 	{
 		// Refresh heatmap using filtered data:
-		parameterspace_heatmap_filtered.refresh(dataspace.getLDAConfigurations(), dataspace.getFilteredLDAConfigurations(), 
-												combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), 
-												button_relativeView_paramDist_filtered.isSelected(), HeatmapDataBinding.FILTERED);
+		HeatmapOptionset fOptions 	= new HeatmapOptionset(	checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int)slider_parameterSpace_distribution_granularity.getValue(), 
+															Color.LIGHTBLUE, Color.DARKBLUE, 
+															combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(),
+															true, button_relativeView_paramDist_selected.isSelected(), true);
+		HeatmapDataset fData		= new HeatmapDataset(dataspace.getLDAConfigurations(), dataspace.getFilteredLDAConfigurations(), fOptions);
+		parameterspace_heatmap_filtered.refresh(fOptions, fData);
 
 		// Refresh heatmap using selected data:
 		parameterspace_heatmap_selected.refresh(dataspace.getLDAConfigurations(), dataspace.getSelectedLDAConfigurations(), 
 												combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), 
 												button_relativeView_paramDist_selected.isSelected(), HeatmapDataBinding.SELECTED);
+	}
+	
+	/**
+	 * Refresh heatmap for topic model comparison.
+	 */
+	private void refreshTMCHeatmap()
+	{
+		HeatmapOptionset tmcOptions = new HeatmapOptionset(	checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int)slider_parameterSpace_distribution_granularity.getValue(), 
+															Color.WHITE, Color.RED, 
+															combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(),
+															true, button_relativeView_paramDist_selected.isSelected(), false);
+		HeatmapDataset tmcData		= new HeatmapDataset(dataspace.getLDAConfigurations(), dataspace.getFilteredLDAConfigurations(), tmcOptions);
+		tmcHeatmap.refresh(tmcOptions, tmcData);
 	}
 	
 	/**
@@ -980,18 +950,19 @@ public class AnalysisController extends Controller
 			// Clear old data.
 			parameterBarchartEntry.getValue().getData().clear();
 
+			// Add filtered data series to barcharts.
 			generateParameterHistogramDataSeries(parameterBarchartEntry, parameterBinLists_filtered, numberOfBins, 0);
 			
 			// Add discarded data series to barcharts.
 			parameterBarchartEntry.getValue().getData().add(
-					generateParameterHistogramDataSeries(parameterBarchartEntry.getKey(), parameterBinLists_discarded, numberOfBins)
+					dataspace.generateParameterHistogramDataSeries(parameterBarchartEntry.getKey(), parameterBinLists_discarded, numberOfBins)
 			);
 			// Color discarded data.
 			colorParameterHistogramBarchart(parameterBarchartEntry.getValue(), 1);
 			
 			// Add selected data series to barcharts.
 			parameterBarchartEntry.getValue().getData().add(
-					generateParameterHistogramDataSeries(parameterBarchartEntry.getKey(), parameterBinLists_selected, numberOfBins)
+					dataspace.generateParameterHistogramDataSeries(parameterBarchartEntry.getKey(), parameterBinLists_selected, numberOfBins)
 			);
 			// Color selected data.
 			colorParameterHistogramBarchart(parameterBarchartEntry.getValue(), 2);
@@ -1011,7 +982,7 @@ public class AnalysisController extends Controller
 	{
 		// Add data series to barcharts.
 		parameterBarchartEntry.getValue().getData().add(
-				generateParameterHistogramDataSeries(parameterBarchartEntry.getKey(), paramterBinLists, numberOfBins)
+				dataspace.generateParameterHistogramDataSeries(parameterBarchartEntry.getKey(), paramterBinLists, numberOfBins)
 		);
 		// Color data.
 		colorParameterHistogramBarchart(parameterBarchartEntry.getValue(), seriesIndex);
@@ -1055,25 +1026,6 @@ public class AnalysisController extends Controller
 		}
 	}
 
-	/**
-	 * Generates data series for histograms in scented widgets controlling the selected parameter boundaries.
-	 * @param key
-	 * @param parameterBinLists
-	 * @param numberOfBins
-	 * @return
-	 */
-	private XYChart.Series<String, Integer> generateParameterHistogramDataSeries(String key, Map<String, int[]> parameterBinLists, final int numberOfBins)
-	{
-		final XYChart.Series<String, Integer> data_series = new XYChart.Series<String, Integer>();
-		
-		for (int i = 0; i < numberOfBins; i++) {
-			final int binContent = parameterBinLists.get(key)[i];
-			data_series.getData().add( new XYChart.Data<String, Integer>(String.valueOf(i), binContent ));
-		}
-		
-		return data_series;
-	}
-
 	@Override
 	public void resizeContent(double width, double height)
 	{
@@ -1085,18 +1037,7 @@ public class AnalysisController extends Controller
 		switch (node.getId()) {
 			case "paramSpace_distribution_anchorPane_filtered":
 				// Adapt width.
-				if (width > 0) {	
-					// Update width of parameter distribution heatmap.
-					paramSpaceHeatmap_canvas_filtered.setWidth(width - 59 - 57);
-					parameterspace_heatmap_filtered.refresh(false);
-				}
-				
-				// Adapt height.
-				if (height > 0) {
-					// Update width of parameter distribution heatmap.
-					paramSpaceHeatmap_canvas_filtered.setHeight(height - 45 - 45);
-					parameterspace_heatmap_filtered.refresh(false);
-				}
+				parameterspace_heatmap_filtered.resizeContent(width, height);
 			break;
 			
 			case "paramSpace_distribution_anchorPane_selected":
@@ -1124,8 +1065,8 @@ public class AnalysisController extends Controller
 			break;
 			
 			// Resize local scope element: Chord diagram.
-			case "localscope_cd_anchorPane":
-				localScopeInstance.resize(width, height, LocalScopeVisualizationType.CHORD_DIAGRAM);
+			case "localscope_tmc_anchorPane":
+				tmcHeatmap.resizeContent(width, height);
 			break;
 			
 			// Resize local scope element: Parallel tag clouds.
@@ -1297,6 +1238,7 @@ public class AnalysisController extends Controller
             	distancesBarchart.processKeyPressedEvent(ke);
             	parameterspace_heatmap_filtered.processKeyPressedEvent(ke);
             	parameterspace_heatmap_selected.processKeyPressedEvent(ke);
+            	tmcHeatmap.processKeyPressedEvent(ke);
             }
 		});
 		
@@ -1307,6 +1249,7 @@ public class AnalysisController extends Controller
             	distancesBarchart.processKeyReleasedEvent(ke);
             	parameterspace_heatmap_filtered.processKeyReleasedEvent(ke);
             	parameterspace_heatmap_selected.processKeyReleasedEvent(ke);
+            	tmcHeatmap.processKeyReleasedEvent(ke);
             }
 		});
 	}
@@ -1326,15 +1269,6 @@ public class AnalysisController extends Controller
 		this.scene = scene;
 	}
 
-	@Override
-	public void setWorkspace(Workspace workspace)
-	{
-		super.setWorkspace(workspace);
-		
-		// Pass reference on to instance of local scope component.
-		localScopeInstance.setWorkspace(workspace);
-	}
-	
 	/**
 	 * Switches to settings panel after corresponding icon has been clicked.
 	 * @param e
@@ -1533,5 +1467,14 @@ public class AnalysisController extends Controller
 	public void removeCrossChartHighlighting()
 	{
 		mdsScatterchart.highlightLDAConfiguration(-1);
+	}
+	
+	@Override
+	public void setReferences(Workspace workspace, ProgressIndicator logPI, TextArea logTA)
+	{
+		super.setReferences(workspace, logPI, logTA);
+		
+		// Set references for child elements.
+		tmcHeatmap.setReferences(workspace, logPI, logTA);
 	}
 }

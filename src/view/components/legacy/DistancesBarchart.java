@@ -1,4 +1,4 @@
-package view.components;
+package view.components.legacy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import view.components.heatmap.HeatmapDataBinding;
+import view.components.legacy.heatmap.HeatmapDataBinding;
 import view.components.rubberbandselection.ISelectableComponent;
 import view.components.rubberbandselection.RubberBandSelection;
 
@@ -35,7 +35,7 @@ import javafx.scene.paint.Color;
 import javafx.util.Pair;
 import control.analysisView.AnalysisController;
 
-public class DistancesBarchart extends VisualizationComponent implements ISelectableComponent
+public class DistancesBarchart extends VisualizationComponent_Legacy implements ISelectableComponent
 {
 	/*
 	 * GUI elements.

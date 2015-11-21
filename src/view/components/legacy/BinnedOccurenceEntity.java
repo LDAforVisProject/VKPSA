@@ -1,4 +1,4 @@
-package view.components.heatmap;
+package view.components.legacy;
 
 /**
  * Auxiliary class for readability purposes.
@@ -41,22 +41,22 @@ public class BinnedOccurenceEntity
 		return maxOccurenceCount;
 	}
 
-	public double getMax_key1()
+	public double getMaxKey1()
 	{
 		return max_key1;
 	}
 
-	public double getMin_key1()
+	public double getMinKey1()
 	{
 		return min_key1;
 	}
 
-	public double getMax_key2()
+	public double getMaxKey2()
 	{
 		return max_key2;
 	}
 
-	public double getMin_key2()
+	public double getMinKey2()
 	{
 		return min_key2;
 	}

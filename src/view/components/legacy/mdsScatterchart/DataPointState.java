@@ -1,4 +1,4 @@
-package view.components.mdsScatterchart;
+package view.components.legacy.mdsScatterchart;
 
 public enum DataPointState
 {
