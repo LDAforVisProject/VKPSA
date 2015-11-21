@@ -141,7 +141,7 @@ public class CoreController extends Controller
 				
 				// Is controller already initiated? If so, node was already created.
 				if (!viewNodeMap.containsKey("analyze")) {
-					initView("analyze", "/view/SII/content/Analysis.fxml");
+					initView("analyze", "/view/fxml/content/Analysis.fxml");
 					
 					// Set scene and draw visualizations.
 					((AnalysisController)controllerMap.get("analyze")).setScene(scene);
@@ -224,7 +224,7 @@ public class CoreController extends Controller
 		 * Init actual data view.
 		 */
 		
-		initView("dataview", "/view/SII/content/Data.fxml");
+		initView("dataview", "/view/fxml/content/Data.fxml");
 		DataViewController dvController	= (DataViewController)controllerMap.get("dataview");
 		// Set reference to CoreController.
 		dvController.setCoreController(this);
@@ -234,7 +234,7 @@ public class CoreController extends Controller
 		 */
 		
         String[] viewIDs				= {"load", "preprocess", "generate"};
-        String[] fxmlFilePaths			= {"/view/SII/content/Load.fxml", "/view/SII/content/Postprocess.fxml", "/view/SII/content/Generate.fxml"};
+        String[] fxmlFilePaths			= {"/view/fxml/content/Load.fxml", "/view/fxml/content/Postprocess.fxml", "/view/fxml/content/Generate.fxml"};
         
         try {
         	// Add all relevant sub-views to DataView.

@@ -350,7 +350,6 @@
                                                           <RowConstraints maxHeight="39.0" minHeight="10.0" prefHeight="29.0" vgrow="SOMETIMES" />
                                                           <RowConstraints maxHeight="54.0" minHeight="10.0" prefHeight="44.0" vgrow="SOMETIMES" />
                                                             <RowConstraints maxHeight="94.0" minHeight="10.0" prefHeight="69.0" vgrow="SOMETIMES" />
-                                                            <RowConstraints maxHeight="59.0" minHeight="10.0" prefHeight="37.0" vgrow="SOMETIMES" />
                                                         </rowConstraints>
                                                          <children>
                                                             <Label text="Parameter on x-axis" />
@@ -378,8 +377,6 @@
                                                                   <Slider fx:id="slider_parameterSpace_distribution_granularity" disable="true" maxWidth="150.0" min="1.0" minorTickCount="5" showTickLabels="true" showTickMarks="true" snapToTicks="true" GridPane.rowIndex="1" />
                                                                </children>
                                                             </GridPane>
-                                                            <Label text="Bind to" GridPane.rowIndex="3" />
-                                                            <ComboBox fx:id="paramDistributionHeatmap_datasetBinding_combobox" disable="true" onAction="#changeParamDistributionHeatmapDataBinding" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                                                          </children>
                                                       </GridPane>
                                                       <Separator prefWidth="200.0">
@@ -537,7 +534,7 @@
                                                       </ImageView>
                                                       <SplitPane dividerPositions="0.29797979797979796" layoutY="31.0" prefHeight="228.0" prefWidth="562.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
                                                         <items>
-                                                          <AnchorPane fx:id="localscope_tmc_anchorPane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
+                                                          <AnchorPane fx:id="localscope_tmc_anchorPane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" style="-fx-background-color: #fff;" />
                                                           <AnchorPane fx:id="localScope_ptc_anchorPane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
                                                         </items>
                                                       </SplitPane>
@@ -545,29 +542,15 @@
                                                 </AnchorPane>
                                               <AnchorPane fx:id="paramSpace_distribution_anchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff;">
                                                    <children>
+                                                      <ToggleButton fx:id="button_relativeView_paramDist" mnemonicParsing="false" onAction="#changeVisualizationViewMode" text="Relative view" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                                         <font>
+                                                            <Font size="10.0" />
+                                                         </font>
+                                                      </ToggleButton>
                                                       <SplitPane dividerPositions="0.5" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
                                                          <items>
-                                                            <AnchorPane fx:id="paramSpace_distribution_anchorPane_filtered" prefHeight="200.0" prefWidth="200.0">
-                                                               <children>
-                                                                  <ToggleButton fx:id="button_relativeView_paramDist_filtered" layoutX="197.0" layoutY="27.0" mnemonicParsing="false" onAction="#changeVisualizationViewMode" text="Relative view" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
-                                                                     <font>
-                                                                        <Font size="10.0" />
-                                                                     </font>
-                                                                  </ToggleButton>
-                                                               </children>
-                                                            </AnchorPane>
-                                                            <AnchorPane fx:id="paramSpace_distribution_anchorPane_selected" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" style="-fx-background-color: #ffffff;">
-                                                               <children>
-                                                                  <Canvas fx:id="paramSpaceHeatmap_canvas_selected" height="135.0" layoutX="68.0" layoutY="45.0" width="164.0" AnchorPane.bottomAnchor="47.0" AnchorPane.leftAnchor="66.0" AnchorPane.topAnchor="45.0" />
-                                                                  <NumberAxis fx:id="numberaxis_parameterSpace_xaxis_selected" label="key1" layoutX="67.0" layoutY="196.0" prefHeight="41.0" prefWidth="150.0" side="BOTTOM" tickLength="5.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="67.0" AnchorPane.rightAnchor="50.0" />
-                                                                  <NumberAxis fx:id="numberaxis_parameterSpace_yaxis_selected" label="key2" layoutX="1.0" layoutY="45.0" prefHeight="150.0" prefWidth="67.0" side="LEFT" tickLength="5.0" AnchorPane.bottomAnchor="47.0" AnchorPane.leftAnchor="1.0" AnchorPane.topAnchor="45.0" />
-                                                                  <ToggleButton fx:id="button_relativeView_paramDist_selected" layoutX="183.0" layoutY="2.0" mnemonicParsing="false" onAction="#changeVisualizationViewMode" text="Relative view" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
-                                                                     <font>
-                                                                        <Font size="10.0" />
-                                                                     </font>
-                                                                  </ToggleButton>
-                                                               </children>
-                                                            </AnchorPane>
+                                                            <AnchorPane fx:id="paramSpace_distribution_anchorPane_filtered" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #fff;" />
+                                                            <AnchorPane fx:id="paramSpace_distribution_anchorPane_selected" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #fff;" />
                                                          </items>
                                                       </SplitPane>
                                                       <Label layoutX="70.0" layoutY="15.0" text="Parameter | Distribution" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="7.0">

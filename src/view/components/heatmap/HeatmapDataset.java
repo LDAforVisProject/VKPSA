@@ -8,6 +8,7 @@ import java.util.Set;
 
 import view.components.VisualizationComponentDataset;
 import javafx.util.Pair;
+import mdsj.Data;
 import model.LDAConfiguration;
 
 /**
@@ -40,9 +41,9 @@ public class HeatmapDataset extends VisualizationComponentDataset
 	 * Binned data.
 	 */
 	
-	private int[][] binMatrix;
-	private int minOccurenceCount;
-	private int maxOccurenceCount;
+	private double[][] binMatrix;
+	private double minOccurenceCount;
+	private double maxOccurenceCount;
 	private double max_key1;
 	private double min_key1;
 	private double max_key2;
@@ -72,8 +73,8 @@ public class HeatmapDataset extends VisualizationComponentDataset
     	this.chosenLDAConfigurations	= chosenLDAConfigurations;
     	this.cellsToConfigurationIDs 	= new HashMap<Pair<Integer,Integer>, Set<Integer>>();
 		
-    	this.minOccurenceCount			= Integer.MAX_VALUE;
-		this.maxOccurenceCount			= Integer.MIN_VALUE;
+    	this.minOccurenceCount			= Double.MAX_VALUE;
+		this.maxOccurenceCount			= Double.MIN_VALUE;
 		max_key1						= Double.MIN_VALUE;
 		min_key1						= Double.MAX_VALUE;
 		max_key2						= Double.MIN_VALUE;
@@ -96,7 +97,7 @@ public class HeatmapDataset extends VisualizationComponentDataset
 		// 2. Bin data based on found minima and maxima.
 		
 		final int numberOfBins	= options.isGranularityDynamic() ? (int) Math.sqrt(this.allLDAConfigurations.size()) : options.getGranularity();
-		binMatrix				= new int[numberOfBins][numberOfBins];
+		binMatrix				= new double[numberOfBins][numberOfBins];
 		double binInterval_key1	= (max_key1 - min_key1) / numberOfBins;
 		double binInterval_key2	= (max_key2 - min_key2) / numberOfBins;
 		
@@ -171,7 +172,7 @@ public class HeatmapDataset extends VisualizationComponentDataset
 		// 2. Bin data based on found minima and maxima.
 		
 		final int numberOfBins	= options.isGranularityDynamic() ? (int) Math.sqrt(coordinates[0].length) * 2 : options.getGranularity();
-		binMatrix				= new int[numberOfBins][numberOfBins];
+		binMatrix				= new double[numberOfBins][numberOfBins];
 		double binIntervalX		= (maxX - minX) / numberOfBins;
 		double binIntervalY		= (maxY - minY) / numberOfBins;
 		
@@ -211,22 +212,58 @@ public class HeatmapDataset extends VisualizationComponentDataset
 		min_key2			= minY;
 		max_key2			= maxY;
 	}
+	
+	/**
+	 * Generate new dataset from distance matrix of LDA configurations.
+	 * Used to transform data for heatmap of similiarities between topics.
+	 * @param allLDAConfigurations
+	 * @param distances
+	 * @param options
+	 */
+	public HeatmapDataset(	ArrayList<LDAConfiguration> allLDAConfigurations, 
+							double distances[][], 
+							HeatmapOptionset options)
+	{
+		this.allLDAConfigurations		= allLDAConfigurations;
+    	this.chosenLDAConfigurations	= null;
+    	this.cellsToConfigurationIDs 	= new HashMap<Pair<Integer,Integer>, Set<Integer>>();
+		
+    	this.minOccurenceCount			= Integer.MAX_VALUE;
+		this.maxOccurenceCount			= Integer.MIN_VALUE;
+		max_key1						= Double.MIN_VALUE;
+		min_key1						= Double.MAX_VALUE;
+		max_key2						= Double.MIN_VALUE;
+		min_key2						= Double.MAX_VALUE;
+		
+		
+		// 1. Accept distance matrix as bin matrix.
+		binMatrix = distances;
+		
+		// 2. Determine minimal and maximal occurence count.
+		for (int i = 0; i < binMatrix.length; i++) {
+			for (int j = 0; j < binMatrix[i].length; j++) {
+				maxOccurenceCount = binMatrix[i][j] > maxOccurenceCount ? binMatrix[i][j] : maxOccurenceCount;
+				minOccurenceCount = (binMatrix[i][j] < minOccurenceCount) && (binMatrix[i][j] > 0)  
+																		? binMatrix[i][j] : minOccurenceCount;
+			}	
+		}
+	}
 
 	/*
 	 * Getter and setter.
 	 */
 	
-	public int[][] getBinMatrix()
+	public double[][] getBinMatrix()
 	{
 		return binMatrix;
 	}
 
-	public int getMinOccurenceCount()
+	public double getMinOccurenceCount()
 	{
 		return minOccurenceCount;
 	}
 
-	public int getMaxOccurenceCount()
+	public double getMaxOccurenceCount()
 	{
 		return maxOccurenceCount;
 	}

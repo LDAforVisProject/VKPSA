@@ -41,7 +41,8 @@ public abstract class VisualizationComponent extends Controller implements ISele
 	 */
 	public static final Map<VisualizationComponentType, String> FXML_PATHS = new HashMap<VisualizationComponentType, String>();
 	static {
-		FXML_PATHS.put(VisualizationComponentType.HEATMAP, "/view/SII/components/Heatmap.fxml");
+		FXML_PATHS.put(VisualizationComponentType.NUMERICAL_HEATMAP, "/view/fxml/components/NumericalHeatmap.fxml");
+		FXML_PATHS.put(VisualizationComponentType.CATEGORICAL_HEATMAP, "/view/fxml/components/CategoricalHeatmap.fxml");
 	}
 	
 	/**
@@ -63,8 +64,12 @@ public abstract class VisualizationComponent extends Controller implements ISele
         // Determine path to .fxml.
         switch (type)
 		{
-			case HEATMAP:
-				path = FXML_PATHS.get(VisualizationComponentType.HEATMAP);
+			case NUMERICAL_HEATMAP:
+				path = FXML_PATHS.get(VisualizationComponentType.NUMERICAL_HEATMAP);
+			break;
+			
+			case CATEGORICAL_HEATMAP:
+				path = FXML_PATHS.get(VisualizationComponentType.CATEGORICAL_HEATMAP);
 			break;
 			
 			default:

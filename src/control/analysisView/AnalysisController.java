@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -18,7 +19,8 @@ import control.Controller;
 import control.analysisView.localScope.LocalScopeVisualizationType;
 import view.components.VisualizationComponent;
 import view.components.VisualizationComponentType;
-import view.components.heatmap.Heatmap;
+import view.components.heatmap.CategoricalHeatmap;
+import view.components.heatmap.NumericalHeatmap;
 import view.components.heatmap.HeatmapDataset;
 import view.components.heatmap.HeatmapOptionset;
 import view.components.legacy.DistancesBarchart;
@@ -178,24 +180,18 @@ public class AnalysisController extends Controller
 	 */
 	
 	// Component for heatmap showing filtered data:
-	private Heatmap parameterspace_heatmap_filtered;
+	private NumericalHeatmap parameterspace_heatmap_filtered;
 	
-	// Components for heatmap showing selected data:
-	
-	private HeatMap parameterspace_heatmap_selected;
-	
-	private @FXML Canvas paramSpaceHeatmap_canvas_selected;
-	private @FXML NumberAxis numberaxis_parameterSpace_xaxis_selected;
-	private @FXML NumberAxis numberaxis_parameterSpace_yaxis_selected;
-	private @FXML ToggleButton button_relativeView_paramDist_selected;
+	// Component for heatmap showing selected data:
+	private NumericalHeatmap parameterspace_heatmap_selected;
 	
 	// Heatmap setting controls (and metadata).
 	
+	private @FXML ToggleButton button_relativeView_paramDist;
 	private @FXML ComboBox<String> combobox_parameterSpace_distribution_xAxis;
 	private @FXML ComboBox<String> combobox_parameterSpace_distribution_yAxis;
 	private @FXML Slider slider_parameterSpace_distribution_granularity;
 	private @FXML CheckBox checkbox_parameterSpace_distribution_dynAdjustment;
-	private @FXML ComboBox<String> paramDistributionHeatmap_datasetBinding_combobox;
 	
 	/*
 	 * Local scope.
@@ -204,7 +200,7 @@ public class AnalysisController extends Controller
 	/**
 	 * Heatmap for comparison of topic models.
 	 */
-	Heatmap tmcHeatmap;
+	CategoricalHeatmap tmcHeatmap;
 	
 	/**
 	 * Parallel tag cloud in local scope.
@@ -349,8 +345,7 @@ public class AnalysisController extends Controller
 	
 	private void initComparisonHeatmaps()
 	{
-		tmcHeatmap = (Heatmap)VisualizationComponent.generateInstance(VisualizationComponentType.HEATMAP, this, null, null, null);
-		System.out.println("intialized comparison heatmap");
+		tmcHeatmap = (CategoricalHeatmap)VisualizationComponent.generateInstance(VisualizationComponentType.CATEGORICAL_HEATMAP, this, null, null, null);
 		tmcHeatmap.embedIn(localscope_tmc_anchorPane);
 	}
 
@@ -456,15 +451,6 @@ public class AnalysisController extends Controller
 	{
 		combobox_parameterSpace_distribution_xAxis.getItems().clear();
 		combobox_parameterSpace_distribution_yAxis.getItems().clear();
-		paramDistributionHeatmap_datasetBinding_combobox.getItems().clear();
-		
-		// Add databinding options.
-		paramDistributionHeatmap_datasetBinding_combobox.getItems().add("Filtered data");
-		paramDistributionHeatmap_datasetBinding_combobox.getItems().add("Selected data");
-		paramDistributionHeatmap_datasetBinding_combobox.requestLayout();
-		paramDistributionHeatmap_datasetBinding_combobox.applyCss();
-		// Set default databinding option.
-		paramDistributionHeatmap_datasetBinding_combobox.getSelectionModel().selectFirst();
 		
 		// Add supported parameters to axis comboboxes. 
 		for (String param : LDAConfiguration.SUPPORTED_PARAMETERS) {
@@ -477,10 +463,11 @@ public class AnalysisController extends Controller
 		combobox_parameterSpace_distribution_yAxis.setValue("eta");
 		
 		// Init heatmaps.
-		parameterspace_heatmap_selected	= new HeatMap(this, paramSpaceHeatmap_canvas_selected, numberaxis_parameterSpace_xaxis_selected, numberaxis_parameterSpace_yaxis_selected, HeatmapDataType.LDAConfiguration);
-		parameterspace_heatmap_filtered	= (Heatmap) VisualizationComponent.generateInstance(VisualizationComponentType.HEATMAP, this, null, null, null);
-		// Embed heatmap in parent.
+		parameterspace_heatmap_selected	= (NumericalHeatmap) VisualizationComponent.generateInstance(VisualizationComponentType.NUMERICAL_HEATMAP, this, null, null, null);
+		parameterspace_heatmap_filtered	= (NumericalHeatmap) VisualizationComponent.generateInstance(VisualizationComponentType.NUMERICAL_HEATMAP, this, null, null, null);
+		// Embed heatmaps in parent.
 		parameterspace_heatmap_filtered.embedIn(paramSpace_distribution_anchorPane_filtered);
+		parameterspace_heatmap_selected.embedIn(paramSpace_distribution_anchorPane_selected);
 		
 		/*
 		 * Init option controls.
@@ -545,11 +532,10 @@ public class AnalysisController extends Controller
 		// 	Heatmaps:
 		refreshParameterspaceHeatmaps();
 		
-		// TM comparison heatmap:
-		refreshTMCHeatmap();
-		
 		//	Local scope:
 		localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
+		// TM comparison heatmap:
+		refreshTMCHeatmap(dataspace.getSelectedLDAConfigurations());
 	}
 
 	/**
@@ -777,27 +763,34 @@ public class AnalysisController extends Controller
 		HeatmapOptionset fOptions 	= new HeatmapOptionset(	checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int)slider_parameterSpace_distribution_granularity.getValue(), 
 															Color.LIGHTBLUE, Color.DARKBLUE, 
 															combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(),
-															true, button_relativeView_paramDist_selected.isSelected(), true);
+															true, button_relativeView_paramDist.isSelected(), true);
 		HeatmapDataset fData		= new HeatmapDataset(dataspace.getLDAConfigurations(), dataspace.getFilteredLDAConfigurations(), fOptions);
 		parameterspace_heatmap_filtered.refresh(fOptions, fData);
 
 		// Refresh heatmap using selected data:
-		parameterspace_heatmap_selected.refresh(dataspace.getLDAConfigurations(), dataspace.getSelectedLDAConfigurations(), 
-												combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), 
-												button_relativeView_paramDist_selected.isSelected(), HeatmapDataBinding.SELECTED);
+		HeatmapOptionset sOptions 	= new HeatmapOptionset(	checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int)slider_parameterSpace_distribution_granularity.getValue(), 
+															Color.RED, Color.DARKRED, 
+															combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(),
+															true, button_relativeView_paramDist.isSelected(), true);
+		HeatmapDataset sData		= new HeatmapDataset(dataspace.getLDAConfigurations(), dataspace.getSelectedLDAConfigurations(), fOptions);
+		parameterspace_heatmap_selected.refresh(sOptions, sData);
 	}
 	
 	/**
 	 * Refresh heatmap for topic model comparison.
 	 */
-	private void refreshTMCHeatmap()
+	private void refreshTMCHeatmap(ArrayList<LDAConfiguration> selectedLDAConfigurations)
 	{
-		HeatmapOptionset tmcOptions = new HeatmapOptionset(	checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int)slider_parameterSpace_distribution_granularity.getValue(), 
-															Color.WHITE, Color.RED, 
-															combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(),
-															true, button_relativeView_paramDist_selected.isSelected(), false);
-		HeatmapDataset tmcData		= new HeatmapDataset(dataspace.getLDAConfigurations(), dataspace.getFilteredLDAConfigurations(), tmcOptions);
-		tmcHeatmap.refresh(tmcOptions, tmcData);
+		// Fetch first two LDA configurations from selection.
+		if (selectedLDAConfigurations.size() > 0) {
+			HeatmapOptionset tmcOptions = new HeatmapOptionset(	true, -1, 
+																Color.WHITE, Color.RED, 
+																combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(),
+																true, false, true);
+			HeatmapDataset tmcData		= new HeatmapDataset(dataspace.getLDAConfigurations(), dataspace.createSelectedDistanceMatrix(dataspace.getSelectedIndices()), tmcOptions);
+			// @todo CURRENT: Load topic distances, display in tmcHeatmap; do axis labeling.
+			tmcHeatmap.refresh(tmcOptions, tmcData);
+		}
 	}
 	
 	/**
@@ -1036,24 +1029,13 @@ public class AnalysisController extends Controller
 	{
 		switch (node.getId()) {
 			case "paramSpace_distribution_anchorPane_filtered":
-				// Adapt width.
+				// Adapt size.
 				parameterspace_heatmap_filtered.resizeContent(width, height);
 			break;
 			
 			case "paramSpace_distribution_anchorPane_selected":
-				// Adapt width.
-				if (width > 0) {	
-					// Update width of parameter distribution heatmap.
-					paramSpaceHeatmap_canvas_selected.setWidth(width - 59 - 57);
-					parameterspace_heatmap_selected.refresh(false);
-				}
-				
-				// Adapt height.
-				if (height > 0) {
-					// Update width of parameter distribution heatmap.
-					paramSpaceHeatmap_canvas_selected.setHeight(height - 45 - 45);
-					parameterspace_heatmap_selected.refresh(false);
-				}
+				// Adapt size.
+				parameterspace_heatmap_selected.resizeContent(width, height);
 			break;
 			
 			// Resize scatter plot.
@@ -1102,13 +1084,13 @@ public class AnalysisController extends Controller
 	@FXML
 	public void updateHeatmap(ActionEvent e)
 	{
-		ArrayList<LDAConfiguration> filteredLDAConfigurations = new ArrayList<LDAConfiguration>(dataspace.getFilteredIndices().size());
-		
-		// Copy data corresponding to chosen LDA configurations in new arrays.
-		for (int selectedIndex : dataspace.getFilteredIndices()) {
-			// Copy LDA configurations.
-			filteredLDAConfigurations.add(dataspace.getLDAConfigurations().get(selectedIndex));
-		}
+//		ArrayList<LDAConfiguration> filteredLDAConfigurations = new ArrayList<LDAConfiguration>(dataspace.getFilteredIndices().size());
+//		
+//		// Copy data corresponding to chosen LDA configurations in new arrays.
+//		for (int selectedIndex : dataspace.getFilteredIndices()) {
+//			// Copy LDA configurations.
+//			filteredLDAConfigurations.add(dataspace.getLDAConfigurations().get(selectedIndex));
+//		}
 		
 		if (	parameterspace_heatmap_filtered != null 			&&
 				parameterspace_heatmap_selected != null 			&&
@@ -1129,8 +1111,7 @@ public class AnalysisController extends Controller
 				distancesBarchart.changeViewMode();
 			break;
 
-			case "button_relativeView_paramDist_filtered":
-			case "button_relativeView_paramDist_selected":
+			case "button_relativeView_paramDist":
 				updateHeatmap(e);
 			break;
 		}
@@ -1175,27 +1156,6 @@ public class AnalysisController extends Controller
 	public void changeMDSHeatmapVisibility(ActionEvent e)
 	{
 		mdsScatterchart.setHeatmapVisiblity(showMSDHeatmap_checkbox.isSelected());
-	}
-	
-	/**
-	 * Changes which dataset the parameter distribution heatmap is bound to (filtered or selected datasets). 
-	 * @param e
-	 * @deprecated
-	 */
-	@FXML
-	public void changeParamDistributionHeatmapDataBinding(ActionEvent e)
-	{
-//		// Translate control value into valid HeatmapDataBinding entitiy.
-//		final String selectedDataBindingString	= paramDistributionHeatmap_datasetBinding_combobox.getSelectionModel().getSelectedItem();
-//		this.paramSpaceHeatmap_dataBinding		= HeatMap.translateItemstringToDataBindingType(selectedDataBindingString);
-//
-//		// Refresh heatmap.
-//		if (dataspace.getLDAConfigurations() != null) {
-//			parameterspace_heatmap_filtered.refresh(	dataspace.getLDAConfigurations(),
-//											paramSpaceHeatmap_dataBinding == HeatmapDataBinding.FILTERED ? dataspace.getFilteredLDAConfigurations() : dataspace.getSelectedLDAConfigurations(), 
-//											combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), 
-//											button_relativeView_paramDist_filtered.isSelected(), paramSpaceHeatmap_dataBinding);
-//		}
 	}
 	
 	/**
@@ -1476,5 +1436,7 @@ public class AnalysisController extends Controller
 		
 		// Set references for child elements.
 		tmcHeatmap.setReferences(workspace, logPI, logTA);
+		parameterspace_heatmap_filtered.setReferences(workspace, logPI, logTA);
+		parameterspace_heatmap_selected.setReferences(workspace, logPI, logTA);
 	}
 }

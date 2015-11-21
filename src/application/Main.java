@@ -92,7 +92,7 @@ public class Main extends Application
 		try {
 			// Load core .fxml file. 
 			FXMLLoader fxmlLoader			= new FXMLLoader();
-			Pane root 						= (Pane) fxmlLoader.load(getClass().getResource("/view/SII/SII_Core.fxml").openStream());
+			Pane root 						= (Pane) fxmlLoader.load(getClass().getResource("/view/fxml/SII_Core.fxml").openStream());
 			CoreController coreController	= (CoreController) fxmlLoader.getController();
 			Scene scene						= new Scene(root);
 			

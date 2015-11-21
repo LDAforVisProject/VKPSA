@@ -18,7 +18,7 @@ import javafx.fxml.FXML;
 import javafx.scene.web.WebView;
 import model.LDAConfiguration;
 import model.workspace.WorkspaceAction;
-import model.workspace.tasks.Task_LoadTopicDistancesForSelection;
+import model.workspace.tasks.Task_LoadTopicDistancesForSelection_CD;
 
 /**
  * Controller for chord diagram in local scope instance.
@@ -45,7 +45,7 @@ public class ChordDiagramController extends LocalScopeVisualizationController
 	/**
 	 * Task executing the loading of the current topic data (and holding the results).
 	 */
-	private Task_LoadTopicDistancesForSelection topicLoadingTask;
+	private Task_LoadTopicDistancesForSelection_CD topicLoadingTask;
 	
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1)
@@ -118,7 +118,7 @@ public class ChordDiagramController extends LocalScopeVisualizationController
 	{
 		if (selectedLDAConfigurations.size() > 0) {
 			// Load topic distance data for selection.
-			topicLoadingTask = new Task_LoadTopicDistancesForSelection(workspace, WorkspaceAction.LOAD_SPECIFIC_TOPIC_DISTANCES, null, selectedLDAConfigurations, localScope.getFilterThresholds());
+			topicLoadingTask = new Task_LoadTopicDistancesForSelection_CD(workspace, WorkspaceAction.LOAD_SPECIFIC_TOPIC_DISTANCES, null, selectedLDAConfigurations, localScope.getFilterThresholds());
 			topicLoadingTask.addListener(this);
 			
 			// Write list to file.

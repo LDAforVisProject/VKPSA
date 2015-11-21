@@ -48,15 +48,15 @@ public class LocalScopeInstance extends VisualizationComponent_Legacy
 	/**
 	 * Path to .fxml for parallel tag clouds.
 	 */
-	private final String ptcPath 	= "/view/SII/localScope/SII_Content_Analysis_LocalScope_ParallelTagCloud.fxml";
+	private final String ptcPath 	= "/view/fxml/localScope/SII_Content_Analysis_LocalScope_ParallelTagCloud.fxml";
 	/**
 	 * Path to .fxml for chord diagram.
 	 */
-	private final String cdPath		= "/view/SII/localScope/SII_Content_Analysis_LocalScope_ChordDiagram.fxml";
+	private final String cdPath		= "/view/fxml/localScope/SII_Content_Analysis_LocalScope_ChordDiagram.fxml";
 	/**
 	 * Path to .fxml for topic model comparison heatmap. 
 	 */
-	private final String hmcPath	= "/view/SII/localScope/SII_Content_Analysis_LocalScope_TMComparisonHeatmap.fxml";
+	private final String hmcPath	= "/view/fxml/localScope/SII_Content_Analysis_LocalScope_TMComparisonHeatmap.fxml";
 	
 	/*
 	 * Other data.
