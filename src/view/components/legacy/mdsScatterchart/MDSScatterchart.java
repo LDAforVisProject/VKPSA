@@ -151,7 +151,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	/**
 	 * Map storing all selected MDS chart points as values; their respective indices as keys.
 	 */
-	private Map<Integer, XYChart.Data<Number, Number>> selectedMDSPoints;
+	private Map<Integer, XYChart.Data<Number, Number>> activeMDSPoints;
 	
 	/**
 	 * Global coordinate extrema on x axis (absolute; not filter- or selection-specific).
@@ -173,11 +173,11 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	/**
 	 * Data series holding all filtered data points.
 	 */
-	private Series<Number, Number> filteredDataSeries;
+	private Series<Number, Number> inactiveDataSeries;
 	/**
 	 * Data series holding all selected data points.
 	 */
-	private Series<Number, Number> selectedDataSeries;
+	private Series<Number, Number> activeDataSeries;
 	
 	/*
 	 * Collections storing the domain data. 
@@ -190,7 +190,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	/**
 	 * Reference to this workspace's filtered coordinate collection.
 	 */
-	private double filteredCoordinates[][];
+	private double inactiveCoordinates[][];
 	/**
 	 * Reference to this workspace's collection of filtered indices.
 	 */
@@ -199,11 +199,11 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	/**
 	 * Reference to this workspace's selected coordinate collection.
 	 */
-	private double selectedCoordinates[][];
+	private double activeCoordinates[][];
 	/**
 	 * Reference to this workspace's collection of selected indices.
 	 */
-	private Set<Integer> selectedIndices;
+	private Set<Integer> activeIndices;
 	
 	/**
 	 * Reference to this workspace's discarded coordinate collection.
@@ -248,13 +248,13 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 		this.heatmap_dynGranularity_checkbox	= heatmap_dynGranularity_checkbox;
 	
 		// Init collection of selected data points in the MDS scatterchart.
-		selectedMDSPoints						= new HashMap<Integer, XYChart.Data<Number, Number>>();
+		activeMDSPoints						= new HashMap<Integer, XYChart.Data<Number, Number>>();
 		globalCoordinateExtrema_X				= new Pair<Double, Double>(Double.MAX_VALUE, Double.MIN_VALUE);
 		globalCoordinateExtrema_Y				= new Pair<Double, Double>(Double.MAX_VALUE, Double.MIN_VALUE);
 		globalCoordinateExtrema					= new double[4];
 		discardedDataSeries						= new Series<Number, Number>();
-		filteredDataSeries						= new Series<Number, Number>();
-		selectedDataSeries						= new Series<Number, Number>();
+		inactiveDataSeries						= new Series<Number, Number>();
+		activeDataSeries						= new Series<Number, Number>();
 		
 		// Init flags.
 		changeInSelectionDetected				= false;
@@ -296,12 +296,12 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
                 			txt = "Discarded (" + discardedIndices.size() + ")";
 	            		}
 	            		
-	            		else if (label.getText().contains("Filtered") && filteredIndices != null) {
-	            			txt = "Filtered (" + (filteredIndices.size() - selectedMDSPoints.size()) + ")";
+	            		else if (label.getText().contains("Inactive") && filteredIndices != null) {
+	            			txt = "Inactive (" + (filteredIndices.size() - activeMDSPoints.size()) + ")";
 	            		}
 	            		
-	            		else if (label.getText().contains("Selected") && selectedIndices != null) {
-	            			txt = "Selected (" + selectedMDSPoints.size() + ")";
+	            		else if (label.getText().contains("Active") && activeIndices != null) {
+	            			txt = "Active (" + activeMDSPoints.size() + ")";
 	            		}
                 		
             			label.setText(txt);
@@ -315,17 +315,13 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	private void initDataSeries()
 	{
 		discardedDataSeries.setName("Discarded");
-		filteredDataSeries.setName("Filtered");
-		selectedDataSeries.setName("Selected");
+		inactiveDataSeries.setName("Inactive");
+		activeDataSeries.setName("Active");
 		
 		scatterchartLegendLabels = new HashMap<String, Label>(3);
 		scatterchartLegendLabels.put("Discarded", null);
-		scatterchartLegendLabels.put("Filtered", null);
-		scatterchartLegendLabels.put("Selected", null);
-		
-		scatterchart.getData().add(discardedDataSeries);
-        scatterchart.getData().add(filteredDataSeries);
-        scatterchart.getData().add(0, selectedDataSeries);
+		scatterchartLegendLabels.put("Inactive", null);
+		scatterchartLegendLabels.put("Active", null);
 	}
 
 	private void initScatterchart()
@@ -360,7 +356,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	 */
 	public void highlightLDAConfiguration(int index)
 	{
-		for (XYChart.Data<Number, Number> data : selectedDataSeries.getData()) {
+		for (XYChart.Data<Number, Number> data : activeDataSeries.getData()) {
 			if (index == ((int) data.getExtraValue()) ) {
 				 // Setting the uniform variable for the glow width and height
 				int depth = 20;
@@ -637,43 +633,44 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	 */
 	public void refresh(double coordinates[][],
 						double filteredCoordinates[][], Set<Integer> filteredIndices,
-						double selectedCoordinates[][], Set<Integer> selectedIndices,
+						double activeCoordinates[][], Set<Integer> activeIndices,
 						double discardedCoordinates[][], Set<Integer> discardedIndices)
 	{	
 		// Store references to data collection.
-		this.filteredCoordinates	= filteredCoordinates;
+		this.inactiveCoordinates	= filteredCoordinates;
 		this.filteredIndices		= filteredIndices;
-		this.selectedCoordinates	= selectedCoordinates;
-		this.selectedIndices		= selectedIndices;
+		this.activeCoordinates		= activeCoordinates;
+		this.activeIndices			= activeIndices;
 		this.discardedCoordinates	= discardedCoordinates;
 		this.discardedIndices		= discardedIndices;
 		
 		// Update information about number of datapoints.
 		discardedDataSeries.setName("Discarded (" + discardedIndices.size() + ")");
-		filteredDataSeries.setName("Filtered (" + filteredIndices.size() + ")");
-		selectedDataSeries.setName("Selected (" + selectedIndices.size() + ")");
+		inactiveDataSeries.setName("Inactive (" + filteredIndices.size() + ")");
+		activeDataSeries.setName("Active (" + activeIndices.size() + ")");
 		
 		// Clear scatterchart.
 		scatterchart.getData().clear();
 		discardedDataSeries.getData().clear();
-		filteredDataSeries.getData().clear();
-		selectedDataSeries.getData().clear();
+		inactiveDataSeries.getData().clear();
+		activeDataSeries.getData().clear();
 		pointsManipulatedInCurrSelectionStep.clear();
-		selectedMDSPoints.clear();
+		activeMDSPoints.clear();
 		
 		// Draw only if heatmap is currently not shown. 
 		if (!heatmap_canvas.isVisible()) {
-	        // Add filtered points points to scatterchart.
-	        addFilteredDataPoints();
-	        // Add selected data points to scatterchart.
-	        addSelectedDataPoints();
 	        // Add discarded data points (greyed out) to scatterchart.
 	        addDiscardedDataPoints();
-	        
+	        // Add filtered points points to scatterchart.
+	        addInactiveDataPoints();
+	        // Add active data points to scatterchart.
+	        addActiveDataPoints();
+
 	        // Add data in scatterchart.
-	        scatterchart.getData().add(discardedDataSeries);
-	        scatterchart.getData().add(filteredDataSeries);
-	        scatterchart.getData().add(0, selectedDataSeries);
+//	        scatterchart.getData().addAll(activeDataSeries, inactiveDataSeries, discardedDataSeries);
+	        scatterchart.getData().add(0, discardedDataSeries);
+	        scatterchart.getData().add(0, inactiveDataSeries);
+	        scatterchart.getData().add(0, activeDataSeries);
 	        
 	        // Redraw scatterchart.
 	        scatterchart.layout();
@@ -684,7 +681,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 		}    
 		
         // Update heatmap.
-        heatmap.refresh(this.filteredCoordinates, globalCoordinateExtrema);
+        heatmap.refresh(this.inactiveCoordinates, globalCoordinateExtrema);
 
         // Update scatterchart ranges.
         updateMDSScatterchartRanges();
@@ -702,19 +699,19 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	/**
 	 * Auxiliary method to add filtered data points to data series in scatterchart.
 	 * @param dataSeries
-	 * @param selectedDataSeries
+	 * @param activeDataSeries
 	 */
-	private void addFilteredDataPoints()
+	private void addInactiveDataPoints()
 	{
         int count = 0;
 
         // Add filtered data points.
         for (int index : filteredIndices) {
         	// Add point only if it's not part of the set of selected indices.
-        	if (!selectedIndices.contains(index)) {
-	        	XYChart.Data<Number, Number> dataPoint = new XYChart.Data<Number, Number>(filteredCoordinates[0][count], filteredCoordinates[1][count]);
+        	if (!activeIndices.contains(index)) {
+	        	XYChart.Data<Number, Number> dataPoint = new XYChart.Data<Number, Number>(inactiveCoordinates[0][count], inactiveCoordinates[1][count]);
 	        	dataPoint.setExtraValue(index);
-	        	filteredDataSeries.getData().add(dataPoint);
+	        	inactiveDataSeries.getData().add(dataPoint);
         	}
         	
         	count++;
@@ -724,19 +721,19 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	/**
 	 * Auxiliary method to add selected data points to data series in scatterchart.
 	 * @param dataSeries
-	 * @param selectedDataSeries
+	 * @param activeDataSeries
 	 */
-	private void addSelectedDataPoints()
+	private void addActiveDataPoints()
 	{
         int count = 0;
         
         // Add selected data points.
         count = 0;
-        for (int index : selectedIndices) {
-    		XYChart.Data<Number, Number> dataPoint = new XYChart.Data<Number, Number>(selectedCoordinates[0][count], selectedCoordinates[1][count]);
+        for (int index : activeIndices) {
+    		XYChart.Data<Number, Number> dataPoint = new XYChart.Data<Number, Number>(activeCoordinates[0][count], activeCoordinates[1][count]);
         	dataPoint.setExtraValue(index);
-        	selectedDataSeries.getData().add(dataPoint);
-        	selectedMDSPoints.put(index, dataPoint);
+        	activeDataSeries.getData().add(dataPoint);
+        	activeMDSPoints.put(index, dataPoint);
     	
         	count++;
         }
@@ -766,7 +763,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	{
 		switch (state)
 		{
-			case FILTERED:
+			case INACTIVE:
 				dataPoint.getNode().setOnMouseClicked(new EventHandler<MouseEvent>()
 				{
 				    @Override
@@ -774,15 +771,15 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 				    {       
 				    	// If control is not down: Add to selection.
 				    	if (!mouseEvent.isControlDown()) {
-					    	if (!selectedMDSPoints.containsKey(dataPoint.getExtraValue())) {
+					    	if (!activeMDSPoints.containsKey(dataPoint.getExtraValue())) {
 					    		// Update collection of selected points.
-								selectedMDSPoints.put((int)dataPoint.getExtraValue(), dataPoint);
+								activeMDSPoints.put((int)dataPoint.getExtraValue(), dataPoint);
 
 								// Change data point selection status.
 								changeDataPointSelectionStatus(dataPoint, true);
 					    		
 								// Refresh other charts.
-					    		analysisController.integrateMDSSelection(selectedMDSPoints.keySet(), false);
+					    		analysisController.integrateMDSSelection(activeMDSPoints.keySet(), false);
 					    	}
 				    	}
 				    	else
@@ -791,7 +788,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 				});
 			break;
 			
-			case SELECTED:
+			case ACTIVE:
 	        	dataPoint.getNode().setOnMouseClicked(new EventHandler<MouseEvent>()
     			{
     			    @Override
@@ -801,13 +798,13 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
     			    	// If control is down: Remove from selection.
     			    	if (isCtrlDown || mouseEvent.isControlDown()) {
 				    		// Update collection of selected points.
-				    		selectedMDSPoints.remove(dataPoint.getExtraValue());
+				    		activeMDSPoints.remove(dataPoint.getExtraValue());
 							
 							// Change data point selection status.
 							changeDataPointSelectionStatus(dataPoint, false);
 							
 							// Refresh other charts.
-				    		analysisController.integrateMDSSelection(selectedMDSPoints.keySet(), false);
+				    		analysisController.integrateMDSSelection(activeMDSPoints.keySet(), false);
     			    	}
     			    }
     			});
@@ -823,13 +820,13 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	{
         // Add mouse event listeners to points in all data series.
 		
-        for (XYChart.Data<Number, Number> dataPoint : filteredDataSeries.getData()) {
-        	addSingleSelectionModeMouseListenerToNode(dataPoint, DataPointState.FILTERED);
+        for (XYChart.Data<Number, Number> dataPoint : inactiveDataSeries.getData()) {
+        	addSingleSelectionModeMouseListenerToNode(dataPoint, DataPointState.INACTIVE);
         }
 		
 		// Add mouse listeners for selected data points.
-        for (XYChart.Data<Number, Number> dataPoint : selectedDataSeries.getData()) {
-        	addSingleSelectionModeMouseListenerToNode(dataPoint, DataPointState.SELECTED);
+        for (XYChart.Data<Number, Number> dataPoint : activeDataSeries.getData()) {
+        	addSingleSelectionModeMouseListenerToNode(dataPoint, DataPointState.ACTIVE);
         }
 	}
 	
@@ -867,17 +864,17 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 		// If control is not down: Ignore selected points, add all non-selected in chosen area.
 		if (!isCtrlDown) {
 			// Iterate over all filtered points.
-			for (XYChart.Data<Number, Number> datapoint : filteredDataSeries.getData()) {
+			for (XYChart.Data<Number, Number> datapoint : inactiveDataSeries.getData()) {
 				// Point was selected - add to sets of selected indices and selected points.
 				if (	isNodeWithinBounds(datapoint.getNode(), minX, minY, maxX, maxY) &&
-						!selectedMDSPoints.containsKey((int)datapoint.getExtraValue())
+						!activeMDSPoints.containsKey((int)datapoint.getExtraValue())
 					) {
 					// Set dirty flags.
 					changeInSelectionDetected				= true;
 					changeInSelectionDetected_localScope	= true;
 					
 					// Update collection of selected points.
-					selectedMDSPoints.put((int)datapoint.getExtraValue(), datapoint);
+					activeMDSPoints.put((int)datapoint.getExtraValue(), datapoint);
 					
 					// Update set of values added to selection in this action.
 					pointsToAddToSelection.add(datapoint);
@@ -888,9 +885,9 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 			}
 
 			// Iterate over all selected points.
-			for (XYChart.Data<Number, Number> datapoint : selectedDataSeries.getData()) {
+			for (XYChart.Data<Number, Number> datapoint : activeDataSeries.getData()) {
 				if (	!isNodeWithinBounds(datapoint.getNode(), minX, minY, maxX, maxY) 	&&
-						selectedMDSPoints.containsKey((int)datapoint.getExtraValue())		&&
+						activeMDSPoints.containsKey((int)datapoint.getExtraValue())		&&
 						pointsManipulatedInCurrSelectionStep.contains((int) datapoint.getExtraValue())
 					) {
 					// Set dirty flags.
@@ -898,7 +895,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 					changeInSelectionDetected_localScope	= true;
 					
 					// Update collection of selected points.
-					selectedMDSPoints.remove((int)datapoint.getExtraValue());
+					activeMDSPoints.remove((int)datapoint.getExtraValue());
 					
 					// Update set of values removed from selection in this action.
 					pointsToRemoveFromSelection.add(datapoint);
@@ -909,17 +906,17 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 		// Else if control is down: Remove selected points in chose area from selection (in data series 0).
 		else {
 			// Iterate over selected points.
-			for (XYChart.Data<Number, Number> datapoint : selectedDataSeries.getData()) {
+			for (XYChart.Data<Number, Number> datapoint : activeDataSeries.getData()) {
 				// Point was deselected - remove from of selected points and selected indices.
 				if (isNodeWithinBounds(datapoint.getNode(), minX, minY, maxX, maxY) &&
-					selectedMDSPoints.containsKey((int)datapoint.getExtraValue())
+					activeMDSPoints.containsKey((int)datapoint.getExtraValue())
 				) {
 					// Set dirty flags.
 					changeInSelectionDetected				= true;
 					changeInSelectionDetected_localScope	= true;
 					
 					// Update collection of selected points.
-					selectedMDSPoints.remove((int)datapoint.getExtraValue());
+					activeMDSPoints.remove((int)datapoint.getExtraValue());
 					
 					// Update set of values removed from selection in this action.
 					pointsToRemoveFromSelection.add(datapoint);			
@@ -930,10 +927,10 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 			}
 			
 			// Iterate over all filtered points.
-			for (XYChart.Data<Number, Number> datapoint : filteredDataSeries.getData()) {
+			for (XYChart.Data<Number, Number> datapoint : inactiveDataSeries.getData()) {
 				// Point was deselected - remove from of selected points and selected indices.
 				if (!isNodeWithinBounds(datapoint.getNode(), minX, minY, maxX, maxY)	&&
-					!selectedMDSPoints.containsKey((int)datapoint.getExtraValue())		&&
+					!activeMDSPoints.containsKey((int)datapoint.getExtraValue())		&&
 					pointsManipulatedInCurrSelectionStep.contains((int) datapoint.getExtraValue())
 				) {
 					// Set dirty flags.
@@ -941,7 +938,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 					changeInSelectionDetected_localScope	= true;
 					
 					// Update collection of selected points.
-					selectedMDSPoints.remove((int)datapoint.getExtraValue());
+					activeMDSPoints.remove((int)datapoint.getExtraValue());
 					
 					// Update set of values removed from selection in this action.
 					pointsToAddToSelection.add(datapoint);						
@@ -957,7 +954,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 				changeDataPointSelectionStatus(newlySelectedDataPoint, true);
 				
 				// Update collection of selected points.
-				selectedMDSPoints.put((int)newlySelectedDataPoint.getExtraValue(), newlySelectedDataPoint);
+				activeMDSPoints.put((int)newlySelectedDataPoint.getExtraValue(), newlySelectedDataPoint);
 			}
 			
 			// Remove newly de-selected data points to selection.
@@ -967,7 +964,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 			}
 			
     		// Refresh other charts.
-    		analysisController.integrateMDSSelection(selectedMDSPoints.keySet(), false);
+    		analysisController.integrateMDSSelection(activeMDSPoints.keySet(), false);
     		
     		// Reset flag.
     		changeInSelectionDetected = false;
@@ -990,27 +987,27 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 		
 		if (selected) {
 			// Remove from filteredDataSeries.
-			filteredDataSeries.getData().remove(data);
+			inactiveDataSeries.getData().remove(data);
 			
 			// Add copy to selectedDataSeries.
-			if (!selectedDataSeries.getData().contains(data)) {
-				selectedDataSeries.getData().add(dataCopy);
+			if (!activeDataSeries.getData().contains(data)) {
+				activeDataSeries.getData().add(dataCopy);
 
 				// Add listener for single selection mode.
-	    		addSingleSelectionModeMouseListenerToNode(dataCopy, DataPointState.SELECTED);
+	    		addSingleSelectionModeMouseListenerToNode(dataCopy, DataPointState.ACTIVE);
 			}
 		}
 		
 		else {
 			// Remove from selectedDataSeries.
-			selectedDataSeries.getData().remove(data);
+			activeDataSeries.getData().remove(data);
 			
 			// Add copy to filteredDataSeries.
-			if (!filteredDataSeries.getData().contains(data)) {
-				filteredDataSeries.getData().add(dataCopy);
+			if (!inactiveDataSeries.getData().contains(data)) {
+				inactiveDataSeries.getData().add(dataCopy);
 				
 				// Add listener for single selection mode.
-	    		addSingleSelectionModeMouseListenerToNode(dataCopy, DataPointState.FILTERED);
+	    		addSingleSelectionModeMouseListenerToNode(dataCopy, DataPointState.INACTIVE);
 			}
 		}
 	}
@@ -1027,7 +1024,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 			changeInSelectionDetected_localScope = false;
 			
 			// Refresh local scope visualization.
-			analysisController.integrateMDSSelection(selectedMDSPoints.keySet(), true);
+			analysisController.integrateMDSSelection(activeMDSPoints.keySet(), true);
 		}
 	}
 	
@@ -1039,7 +1036,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	
 	/**
 	 * Updates x- and y-range of the MDS scatterchart.
-	 * @param filteredCoordinates
+	 * @param inactiveCoordinates
 	 */
 	public void updateMDSScatterchartRanges()
 	{
@@ -1073,7 +1070,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	 */
 	public Set<Integer> getSelectedIndices()
 	{
-		return selectedMDSPoints.keySet();
+		return activeMDSPoints.keySet();
 	}
 
 	/**

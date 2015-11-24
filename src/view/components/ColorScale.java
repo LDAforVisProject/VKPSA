@@ -120,8 +120,17 @@ public class ColorScale extends ImageView
         	return Color.TRANSPARENT;
         
         else {
-	        final double hue = minColor.getHue() + (maxColor.getHue() - minColor.getHue()) * (value - min) / (max - min);
-	        return Color.hsb(hue, (value - min) / (max - min), 1.0);
+        	final double hue = minColor.getHue() + (maxColor.getHue() - minColor.getHue()) * (value - min) / (max - min);
+        	
+        	// Workaround: No hue difference calculation when both colors are grey - doesn't work (switches to red - why?).
+        	if (minColor != Color.GRAY && maxColor != Color.GREY) {
+		        
+		        return Color.hsb(hue, (value - min) / (max - min), 1.0);
+        	}
+        	
+        	else {
+        		return Color.gray(hue, (value - min) / (max - min));
+        	}
         }
     }
     

@@ -138,7 +138,7 @@ public class DistancesBarchart extends VisualizationComponent_Legacy implements 
 	/**
 	 * Series containing filtered data.
 	 */
-	private XYChart.Series<String, Number> filteredDataSeries;
+	private XYChart.Series<String, Number> inactiveDataSeries;
 	/**
 	 * Series containing filtered and selected data.
 	 */
@@ -206,16 +206,16 @@ public class DistancesBarchart extends VisualizationComponent_Legacy implements 
 		
 		// Initialize data series.
 		discardedDataSeries	= new XYChart.Series<String, Number>();
-		filteredDataSeries	= new XYChart.Series<String, Number>();
+		inactiveDataSeries	= new XYChart.Series<String, Number>();
 		selectedDataSeries	= new XYChart.Series<String, Number>();
 		
 		discardedDataSeries.setName("Discarded");
-		filteredDataSeries.setName("Filtered");
+		inactiveDataSeries.setName("Filtered");
 		selectedDataSeries.setName("Selected");
 		
 		barchart.getData().clear();
 		barchart.getData().add(discardedDataSeries);
-		barchart.getData().add(filteredDataSeries);
+		barchart.getData().add(inactiveDataSeries);
 		barchart.getData().add(selectedDataSeries);
 		
 		// Init legend.
@@ -259,15 +259,15 @@ public class DistancesBarchart extends VisualizationComponent_Legacy implements 
 	                                				switch (label.getText())
 	                                				{
 	                                					case "Filtered":
-	                                						labelColor = "blue";
+	                                						labelColor = "darkgrey";
 	                                					break;
 	                                					
 	                                					case "Discarded":
-	                                						labelColor = "grey";
+	                                						labelColor = "lightgrey";
 		                                				break;
 		                                				
 		                                				default:
-		                                					labelColor = "red";
+		                                					labelColor = "blue";
 	                                				}
 	                                				 
 	                                				// Set label color.
@@ -368,7 +368,7 @@ public class DistancesBarchart extends VisualizationComponent_Legacy implements 
 				}
 				
 				// Add all filtered distances to chart.
-				addToDataSeries(filteredDataSeries, 1, filteredIndices, filteredDistances, numberOfBins, numberOfFilteredElements);
+				addToDataSeries(inactiveDataSeries, 1, filteredIndices, filteredDistances, numberOfBins, numberOfFilteredElements);
 				
 				// Set y-axis range, if in absolute mode and the maximal bin count has not yet been determined.
 				if (!button_relativeView_distEval.isSelected() && !distanceBinCountMaximumDetermined) {
@@ -509,23 +509,23 @@ public class DistancesBarchart extends VisualizationComponent_Legacy implements 
 				case 0:
 					if (node.getUserData() == null || node.getUserData().toString() == "discarded") {
 						node.setUserData("discarded");
-						node.setStyle("-fx-bar-fill: grey;");
+						node.setStyle("-fx-bar-fill: lightgrey;");
 					}
 				break;
 				
 				// Filtered data.
 				case 1:
-					if (node.getUserData() == null || node.getUserData().toString() == "filtered") {
-						node.setUserData("filtered");
-						node.setStyle("-fx-bar-fill: blue;");
+					if (node.getUserData() == null || node.getUserData().toString() == "inactive") {
+						node.setUserData("inactive");
+						node.setStyle("-fx-bar-fill: darkgrey;");
 					}
 				break;
 				
 				// Selected data.
 				case 2:
-					if (node.getUserData() == null || node.getUserData().toString() == "selected") {
-						node.setUserData("selected");
-						node.setStyle("-fx-bar-fill: red;");
+					if (node.getUserData() == null || node.getUserData().toString() == "active") {
+						node.setUserData("active");
+						node.setStyle("-fx-bar-fill: blue;");
 					}	
 				break;
 			}
@@ -678,14 +678,14 @@ public class DistancesBarchart extends VisualizationComponent_Legacy implements 
 		// If control is not down: Ignore selected points, add all non-selected in chosen area.
 		if (!isCtrlDown) {
 			// Process filtered, non-selected data.
-			for (Data<String, Number> data : filteredDataSeries.getData()) {
+			for (Data<String, Number> data : inactiveDataSeries.getData()) {
 				Node dataNode = data.getNode();
 				
-				if (	barToDataAssociations.get(data.getXValue() + filteredDataSeries.getName()).size() > 0 &&
+				if (	barToDataAssociations.get(data.getXValue() + inactiveDataSeries.getName()).size() > 0 &&
 						dataNode.getLayoutX() >= minX && dataNode.getLayoutX() + dataNode.getBoundsInLocal().getWidth() <= maxX &&
 						dataNode.getLayoutY() >= minY && dataNode.getLayoutY() + dataNode.getBoundsInLocal().getHeight() <= maxY ) {
 					// Highlight bar.
-					setBarHighlighting(dataNode, true, Color.RED);
+					setBarHighlighting(dataNode, true, Color.BLUE);
 				
 					// Add to collection.
 					if (!selectedBars.contains(data.getXValue())) {
@@ -713,7 +713,7 @@ public class DistancesBarchart extends VisualizationComponent_Legacy implements 
 						dataNode.getLayoutX() >= minX && dataNode.getLayoutX() + dataNode.getBoundsInLocal().getWidth() <= maxX &&
 						dataNode.getLayoutY() >= minY && dataNode.getLayoutY() + dataNode.getBoundsInLocal().getHeight() <= maxY ) {
 					// Highlight bar.
-					setBarHighlighting(dataNode, true, Color.BLUE);
+					setBarHighlighting(dataNode, true, Color.GREY);
 					
 					// Add to collection.
 					if (!selectedBars.contains(data.getXValue())) {
@@ -739,11 +739,11 @@ public class DistancesBarchart extends VisualizationComponent_Legacy implements 
 		
 		for (String description : selectedBars) {
 			// Add to collection.
-			final String seriesSuffix = !isCtrlDown ? filteredDataSeries.getName() : selectedDataSeries.getName(); 
+			final String seriesSuffix = !isCtrlDown ? inactiveDataSeries.getName() : selectedDataSeries.getName(); 
 			selectedLocalIndices.addAll(barToDataAssociations.get(description + seriesSuffix));
 			
 			// Remove glow from all bars.
-			for (Data<String, Number> data : filteredDataSeries.getData()) {
+			for (Data<String, Number> data : inactiveDataSeries.getData()) {
 				setBarHighlighting(data.getNode(), false, null);	
 			}
 			for (Data<String, Number> data : selectedDataSeries.getData()) {

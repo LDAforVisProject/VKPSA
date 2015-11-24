@@ -1,27 +1,23 @@
-#alpha_barchart {
-	
-}
-
 /* Defines color for discarded data series in scatterchart. */
 .default-color0.chart-symbol { /* hollow circle */
-    -fx-background-color: #CACACA, white;
+    -fx-background-color: lightgrey, white;
     -fx-background-insets: 0, 2;
-    -fx-background-radius: 5px;
-    -fx-padding: 5px;
+    -fx-background-radius: 4px;
+    -fx-padding: 4px;
 }
 
-/* Defines color for filtered data series in scatterchart. */
+/* Defines color for active data series in scatterchart. */
 .default-color1.chart-symbol {
-    -fx-background-color: blue;
+    -fx-background-color: darkgrey;
     -fx-background-insets: 0, 2;
-    -fx-background-radius: 5px;
-    -fx-padding: 5px;
+    -fx-background-radius: 4px;
+    -fx-padding: 4px;
 }
 
 /* Defines color for selected data series in scatterchart. */
 .default-color2.chart-symbol {
-    -fx-background-color: red;
+    -fx-background-color: blue;
     -fx-background-insets: 0, 2;
-    -fx-background-radius: 5px;
-    -fx-padding: 5px;
+    -fx-background-radius: 4px;
+    -fx-padding: 4px;
 }

@@ -773,7 +773,7 @@ public class AnalysisController extends Controller
 	{
 		// Refresh heatmap using filtered data:
 		HeatmapOptionset fOptions 	= new HeatmapOptionset(	checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int)slider_parameterSpace_distribution_granularity.getValue(), 
-															Color.LIGHTBLUE, Color.DARKBLUE, new Color(0.0, 0.0, 1.0, 0.5), new Color(1.0, 0.0, 0.0, 0.5), 
+															Color.GREY, Color.GREY, Color.gray(0.5, 0.5), new Color(0.0, 0.0, 1.0, 0.5), 
 															combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(),
 															true, button_relativeView_paramDist.isSelected(), true);
 		HeatmapDataset fData		= new HeatmapDataset(dataspace.getLDAConfigurations(), dataspace.getFilteredLDAConfigurations(), fOptions);
@@ -781,7 +781,7 @@ public class AnalysisController extends Controller
 
 		// Refresh heatmap using selected data:
 		HeatmapOptionset sOptions 	= new HeatmapOptionset(	checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int)slider_parameterSpace_distribution_granularity.getValue(), 
-															Color.RED, Color.DARKRED, new Color(0.0, 0.0, 1.0, 0.5), new Color(1.0, 0.0, 0.0, 0.5),
+															Color.LIGHTBLUE, Color.DARKBLUE, Color.gray(0.5, 0.5), new Color(0.0, 0.0, 1.0, 0.5),
 															combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(),
 															true, button_relativeView_paramDist.isSelected(), true);
 		HeatmapDataset sData		= new HeatmapDataset(dataspace.getLDAConfigurations(), dataspace.getSelectedLDAConfigurations(), fOptions);
@@ -796,7 +796,7 @@ public class AnalysisController extends Controller
 		// If data sets were selected:
 		if (selectedLDAConfigurations.size() > 0) {
 			HeatmapOptionset tmcOptions = new HeatmapOptionset(	true, -1, 
-																Color.LIGHTCORAL, Color.DARKRED, new Color(0.0, 0.0, 1.0, 0.5), new Color(1.0, 0.0, 0.0, 0.5),
+																Color.LIGHTBLUE, Color.DARKBLUE, new Color(0.0, 0.0, 1.0, 0.5), new Color(1.0, 0.0, 0.0, 0.5),
 																"", "",
 																true, false, true);
 			// Instruct heatmap to fetch topic distance data asynchronously.
@@ -1006,9 +1006,9 @@ public class AnalysisController extends Controller
 			{
 				// Selectede data.
 				case 2:
-					if (node.getUserData() == null || node.getUserData().toString() == "selected") {
-						node.setUserData("selected");
-						node.setStyle("-fx-bar-fill: red;");
+					if (node.getUserData() == null || node.getUserData().toString() == "active") {
+						node.setUserData("active");
+						node.setStyle("-fx-bar-fill: blue;");
 					}
 				break;
 				
@@ -1016,15 +1016,15 @@ public class AnalysisController extends Controller
 				case 1:
 					if (node.getUserData() == null || node.getUserData().toString() == "discarded") {
 						node.setUserData("discarded");
-						node.setStyle("-fx-bar-fill: grey;");
+						node.setStyle("-fx-bar-fill: lightgrey;");
 					}
 				break;
 				
 				// Filtered data.
 				case 0:
-					if (node.getUserData() == null || node.getUserData().toString() == "filtered") {
-						node.setUserData("filtered");
-						node.setStyle("-fx-bar-fill: blue;");
+					if (node.getUserData() == null || node.getUserData().toString() == "inactive") {
+						node.setUserData("inactive");
+						node.setStyle("-fx-bar-fill: darkgrey;");
 					}
 				break;
 			}
