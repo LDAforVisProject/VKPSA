@@ -25,6 +25,15 @@ public class HeatmapOptionset extends VisualizationComponentOptionset
 	private Color maxColor;
 	
 	/**
+	 * Color cells are highlighted in when they ought to be removed from the current selection.
+	 */
+	private Color subtractiveSelectionColor;
+	/**
+	 * Color cells are highlighted in when they ought to be added to the current selection.
+	 */
+	private Color additiveSelectionColor;
+	
+	/**
 	 * Name of x-axis parameter.
 	 */
 	private String key1;
@@ -38,17 +47,20 @@ public class HeatmapOptionset extends VisualizationComponentOptionset
 	//			Methods	
 	// -------------------------------
 	
-	public HeatmapOptionset(boolean isGranularityDynamic, int granularity, Color minColor, Color maxColor,
+	public HeatmapOptionset(boolean isGranularityDynamic, int granularity, 
+							Color minColor, Color maxColor, Color subtractiveSelectionColor, Color additiveSelectionColor,
 							String key1, String key2, boolean isSelectionEnabled, boolean relativeMode, boolean showAxes)
 	{
 		super(isSelectionEnabled, showAxes, relativeMode);
 		
-		this.isGranularityDynamic	= isGranularityDynamic;
-		this.granularity			= granularity;
-		this.minColor				= minColor;
-		this.maxColor				= maxColor;
-		this.key1					= key1;
-		this.key2					= key2;
+		this.isGranularityDynamic		= isGranularityDynamic;
+		this.granularity				= granularity;
+		this.minColor					= minColor;
+		this.maxColor					= maxColor;
+		this.key1						= key1;
+		this.key2						= key2;
+		this.subtractiveSelectionColor	= subtractiveSelectionColor;
+		this.additiveSelectionColor		= additiveSelectionColor;
 	}
 
 	/*
@@ -98,5 +110,15 @@ public class HeatmapOptionset extends VisualizationComponentOptionset
 	public boolean getShowAxes()
 	{
 		return showAxes;
+	}
+
+	public Color getSubtractiveSelectionColor()
+	{
+		return subtractiveSelectionColor;
+	}
+
+	public Color getAdditiveSelectionColor()
+	{
+		return additiveSelectionColor;
 	}
 }

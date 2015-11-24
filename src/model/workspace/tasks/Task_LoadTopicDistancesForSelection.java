@@ -35,11 +35,6 @@ public class Task_LoadTopicDistancesForSelection extends WorkspaceTask
 	 */
 	private ArrayList<LDAConfiguration> ldaConfigurationsToLoad;
 	
-	/**
-	 * Filter thresholds for all currently supported parameter. 
-	 */
-	Map<String, Pair<Double, Double>> parameterFilterThresholds;
-	
 
 	/*
 	 * --------------------------------------------------------------
@@ -48,12 +43,11 @@ public class Task_LoadTopicDistancesForSelection extends WorkspaceTask
 	 */
 	
 	public Task_LoadTopicDistancesForSelection(	Workspace workspace, WorkspaceAction workspaceAction, final Map<String, Integer> additionalOptionSet,
-												ArrayList<LDAConfiguration> ldaConfigurationsToLoad, Map<String, Pair<Double, Double>> parameterFilterThresholds)
+												ArrayList<LDAConfiguration> ldaConfigurationsToLoad)
 	{
 		super(workspace, workspaceAction, additionalOptionSet);
 		
 		this.ldaConfigurationsToLoad	= ldaConfigurationsToLoad;
-		this.parameterFilterThresholds	= parameterFilterThresholds;
 	}
 
 	@Override
@@ -71,5 +65,20 @@ public class Task_LoadTopicDistancesForSelection extends WorkspaceTask
 		this.topicDistances						= topicDistancesDataset.getValue();
 
 		return 1;
+	}
+
+	public double[][] getTopicDistances()
+	{
+		return topicDistances;
+	}
+
+	public Map<Pair<Integer, Integer>, Integer> getSpatialIDsForLDATopicConfiguration()
+	{
+		return spatialIDsForLDATopicConfiguration;
+	}
+
+	public ArrayList<LDAConfiguration> getLDAConfigurationsToLoad()
+	{
+		return ldaConfigurationsToLoad;
 	}
 }

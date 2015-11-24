@@ -198,7 +198,7 @@ public class DistancesBarchart extends VisualizationComponent_Legacy implements 
 		barchart.setLegendVisible(true);
 		barchart.setAnimated(false);
 		barchart.setBarGap(0);
-		barchart.setCategoryGap(1);
+		barchart.setCategoryGap(5);
 		
 		// Disable auto-ranging (absolute view is default).
 		barchart.getXAxis().setAutoRanging(true);

@@ -39,15 +39,12 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.chart.BarChart;
-import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.StackedBarChart;
 import javafx.scene.chart.ValueAxis;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
@@ -597,8 +594,22 @@ public class AnalysisController extends Controller
 		}
 		
 		// Even if no change on global scope detected: Update local scope, if requested. 
-		else if (includeLocalScope)
+		else if (includeLocalScope) {
 			localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
+			// Refresh topic model comparison heatmap.
+			refreshTMCHeatmap(dataspace.getSelectedLDAConfigurations());
+		}
+	}
+	
+	/**
+	 * Integrates data/heatmap cells selected in TMC heatmap into dataspace and displays the
+	 * selection in local scope.
+	 * @param selectedTopicConfigIDs
+	 * @param isCtrlDown Determines whether currently transferred data should be added or subtracted from current data set.
+	 */
+	public void integrateTMCHeatmapSelection(Set<Pair<Integer, Integer>> selectedTopicConfigIDs, boolean isCtrlDown)
+	{
+		localScopeInstance.refreshPTC(selectedTopicConfigIDs);
 	}
 	
 	/**
@@ -749,6 +760,7 @@ public class AnalysisController extends Controller
 
 		//	Local scope:
 		localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
+		refreshTMCHeatmap(dataspace.getSelectedLDAConfigurations());
 		
 		// 	Parameter histograms:
 		refreshParameterHistograms(50);
@@ -761,7 +773,7 @@ public class AnalysisController extends Controller
 	{
 		// Refresh heatmap using filtered data:
 		HeatmapOptionset fOptions 	= new HeatmapOptionset(	checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int)slider_parameterSpace_distribution_granularity.getValue(), 
-															Color.LIGHTBLUE, Color.DARKBLUE, 
+															Color.LIGHTBLUE, Color.DARKBLUE, new Color(0.0, 0.0, 1.0, 0.5), new Color(1.0, 0.0, 0.0, 0.5), 
 															combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(),
 															true, button_relativeView_paramDist.isSelected(), true);
 		HeatmapDataset fData		= new HeatmapDataset(dataspace.getLDAConfigurations(), dataspace.getFilteredLDAConfigurations(), fOptions);
@@ -769,7 +781,7 @@ public class AnalysisController extends Controller
 
 		// Refresh heatmap using selected data:
 		HeatmapOptionset sOptions 	= new HeatmapOptionset(	checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int)slider_parameterSpace_distribution_granularity.getValue(), 
-															Color.RED, Color.DARKRED, 
+															Color.RED, Color.DARKRED, new Color(0.0, 0.0, 1.0, 0.5), new Color(1.0, 0.0, 0.0, 0.5),
 															combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(),
 															true, button_relativeView_paramDist.isSelected(), true);
 		HeatmapDataset sData		= new HeatmapDataset(dataspace.getLDAConfigurations(), dataspace.getSelectedLDAConfigurations(), fOptions);
@@ -781,15 +793,15 @@ public class AnalysisController extends Controller
 	 */
 	private void refreshTMCHeatmap(ArrayList<LDAConfiguration> selectedLDAConfigurations)
 	{
-		// Fetch first two LDA configurations from selection.
+		// If data sets were selected:
 		if (selectedLDAConfigurations.size() > 0) {
 			HeatmapOptionset tmcOptions = new HeatmapOptionset(	true, -1, 
-																Color.WHITE, Color.RED, 
-																combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(),
+																Color.LIGHTCORAL, Color.DARKRED, new Color(0.0, 0.0, 1.0, 0.5), new Color(1.0, 0.0, 0.0, 0.5),
+																"", "",
 																true, false, true);
-			HeatmapDataset tmcData		= new HeatmapDataset(dataspace.getLDAConfigurations(), dataspace.createSelectedDistanceMatrix(dataspace.getSelectedIndices()), tmcOptions);
+			// Instruct heatmap to fetch topic distance data asynchronously.
+			tmcHeatmap.fetchTopicDistanceData(selectedLDAConfigurations, tmcOptions);
 			// @todo CURRENT: Load topic distances, display in tmcHeatmap; do axis labeling.
-			tmcHeatmap.refresh(tmcOptions, tmcData);
 		}
 	}
 	
@@ -1438,5 +1450,6 @@ public class AnalysisController extends Controller
 		tmcHeatmap.setReferences(workspace, logPI, logTA);
 		parameterspace_heatmap_filtered.setReferences(workspace, logPI, logTA);
 		parameterspace_heatmap_selected.setReferences(workspace, logPI, logTA);
+		localScopeInstance.setReferences(workspace, logPI, logTA);
 	}
 }

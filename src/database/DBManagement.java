@@ -765,20 +765,25 @@ public class DBManagement
 				// Iterate through topic distances for this pair of LDA configurations.
 				for (int i = 0; i < topicDistanceMatrix.length; i++) {
 					for (int j = 0; j < topicDistanceMatrix[i].length; j++) {
+						statement.setInt(1, ldaConfigID_1);
+						statement.setInt(2, ldaConfigID_2);
+						statement.setInt(3, i);
+						statement.setInt(4, j);
+						
 						// Set values for row, if distance is not between the same topic.
 						if ( !( (ldaConfigID_1 == ldaConfigID_2) && (i == j) ) ) {
-							statement.setInt(1, ldaConfigID_1);
-							statement.setInt(2, ldaConfigID_2);
-							statement.setInt(3, i);
-							statement.setInt(4, j);
 							statement.setDouble(5, topicDistanceMatrix[i][j]);
-
-							// Add row to batch.
-							statement.addBatch();
-							
-							// Keep track of how many statements are in this batch.
-							statementsInBatch++;
 						}
+						// Else: Use 0 as distance of a topic to itself.
+						else {
+							statement.setDouble(5, 0);
+						}
+
+						// Add row to batch.
+						statement.addBatch();
+						
+						// Keep track of how many statements are in this batch.
+						statementsInBatch++;
 					}	
 				}
 				

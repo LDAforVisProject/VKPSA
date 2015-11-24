@@ -36,6 +36,10 @@ public class HeatmapDataset extends VisualizationComponentDataset
 	 * Stores index of an cell and the IDs of the corresponding/contained LDA configurations.
 	 */
 	private Map<Pair<Integer, Integer>, Set<Integer>> cellsToConfigurationIDs;
+	/**
+	 * Stores index of an cell and the IDs of the corresponding/contained LDA and topic configuration.
+	 */
+	private Map<Pair<Integer, Integer>, Set<Pair<Integer, Integer>>> cellsToTopicConfigurationIDs;
 	
 	/*
 	 * Binned data.
@@ -217,16 +221,18 @@ public class HeatmapDataset extends VisualizationComponentDataset
 	 * Generate new dataset from distance matrix of LDA configurations.
 	 * Used to transform data for heatmap of similiarities between topics.
 	 * @param allLDAConfigurations
+	 * @param spatialIDs
 	 * @param distances
 	 * @param options
 	 */
 	public HeatmapDataset(	ArrayList<LDAConfiguration> allLDAConfigurations, 
-							double distances[][], 
-							HeatmapOptionset options)
+							Map<Pair<Integer, Integer>, Integer> spatialIDs,
+							double distances[][], HeatmapOptionset options)
 	{
 		this.allLDAConfigurations		= allLDAConfigurations;
     	this.chosenLDAConfigurations	= null;
     	this.cellsToConfigurationIDs 	= new HashMap<Pair<Integer,Integer>, Set<Integer>>();
+		this.cellsToTopicConfigurationIDs			= new HashMap<Pair<Integer,Integer>, Set<Pair<Integer,Integer>>>();
 		
     	this.minOccurenceCount			= Integer.MAX_VALUE;
 		this.maxOccurenceCount			= Integer.MIN_VALUE;
@@ -246,6 +252,39 @@ public class HeatmapDataset extends VisualizationComponentDataset
 				minOccurenceCount = (binMatrix[i][j] < minOccurenceCount) && (binMatrix[i][j] > 0)  
 																		? binMatrix[i][j] : minOccurenceCount;
 			}	
+		}
+		
+		// 3. Assign LDA and topic configuration IDs to cells.
+		
+		//	a. Initialize translation map.
+		for (int i = 0; i < binMatrix.length; i++) {
+			for (int j = 0; j < binMatrix.length; j++) {
+				cellsToTopicConfigurationIDs.put(new Pair<Integer, Integer>(i, j), new HashSet<Pair<Integer,Integer>>());
+				cellsToConfigurationIDs.put(new Pair<Integer, Integer>(i, j), new HashSet<Integer>());
+			}
+		}
+		
+		// 	b. Map topic configurations to cells..
+		for (Pair<Integer, Integer> topicConfig : spatialIDs.keySet()) {
+				int spatialID = spatialIDs.get(topicConfig);
+
+				// Add configuration signature to entire row.
+				for (int j = 0; j < binMatrix.length; j++) {
+					final Pair<Integer, Integer> cellID = new Pair<Integer, Integer>(spatialID, j);
+
+					// Add configuration signature/ID to cell representation.
+					cellsToTopicConfigurationIDs.get(cellID).add(topicConfig);
+					cellsToConfigurationIDs.get(cellID).add(topicConfig.getKey());
+				}
+				
+				// Add configuration signature to entire column.
+				for (int i = 0; i < binMatrix.length; i++) {
+					final Pair<Integer, Integer> cellID = new Pair<Integer, Integer>(i, spatialID);
+
+					// Add configuration signature/ID to cell representation.
+					cellsToTopicConfigurationIDs.get(cellID).add(topicConfig);
+					cellsToConfigurationIDs.get(cellID).add(topicConfig.getKey());
+				}
 		}
 	}
 
@@ -293,8 +332,7 @@ public class HeatmapDataset extends VisualizationComponentDataset
 		return chosenLDAConfigurations;
 	}
 
-	public void setChosenLDAConfigurations(
-			ArrayList<LDAConfiguration> chosenLDAConfigurations)
+	public void setChosenLDAConfigurations(ArrayList<LDAConfiguration> chosenLDAConfigurations)
 	{
 		this.chosenLDAConfigurations = chosenLDAConfigurations;
 	}
@@ -304,9 +342,8 @@ public class HeatmapDataset extends VisualizationComponentDataset
 		return cellsToConfigurationIDs;
 	}
 
-	public void setCellsToConfigurationIDs(
-			Map<Pair<Integer, Integer>, Set<Integer>> cellsToConfigurationIDs)
+	public Map<Pair<Integer, Integer>, Set<Pair<Integer, Integer>>> getCellsToTopicConfigurationIDs()
 	{
-		this.cellsToConfigurationIDs = cellsToConfigurationIDs;
+		return cellsToTopicConfigurationIDs;
 	}
 }

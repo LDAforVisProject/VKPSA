@@ -8,11 +8,7 @@ import javafx.scene.paint.Color;
 
 public class ColorScale extends ImageView
 {
-	private final static double YELLOW_HUE			= Color.YELLOW.getHue();
-    private final static double BLUE_HUE			= Color.BLUE.getHue();
-    private final static double RED_HUE				= Color.RED.getHue();
-    
-    private final static double DEFAULT_COLOR_HUE	= Color.DARKGREEN.getHue(); 
+	private final static double DEFAULT_COLOR_HUE	= Color.DARKGREEN.getHue(); 
     
     public ColorScale(WritableImage image)
 	{
@@ -116,11 +112,11 @@ public class ColorScale extends ImageView
      */
     public static Color getColorForValue(double value, double min, double max, Color minColor, Color maxColor) 
     {
-        if (value != 0 && (value < min || value > max) ) {
+    	if (value != 0 && value != -1 && (value < min || value > max) ) {
             return Color.BLACK ;
         }
         
-        else if (value == 0) 
+        else if (value == 0 || value == -1) 
         	return Color.TRANSPARENT;
         
         else {

@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.util.Pair;
@@ -23,6 +24,8 @@ public abstract class Heatmap  extends VisualizationComponent
 	/*
 	 * GUI elements.
 	 */
+	
+	@FXML protected AnchorPane parent_anchorpane;
 	
 	@FXML protected Canvas canvas;
 	
@@ -102,7 +105,7 @@ public abstract class Heatmap  extends VisualizationComponent
 		applyOptions(options);
 		
 		// Draw.
-		//draw(data, false);
+		draw(data, false);
 	}
 	
 	/**
@@ -178,8 +181,8 @@ public abstract class Heatmap  extends VisualizationComponent
     	
 		// Define color spectrum.
 		// Set highlight color (red for additional selection, blue for subtractive).
-		final Color highlightColor 	= isCtrlDown ? new Color(0.0, 0.0, 1.0, 0.5) : new Color(1.0, 0.0, 0.0, 0.5);
-    	
+		final Color highlightColor 	= isCtrlDown ? hOptions.getSubtractiveSelectionColor() : hOptions.getAdditiveSelectionColor(); 
+		
 		// Check if settings icon was used. Workaround due to problems with selection's mouse event handling. 
 		if (minX == maxX && minY == maxY) {
 			final Pair<Integer, Integer> offsets = provideOffsets();
@@ -270,9 +273,9 @@ public abstract class Heatmap  extends VisualizationComponent
 	public void resizeContent(double width, double height)
 	{
 		if (width > 0)
-			canvas.setWidth(width - 78);
+			canvas.setWidth(width - 79);
 		if (height > 0)
-			canvas.setHeight(height - 67);
+			canvas.setHeight(height - 68);
 		
 		// Refresh heatmap.
 		refresh();

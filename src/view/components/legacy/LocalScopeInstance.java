@@ -2,13 +2,16 @@ package view.components.legacy;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 
 import model.LDAConfiguration;
 import model.workspace.Workspace;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Slider;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -39,6 +42,15 @@ public class LocalScopeInstance extends VisualizationComponent_Legacy
 	 */
 	private AnchorPane cd_anchorpane;
 	
+	/**
+	 * Protocol pane's ProgressIndicator.
+	 */
+	protected ProgressIndicator log_protocol_progressindicator;
+	/**
+	 * Protocol pane's TextArea.
+	 */
+	protected TextArea log_protocol_textarea;
+	
 	// Option controls.
 	private Slider slider_localScope_numTopicsToUse;
 	private TextField textfield_localScope_numTopicsToUse;
@@ -48,15 +60,11 @@ public class LocalScopeInstance extends VisualizationComponent_Legacy
 	/**
 	 * Path to .fxml for parallel tag clouds.
 	 */
-	private final String ptcPath 	= "/view/fxml/localScope/SII_Content_Analysis_LocalScope_ParallelTagCloud.fxml";
+	private final String ptcPath 	= "/view/fxml/localScope/ParallelTagCloud.fxml";
 	/**
 	 * Path to .fxml for chord diagram.
 	 */
-	private final String cdPath		= "/view/fxml/localScope/SII_Content_Analysis_LocalScope_ChordDiagram.fxml";
-	/**
-	 * Path to .fxml for topic model comparison heatmap. 
-	 */
-	private final String hmcPath	= "/view/fxml/localScope/SII_Content_Analysis_LocalScope_TMComparisonHeatmap.fxml";
+	private final String cdPath		= "/view/fxml/localScope/ChordDiagram.fxml";
 	
 	/*
 	 * Other data.
@@ -129,7 +137,7 @@ public class LocalScopeInstance extends VisualizationComponent_Legacy
             	
             	// Update visualization.
             	if (event.getEventType() == MouseEvent.MOUSE_RELEASED && selectedLDAConfigurations != null) {
-            		ptcController.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), roundedNumberOfTopics, (int)slider_localScope_numKeywordsToUse.getMax(), (int) Math.round(slider_localScope_numKeywordsToUse.getValue()), false);
+//            		ptcController.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), roundedNumberOfTopics, (int)slider_localScope_numKeywordsToUse.getMax(), (int) Math.round(slider_localScope_numKeywordsToUse.getValue()), false);
 //            		cdController.refresh(selectedLDAConfigurations, (int)slider_localScope_numTopicsToUse.getMax(), roundedNumberOfTopics, (int)slider_localScope_numKeywordsToUse.getMax(), (int) Math.round(slider_localScope_numKeywordsToUse.getValue()), false);
             	}
             }
@@ -210,7 +218,7 @@ public class LocalScopeInstance extends VisualizationComponent_Legacy
 			
 			// Init controller.
 			controller	= (LocalScopeVisualizationController)fxmlLoader.getController();
-			controller.setWorkspace(workspace);
+			controller.setReferences(workspace, log_protocol_progressindicator, log_protocol_textarea);
 			controller.setAnchorPane(anchorPane);
 			
 			// Add to parent pane.
@@ -281,6 +289,22 @@ public class LocalScopeInstance extends VisualizationComponent_Legacy
 	}
 	
 	/**
+	 * Loads raw data for several topics, updates parallel tag clouds visualization with this data. 
+	 * @param topicConfigurations
+	 */
+	public void refreshPTC(final Set<Pair<Integer, Integer>> topicConfigurations)
+	{
+		// Store currently selected topic configurations.
+		selectedTopicConfigurations.clear();
+		selectedTopicConfigurations.addAll(topicConfigurations);
+		
+		// Refresh parallel tag clouds controller using the specified topic identification data.
+		((ParallelTagCloudsController)ptcController).refresh(	selectedTopicConfigurations,
+														 		(int)slider_localScope_numKeywordsToUse.getMax(), (int)slider_localScope_numKeywordsToUse.getValue(), 
+														 		true);
+	}
+	
+	/**
 	 * Propagates information about hover over a LDA config.
 	 * @param ldaID
 	 */
@@ -312,19 +336,6 @@ public class LocalScopeInstance extends VisualizationComponent_Legacy
 	}
 	
 	/**
-	 * Sets reference to instance of Workspace.
-	 * @param workspace
-	 */
-	public void setWorkspace(Workspace workspace)
-	{
-		this.workspace = workspace;
-		
-		// Pass reference on to controllers.
-		ptcController.setWorkspace(workspace);
-//		cdController.setWorkspace(workspace);
-	}
-	
-	/**
 	 * Updates possible maximum of number of topics to select.
 	 * Called from instance of LocalScopeVisualizationController, after
 	 * a new dataset was selected/loaded.
@@ -346,5 +357,20 @@ public class LocalScopeInstance extends VisualizationComponent_Legacy
 	public Map<String, Pair<Double, Double>> getFilterThresholds()
 	{
 		return analysisController.getParamExtrema();
+	}
+	
+	/**
+	 * Sets references to current workspace and logging elements.
+	 * @param workspace
+	 * @param logPI
+	 * @param logTA
+	 */
+	public void setReferences(Workspace workspace, ProgressIndicator logPI, TextArea logTA)
+	{
+		this.workspace						= workspace;
+		this.log_protocol_progressindicator = logPI;
+		this.log_protocol_textarea 			= logTA;
+		
+		ptcController.setReferences(workspace, logPI, logTA);
 	}
 }
