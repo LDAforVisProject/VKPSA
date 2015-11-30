@@ -1,8 +1,11 @@
 package view.components.heatmap;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -229,10 +232,10 @@ public class HeatmapDataset extends VisualizationComponentDataset
 							Map<Pair<Integer, Integer>, Integer> spatialIDs,
 							double distances[][], HeatmapOptionset options)
 	{
-		this.allLDAConfigurations		= allLDAConfigurations;
-    	this.chosenLDAConfigurations	= null;
-    	this.cellsToConfigurationIDs 	= new HashMap<Pair<Integer,Integer>, Set<Integer>>();
-		this.cellsToTopicConfigurationIDs			= new HashMap<Pair<Integer,Integer>, Set<Pair<Integer,Integer>>>();
+		this.allLDAConfigurations			= allLDAConfigurations;
+    	this.chosenLDAConfigurations		= null;
+    	this.cellsToConfigurationIDs 		= new HashMap<Pair<Integer,Integer>, Set<Integer>>();
+		this.cellsToTopicConfigurationIDs	= new HashMap<Pair<Integer,Integer>, Set<Pair<Integer,Integer>>>();
 		
     	this.minOccurenceCount			= Integer.MAX_VALUE;
 		this.maxOccurenceCount			= Integer.MIN_VALUE;
@@ -266,26 +269,36 @@ public class HeatmapDataset extends VisualizationComponentDataset
 		
 		// 	b. Map topic configurations to cells..
 		for (Pair<Integer, Integer> topicConfig : spatialIDs.keySet()) {
-				int spatialID = spatialIDs.get(topicConfig);
+			// Fetch spatial ID for this topic configuration ID.
+			int spatialID = spatialIDs.get(topicConfig);
 
-				// Add configuration signature to entire row.
-				for (int j = 0; j < binMatrix.length; j++) {
-					final Pair<Integer, Integer> cellID = new Pair<Integer, Integer>(spatialID, j);
+			// Add configuration signature to entire row.
+			for (int j = 0; j < binMatrix.length; j++) {
+				final Pair<Integer, Integer> cellID = new Pair<Integer, Integer>(spatialID, j);
 
-					// Add configuration signature/ID to cell representation.
-					cellsToTopicConfigurationIDs.get(cellID).add(topicConfig);
-					cellsToConfigurationIDs.get(cellID).add(topicConfig.getKey());
-				}
-				
-				// Add configuration signature to entire column.
-				for (int i = 0; i < binMatrix.length; i++) {
-					final Pair<Integer, Integer> cellID = new Pair<Integer, Integer>(i, spatialID);
+				// Add configuration signature/ID to cell representation.
+				cellsToTopicConfigurationIDs.get(cellID).add(topicConfig);
+				cellsToConfigurationIDs.get(cellID).add(topicConfig.getKey());
+			}
+			
+			// Add configuration signature to entire column.
+			for (int i = 0; i < binMatrix.length; i++) {
+				final Pair<Integer, Integer> cellID = new Pair<Integer, Integer>(i, spatialID);
 
-					// Add configuration signature/ID to cell representation.
-					cellsToTopicConfigurationIDs.get(cellID).add(topicConfig);
-					cellsToConfigurationIDs.get(cellID).add(topicConfig.getKey());
-				}
+				// Add configuration signature/ID to cell representation.
+				cellsToTopicConfigurationIDs.get(cellID).add(topicConfig);
+				cellsToConfigurationIDs.get(cellID).add(topicConfig.getKey());
+			}
 		}
+		
+		// 4. Sort list of LDA configurations in ascending order.
+		Collections.sort(allLDAConfigurations, new Comparator<LDAConfiguration>() {
+	        @Override
+	        public int compare(LDAConfiguration ldaConfig1, LDAConfiguration ldaConfig2)
+	        {
+	        	return ldaConfig1.getConfigurationID() - ldaConfig2.getConfigurationID();
+	        }
+	    });
 	}
 
 	/*

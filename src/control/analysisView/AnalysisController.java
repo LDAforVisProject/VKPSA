@@ -414,6 +414,23 @@ public class AnalysisController extends Controller
 		rangeSliders.get("kappa").setMin(1);
 		rangeSliders.get("kappa").setMax(50);
 		rangeSliders.get("kappa").setHighValue(50);
+		rangeSliders.get("kappa").setSnapToTicks(false);
+		
+		// Temporary workaround: Fix length of kappa range slider interval at 1.
+		rangeSliders.get("kappa").lowValueProperty().addListener(new ChangeListener<Number>() {
+		    @Override 
+		    public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue)
+		    {
+		    	rangeSliders.get("kappa").setHighValue(rangeSliders.get("kappa").getLowValue() + 1);
+		    }
+		});
+		rangeSliders.get("kappa").highValueProperty().addListener(new ChangeListener<Number>() {
+		    @Override 
+		    public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue)
+		    {
+		    	rangeSliders.get("kappa").setLowValue(rangeSliders.get("kappa").getHighValue() - 1);
+		    }
+		});
 		
 		// Adapt textfield values.
 		for (Map.Entry<String, Pair<TextField, TextField>> entry : textfieldsForFilterControls.entrySet()) {
@@ -796,7 +813,7 @@ public class AnalysisController extends Controller
 		// If data sets were selected:
 		if (selectedLDAConfigurations.size() > 0) {
 			HeatmapOptionset tmcOptions = new HeatmapOptionset(	true, -1, 
-																Color.LIGHTBLUE, Color.DARKBLUE, new Color(0.0, 0.0, 1.0, 0.5), new Color(1.0, 0.0, 0.0, 0.5),
+																Color.BLUE, Color.DARKBLUE, new Color(0.0, 0.0, 1.0, 0.5), new Color(1.0, 0.0, 0.0, 0.5),
 																"", "",
 																true, false, true);
 			// Instruct heatmap to fetch topic distance data asynchronously.

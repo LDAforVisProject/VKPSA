@@ -3,6 +3,7 @@ package view.components.heatmap;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -67,7 +68,7 @@ public abstract class Heatmap  extends VisualizationComponent
 		System.out.println("Initializing heatmap component.");
 		
 		// Init metadata collections.
-		cellsToCoordinates					= new HashMap<Pair<Integer, Integer>, double[]>();
+		cellsToCoordinates					= new LinkedHashMap<Pair<Integer, Integer>, double[]>();
 		selectedCellsCoordinates			= new HashSet<Pair<Integer,Integer>>();
 		
 		// Init axis settings.

@@ -91,7 +91,7 @@ public class CategoricalHeatmap extends Heatmap
 		// Prepare for graphical seperation of LDA configurations.
 		GraphicsContext gc = canvas.getGraphicsContext2D();
 		gc.setStroke(Color.BLACK);
-		gc.setLineWidth(2);
+		gc.setLineWidth(0.5);
 		
 		// Remove old labels.
     	for (Label label : xAxisLabels) {
@@ -115,12 +115,13 @@ public class CategoricalHeatmap extends Heatmap
     	double currYPos			= 0;
     	
     	// Base interval per topic on x-axis.
-    	double[] defaultCell = cellsToCoordinates.get(new Pair<Integer, Integer>(0, 0));
+    	double[] defaultCell	= cellsToCoordinates.get(new Pair<Integer, Integer>(0, 0));
     	final double xInterval 	= defaultCell[2] - defaultCell[0];
     	// Base interval per topic on y-axis.
     	final double yInterval 	= defaultCell[3] - defaultCell[1];
     	
-    	for (int i = data.getAllLDAConfigurations().size() - 1; i >= 0; i--) {
+//    	for (int i = data.getAllLDAConfigurations().size() - 1; i >= 0; i--) {
+    	for (int i = 0; i < data.getAllLDAConfigurations().size(); i++) {
     		LDAConfiguration ldaConfig = data.getAllLDAConfigurations().get(i);  
     				
     		// Calculate width of this block on x-axis.
@@ -131,7 +132,7 @@ public class CategoricalHeatmap extends Heatmap
     		Label xLabel = new Label();
     		xLabel.setText( String.valueOf(ldaConfig.getConfigurationID()) );
     		xLabel.setLayoutX(xAxis.getLayoutX() + currXPos + xDiff / 2);
-    		xLabel.setLayoutY(xAxis.getLayoutY() + 5);
+    		xLabel.setLayoutY(xAxis.getLayoutY() + 10);
     		xLabel.setFont(new Font(9));
     		
     		// For y-axis.
@@ -189,12 +190,14 @@ public class CategoricalHeatmap extends Heatmap
 		
 		//cellsToCoordinates.clear();
 		// Draw each cell in its corresponding place.
-		for (int i = binMatrix.length - 1; i >= 0; i--) {
-			for (int j = binMatrix.length - 1; j >= 0; j--) {
+//		for (int i = binMatrix.length - 1; i >= 0; i--) {
+//			for (int j = binMatrix.length - 1; j >= 0; j--) {
+		for (int i = 0; i < binMatrix.length; i++) {
+			for (int j = 0; j < binMatrix.length; j++) {		
 				// Calculate coordinates (minX, minY, maxX, maxY).
 				double[] cellCoordinates	= new double[4];
 				cellCoordinates[0]			= cellWidth * i + 1;
-				cellCoordinates[1]			= cellHeight * j - 1;//cellHeight * (binMatrix.length - 1 - j) - 1;
+				cellCoordinates[1]			= cellHeight * j - 1;
 				cellCoordinates[2] 			= cellCoordinates[0] + cellWidth;
 				cellCoordinates[3] 			= cellCoordinates[1] + cellHeight;
 				
@@ -268,5 +271,8 @@ public class CategoricalHeatmap extends Heatmap
 		// Pass references to selected data onward to AnalysisController.
 		if (selectedTopicConfigIDs.size() > 0)
 			analysisController.integrateTMCHeatmapSelection(selectedTopicConfigIDs, !isCtrlDown);
+		
+		// Clear collection of selected cell (coordinates).
+		selectedCellsCoordinates.clear();
 	}
 }
