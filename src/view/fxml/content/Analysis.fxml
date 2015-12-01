@@ -22,13 +22,13 @@
                <children>
                   <SplitPane dividerPositions="0.298" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <items>
-                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" style="-fx-background-color: #ffffff;">
+                      <AnchorPane fx:id="settings_anchorPane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" style="-fx-background-color: #ffffff;">
                            <children>
                               <Accordion fx:id="accordion_options" layoutX="34.0" layoutY="13.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="45.0">
                                 <panes>
                                   <TitledPane fx:id="filter_titledPane" animated="false" onMouseClicked="#selectSettingsPane" style="-fx-background-color: #ffffff;" text="Result Space | Filter">
                                     <content>
-                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: #ffffff;">
+                                      <AnchorPane fx:id="settings_filter_anchorPane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: #ffffff;">
                                              <children>
                                                 <ScrollPane fx:id="scrollpane_filter" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" layoutX="19.6" layoutY="19.6" prefHeight="306.0" prefWidth="354.0" style="-fx-background-color: #ffffff;" vbarPolicy="ALWAYS" AnchorPane.bottomAnchor="27.0" AnchorPane.leftAnchor="-8.7" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-0.6">
                                                   <content>

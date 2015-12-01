@@ -29,6 +29,7 @@ import view.components.legacy.heatmap.HeatMap;
 import view.components.legacy.heatmap.HeatmapDataBinding;
 import view.components.legacy.heatmap.HeatmapDataType;
 import view.components.legacy.mdsScatterchart.MDSScatterchart;
+import view.components.scentedFilter.ScentedFilter;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -58,6 +59,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.util.Pair;
@@ -84,6 +86,15 @@ public class AnalysisController extends Controller
 	/*
 	 * Anchorpanes hosting visualizations. 
 	 */
+	
+	/**
+	 * For settings.
+	 */
+	private @FXML AnchorPane settings_anchorPane;
+	/**
+	 * For filter settings.
+	 */
+	private @FXML AnchorPane settings_filter_anchorPane;
 	
 	/**
 	 * For MDS scatterchart.
@@ -118,6 +129,7 @@ public class AnalysisController extends Controller
 	
 	/**
 	 * For distance correlation linechart.
+	 * @deprecated
 	 */
 	private @FXML AnchorPane paramSpace_correlation_anchorPane;
 	
@@ -236,6 +248,15 @@ public class AnalysisController extends Controller
 	private @FXML TextField kappa_min_textfield;
 	private @FXML TextField kappa_max_textfield;
 	
+	/**
+	 * Container for scented filters.
+	 */
+	private VBox filters_vbox;
+	/**
+	 * Scented filters for parameters.
+	 */
+	private ArrayList<ScentedFilter> filters;
+	
 	/*
 	 * Setting shortcuts icons.
 	 */
@@ -296,16 +317,18 @@ public class AnalysisController extends Controller
 	private void addResizeListeners()
 	{
 		// Define list of anchor panes / other elements to add resize listeners to.
-		ArrayList<AnchorPane> anchorPanesToResize = new ArrayList<AnchorPane>();
+		ArrayList<Pane> anchorPanesToResize = new ArrayList<Pane>();
 		
 		anchorPanesToResize.add(paramSpace_distribution_anchorPane_filtered);
 		anchorPanesToResize.add(paramSpace_distribution_anchorPane_selected);
 		anchorPanesToResize.add(mds_anchorPane);
 		anchorPanesToResize.add(localscope_tmc_anchorPane);
 		anchorPanesToResize.add(localScope_ptc_anchorPane);
+		anchorPanesToResize.add(settings_anchorPane);
+		anchorPanesToResize.add(settings_filter_anchorPane);
 		
 		// Add width and height resize listeners to all panes.
-		for (AnchorPane ap : anchorPanesToResize) {
+		for (Pane ap : anchorPanesToResize) {
 			// Add listener to width property.
 			ap.widthProperty().addListener(new ChangeListener<Number>() {
 			    @Override 
@@ -360,6 +383,7 @@ public class AnalysisController extends Controller
 		scrollpane_filter.setContent(gridpane_parameterConfiguration);
 		
 		// Init collections.
+		filters						= new ArrayList<ScentedFilter>();
 		rangeSliders				= new HashMap<String, RangeSlider>();
 		textfieldsForFilterControls	= new HashMap<String, Pair<TextField, TextField>>();
 		barchartsForFilterControls	= new HashMap<String, StackedBarChart<String, Integer>>();
@@ -443,10 +467,33 @@ public class AnalysisController extends Controller
 		vbox_eta.getChildren().add(rangeSliders.get("eta"));
 		vbox_kappa.getChildren().add(rangeSliders.get("kappa"));
 		
+		// Init container for filters.
+		filters_vbox = new VBox();
+		filters_vbox.resize(100, filters_vbox.getHeight());
+		// Iterate over supported parameters.
+		for (String param : LDAConfiguration.SUPPORTED_PARAMETERS) {
+			// Create new filter.
+			ScentedFilter filter = (ScentedFilter) VisualizationComponent.generateInstance(VisualizationComponentType.SCENTED_FILTER, this, this.workspace, this.log_protocol_progressindicator, this.log_protocol_textarea);
+
+			// Add to collection of filters.
+			filters.add(filter);
+			
+			// Embed in containing VBox.
+			filter.embedIn(filters_vbox);
+		}
+		
+		// Add containing VBox to pane.
+		settings_filter_anchorPane.getChildren().add(filters_vbox);
+		settings_filter_anchorPane.applyCss();
+		settings_filter_anchorPane.layout();
+		settings_filter_anchorPane.requestLayout();
+		filters_vbox.resize(100, filters_vbox.getHeight());
+		
 		// Set gridpane's height (based on the number of supported parameters).
 		final int prefRowHeight = 100;
 		gridpane_parameterConfiguration.setPrefHeight(LDAConfiguration.SUPPORTED_PARAMETERS.length * prefRowHeight);
 		gridpane_parameterConfiguration.setMinHeight(LDAConfiguration.SUPPORTED_PARAMETERS.length * prefRowHeight);
+
 	}
 
 	private void initMDSScatterchart()
@@ -818,7 +865,6 @@ public class AnalysisController extends Controller
 																true, false, true);
 			// Instruct heatmap to fetch topic distance data asynchronously.
 			tmcHeatmap.fetchTopicDistanceData(selectedLDAConfigurations, tmcOptions);
-			// @todo CURRENT: Load topic distances, display in tmcHeatmap; do axis labeling.
 		}
 	}
 	
@@ -1083,6 +1129,10 @@ public class AnalysisController extends Controller
 			// Resize local scope element: Parallel tag clouds.
 			case "localScope_ptc_anchorPane":
 				localScopeInstance.resize(width, height, LocalScopeVisualizationType.PARALLEL_TAG_CLOUDS);
+			break;
+			
+			case "settings_anchorPane":
+				filters_vbox.setPrefWidth(width - 20);
 			break;
 		}
 	}
@@ -1464,9 +1514,16 @@ public class AnalysisController extends Controller
 		super.setReferences(workspace, logPI, logTA);
 		
 		// Set references for child elements.
+		//	...for TMC heatmap.
 		tmcHeatmap.setReferences(workspace, logPI, logTA);
+		// ...for parameter space heatmaps. 
 		parameterspace_heatmap_filtered.setReferences(workspace, logPI, logTA);
 		parameterspace_heatmap_selected.setReferences(workspace, logPI, logTA);
+		//	...for local scope instance.
 		localScopeInstance.setReferences(workspace, logPI, logTA);
+		//	... for scented filter.
+		for (ScentedFilter filter : filters) {
+			filter.setReferences(workspace, logPI, logTA);
+		}
 	}
 }

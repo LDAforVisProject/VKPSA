@@ -6,10 +6,13 @@ import java.util.Map;
 
 import view.components.rubberbandselection.ISelectableComponent;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import control.Controller;
 import control.analysisView.AnalysisController;
 import model.workspace.Workspace;
@@ -43,6 +46,7 @@ public abstract class VisualizationComponent extends Controller implements ISele
 	static {
 		FXML_PATHS.put(VisualizationComponentType.NUMERICAL_HEATMAP, "/view/fxml/components/NumericalHeatmap.fxml");
 		FXML_PATHS.put(VisualizationComponentType.CATEGORICAL_HEATMAP, "/view/fxml/components/CategoricalHeatmap.fxml");
+		FXML_PATHS.put(VisualizationComponentType.SCENTED_FILTER, "/view/fxml/components/ScentedFilter.fxml");
 	}
 	
 	/**
@@ -72,6 +76,10 @@ public abstract class VisualizationComponent extends Controller implements ISele
 				path = FXML_PATHS.get(VisualizationComponentType.CATEGORICAL_HEATMAP);
 			break;
 			
+			case SCENTED_FILTER:
+				path = FXML_PATHS.get(VisualizationComponentType.SCENTED_FILTER);
+			break;
+			
 			default:
 				System.out.println("Currently not supported.");
 		}
@@ -95,7 +103,7 @@ public abstract class VisualizationComponent extends Controller implements ISele
 	}
 	
 	/**
-	 * Embeds this component in parent node.
+	 * Embeds this component in parent AnchorPane.
 	 * @param parent
 	 */
 	public void embedIn(AnchorPane parent)
@@ -108,6 +116,28 @@ public abstract class VisualizationComponent extends Controller implements ISele
 		AnchorPane.setBottomAnchor(rootNode, 0.0);
 		AnchorPane.setLeftAnchor(rootNode, 0.0);
 		AnchorPane.setRightAnchor(rootNode, 0.0);
+	}
+	
+	/**
+	 * Embeds this component in parent VBox.
+	 * @param parent
+	 */
+	public void embedIn(VBox parent)
+	{
+		// Add root node to parent.
+		parent.getChildren().add(this.rootNode);
+		
+		// Ensure resizability of content.
+		AnchorPane.setTopAnchor(rootNode, 0.0);
+		AnchorPane.setBottomAnchor(rootNode, 0.0);
+		AnchorPane.setLeftAnchor(rootNode, 0.0);
+		AnchorPane.setRightAnchor(rootNode, 0.0);
+		
+		// Set alignment within parent.
+		parent.setAlignment(Pos.CENTER);
+		
+		// Set VgrowPriority in VBox.
+		VBox.setVgrow(this.rootNode, Priority.NEVER);
 	}
 
 	/*
