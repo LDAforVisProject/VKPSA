@@ -2,7 +2,6 @@ package view.components.scentedFilter;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -17,17 +16,18 @@ import org.controlsfx.control.RangeSlider;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.chart.BarChart;
 import javafx.scene.chart.StackedBarChart;
-import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Data;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.util.Pair;
 import view.components.VisualizationComponent;
 import view.components.rubberbandselection.RubberBandSelection;
@@ -61,6 +61,20 @@ public class ScentedFilter extends VisualizationComponent
 	 */
 	private Slider slider;
 	
+	/**
+	 * Series containing all data.
+	 */
+	private XYChart.Series<String, Integer> discardedDataSeries;
+	/**
+	 * Series containing filtered data.
+	 */
+	private XYChart.Series<String, Integer> inactiveDataSeries;
+	/**
+	 * Series containing active data.
+	 */
+	private XYChart.Series<String, Integer> activeDataSeries;
+
+	
 	/*
 	 * Data.
 	 */
@@ -79,6 +93,15 @@ public class ScentedFilter extends VisualizationComponent
 	 * Auxiliary variable used for check of extrema adjustments.
 	 */
 	private boolean isAdjustedToExtrema;
+	
+	/*
+	 * Data for selection mechanism. 
+	 */
+	
+	/**
+	 * Collection of the descriptions of selected bars.
+	 */
+	private Set<String> selectedBars;
 	
 	
 	@Override
@@ -102,7 +125,9 @@ public class ScentedFilter extends VisualizationComponent
 	private void initSelection()
 	{
 		// Add rubberband selection tool.
-        rubberbandSelection = new RubberBandSelection((Pane) barchart.getParent(), this);	
+        rubberbandSelection 	= new RubberBandSelection((Pane) barchart.getParent().getParent(), this);
+        // Init data collections needed for cross-component interaction.
+        selectedBars			= new HashSet<String>();
 	}
 	
 	/**
@@ -260,36 +285,113 @@ public class ScentedFilter extends VisualizationComponent
 	@Override
 	public void processSelectionManipulationRequest(double minX, double minY, double maxX, double maxY)
 	{
-		// @todo Auto-generated method stub
+		System.out.println("minX = " + minX + ", minY = " + minY + "\tmaxX = " + maxX + ", maxY = " + maxY);
+
+		// If control is not down: Ignore selected points, add all non-selected in chosen area.
+		if (!isCtrlDown) {
+			// Process filtered, non-selected data.
+			for (int i = 0; i < inactiveDataSeries.getData().size(); i++) {
+				Data<String, Integer> barData 	= inactiveDataSeries.getData().get(i);
+				Node dataNode 					= barData.getNode();
+				String barKey					= "inactive_" + i;
+				
+				if (	data.getBarToDataAssociations().containsKey(barKey) &&
+						data.getBarToDataAssociations().get(barKey).size() > 0 &&
+						dataNode.getLayoutX() >= minX && dataNode.getLayoutX() + dataNode.getBoundsInLocal().getWidth() <= maxX &&
+						dataNode.getLayoutY() >= minY && dataNode.getLayoutY() + dataNode.getBoundsInLocal().getHeight() <= maxY ) {
+					// Highlight bar.
+					setBarHighlighting(dataNode, true, Color.BLUE);
+				
+					// Add to collection.
+					if (!selectedBars.contains(barData.getXValue())) {
+						selectedBars.add(String.valueOf(i));
+					}
+				}
+				
+				else {
+					// Remove bar highlighting.
+					setBarHighlighting(dataNode, false, null);
+					
+					// Remove from collection.
+					selectedBars.remove(i);
+				}
+			}
+		}
 		
+		else {
+			// Process filtered, non-selected data.
+			for (int i = 0; i < activeDataSeries.getData().size(); i++) {
+			//for (Data<String, Integer> data : activeDataSeries.getData()) {
+				Data<String, Integer> barData 	= activeDataSeries.getData().get(i);
+				Node dataNode 					= barData.getNode();
+				String barKey					= "active_" + i;
+				
+				if (	data.getBarToDataAssociations().containsKey(barKey) && 
+						data.getBarToDataAssociations().get(barKey).size() > 0 &&
+						dataNode.getLayoutX() >= minX && dataNode.getLayoutX() + dataNode.getBoundsInLocal().getWidth() <= maxX &&
+						dataNode.getLayoutY() >= minY && dataNode.getLayoutY() + dataNode.getBoundsInLocal().getHeight() <= maxY ) {
+					// Highlight bar.
+					setBarHighlighting(dataNode, true, Color.GREY);
+					
+					// Add to collection.
+					if (!selectedBars.contains(barData.getXValue())) {
+						selectedBars.add(String.valueOf(i));
+					}
+				}
+				
+				else {
+					// Remove bar highlighting.
+					setBarHighlighting(dataNode, false, null);
+					
+					// Remove from collection.
+					selectedBars.remove(i);
+				}
+			}
+		}
 	}
 
 	@Override
 	public void processEndOfSelectionManipulation()
 	{
-		// @todo Auto-generated method stub
+		ArrayList<Integer> selectedLocalIndices = new ArrayList<Integer>();
 		
+		for (String description : selectedBars) {
+			// Add to collection.
+			final String seriesPraefix = !isCtrlDown ? "inactive_" : "active_"; 
+			selectedLocalIndices.addAll(data.getBarToDataAssociations().get(seriesPraefix + description));
+			
+			// Remove glow from all bars.
+			for (Data<String, Integer> data : inactiveDataSeries.getData()) {
+				setBarHighlighting(data.getNode(), false, null);	
+			}
+			for (Data<String, Integer> data : activeDataSeries.getData()) {
+				setBarHighlighting(data.getNode(), false, null);	
+			}
+		}
+		
+		// Clear collection of selected bars.
+		selectedBars.clear();
+		
+		// Pass selection data on to controller.
+		analysisController.integrateBarchartSelection(selectedLocalIndices, !isCtrlDown);
 	}
 
 	@Override
 	public Pair<Integer, Integer> provideOffsets()
 	{
-		// @todo Auto-generated method stub
-		return null;
+		return new Pair<Integer, Integer>(95, 26);
 	}
 
 	@Override
 	public void processKeyPressedEvent(KeyEvent ke)
 	{
-		// @todo Auto-generated method stub
-		
+		isCtrlDown = ke.isControlDown();
 	}
 
 	@Override
 	public void processKeyReleasedEvent(KeyEvent ke)
 	{
-		// @todo Auto-generated method stub
-		
+		isCtrlDown = ke.isControlDown();
 	}
 
 	@Override
@@ -304,6 +406,34 @@ public class ScentedFilter extends VisualizationComponent
 		return null;
 	}
 
+	/**
+	 * Toggles border glow (indicating the bar having been selected) on/off.
+	 * @param node
+	 * @param color 
+	 */
+	private void setBarHighlighting(Node node, boolean on, Color color)
+	{
+		if (!on) {
+			node.setEffect(null);
+		}
+		
+		else {
+			 // Setting the uniform variable for the glow width and height
+			int depth = 20;
+			
+			DropShadow borderGlow= new DropShadow();
+			borderGlow.setOffsetY(0f);
+			borderGlow.setOffsetX(0f);
+			
+			borderGlow.setRadius(3);
+			borderGlow.setColor(color);
+			borderGlow.setWidth(depth);
+			borderGlow.setHeight(depth); 
+			
+			// Apply the borderGlow effect to the JavaFX node.
+			node.setEffect(borderGlow); 
+		}
+	}
 
 	@Override
 	public void resizeContent(double width, double height)
@@ -360,15 +490,16 @@ public class ScentedFilter extends VisualizationComponent
 		
 		// Clear old data.
 		barchart.getData().clear();
+		selectedBars.clear();
 
+		// Add active data series to barcharts.
+		activeDataSeries	= addParameterHistogramDataSeries(binnedData.get(1), options.getNumberOfBins(), 0);
+		
 		// Add inactive data series to barcharts.
-		addParameterHistogramDataSeries(binnedData.get(0), options.getNumberOfBins(), 0);
+		inactiveDataSeries	= addParameterHistogramDataSeries(binnedData.get(0), options.getNumberOfBins(), 1);
 		
 		// Add discarded data series to barcharts.
-		addParameterHistogramDataSeries(binnedData.get(2), options.getNumberOfBins(), 1);
-		
-		// Add active data series to barcharts.
-		addParameterHistogramDataSeries(binnedData.get(1), options.getNumberOfBins(), 2);
+		discardedDataSeries = addParameterHistogramDataSeries(binnedData.get(2), options.getNumberOfBins(), 2);
 	}
 	
 	/**
@@ -406,14 +537,18 @@ public class ScentedFilter extends VisualizationComponent
 	 * @param paramterBinLists
 	 * @param numberOfBins
 	 * @param seriesIndex
+	 * @return Newly added data series.
 	 */
-	private void addParameterHistogramDataSeries(int[] parameterBinList, final int numberOfBins, final int seriesIndex)
+	private XYChart.Series<String, Integer> addParameterHistogramDataSeries(int[] parameterBinList, final int numberOfBins, final int seriesIndex)
 	{
 		// Add data series to barcharts.
-		barchart.getData().add( generateParameterHistogramDataSeries(parameterBinList, numberOfBins) );
+		XYChart.Series<String, Integer> dataSeries = generateParameterHistogramDataSeries(parameterBinList, numberOfBins);
+		barchart.getData().add(dataSeries);
 		
 		// Color data.
 		colorParameterHistogramBarchart(barchart, seriesIndex);
+		
+		return dataSeries;
 	}
 	
 	/**
@@ -447,7 +582,7 @@ public class ScentedFilter extends VisualizationComponent
 			switch (seriesIndex)
 			{
 				// Selectede data.
-				case 2:
+				case 0:
 					if (node.getUserData() == null || node.getUserData().toString() == "active") {
 						node.setUserData("active");
 						node.setStyle("-fx-bar-fill: blue;");
@@ -456,17 +591,17 @@ public class ScentedFilter extends VisualizationComponent
 				
 				// Discarded data.
 				case 1:
-					if (node.getUserData() == null || node.getUserData().toString() == "discarded") {
-						node.setUserData("discarded");
-						node.setStyle("-fx-bar-fill: lightgrey;");
+					if (node.getUserData() == null || node.getUserData().toString() == "inactive") {
+						node.setUserData("inactive");
+						node.setStyle("-fx-bar-fill: darkgrey;");
 					}
 				break;
 				
 				// Filtered data.
-				case 0:
-					if (node.getUserData() == null || node.getUserData().toString() == "inactive") {
-						node.setUserData("inactive");
-						node.setStyle("-fx-bar-fill: darkgrey;");
+				case 2:
+					if (node.getUserData() == null || node.getUserData().toString() == "discarded") {
+						node.setUserData("discarded");
+						node.setStyle("-fx-bar-fill: lightgrey;");
 					}
 				break;
 			}

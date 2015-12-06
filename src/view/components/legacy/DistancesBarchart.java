@@ -140,9 +140,9 @@ public class DistancesBarchart extends VisualizationComponent_Legacy implements 
 	 */
 	private XYChart.Series<String, Number> inactiveDataSeries;
 	/**
-	 * Series containing filtered and selected data.
+	 * Series containing active data.
 	 */
-	private XYChart.Series<String, Number> selectedDataSeries;
+	private XYChart.Series<String, Number> activeDataSeries;
 
 	
 	/*
@@ -207,16 +207,16 @@ public class DistancesBarchart extends VisualizationComponent_Legacy implements 
 		// Initialize data series.
 		discardedDataSeries	= new XYChart.Series<String, Number>();
 		inactiveDataSeries	= new XYChart.Series<String, Number>();
-		selectedDataSeries	= new XYChart.Series<String, Number>();
+		activeDataSeries	= new XYChart.Series<String, Number>();
 		
 		discardedDataSeries.setName("Discarded");
 		inactiveDataSeries.setName("Filtered");
-		selectedDataSeries.setName("Selected");
+		activeDataSeries.setName("Selected");
 		
 		barchart.getData().clear();
 		barchart.getData().add(discardedDataSeries);
 		barchart.getData().add(inactiveDataSeries);
-		barchart.getData().add(selectedDataSeries);
+		barchart.getData().add(activeDataSeries);
 		
 		// Init legend.
 		initBarchartLegend();
@@ -363,7 +363,7 @@ public class DistancesBarchart extends VisualizationComponent_Legacy implements 
 					// Add data series only to chart if it contains data points.
 					if (numberOfSelectedElements > 0) {
 						// Add distance values to data series.
-						addToDataSeries(selectedDataSeries, 2, selectedIndices, selectedFilteredDistances, numberOfBins, numberOfSelectedElements);
+						addToDataSeries(activeDataSeries, 2, selectedIndices, selectedFilteredDistances, numberOfBins, numberOfSelectedElements);
 					}
 				}
 				
@@ -705,11 +705,11 @@ public class DistancesBarchart extends VisualizationComponent_Legacy implements 
 		
 		else {
 			// Process filtered, non-selected data.
-			for (Data<String, Number> data : selectedDataSeries.getData()) {
+			for (Data<String, Number> data : activeDataSeries.getData()) {
 				Node dataNode = data.getNode();
 				
-				if (	barToDataAssociations.containsKey(data.getXValue() + selectedDataSeries.getName()) && 
-						barToDataAssociations.get(data.getXValue() + selectedDataSeries.getName()).size() > 0 &&
+				if (	barToDataAssociations.containsKey(data.getXValue() + activeDataSeries.getName()) && 
+						barToDataAssociations.get(data.getXValue() + activeDataSeries.getName()).size() > 0 &&
 						dataNode.getLayoutX() >= minX && dataNode.getLayoutX() + dataNode.getBoundsInLocal().getWidth() <= maxX &&
 						dataNode.getLayoutY() >= minY && dataNode.getLayoutY() + dataNode.getBoundsInLocal().getHeight() <= maxY ) {
 					// Highlight bar.
@@ -739,14 +739,14 @@ public class DistancesBarchart extends VisualizationComponent_Legacy implements 
 		
 		for (String description : selectedBars) {
 			// Add to collection.
-			final String seriesSuffix = !isCtrlDown ? inactiveDataSeries.getName() : selectedDataSeries.getName(); 
+			final String seriesSuffix = !isCtrlDown ? inactiveDataSeries.getName() : activeDataSeries.getName(); 
 			selectedLocalIndices.addAll(barToDataAssociations.get(description + seriesSuffix));
 			
 			// Remove glow from all bars.
 			for (Data<String, Number> data : inactiveDataSeries.getData()) {
 				setBarHighlighting(data.getNode(), false, null);	
 			}
-			for (Data<String, Number> data : selectedDataSeries.getData()) {
+			for (Data<String, Number> data : activeDataSeries.getData()) {
 				setBarHighlighting(data.getNode(), false, null);	
 			}
 		}

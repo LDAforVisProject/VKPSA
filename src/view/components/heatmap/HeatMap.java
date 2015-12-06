@@ -43,15 +43,6 @@ public abstract class Heatmap extends VisualizationComponent
 	 */
 	protected Set<Pair<Integer, Integer>> selectedCellsCoordinates;
 	
-	/*
-	 * Other data.
-	 */
-	
-	/**
-	 * Signifies whether the ctrl key is down at any given time.
-	 */
-	protected boolean isCtrlDown;
-	
 	
 	// -----------------------------------------------
 	//					Methods

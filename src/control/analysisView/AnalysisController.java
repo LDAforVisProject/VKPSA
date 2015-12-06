@@ -1016,6 +1016,8 @@ public class AnalysisController extends Controller
             	parameterspace_heatmap_filtered.processKeyPressedEvent(ke);
             	parameterspace_heatmap_selected.processKeyPressedEvent(ke);
             	tmcHeatmap.processKeyPressedEvent(ke);
+            	for (ScentedFilter filter : filters)
+            		filter.processKeyPressedEvent(ke);
             }
 		});
 		
@@ -1027,6 +1029,8 @@ public class AnalysisController extends Controller
             	parameterspace_heatmap_filtered.processKeyReleasedEvent(ke);
             	parameterspace_heatmap_selected.processKeyReleasedEvent(ke);
             	tmcHeatmap.processKeyReleasedEvent(ke);
+            	for (ScentedFilter filter : filters)
+            		filter.processKeyReleasedEvent(ke);
             }
 		});
 	}

@@ -45,6 +45,15 @@ public abstract class VisualizationComponent extends Controller implements ISele
 	 */
 	protected RubberBandSelection rubberbandSelection;
 	
+	/*
+	 * Other data.
+	 */
+	
+	/**
+	 * Signifies whether the ctrl key is down at any given time.
+	 */
+	protected boolean isCtrlDown;
+	
 	/**
 	 * Contains all .fxml paths for the respective visualization components.
 	 */
