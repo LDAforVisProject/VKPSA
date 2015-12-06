@@ -30,6 +30,8 @@ import view.components.legacy.heatmap.HeatmapDataBinding;
 import view.components.legacy.heatmap.HeatmapDataType;
 import view.components.legacy.mdsScatterchart.MDSScatterchart;
 import view.components.scentedFilter.ScentedFilter;
+import view.components.scentedFilter.ScentedFilterDataset;
+import view.components.scentedFilter.ScentedFilterOptionset;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -227,27 +229,6 @@ public class AnalysisController extends Controller
 	 * Filter controls.
 	 */
 	
-	private @FXML ScrollPane scrollpane_filter;
-	private @FXML GridPane gridpane_parameterConfiguration;
-	
-	private Map<String, StackedBarChart<String, Integer>> barchartsForFilterControls;
-	private @FXML StackedBarChart<String, Integer> barchart_alpha;
-	private @FXML StackedBarChart<String, Integer> barchart_eta;
-	private @FXML StackedBarChart<String, Integer> barchart_kappa;
-	
-	private Map<String, RangeSlider> rangeSliders;
-	private @FXML VBox vbox_alpha;
-	private @FXML VBox vbox_eta;
-	private @FXML VBox vbox_kappa;
-	
-	private Map<String, Pair<TextField, TextField>> textfieldsForFilterControls;
-	private @FXML TextField alpha_min_textfield;
-	private @FXML TextField alpha_max_textfield;
-	private @FXML TextField eta_min_textfield;
-	private @FXML TextField eta_max_textfield;
-	private @FXML TextField kappa_min_textfield;
-	private @FXML TextField kappa_max_textfield;
-	
 	/**
 	 * Container for scented filters.
 	 */
@@ -380,92 +361,8 @@ public class AnalysisController extends Controller
 
 	private void initFilterControls()
 	{
-		scrollpane_filter.setContent(gridpane_parameterConfiguration);
-		
 		// Init collections.
 		filters						= new ArrayList<ScentedFilter>();
-		rangeSliders				= new HashMap<String, RangeSlider>();
-		textfieldsForFilterControls	= new HashMap<String, Pair<TextField, TextField>>();
-		barchartsForFilterControls	= new HashMap<String, StackedBarChart<String, Integer>>();
-		
-		// Add range sliders to collection.
-		rangeSliders.put("alpha", new RangeSlider());
-		rangeSliders.put("eta", new RangeSlider());
-		rangeSliders.put("kappa", new RangeSlider());
-		
-		// Add textfields to collection.
-		textfieldsForFilterControls.put("alpha", new Pair<TextField, TextField>(alpha_min_textfield, alpha_max_textfield));
-		textfieldsForFilterControls.put("eta", new Pair<TextField, TextField>(eta_min_textfield, eta_max_textfield));
-		textfieldsForFilterControls.put("kappa", new Pair<TextField, TextField>(kappa_min_textfield, kappa_max_textfield));
-		
-		// Add barcharts to collections.
-		barchartsForFilterControls.put("alpha", barchart_alpha);
-		barchartsForFilterControls.put("eta", barchart_eta);
-		barchartsForFilterControls.put("kappa", barchart_kappa);
-		
-		// Init range slider.
-		for (Map.Entry<String, RangeSlider> entry : rangeSliders.entrySet()) {
-			RangeSlider rs = entry.getValue();
-			
-			rs.setMaxWidth(230);
-			rs.setMax(25);
-			rs.setMax(100);
-			rs.setMajorTickUnit(5);
-			rs.setMinorTickCount(4);
-			rs.setSnapToTicks(false);
-			rs.setShowTickLabels(true);
-			rs.setShowTickMarks(true);
-			rs.setLowValue(0);
-			rs.setHighValue(25);
-			rs.setHighValue(100);
-			
-			// Set width. 
-			rs.setMaxWidth(220);
-			rs.setMinWidth(220);
-			rs.setPrefWidth(220);
-			
-			// Get some distance between range sliders and bar charts.
-			rs.setTranslateX(-6);
-			rs.setPadding(new Insets(5, 0, 0, 0));
-			
-			// Add event handler - trigger update of visualizations (and the
-			// data preconditioning necessary for that) if filter settings
-			// are changed.
-			addEventHandlerToRangeSlider(rs, entry.getKey());
-		}
-		
-		// Set variable-specific minima and maxima.
-		rangeSliders.get("kappa").setMin(1);
-		rangeSliders.get("kappa").setMax(50);
-		rangeSliders.get("kappa").setHighValue(50);
-		rangeSliders.get("kappa").setSnapToTicks(false);
-		
-		// Temporary workaround: Fix length of kappa range slider interval at 1.
-		rangeSliders.get("kappa").lowValueProperty().addListener(new ChangeListener<Number>() {
-		    @Override 
-		    public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue)
-		    {
-		    	rangeSliders.get("kappa").setHighValue(rangeSliders.get("kappa").getLowValue() + 1);
-		    }
-		});
-		rangeSliders.get("kappa").highValueProperty().addListener(new ChangeListener<Number>() {
-		    @Override 
-		    public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue)
-		    {
-		    	rangeSliders.get("kappa").setLowValue(rangeSliders.get("kappa").getHighValue() - 1);
-		    }
-		});
-		
-		// Adapt textfield values.
-		for (Map.Entry<String, Pair<TextField, TextField>> entry : textfieldsForFilterControls.entrySet()) {
-			entry.getValue().getKey().setText( String.valueOf(rangeSliders.get(entry.getKey()).getMin()) );
-			entry.getValue().getValue().setText( String.valueOf(rangeSliders.get(entry.getKey()).getMax()) );
-		}
-		
-		// Add range slider to GUI.
-		vbox_alpha.getChildren().add(rangeSliders.get("alpha"));
-		vbox_eta.getChildren().add(rangeSliders.get("eta"));
-		vbox_kappa.getChildren().add(rangeSliders.get("kappa"));
 		
 		// Init container for filters.
 		filters_vbox = new VBox();
@@ -475,9 +372,14 @@ public class AnalysisController extends Controller
 			// Create new filter.
 			ScentedFilter filter = (ScentedFilter) VisualizationComponent.generateInstance(VisualizationComponentType.SCENTED_FILTER, this, this.workspace, this.log_protocol_progressindicator, this.log_protocol_textarea);
 
+			// Init filter.
+			if (param != "kappa")
+				filter.applyOptions(new ScentedFilterOptionset(param, true, 0, 15, 50));
+			else
+				filter.applyOptions(new ScentedFilterOptionset(param, false, 2, 25, 50));
+			
 			// Add to collection of filters.
 			filters.add(filter);
-			
 			// Embed in containing VBox.
 			filter.embedIn(filters_vbox);
 		}
@@ -488,12 +390,6 @@ public class AnalysisController extends Controller
 		settings_filter_anchorPane.layout();
 		settings_filter_anchorPane.requestLayout();
 		filters_vbox.resize(100, filters_vbox.getHeight());
-		
-		// Set gridpane's height (based on the number of supported parameters).
-		final int prefRowHeight = 100;
-		gridpane_parameterConfiguration.setPrefHeight(LDAConfiguration.SUPPORTED_PARAMETERS.length * prefRowHeight);
-		gridpane_parameterConfiguration.setMinHeight(LDAConfiguration.SUPPORTED_PARAMETERS.length * prefRowHeight);
-
 	}
 
 	private void initMDSScatterchart()
@@ -577,16 +473,16 @@ public class AnalysisController extends Controller
 		// Refresh visualizations.
 		
 		// 	Parameter filtering controls:
-		refreshParameterHistograms(50);
-
+		refreshScentedFilters();
+		
 		// 	MDS scatterchart:
 		mdsScatterchart.refresh(	dataspace.getCoordinates(),
-									dataspace.getFilteredCoordinates(), dataspace.getFilteredIndices(), 
-									dataspace.getSelectedCoordinates(), dataspace.getSelectedIndices(), 
+									dataspace.getFilteredCoordinates(), dataspace.getInactiveIndices(), 
+									dataspace.getSelectedCoordinates(), dataspace.getActiveIndices(), 
 									dataspace.getDiscardedCoordinates(), dataspace.getDiscardedIndices());
 
 		//	Distance evaluation barchart:
-		distancesBarchart.refresh(	dataspace.getDiscardedIndices(), dataspace.getFilteredIndices(), dataspace.getSelectedIndices(),
+		distancesBarchart.refresh(	dataspace.getDiscardedIndices(), dataspace.getInactiveIndices(), dataspace.getActiveIndices(),
 									dataspace.getDiscardedDistances(), dataspace.getFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
 									true);
 
@@ -615,9 +511,13 @@ public class AnalysisController extends Controller
 			
 			// Mark global extrema as found.
 			globalExtremaIdentified = true;
-			
-			// Adapt controls to new data.
-			adjustControlExtrema();
+
+			for (ScentedFilter filter : filters) {
+				// Adjust global extrema for controls.
+				filter.adjustControlExtrema(dataspace.getLDAConfigurations());
+				// Set initial width.
+				filter.resizeContent(300, 0);
+			}
 		}
 	}
 	
@@ -627,7 +527,7 @@ public class AnalysisController extends Controller
 	 */
 	public void integrateMDSSelection(Set<Integer> selectedIndices, boolean includeLocalScope)
 	{
-		boolean changeDetected = !( selectedIndices.containsAll(dataspace.getSelectedIndices()) && dataspace.getSelectedIndices().containsAll(selectedIndices) );
+		boolean changeDetected = !( selectedIndices.containsAll(dataspace.getActiveIndices()) && dataspace.getActiveIndices().containsAll(selectedIndices) );
 
 		// Update set of filtered and selected indices.
 		if (changeDetected) {
@@ -642,7 +542,7 @@ public class AnalysisController extends Controller
 			// Refresh other (than MDSScatterchart) visualizations.
 			
 			//	Distances barchart:
-			distancesBarchart.refresh(	dataspace.getDiscardedIndices(), dataspace.getFilteredIndices(), dataspace.getSelectedIndices(),
+			distancesBarchart.refresh(	dataspace.getDiscardedIndices(), dataspace.getInactiveIndices(), dataspace.getActiveIndices(),
 										dataspace.getDiscardedDistances(), dataspace.getFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
 										true);
 			
@@ -654,7 +554,7 @@ public class AnalysisController extends Controller
 				localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
 			
 			// 	Parameter histograms:
-			refreshParameterHistograms(50);
+			refreshScentedFilters();
 		}
 		
 		// Even if no change on global scope detected: Update local scope, if requested. 
@@ -708,13 +608,13 @@ public class AnalysisController extends Controller
 				changeDetected = true;
 				
 				// Add missing LDA configurations to collection.
-				for (final int ldaConfigIndex : dataspace.getFilteredIndices()) {
+				for (final int ldaConfigIndex : dataspace.getInactiveIndices()) {
 					// Get LDA configuration for this index.
 					final LDAConfiguration ldaConfiguration = dataspace.getLDAConfigurations().get(ldaConfigIndex);
 					
 					// Check if this LDA configuration is part of the set of newly selected LDA configurations. 
 					if ( newlySelectedLDAConfigIDs.contains(ldaConfiguration.getConfigurationID()) )
-						dataspace.getSelectedIndices().add(ldaConfigIndex);
+						dataspace.getActiveIndices().add(ldaConfigIndex);
 				}
 			}
 		}
@@ -726,7 +626,7 @@ public class AnalysisController extends Controller
 			
 			// Check if any of the newly selected IDs are contained in global selection.
 			// If so: Remove them.
-			for (final int ldaConfigIndex : dataspace.getSelectedIndices()) {
+			for (final int ldaConfigIndex : dataspace.getActiveIndices()) {
 				// Get LDA configuration for this index.
 				final LDAConfiguration ldaConfiguration = this.dataspace.getLDAConfigurations().get(ldaConfigIndex); 
 				
@@ -742,7 +642,7 @@ public class AnalysisController extends Controller
 			}
 			
 			// Remove set of indices to delete from set of selected indices.
-			dataspace.getSelectedIndices().removeAll(indicesToDeleteFromSelection);
+			dataspace.getActiveIndices().removeAll(indicesToDeleteFromSelection);
 		}
 		
 		// 2. 	Update related (i.e. dependent on the set of selected entities) datasets and visualization, if there were any changes made.
@@ -767,9 +667,9 @@ public class AnalysisController extends Controller
 		if (isAddition) {
 			// Translate local indices to global indices.
 			for (int i = 0; i < newlySelectedLocalIndices.size(); i++) {
-				if (!dataspace.getSelectedIndices().contains( newlySelectedLocalIndices.get(i)) ) {
+				if (!dataspace.getActiveIndices().contains( newlySelectedLocalIndices.get(i)) ) {
 					// Add to collection of selected indices.
-					dataspace.getSelectedIndices().add( newlySelectedLocalIndices.get(i) );
+					dataspace.getActiveIndices().add( newlySelectedLocalIndices.get(i) );
 					
 					// Change detected.
 					changeDetected = true;
@@ -781,8 +681,8 @@ public class AnalysisController extends Controller
 			// Translate local indices to global indices.
 			for (int i = 0; i < newlySelectedLocalIndices.size(); i++) {
 				// Add to set of selected, translated indices. 
-				if (dataspace.getSelectedIndices().contains( newlySelectedLocalIndices.get(i)) ) {
-					dataspace.getSelectedIndices().remove( newlySelectedLocalIndices.get(i) );
+				if (dataspace.getActiveIndices().contains( newlySelectedLocalIndices.get(i)) ) {
+					dataspace.getActiveIndices().remove( newlySelectedLocalIndices.get(i) );
 					
 					// Change detected.
 					changeDetected = true;
@@ -811,13 +711,13 @@ public class AnalysisController extends Controller
 
 		// 4.	Refresh visualizations.
 		// 	Distances barchart:
-		distancesBarchart.refresh(		dataspace.getDiscardedIndices(), dataspace.getFilteredIndices(), dataspace.getSelectedIndices(),
+		distancesBarchart.refresh(		dataspace.getDiscardedIndices(), dataspace.getInactiveIndices(), dataspace.getActiveIndices(),
 										dataspace.getDiscardedDistances(), dataspace.getFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
 										true);
 		// 	MDS scatterchart:
 		mdsScatterchart.refresh(		dataspace.getCoordinates(),
-										dataspace.getFilteredCoordinates(), dataspace.getFilteredIndices(), 
-										dataspace.getSelectedCoordinates(), dataspace.getSelectedIndices(), 
+										dataspace.getFilteredCoordinates(), dataspace.getInactiveIndices(), 
+										dataspace.getSelectedCoordinates(), dataspace.getActiveIndices(), 
 										dataspace.getDiscardedCoordinates(), dataspace.getDiscardedIndices());
 		// 	Parameter space heatmap:
 		refreshParameterspaceHeatmaps();
@@ -827,7 +727,7 @@ public class AnalysisController extends Controller
 		refreshTMCHeatmap(dataspace.getSelectedLDAConfigurations());
 		
 		// 	Parameter histograms:
-		refreshParameterHistograms(50);
+		refreshScentedFilters();
 	}
 	
 	/**
@@ -868,35 +768,6 @@ public class AnalysisController extends Controller
 		}
 	}
 	
-	/**
-	 * Adds event handler processing slide and other events to a specified range slider.
-	 * @param rs
-	 * @param parameter
-	 */
-	private void addEventHandlerToRangeSlider(RangeSlider rs, String parameter)
-	{
-		// Add listener to determine position during after release.
-		rs.addEventHandler(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
-            public void handle(MouseEvent event) 
-            {
-            	// Update control values after slider values where changed.
-            	updateControlValues(rs, parameter);
-
-            	// Filter by values; refresh visualizations.
-            	refreshVisualizations(true);
-            }
-        });
-		
-		// Add listener to determine position during mouse drag.
-		rs.addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
-            public void handle(MouseEvent event) 
-            {
-            	// Update control values after slider values where changed.
-            	updateControlValues(rs, parameter);
-            };
-        });
-	}
-	
 	private void applyFilter()
 	{
 		/*
@@ -917,124 +788,15 @@ public class AnalysisController extends Controller
 		// Get parameter boundaries.
 		Map<String, Pair<Double, Double>> parameterBoundaries = new HashMap<String, Pair<Double, Double>>();
 		
-		for (String param : rangeSliders.keySet()) {
-			parameterBoundaries.put(param, new Pair<Double, Double>(rangeSliders.get(param).getLowValue(), rangeSliders.get(param).getHighValue()));
+//		for (String param : rangeSliders.keySet()) {
+//			parameterBoundaries.put(param, new Pair<Double, Double>(rangeSliders.get(param).getLowValue(), rangeSliders.get(param).getHighValue()));
+//		}
+		for (ScentedFilter filter : filters) {
+			filter.addThresholdsToMap(parameterBoundaries);
 		}
 		
 		// Filter indices.
 		dataspace.filterIndices(parameterBoundaries);
-	}
-
-
-	/**
-	 * Updates control values after slide event ended.
-	 * @param rs
-	 * @param parameter
-	 */
-	private void updateControlValues(RangeSlider rs, String parameter)
-	{
-		Map<String, Double> parameterValues_low		= new HashMap<String, Double>();
-		Map<String, Double> parameterValues_high	= new HashMap<String, Double>();
-		
-		// Determine minima and maxima for all parameters.
-		for (String param : rangeSliders.keySet()) {
-			parameterValues_low.put(param, rs.getLowValue() >= rangeSliders.get(param).getMin() ? rs.getLowValue() : rangeSliders.get(param).getMin());
-			parameterValues_high.put(param, rs.getHighValue() <= rangeSliders.get(param).getMax() ? rs.getHighValue() : rangeSliders.get(param).getMax());
-		}
-		
-		// Update textfield values.
-    	switch (parameter) 
-    	{
-    		case "alpha":
-    			alpha_min_textfield.setText(String.valueOf(parameterValues_low.get("alpha")));
-            	alpha_max_textfield.setText(String.valueOf(parameterValues_high.get("alpha")));
-    		break;
-    		
-    		case "eta":
-    	       	eta_min_textfield.setText(String.valueOf(parameterValues_low.get("eta")));
-            	eta_max_textfield.setText(String.valueOf(parameterValues_high.get("eta")));
-        	break;
-        		
-    		case "kappa":
-    			kappa_min_textfield.setText(String.valueOf(parameterValues_low.get("kappa")));
-            	kappa_max_textfield.setText(String.valueOf(parameterValues_high.get("kappa")));
-        	break;	
-    	}            		
-	}
-
-	/**
-	 * Refresh parameter filter control histograms.
-	 * @param numberOfBins
-	 */
-	private void refreshParameterHistograms(final int numberOfBins)
-	{
-		// Map storing one bin list for each parameter, counting only filtered datasets.
-		Map<String, int[]> parameterBinLists_filtered	= new HashMap<String, int[]>();
-		// Map storing one bin list for each parameter, counting only selected datasets.
-		Map<String, int[]> parameterBinLists_selected	= new HashMap<String, int[]>();
-		// Map storing one bin list for each parameter, counting only discarded datasets.
-		Map<String, int[]> parameterBinLists_discarded	= new HashMap<String, int[]>();
-		
-		// Add parameters to map of bin lists. 
-		for (String supportedParameter : LDAConfiguration.SUPPORTED_PARAMETERS) {
-			parameterBinLists_filtered.put(supportedParameter, new int[numberOfBins]);
-			parameterBinLists_selected.put(supportedParameter, new int[numberOfBins]);
-			parameterBinLists_discarded.put(supportedParameter, new int[numberOfBins]);
-		}
-		
-		// Bin data.
-		for (int i = 0; i < dataspace.getLDAConfigurations().size(); i++) {
-			// Check if dataset is filtered (as opposed to discarded).
-			boolean isFilteredDataset = dataspace.getFilteredIndices().contains(i);
-			boolean isSelectedDataset = dataspace.getSelectedIndices().contains(i);
-			
-			// Evaluate bin counts for this dataset for each parameter.
-			for (String param : rangeSliders.keySet()) {
-				double binInterval	= (rangeSliders.get(param).getMax() - rangeSliders.get(param).getMin()) / numberOfBins;
-				// Calculate index of bin in which to store the current value.
-				int index_key		= (int) ( (dataspace.getLDAConfigurations().get(i).getParameter(param) - rangeSliders.get(param).getMin()) / binInterval);
-				// Check if element is highest allowed entry.
-				index_key			= index_key < numberOfBins ? index_key : numberOfBins - 1;
-				
-				// Check if this dataset fits all boundaries / is filtered, selected or discarded - then increment content of corresponding bin.
-				if (isFilteredDataset) {
-					// Filtered dataset:
-					if (!isSelectedDataset)
-						parameterBinLists_filtered.get(param)[index_key]++;
-					// Selected dataset:
-					else 
-						parameterBinLists_selected.get(param)[index_key]++;
-				}
-				else
-					parameterBinLists_discarded.get(param)[index_key]++;
-			}
-		}
-
-		/*
-		 * Transfer data to scented widgets.
-		 */
-		
-		for (Map.Entry<String, StackedBarChart<String, Integer>> parameterBarchartEntry : barchartsForFilterControls.entrySet()) {
-			// Clear old data.
-			parameterBarchartEntry.getValue().getData().clear();
-
-			// Add filtered data series to barcharts.
-			generateParameterHistogramDataSeries(parameterBarchartEntry, parameterBinLists_filtered, numberOfBins, 0);
-			
-			// Add discarded data series to barcharts.
-			parameterBarchartEntry.getValue().getData().add(
-					dataspace.generateParameterHistogramDataSeries(parameterBarchartEntry.getKey(), parameterBinLists_discarded, numberOfBins)
-			);
-			// Color discarded data.
-			colorParameterHistogramBarchart(parameterBarchartEntry.getValue(), 1);
-			
-			// Add selected data series to barcharts.
-			parameterBarchartEntry.getValue().getData().add(
-					dataspace.generateParameterHistogramDataSeries(parameterBarchartEntry.getKey(), parameterBinLists_selected, numberOfBins)
-			);
-			// Color selected data.
-			colorParameterHistogramBarchart(parameterBarchartEntry.getValue(), 2);
-		}
 	}
 	
 	/**
@@ -1133,6 +895,9 @@ public class AnalysisController extends Controller
 			
 			case "settings_anchorPane":
 				filters_vbox.setPrefWidth(width - 20);
+				for (ScentedFilter filter : filters) {
+					filter.resizeContent(width - 20, 0);
+				}
 			break;
 		}
 	}
@@ -1140,15 +905,15 @@ public class AnalysisController extends Controller
 	@FXML
 	public void ddcButtonStateChanged(ActionEvent e)
 	{
-		double filteredDistances[][]							= new double[dataspace.getFilteredIndices().size()][dataspace.getFilteredIndices().size()];
-		ArrayList<LDAConfiguration> filteredLDAConfigurations	= new ArrayList<LDAConfiguration>(dataspace.getFilteredIndices().size());
+		double filteredDistances[][]							= new double[dataspace.getInactiveIndices().size()][dataspace.getInactiveIndices().size()];
+		ArrayList<LDAConfiguration> filteredLDAConfigurations	= new ArrayList<LDAConfiguration>(dataspace.getInactiveIndices().size());
 		
 		// Copy data corresponding to chosen LDA configurations in new arrays.
 		int count = 0;
-		for (int selectedIndex : dataspace.getFilteredIndices()) {
+		for (int selectedIndex : dataspace.getInactiveIndices()) {
 			// Copy distances.
 			int innerCount = 0;
-			for (int selectedInnerIndex : dataspace.getFilteredIndices()) {
+			for (int selectedInnerIndex : dataspace.getInactiveIndices()) {
 				filteredDistances[count][innerCount] = dataspace.getDistances()[selectedIndex][selectedInnerIndex];
 				innerCount++;
 			}
@@ -1235,33 +1000,6 @@ public class AnalysisController extends Controller
 	public void changeMDSHeatmapVisibility(ActionEvent e)
 	{
 		mdsScatterchart.setHeatmapVisiblity(showMSDHeatmap_checkbox.isSelected());
-	}
-	
-	/**
-	 * Adjusts minimal and maximal control values so that they fit the loaded data set.
-	 */
-	private void adjustControlExtrema()
-	{
-		Map<String, Pair<Double, Double>> ldaParameterExtrema = dataspace.identifyLDAParameterExtrema(dataspace.getLDAConfigurations());
-		
-		// Update values of range slider. 
-		for (Map.Entry<String, RangeSlider> rs : rangeSliders.entrySet()) {
-			String param	= rs.getKey();
-			double min		= ldaParameterExtrema.get(param).getKey();
-			double max		= ldaParameterExtrema.get(param).getValue();
-			
-			// Set range slider values.
-			rs.getValue().setMin(min);
-			rs.getValue().setMax(max);
-			
-			// Set range slider's textfield values.
-			textfieldsForFilterControls.get(param).getKey().setText(String.valueOf(min));
-			textfieldsForFilterControls.get(param).getValue().setText(String.valueOf(max));
-			
-			// Adapt barchart axis.
-			ValueAxis<Integer> yAxis = (ValueAxis<Integer>) barchartsForFilterControls.get(param).getYAxis();
-			yAxis.setMinorTickVisible(false);
-		}
 	}
 	
 	/**
@@ -1468,21 +1206,6 @@ public class AnalysisController extends Controller
 	}
 	
 	/**
-	 * Returns extrema for all currently supported parameters.
-	 * @return
-	 */
-	public Map<String, Pair<Double, Double>> getParamExtrema()
-	{
-		Map<String, Pair<Double, Double>> parameterFilterThresholds = new HashMap<String, Pair<Double, Double>>();
-		
-		for (Map.Entry<String, RangeSlider> entry : rangeSliders.entrySet()) {
-			parameterFilterThresholds.put(entry.getKey(), new Pair<Double, Double>(entry.getValue().getMin(), entry.getValue().getMax()));
-		}
-		
-		return parameterFilterThresholds;
-	}
-	
-	/**
 	 * Induces cross-visualization highlighting of one particular LDA configuration.
 	 * @param ldaConfigurationID
 	 */
@@ -1490,7 +1213,7 @@ public class AnalysisController extends Controller
 	{
 		// Find index of this LDA configuration (remark: data structure not appropriate for this task).
 		int index = -1;
-		for (int i : dataspace.getSelectedIndices()) {
+		for (int i : dataspace.getActiveIndices()) {
 			LDAConfiguration ldaConfig = dataspace.getLDAConfigurations().get(i);
 			
 			if (ldaConfig.getConfigurationID() == ldaConfigurationID)
@@ -1506,6 +1229,16 @@ public class AnalysisController extends Controller
 	public void removeCrossChartHighlighting()
 	{
 		mdsScatterchart.highlightLDAConfiguration(-1);
+	}
+	
+	/**
+	 * Refreshes all scented filters.
+	 */
+	private void refreshScentedFilters()
+	{
+		for (ScentedFilter filter : filters) {
+			filter.refresh(new ScentedFilterDataset(dataspace.getLDAConfigurations(), dataspace.getInactiveIndices(), dataspace.getActiveIndices()));
+		}
 	}
 	
 	@Override

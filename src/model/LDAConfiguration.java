@@ -115,6 +115,13 @@ public class LDAConfiguration
 		return true;
 	}
 	
+	/**
+	 * Generates LDA configuration from configuration string.
+	 * @param ldaConfigString
+	 * @return
+	 * @throws Exception
+	 * @deprecated
+	 */
 	public static LDAConfiguration generateLDAConfiguration(String ldaConfigString) throws Exception
 	{
 		Map<String, Integer> paramMapCopy	= new HashMap<String, Integer>(LDAConfiguration.PARAMETER_MAP);

@@ -30,11 +30,6 @@ public abstract class Heatmap extends VisualizationComponent
 	
 	@FXML protected Canvas canvas;
 	
-	/**
-	 * Component enabling rubberband-type selection of points in scatterchart.
-	 */
-	protected RubberBandSelection rubberbandSelection;
-	
 	/*
 	 * Metadata.
 	 */

@@ -160,13 +160,12 @@ public class AnalysisDataspace
 	// 				Analytic methods.
 	// -----------------------------------------------
 	
-	
 	/**
 	 * Identify maxima and minima in set of loaded LDA parameters.
 	 * @param ldaConfigurations
 	 * @return
 	 */
-	public Map<String, Pair<Double, Double>> identifyLDAParameterExtrema(ArrayList<LDAConfiguration> ldaConfigurations)
+	public static Map<String, Pair<Double, Double>> identifyLDAParameterExtrema(ArrayList<LDAConfiguration> ldaConfigurations)
 	{
 		Map<String, Pair<Double, Double>> parameterExtrema = new HashMap<String, Pair<Double, Double>>(LDAConfiguration.SUPPORTED_PARAMETERS.length);
 		
@@ -189,6 +188,32 @@ public class AnalysisDataspace
 		
 		return parameterExtrema;
 	}
+	
+	/**
+	 * Identify maxima and minima in set of loaded LDA parameters.
+	 * @param ldaConfigurations
+	 * @return
+	 */
+	public static Map<String, Pair<Double, Double>> identifyLDAParameterExtrema(ArrayList<LDAConfiguration> ldaConfigurations, String param)
+	{
+		Map<String, Pair<Double, Double>> parameterExtrema = new HashMap<String, Pair<Double, Double>>(LDAConfiguration.SUPPORTED_PARAMETERS.length);
+		
+		// Init parameter extrema collection.
+		parameterExtrema.put(param, new Pair<Double, Double>(Double.MAX_VALUE, Double.MIN_VALUE));
+		
+		// Search for extrema in all LDA configurations.
+		for (LDAConfiguration ldaConfig : ldaConfigurations) {
+			// For all supported parameters:
+			double value	= ldaConfig.getParameter(param);
+			double min		= value < parameterExtrema.get(param).getKey()		? value : parameterExtrema.get(param).getKey();
+			double max 		= value > parameterExtrema.get(param).getValue() 	? value : parameterExtrema.get(param).getValue();
+			
+			parameterExtrema.put(param, new Pair<Double, Double>(min, max));
+		}
+		
+		return parameterExtrema;
+	}
+	
 	
 	/**
 	 * Updates set of selected indices.
@@ -613,7 +638,7 @@ public class AnalysisDataspace
 		return ldaConfigurations;
 	}
 
-	public Set<Integer> getFilteredIndices()
+	public Set<Integer> getInactiveIndices()
 	{
 		return filteredIndices;
 	}
@@ -653,7 +678,7 @@ public class AnalysisDataspace
 		return discardedLDAConfigurations;
 	}
 
-	public Set<Integer> getSelectedIndices()
+	public Set<Integer> getActiveIndices()
 	{
 		return selectedFilteredIndices;
 	}

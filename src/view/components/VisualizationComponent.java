@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import view.components.rubberbandselection.ISelectableComponent;
+import view.components.rubberbandselection.RubberBandSelection;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -38,6 +39,11 @@ public abstract class VisualizationComponent extends Controller implements ISele
 	 * Reference to AnalysisController.
 	 */
 	protected AnalysisController analysisController;
+	
+	/**
+	 * Component enabling rubberband-type selection of points in scatterchart.
+	 */
+	protected RubberBandSelection rubberbandSelection;
 	
 	/**
 	 * Contains all .fxml paths for the respective visualization components.

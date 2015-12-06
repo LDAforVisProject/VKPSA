@@ -351,15 +351,6 @@ public class LocalScopeInstance extends VisualizationComponent_Legacy
 	}
 	
 	/**
-	 * Returns current filter thresholds for all currently supported parameters.
-	 * @return
-	 */
-	public Map<String, Pair<Double, Double>> getFilterThresholds()
-	{
-		return analysisController.getParamExtrema();
-	}
-	
-	/**
 	 * Sets references to current workspace and logging elements.
 	 * @param workspace
 	 * @param logPI
