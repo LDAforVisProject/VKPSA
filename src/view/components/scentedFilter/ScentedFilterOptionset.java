@@ -1,6 +1,8 @@
 package view.components.scentedFilter;
 
-public class ScentedFilterOptionset
+import view.components.VisualizationComponentOptionset;
+
+public class ScentedFilterOptionset extends VisualizationComponentOptionset
 {
 	/**
 	 * Number of bins to use.
@@ -19,8 +21,11 @@ public class ScentedFilterOptionset
 	 */
 	private double max;
 	
-	public ScentedFilterOptionset(String paramID, boolean useRangeSlider, double min, double max, int numberOfBins)
+	public ScentedFilterOptionset(	String paramID, boolean useRangeSlider, double min, double max, int numberOfBins,
+									boolean isSelectionEnabled, boolean showAxes, boolean relativeMode)
 	{
+		super(isSelectionEnabled, showAxes, relativeMode);
+		
 		this.paramID 		= paramID;
 		this.useRangeSlider = useRangeSlider;
 		this.min			= min;

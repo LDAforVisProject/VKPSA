@@ -29,6 +29,7 @@ import view.components.legacy.heatmap.HeatMap;
 import view.components.legacy.heatmap.HeatmapDataBinding;
 import view.components.legacy.heatmap.HeatmapDataType;
 import view.components.legacy.mdsScatterchart.MDSScatterchart;
+import view.components.scatterchart.ParameterSpaceScatterchart;
 import view.components.scentedFilter.ScentedFilter;
 import view.components.scentedFilter.ScentedFilterDataset;
 import view.components.scentedFilter.ScentedFilterOptionset;
@@ -129,12 +130,6 @@ public class AnalysisController extends Controller
 	 */
 	private @FXML AnchorPane localscope_tmc_anchorPane;
 	
-	/**
-	 * For distance correlation linechart.
-	 * @deprecated
-	 */
-	private @FXML AnchorPane paramSpace_correlation_anchorPane;
-	
 	/*
 	 * MDS Scatterchart.
 	 */
@@ -193,11 +188,12 @@ public class AnalysisController extends Controller
 	// Component for heatmap showing filtered data:
 	private NumericalHeatmap parameterspace_heatmap_filtered;
 	
-	// Component for heatmap showing selected data:
-	private NumericalHeatmap parameterspace_heatmap_selected;
+	/**
+	 * ParameterSpaceScatterchart for display of parameter values.
+	 */
+	private ParameterSpaceScatterchart paramSpaceScatterchart;
 	
 	// Heatmap setting controls (and metadata).
-	
 	private @FXML ToggleButton button_relativeView_paramDist;
 	private @FXML ComboBox<String> combobox_parameterSpace_distribution_xAxis;
 	private @FXML ComboBox<String> combobox_parameterSpace_distribution_yAxis;
@@ -374,9 +370,9 @@ public class AnalysisController extends Controller
 
 			// Init filter.
 			if (param != "kappa")
-				filter.applyOptions(new ScentedFilterOptionset(param, true, 0, 15, 50));
+				filter.applyOptions(new ScentedFilterOptionset(param, true, 0, 15, 50, true, true, false));
 			else
-				filter.applyOptions(new ScentedFilterOptionset(param, false, 2, 25, 50));
+				filter.applyOptions(new ScentedFilterOptionset(param, false, 2, 25, 50, true, true, false));
 			
 			// Add to collection of filters.
 			filters.add(filter);
@@ -420,11 +416,13 @@ public class AnalysisController extends Controller
 		combobox_parameterSpace_distribution_yAxis.setValue("eta");
 		
 		// Init heatmaps.
-		parameterspace_heatmap_selected	= (NumericalHeatmap) VisualizationComponent.generateInstance(VisualizationComponentType.NUMERICAL_HEATMAP, this, null, null, null);
 		parameterspace_heatmap_filtered	= (NumericalHeatmap) VisualizationComponent.generateInstance(VisualizationComponentType.NUMERICAL_HEATMAP, this, null, null, null);
 		// Embed heatmaps in parent.
 		parameterspace_heatmap_filtered.embedIn(paramSpace_distribution_anchorPane_filtered);
-		parameterspace_heatmap_selected.embedIn(paramSpace_distribution_anchorPane_selected);
+
+		// Init parameter space scatterchart.
+		paramSpaceScatterchart = (ParameterSpaceScatterchart) VisualizationComponent.generateInstance(VisualizationComponentType.PARAMSPACE_SCATTERCHART, this, null, null, null);
+		paramSpaceScatterchart.embedIn(paramSpace_distribution_anchorPane_selected);
 		
 		/*
 		 * Init option controls.
@@ -434,7 +432,6 @@ public class AnalysisController extends Controller
 		slider_parameterSpace_distribution_granularity.addEventHandler(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) 
             {
-            	parameterspace_heatmap_selected.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
             	parameterspace_heatmap_filtered.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
             }
         });
@@ -443,7 +440,6 @@ public class AnalysisController extends Controller
 		slider_parameterSpace_distribution_granularity.addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) 
             {
-            	parameterspace_heatmap_selected.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
             	parameterspace_heatmap_filtered.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
             };
         });
@@ -742,14 +738,6 @@ public class AnalysisController extends Controller
 															true, button_relativeView_paramDist.isSelected(), true);
 		HeatmapDataset fData		= new HeatmapDataset(dataspace.getLDAConfigurations(), dataspace.getFilteredLDAConfigurations(), fOptions);
 		parameterspace_heatmap_filtered.refresh(fOptions, fData);
-
-		// Refresh heatmap using selected data:
-		HeatmapOptionset sOptions 	= new HeatmapOptionset(	checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int)slider_parameterSpace_distribution_granularity.getValue(), 
-															Color.LIGHTBLUE, Color.DARKBLUE, Color.gray(0.5, 0.5), new Color(0.0, 0.0, 1.0, 0.5),
-															combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(),
-															true, button_relativeView_paramDist.isSelected(), true);
-		HeatmapDataset sData		= new HeatmapDataset(dataspace.getLDAConfigurations(), dataspace.getSelectedLDAConfigurations(), fOptions);
-		parameterspace_heatmap_selected.refresh(sOptions, sData);
 	}
 	
 	/**
@@ -872,7 +860,7 @@ public class AnalysisController extends Controller
 			
 			case "paramSpace_distribution_anchorPane_selected":
 				// Adapt size.
-				parameterspace_heatmap_selected.resizeContent(width, height);
+				paramSpaceScatterchart.resizeContent(width, height);
 			break;
 			
 			// Resize scatter plot.
@@ -928,16 +916,7 @@ public class AnalysisController extends Controller
 	@FXML
 	public void updateHeatmap(ActionEvent e)
 	{
-//		ArrayList<LDAConfiguration> filteredLDAConfigurations = new ArrayList<LDAConfiguration>(dataspace.getFilteredIndices().size());
-//		
-//		// Copy data corresponding to chosen LDA configurations in new arrays.
-//		for (int selectedIndex : dataspace.getFilteredIndices()) {
-//			// Copy LDA configurations.
-//			filteredLDAConfigurations.add(dataspace.getLDAConfigurations().get(selectedIndex));
-//		}
-		
 		if (	parameterspace_heatmap_filtered != null 			&&
-				parameterspace_heatmap_selected != null 			&&
 				combobox_parameterSpace_distribution_xAxis != null 	&& 
 				combobox_parameterSpace_distribution_yAxis != null) {
 			// Refresh heatmaps.
@@ -978,7 +957,6 @@ public class AnalysisController extends Controller
 
 		// Propagate information to heatmaps.
 		parameterspace_heatmap_filtered.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
-		parameterspace_heatmap_selected.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
 	}
 	
 	/**
@@ -1014,7 +992,6 @@ public class AnalysisController extends Controller
             	mdsScatterchart.processKeyPressedEvent(ke);
             	distancesBarchart.processKeyPressedEvent(ke);
             	parameterspace_heatmap_filtered.processKeyPressedEvent(ke);
-            	parameterspace_heatmap_selected.processKeyPressedEvent(ke);
             	tmcHeatmap.processKeyPressedEvent(ke);
             	for (ScentedFilter filter : filters)
             		filter.processKeyPressedEvent(ke);
@@ -1027,7 +1004,6 @@ public class AnalysisController extends Controller
             	mdsScatterchart.processKeyReleasedEvent(ke);
             	distancesBarchart.processKeyReleasedEvent(ke);
             	parameterspace_heatmap_filtered.processKeyReleasedEvent(ke);
-            	parameterspace_heatmap_selected.processKeyReleasedEvent(ke);
             	tmcHeatmap.processKeyReleasedEvent(ke);
             	for (ScentedFilter filter : filters)
             		filter.processKeyReleasedEvent(ke);
@@ -1253,9 +1229,9 @@ public class AnalysisController extends Controller
 		// Set references for child elements.
 		//	...for TMC heatmap.
 		tmcHeatmap.setReferences(workspace, logPI, logTA);
-		// ...for parameter space heatmaps. 
+		// ...for parameter space visualizations. 
 		parameterspace_heatmap_filtered.setReferences(workspace, logPI, logTA);
-		parameterspace_heatmap_selected.setReferences(workspace, logPI, logTA);
+		paramSpaceScatterchart.setReferences(workspace, logPI, logTA);
 		//	...for local scope instance.
 		localScopeInstance.setReferences(workspace, logPI, logTA);
 		//	... for scented filter.

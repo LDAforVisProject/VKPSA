@@ -5,15 +5,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import view.components.VisualizationComponentDataset;
 import model.LDAConfiguration;
 
-public class ScentedFilterDataset
+public class ScentedFilterDataset extends VisualizationComponentDataset
 {
-	/**
-	 * Relevant LDA configurations.
-	 */
-	private ArrayList<LDAConfiguration> ldaConfigurations;
-	
 	/**
 	 * Indices of inactive datasets.
 	 */
@@ -35,10 +31,10 @@ public class ScentedFilterDataset
 	
 	public ScentedFilterDataset(ArrayList<LDAConfiguration> data, Set<Integer> inactiveIndices, Set<Integer> activeIndices)
 	{
-		this.ldaConfigurations 	= data;
-		this.inactiveIndices 	= inactiveIndices;
-		this.activeIndices 		= activeIndices;
-		barToDataAssociations	= new LinkedHashMap<String, ArrayList<Integer>>();
+		this.allLDAConfigurations 	= data;
+		this.inactiveIndices 		= inactiveIndices;
+		this.activeIndices 			= activeIndices;
+		barToDataAssociations		= new LinkedHashMap<String, ArrayList<Integer>>();
 	}
 	
 	/**
@@ -69,13 +65,13 @@ public class ScentedFilterDataset
 		double binInterval	= (max - min) / numberOfBins;
 		
 		// ...iterate over all LDA configurations.
-		for (int i = 0; i < ldaConfigurations.size(); i++) {
+		for (int i = 0; i < allLDAConfigurations.size(); i++) {
 			// Check if dataset is filtered (as opposed to discarded).
 			boolean isInactiveDataset 	= inactiveIndices.contains(i);
 			boolean isActiveDataset		= activeIndices.contains(i);
 
 			// Calculate index of bin in which to store the current value.
-			int index_key		= (int) ( (ldaConfigurations.get(i).getParameter(param) - min) / binInterval);
+			int index_key		= (int) ( (allLDAConfigurations.get(i).getParameter(param) - min) / binInterval);
 			// Check if element is highest allowed entry.
 			index_key			= index_key < numberOfBins ? index_key : numberOfBins - 1;
 			// Check if element is lowest allowed entry.
@@ -111,7 +107,7 @@ public class ScentedFilterDataset
 
 	public ArrayList<LDAConfiguration> getLDAConfigurations()
 	{
-		return ldaConfigurations;
+		return allLDAConfigurations;
 	}
 
 	public Set<Integer> getInactiveIndices()

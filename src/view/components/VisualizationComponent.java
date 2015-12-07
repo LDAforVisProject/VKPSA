@@ -62,6 +62,7 @@ public abstract class VisualizationComponent extends Controller implements ISele
 		FXML_PATHS.put(VisualizationComponentType.NUMERICAL_HEATMAP, "/view/fxml/components/NumericalHeatmap.fxml");
 		FXML_PATHS.put(VisualizationComponentType.CATEGORICAL_HEATMAP, "/view/fxml/components/CategoricalHeatmap.fxml");
 		FXML_PATHS.put(VisualizationComponentType.SCENTED_FILTER, "/view/fxml/components/ScentedFilter.fxml");
+		FXML_PATHS.put(VisualizationComponentType.PARAMSPACE_SCATTERCHART, "/view/fxml/components/ParameterSpaceScatterchart.fxml");
 	}
 	
 	/**
@@ -78,26 +79,7 @@ public abstract class VisualizationComponent extends Controller implements ISele
 		FXMLLoader fxmlLoader				= new FXMLLoader();
         Node rootNode						= null;
         VisualizationComponent component	= null;
-        String path							= null;
-        
-        // Determine path to .fxml.
-        switch (type)
-		{
-			case NUMERICAL_HEATMAP:
-				path = FXML_PATHS.get(VisualizationComponentType.NUMERICAL_HEATMAP);
-			break;
-			
-			case CATEGORICAL_HEATMAP:
-				path = FXML_PATHS.get(VisualizationComponentType.CATEGORICAL_HEATMAP);
-			break;
-			
-			case SCENTED_FILTER:
-				path = FXML_PATHS.get(VisualizationComponentType.SCENTED_FILTER);
-			break;
-			
-			default:
-				System.out.println("Currently not supported.");
-		}
+        String path							= FXML_PATHS.get(type);
         
         // Load .fxml.
         try {

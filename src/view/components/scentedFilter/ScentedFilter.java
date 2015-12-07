@@ -509,7 +509,7 @@ public class ScentedFilter extends VisualizationComponent
 	{
 		if (options != null) {
 			Map<String, Pair<Double, Double>> ldaParameterExtrema = AnalysisDataspace.identifyLDAParameterExtrema(ldaConfigurations, options.getParamID());
-			System.out.println("adjusting");
+			
 			// Update values of range slider. 
 			String param	= options.getParamID();
 			double min		= ldaParameterExtrema.get(param).getKey();
