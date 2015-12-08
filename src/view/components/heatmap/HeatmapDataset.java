@@ -68,9 +68,10 @@ public class HeatmapDataset extends VisualizationComponentDataset
 	 * @param chosenLDAConfigurations
 	 * @param options
 	 */
-	public HeatmapDataset(	ArrayList<LDAConfiguration> allLDAConfigurations, ArrayList<LDAConfiguration> chosenLDAConfigurations, 
-							HeatmapOptionset options)
+	public HeatmapDataset(	ArrayList<LDAConfiguration> allLDAConfigurations, ArrayList<LDAConfiguration> chosenLDAConfigurations, HeatmapOptionset options)
 	{
+		super(allLDAConfigurations);
+		
 		/*
 		 * Initialize values.
 		 */
@@ -152,6 +153,8 @@ public class HeatmapDataset extends VisualizationComponentDataset
 							double coordinates[][], double coordinateExtrema[], 
 							HeatmapOptionset options)
 	{
+		super(allLDAConfigurations);
+		
 		/*
 		* Initialize values.
 		*/
@@ -232,7 +235,8 @@ public class HeatmapDataset extends VisualizationComponentDataset
 							Map<Pair<Integer, Integer>, Integer> spatialIDs,
 							double distances[][], HeatmapOptionset options)
 	{
-		this.allLDAConfigurations			= allLDAConfigurations;
+		super(allLDAConfigurations);
+		
     	this.chosenLDAConfigurations		= null;
     	this.cellsToConfigurationIDs 		= new HashMap<Pair<Integer,Integer>, Set<Integer>>();
 		this.cellsToTopicConfigurationIDs	= new HashMap<Pair<Integer,Integer>, Set<Pair<Integer,Integer>>>();

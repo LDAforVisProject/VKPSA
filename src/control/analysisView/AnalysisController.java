@@ -29,6 +29,8 @@ import view.components.legacy.heatmap.HeatMap;
 import view.components.legacy.heatmap.HeatmapDataBinding;
 import view.components.legacy.heatmap.HeatmapDataType;
 import view.components.legacy.mdsScatterchart.MDSScatterchart;
+import view.components.scatterchart.ScatterchartDataset;
+import view.components.scatterchart.ScatterchartOptionset;
 import view.components.scatterchart.ParameterSpaceScatterchart;
 import view.components.scentedFilter.ScentedFilter;
 import view.components.scentedFilter.ScentedFilterDataset;
@@ -422,8 +424,9 @@ public class AnalysisController extends Controller
 
 		// Init parameter space scatterchart.
 		paramSpaceScatterchart = (ParameterSpaceScatterchart) VisualizationComponent.generateInstance(VisualizationComponentType.PARAMSPACE_SCATTERCHART, this, null, null, null);
+		paramSpaceScatterchart.applyOptions(new ScatterchartOptionset(true, true, false));
 		paramSpaceScatterchart.embedIn(paramSpace_distribution_anchorPane_selected);
-		
+				
 		/*
 		 * Init option controls.
 		 */
@@ -466,29 +469,33 @@ public class AnalysisController extends Controller
 		}
 		
 		
-		// Refresh visualizations.
+		/*
+		 * Refresh visualizations.
+		 */
 		
 		// 	Parameter filtering controls:
 		refreshScentedFilters();
 		
 		// 	MDS scatterchart:
 		mdsScatterchart.refresh(	dataspace.getCoordinates(),
-									dataspace.getFilteredCoordinates(), dataspace.getInactiveIndices(), 
-									dataspace.getSelectedCoordinates(), dataspace.getActiveIndices(), 
+									dataspace.getAvailableCoordinates(), dataspace.getInactiveIndices(), 
+									dataspace.getActiveCoordinates(), dataspace.getActiveIndices(), 
 									dataspace.getDiscardedCoordinates(), dataspace.getDiscardedIndices());
 
 		//	Distance evaluation barchart:
 		distancesBarchart.refresh(	dataspace.getDiscardedIndices(), dataspace.getInactiveIndices(), dataspace.getActiveIndices(),
-									dataspace.getDiscardedDistances(), dataspace.getFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
+									dataspace.getDiscardedDistances(), dataspace.getAvaibleDistances(), dataspace.getActiveDistances(), 
 									true);
 
-		// 	Heatmaps:
+		// 	Parameter space scatterchart:
 		refreshParameterspaceHeatmaps();
+		paramSpaceScatterchart.refresh(new ScatterchartDataset(	dataspace.getLDAConfigurations(), dataspace.getDiscardedLDAConfigurations(),
+																	dataspace.getInactiveLDAConfigurations(), dataspace.getActiveLDAConfigurations()));
 		
 		//	Local scope:
-		localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
+		localScopeInstance.refresh(dataspace.getActiveLDAConfigurations());
 		// TM comparison heatmap:
-		refreshTMCHeatmap(dataspace.getSelectedLDAConfigurations());
+		refreshTMCHeatmap(dataspace.getActiveLDAConfigurations());
 	}
 
 	/**
@@ -501,7 +508,8 @@ public class AnalysisController extends Controller
 			// Identify global extrema.
 			distancesBarchart.identifyGlobalExtrema(dataspace.getDistances());
 			mdsScatterchart.identifyGlobalExtrema(dataspace.getCoordinates());
-
+			paramSpaceScatterchart.identifyGlobalExtrema(dataspace.getLDAConfigurations());
+			
 			// Add keyboard listener in order to enable selection.
 			addKeyListener();
 			
@@ -527,27 +535,24 @@ public class AnalysisController extends Controller
 
 		// Update set of filtered and selected indices.
 		if (changeDetected) {
-			dataspace.updateSelectedIndexSet(selectedIndices);
-			
-			// Find selected and filtered values.
-			dataspace.updateSelectedDistanceMatrix();
-			dataspace.updateSelectedLDAConfigurations();
-			dataspace.updateSelectedCoordinateMatrix();
-			dataspace.updateReductiveFilteredDistanceMatrix();
+			// Update dataspace.
+			dataspace.updateAfterSelection(selectedIndices);
 			
 			// Refresh other (than MDSScatterchart) visualizations.
 			
 			//	Distances barchart:
 			distancesBarchart.refresh(	dataspace.getDiscardedIndices(), dataspace.getInactiveIndices(), dataspace.getActiveIndices(),
-										dataspace.getDiscardedDistances(), dataspace.getFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
+										dataspace.getDiscardedDistances(), dataspace.getAvaibleDistances(), dataspace.getActiveDistances(), 
 										true);
 			
-			//	Paramer space heatmaps:
+			//	Paramer space scatterchart:
 			refreshParameterspaceHeatmaps();
+			paramSpaceScatterchart.refresh(new ScatterchartDataset(	dataspace.getLDAConfigurations(), dataspace.getDiscardedLDAConfigurations(),
+																	dataspace.getInactiveLDAConfigurations(), dataspace.getActiveLDAConfigurations()));
 			
 			// 	Local scope:
 			if (includeLocalScope)
-				localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
+				localScopeInstance.refresh(dataspace.getActiveLDAConfigurations());
 			
 			// 	Parameter histograms:
 			refreshScentedFilters();
@@ -555,9 +560,9 @@ public class AnalysisController extends Controller
 		
 		// Even if no change on global scope detected: Update local scope, if requested. 
 		else if (includeLocalScope) {
-			localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
+			localScopeInstance.refresh(dataspace.getActiveLDAConfigurations());
 			// Refresh topic model comparison heatmap.
-			refreshTMCHeatmap(dataspace.getSelectedLDAConfigurations());
+			refreshTMCHeatmap(dataspace.getActiveLDAConfigurations());
 		}
 	}
 	
@@ -573,75 +578,16 @@ public class AnalysisController extends Controller
 	}
 	
 	/**
-	 * Integrates heatmap selection into MDS selection, then fires update for all relevant visualizations.
+	 * Integrates heatmap selection into dataspace, then fires update for all relevant visualizations.
 	 * @param newlySelectedLDAConfigIDs
 	 * @param isAddition
 	 */
-	public void integrateHeatmapSelection(Set<Integer> newlySelectedLDAConfigIDs, final boolean isAddition)
+	public void integrateSelection(Set<Integer> newlySelectedLDAConfigIDs, final boolean isAddition)
 	{
 		// Check if there is any change in the set of selected datasets.
-		boolean changeDetected = false;
-		
-		// 1. 	Check which elements are to be added/removed from current selection by comparing 
-		// 		with set of filtered and selected datasets.
-		
-		// 1.a.	Selection should be added:
-		if (isAddition) {
-			// Check if any of the newly selected IDs are not contained in global selection yet.
-			// If so: Add them.
-			for (LDAConfiguration selectedLDAConfiguration : dataspace.getSelectedLDAConfigurations()) {
-				final int alreadySelectedLDAConfigID = selectedLDAConfiguration.getConfigurationID(); 
-				
-				// If newly selected set already contained in existing selection: Remove from addition set.
-				if (newlySelectedLDAConfigIDs.contains(alreadySelectedLDAConfigID)) {
-					newlySelectedLDAConfigIDs.remove(alreadySelectedLDAConfigID);
-				}
-			}
-			
-			// If set of newly selected indices still contains elements: Change detected.
-			if (newlySelectedLDAConfigIDs.size() > 0) {
-				// Update flag.
-				changeDetected = true;
-				
-				// Add missing LDA configurations to collection.
-				for (final int ldaConfigIndex : dataspace.getInactiveIndices()) {
-					// Get LDA configuration for this index.
-					final LDAConfiguration ldaConfiguration = dataspace.getLDAConfigurations().get(ldaConfigIndex);
-					
-					// Check if this LDA configuration is part of the set of newly selected LDA configurations. 
-					if ( newlySelectedLDAConfigIDs.contains(ldaConfiguration.getConfigurationID()) )
-						dataspace.getActiveIndices().add(ldaConfigIndex);
-				}
-			}
-		}
-		
-		// 1.b.	Selection should be removed:
-		else {
-			// Set of dataset indices (instead of configuration IDs) to delete.
-			Set<Integer> indicesToDeleteFromSelection = new HashSet<Integer>();
-			
-			// Check if any of the newly selected IDs are contained in global selection.
-			// If so: Remove them.
-			for (final int ldaConfigIndex : dataspace.getActiveIndices()) {
-				// Get LDA configuration for this index.
-				final LDAConfiguration ldaConfiguration = this.dataspace.getLDAConfigurations().get(ldaConfigIndex); 
-				
-				// If currently examine LDAConfiguration is in set of newly selected indices:
-				// Remove LDAConfiguration from set of selected indices.
-				if (newlySelectedLDAConfigIDs.contains(ldaConfiguration.getConfigurationID())) {
-					// Update flag.
-					changeDetected = true;
-					
-					// Add dataset index to collection of indices to remove from selection.
-					indicesToDeleteFromSelection.add(ldaConfigIndex);
-				}
-			}
-			
-			// Remove set of indices to delete from set of selected indices.
-			dataspace.getActiveIndices().removeAll(indicesToDeleteFromSelection);
-		}
-		
-		// 2. 	Update related (i.e. dependent on the set of selected entities) datasets and visualization, if there were any changes made.
+		boolean changeDetected = dataspace.integrateSelection(newlySelectedLDAConfigIDs, isAddition);
+
+		// If so: Refresh visualizations.
 		if (changeDetected)
 			refreshVisualizationsAfterLocalSelection(isAddition);
 	}
@@ -699,28 +645,27 @@ public class AnalysisController extends Controller
 	 */
 	private void refreshVisualizationsAfterLocalSelection(boolean isAddition)
 	{
-		// Find selected and filtered values.
-		dataspace.updateSelectedDistanceMatrix();
-		dataspace.updateSelectedLDAConfigurations();
-		dataspace.updateSelectedCoordinateMatrix();
-		dataspace.updateReductiveFilteredDistanceMatrix();
+		// Update dataspace.
+		dataspace.updateAfterSelection(null);
 
 		// 4.	Refresh visualizations.
 		// 	Distances barchart:
 		distancesBarchart.refresh(		dataspace.getDiscardedIndices(), dataspace.getInactiveIndices(), dataspace.getActiveIndices(),
-										dataspace.getDiscardedDistances(), dataspace.getFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
+										dataspace.getDiscardedDistances(), dataspace.getAvaibleDistances(), dataspace.getActiveDistances(), 
 										true);
 		// 	MDS scatterchart:
 		mdsScatterchart.refresh(		dataspace.getCoordinates(),
-										dataspace.getFilteredCoordinates(), dataspace.getInactiveIndices(), 
-										dataspace.getSelectedCoordinates(), dataspace.getActiveIndices(), 
+										dataspace.getAvailableCoordinates(), dataspace.getInactiveIndices(), 
+										dataspace.getActiveCoordinates(), dataspace.getActiveIndices(), 
 										dataspace.getDiscardedCoordinates(), dataspace.getDiscardedIndices());
 		// 	Parameter space heatmap:
 		refreshParameterspaceHeatmaps();
-
+		paramSpaceScatterchart.refresh(new ScatterchartDataset(	dataspace.getLDAConfigurations(), dataspace.getDiscardedLDAConfigurations(),
+																dataspace.getInactiveLDAConfigurations(), dataspace.getActiveLDAConfigurations()));
+		
 		//	Local scope:
-		localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
-		refreshTMCHeatmap(dataspace.getSelectedLDAConfigurations());
+		localScopeInstance.refresh(dataspace.getActiveLDAConfigurations());
+		refreshTMCHeatmap(dataspace.getActiveLDAConfigurations());
 		
 		// 	Parameter histograms:
 		refreshScentedFilters();
@@ -736,7 +681,7 @@ public class AnalysisController extends Controller
 															Color.GREY, Color.GREY, Color.gray(0.5, 0.5), new Color(0.0, 0.0, 1.0, 0.5), 
 															combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(),
 															true, button_relativeView_paramDist.isSelected(), true);
-		HeatmapDataset fData		= new HeatmapDataset(dataspace.getLDAConfigurations(), dataspace.getFilteredLDAConfigurations(), fOptions);
+		HeatmapDataset fData		= new HeatmapDataset(dataspace.getLDAConfigurations(), dataspace.getAvailableLDAConfigurations(), fOptions);
 		parameterspace_heatmap_filtered.refresh(fOptions, fData);
 	}
 	
@@ -785,25 +730,6 @@ public class AnalysisController extends Controller
 		
 		// Filter indices.
 		dataspace.filterIndices(parameterBoundaries);
-	}
-	
-	/**
-	 * Generates parameter histogram in/for specified barcharts.
-	 * @param parameterBarchartEntry
-	 * @param paramterBinLists
-	 * @param numberOfBins
-	 * @param seriesIndex
-	 */
-	private void generateParameterHistogramDataSeries(	Map.Entry<String, StackedBarChart<String, Integer>> parameterBarchartEntry, 
-														Map<String, int[]> paramterBinLists,
-														final int numberOfBins, final int seriesIndex)
-	{
-		// Add data series to barcharts.
-		parameterBarchartEntry.getValue().getData().add(
-				dataspace.generateParameterHistogramDataSeries(parameterBarchartEntry.getKey(), paramterBinLists, numberOfBins)
-		);
-		// Color data.
-		colorParameterHistogramBarchart(parameterBarchartEntry.getValue(), seriesIndex);
 	}
 	
 	/**
@@ -995,6 +921,7 @@ public class AnalysisController extends Controller
             	tmcHeatmap.processKeyPressedEvent(ke);
             	for (ScentedFilter filter : filters)
             		filter.processKeyPressedEvent(ke);
+            	paramSpaceScatterchart.processKeyPressedEvent(ke);
             }
 		});
 		
@@ -1007,6 +934,7 @@ public class AnalysisController extends Controller
             	tmcHeatmap.processKeyReleasedEvent(ke);
             	for (ScentedFilter filter : filters)
             		filter.processKeyReleasedEvent(ke);
+            	paramSpaceScatterchart.processKeyReleasedEvent(ke);
             }
 		});
 	}
@@ -1135,7 +1063,7 @@ public class AnalysisController extends Controller
 				settings_distEval_icon.setVisible(true);
 			break;
 			
-			case "paramSpace_distribution_anchorPane":
+			case "paramSpace_anchorPane":
 				settings_paramDist_icon.setVisible(true);
 			break;
 			

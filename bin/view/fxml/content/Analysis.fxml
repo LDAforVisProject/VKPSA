@@ -313,11 +313,11 @@
                                 <items>
                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                                        <children>
-                                          <SplitPane dividerPositions="0.5593869731800766" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                          <SplitPane dividerPositions="0.5" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <items>
                                               <AnchorPane fx:id="mds_anchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff;">
                                                    <children>
-                                                      <Label layoutX="7.0" layoutY="5.0" text="MDS View" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                                      <Label layoutX="7.0" layoutY="5.0" text="Topic Models | Result Space" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0">
                                                          <font>
                                                             <Font name="System Bold" size="12.0" />
                                                          </font>
@@ -332,7 +332,7 @@
                                                       </ScatterChart>
                                                       <Canvas height="50.0" layoutX="216.0" layoutY="221.0" width="50.0" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="28.0" />
                                                       <Canvas fx:id="mdsHeatmap_canvas" height="180.0" layoutX="43.0" layoutY="48.0" visible="false" width="288.0" />
-                                                      <ImageView fx:id="settings_mds_icon" fitHeight="15.0" fitWidth="15.0" layoutX="81.0" layoutY="6.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="81.0" AnchorPane.topAnchor="6.0">
+                                                      <ImageView fx:id="settings_mds_icon" fitHeight="15.0" fitWidth="15.0" layoutX="81.0" layoutY="6.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="170.0" AnchorPane.topAnchor="6.0">
                                                          <image>
                                                             <Image url="@icons/cog.png" />
                                                          </image>
@@ -342,34 +342,22 @@
                                                       </ImageView>
                                                    </children>
                                                 </AnchorPane>
-                                              <AnchorPane fx:id="distEval_anchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff;">
+                                                <AnchorPane fx:id="paramSpace_anchorPane" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" style="-fx-background-color: #fff;">
                                                    <children>
-                                                      <Label layoutX="7.0" layoutY="4.0" text="Distance Evaluation" AnchorPane.topAnchor="7.0">
+                                                      <ImageView fx:id="settings_paramDist_icon" fitHeight="15.0" fitWidth="15.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="200.0" AnchorPane.topAnchor="8.0">
+                                                         <cursor>
+                                                            <Cursor fx:constant="HAND" />
+                                                         </cursor>
+                                                         <image>
+                                                            <Image url="@icons/cog.png" />
+                                                         </image>
+                                                      </ImageView>
+                                                      <AnchorPane fx:id="paramSpace_distribution_anchorPane_selected" layoutY="32.0" prefHeight="227.0" prefWidth="411.0" style="-fx-background-color: #fff; -fx-border-color: #ccc;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                                                      <Label layoutX="8.0" layoutY="7.0" text="Topic Models | Parameter Space" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="7.0">
                                                          <font>
                                                             <Font name="System Bold" size="12.0" />
                                                          </font>
                                                       </Label>
-                                                      <BarChart fx:id="barchart_distances" animated="false" layoutX="-173.0" layoutY="-88.0" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="30.0">
-                                                        <xAxis>
-                                                          <CategoryAxis side="BOTTOM" />
-                                                        </xAxis>
-                                                        <yAxis>
-                                                          <NumberAxis fx:id="numberaxis_distanceEvaluation_yaxis" side="LEFT" />
-                                                        </yAxis>
-                                                      </BarChart>
-                                                      <ToggleButton fx:id="button_relativeView_distEval" layoutX="268.0" layoutY="3.0" mnemonicParsing="false" onAction="#changeVisualizationViewMode" text="Relative view" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
-                                                         <font>
-                                                            <Font size="10.0" />
-                                                         </font>
-                                                      </ToggleButton>
-                                                      <ImageView fx:id="settings_distEval_icon" fitHeight="15.0" fitWidth="15.0" layoutX="133.0" layoutY="9.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="132.0" AnchorPane.topAnchor="8.0">
-                                                         <image>
-                                                            <Image url="@icons/cog.png" />
-                                                         </image>
-                                                         <cursor>
-                                                            <Cursor fx:constant="HAND" />
-                                                         </cursor>
-                                                      </ImageView>
                                                    </children>
                                                 </AnchorPane>
                                             </items>
@@ -413,7 +401,36 @@
                                                       <SplitPane dividerPositions="0.5" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
                                                          <items>
                                                             <AnchorPane fx:id="paramSpace_distribution_anchorPane_filtered" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #fff;" />
-                                                            <AnchorPane fx:id="paramSpace_distribution_anchorPane_selected" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #fff;" />
+                                                          <AnchorPane fx:id="distEval_anchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff;">
+                                                               <children>
+                                                                  <Label layoutX="7.0" layoutY="4.0" text="Distance Evaluation" AnchorPane.topAnchor="7.0">
+                                                                     <font>
+                                                                        <Font name="System Bold" size="12.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <BarChart fx:id="barchart_distances" animated="false" layoutX="-173.0" layoutY="-88.0" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="30.0">
+                                                                    <xAxis>
+                                                                      <CategoryAxis side="BOTTOM" />
+                                                                    </xAxis>
+                                                                    <yAxis>
+                                                                      <NumberAxis fx:id="numberaxis_distanceEvaluation_yaxis" side="LEFT" />
+                                                                    </yAxis>
+                                                                  </BarChart>
+                                                                  <ToggleButton fx:id="button_relativeView_distEval" layoutX="268.0" layoutY="3.0" mnemonicParsing="false" onAction="#changeVisualizationViewMode" text="Relative view" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                                                     <font>
+                                                                        <Font size="10.0" />
+                                                                     </font>
+                                                                  </ToggleButton>
+                                                                  <ImageView fx:id="settings_distEval_icon" fitHeight="15.0" fitWidth="15.0" layoutX="133.0" layoutY="9.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="132.0" AnchorPane.topAnchor="8.0">
+                                                                     <image>
+                                                                        <Image url="@icons/cog.png" />
+                                                                     </image>
+                                                                     <cursor>
+                                                                        <Cursor fx:constant="HAND" />
+                                                                     </cursor>
+                                                                  </ImageView>
+                                                               </children>
+                                                            </AnchorPane>
                                                          </items>
                                                       </SplitPane>
                                                       <Label layoutX="70.0" layoutY="15.0" text="Parameter | Distribution" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="7.0">
@@ -421,14 +438,6 @@
                                                             <Font name="System Bold" size="12.0" />
                                                          </font>
                                                       </Label>
-                                                      <ImageView fx:id="settings_paramDist_icon" fitHeight="15.0" fitWidth="15.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="155.0" AnchorPane.topAnchor="8.0">
-                                                         <image>
-                                                            <Image url="@icons/cog.png" />
-                                                         </image>
-                                                         <cursor>
-                                                            <Cursor fx:constant="HAND" />
-                                                         </cursor>
-                                                      </ImageView>
                                                    </children>
                                                 </AnchorPane>
                                             </items>

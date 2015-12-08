@@ -11,7 +11,11 @@ public abstract class VisualizationComponentDataset
 	 */
 	protected ArrayList<LDAConfiguration> allLDAConfigurations;
 	
-
+	public VisualizationComponentDataset(ArrayList<LDAConfiguration> allLDAConfigurations)
+	{
+		this.allLDAConfigurations = allLDAConfigurations;
+	}
+	
 	public ArrayList<LDAConfiguration> getAllLDAConfigurations()
 	{
 		return allLDAConfigurations;

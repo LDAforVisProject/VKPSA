@@ -31,7 +31,8 @@ public class ScentedFilterDataset extends VisualizationComponentDataset
 	
 	public ScentedFilterDataset(ArrayList<LDAConfiguration> data, Set<Integer> inactiveIndices, Set<Integer> activeIndices)
 	{
-		this.allLDAConfigurations 	= data;
+		super(data);
+		
 		this.inactiveIndices 		= inactiveIndices;
 		this.activeIndices 			= activeIndices;
 		barToDataAssociations		= new LinkedHashMap<String, ArrayList<Integer>>();

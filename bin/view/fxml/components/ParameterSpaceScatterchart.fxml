@@ -8,9 +8,9 @@
 
 <AnchorPane prefHeight="199.0" prefWidth="264.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.components.scatterchart.ParameterSpaceScatterchart">
    <children>
-      <ComboBox fx:id="paramX_combobox" layoutX="116.0" layoutY="169.0" prefHeight="25.0" prefWidth="75.0" promptText="kappa" AnchorPane.bottomAnchor="5.0" />
-      <ComboBox fx:id="paramY_combobox" layoutX="-18.0" layoutY="71.0" prefHeight="25.0" prefWidth="75.0" promptText="alpha" rotate="270.0" AnchorPane.leftAnchor="-18.0" />
-      <ScatterChart fx:id="scatterchart" animated="false" layoutX="55.0" layoutY="14.0" prefHeight="150.0" prefWidth="200.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="35.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+      <ComboBox fx:id="paramX_combobox" layoutX="116.0" layoutY="169.0" onAction="#updateParamValue" prefHeight="25.0" prefWidth="75.0" promptText="kappa" AnchorPane.topAnchor="5.0" />
+      <ComboBox fx:id="paramY_combobox" layoutX="-18.0" layoutY="71.0" onAction="#updateParamValue" prefHeight="25.0" prefWidth="75.0" promptText="alpha" rotate="270.0" AnchorPane.leftAnchor="-18.0" />
+      <ScatterChart fx:id="scatterchart" animated="false" layoutX="55.0" layoutY="14.0" prefHeight="150.0" prefWidth="200.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="35.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="30.0">
         <xAxis>
           <NumberAxis side="BOTTOM" fx:id="xAxis_numberaxis" />
         </xAxis>

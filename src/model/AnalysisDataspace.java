@@ -47,23 +47,19 @@ public class AnalysisDataspace
 	/**
 	 * Set of all datasets matching the currently defined thresholds.
 	 */
-	private Set<Integer> filteredIndices;
+	private Set<Integer> availableIndices;
 	/**
 	 * Stores filterd coordinates.
 	 */
-	private double filteredCoordinates[][];
+	private double availableCoordinates[][];
 	/**
 	 * Stores filtered distances.
 	 */
-	private double filteredDistances[][];
-	/**
-	 * Stores filtered distances - without distances from and to selected datapoints.
-	 */
-	private double reductiveFilteredDistances[][];
+	private double avaibleDistances[][];
 	/**
 	 * List of filtered LDA configurations.
 	 */
-	private ArrayList<LDAConfiguration> filteredLDAConfigurations;
+	private ArrayList<LDAConfiguration> availableLDAConfigurations;
 	
 	/*
 	 * Derived, second-level data: Discarded (as opposed to filtered) indices, coordinates and distances.
@@ -87,25 +83,46 @@ public class AnalysisDataspace
 	private ArrayList<LDAConfiguration> discardedLDAConfigurations;
 	
 	/*
+	 * Derived, third-level data: Inactive indices, coordinates and distances.
+	 */
+	
+	/**
+	 * Set of all datasets matching the currently defined thresholds and selection.
+	 */
+	private Set<Integer> inactiveIndices;
+	/**
+	 * Stores filtered distances - without distances from and to selected datapoints.
+	 */
+	private double inactiveDistances[][];
+	/**
+	 * Stores inactive LDA configurations.
+	 */
+	private ArrayList<LDAConfiguration> inactiveLDAConfigurations;
+	/**
+	 * Stores inactive coordinates.
+	 */
+	private double inactiveCoordinates[][];
+	
+	/*
 	 * Derived, third-level data: Selected indices, coordinates and distances.
 	 */
 	
 	/**
 	 * Set of all datasets matching the currently defined thresholds and selection.
 	 */
-	private Set<Integer> selectedFilteredIndices;
+	private Set<Integer> activeIndices;
 	/**
-	 * Stores filtered and selecte distances.
+	 * Stores active distances.
 	 */
-	private double selectedFilteredDistances[][];
+	private double activeDistances[][];
 	/**
-	 * Stores filtered and selected LDA configurations.
+	 * Stores active LDA configurations.
 	 */
-	private ArrayList<LDAConfiguration> selectedLDAConfigurations;
+	private ArrayList<LDAConfiguration> activeLDAConfigurations;
 	/**
 	 * Stores selected coordinates.
 	 */
-	private double selectedCoordinates[][];
+	private double activeCoordinates[][];
 
 	
 	/*
@@ -131,10 +148,11 @@ public class AnalysisDataspace
 	{
 		this.controller = controller;
 		
-		// Init collection of filtered/selected indices.
-		filteredIndices						= new LinkedHashSet<Integer>();
-		selectedFilteredIndices				= new LinkedHashSet<Integer>();
-		discardedIndices					= new LinkedHashSet<Integer>();
+		// Init collections.
+		availableIndices	= new LinkedHashSet<Integer>();
+		activeIndices		= new LinkedHashSet<Integer>();
+		inactiveIndices		= new LinkedHashSet<Integer>();
+		discardedIndices	= new LinkedHashSet<Integer>();
 	}
 	
 	/**
@@ -214,58 +232,101 @@ public class AnalysisDataspace
 		return parameterExtrema;
 	}
 	
-	
 	/**
-	 * Updates set of selected indices.
-	 * @param filteredIndices
+	 * Update dataspace after user selected new datapoints.
 	 * @param selectedIndices
 	 */
-	public void updateSelectedIndexSet(Set<Integer> selectedIndices)
+	public void updateAfterSelection(Set<Integer> selectedIndices)
 	{
-		this.selectedFilteredIndices = createSelectedIndexSet(this.filteredIndices, selectedIndices);
+		// Update active values.
+		updateActiveIndexSet(selectedIndices == null ? this.activeIndices : selectedIndices);
+		updateActiveDistanceMatrix();
+		updateActiveLDAConfigurations();
+		updateActiveCoordinateMatrix();
+		
+		// Update inactive values.
+		updateInactiveIndexSet(selectedIndices == null ? this.activeIndices : selectedIndices);
+		updateInactiveDistanceMatrix();
+		updateInactiveLDAConfigurations();
+		updateInactiveCoordinateMatrix();
 	}
 	
 	/**
-	 * Creates set of selected and filtered indices.
-	 * @param filteredIndices
+	 * Updates set of active indices.
+	 * @param selectedIndices
+	 */
+	private void updateActiveIndexSet(Set<Integer> selectedIndices)
+	{
+		this.activeIndices = createActiveIndexSet(this.availableIndices, selectedIndices);
+	}
+	
+	/**
+	 * Updates set of inactive indices.
+	 * @param selectedIndices
+	 */
+	private void updateInactiveIndexSet(Set<Integer> selectedIndices)
+	{
+		this.inactiveIndices = createInactiveIndexSet(this.availableIndices, selectedIndices);
+	}
+	
+	/**
+	 * Creates set of active indices.
+	 * @param availableIndices
 	 * @param selectedIndices
 	 * @return
 	 */
-	public Set<Integer> createSelectedIndexSet(Set<Integer> filteredIndices, Set<Integer> selectedIndices)
+	public Set<Integer> createActiveIndexSet(Set<Integer> availableIndices, Set<Integer> selectedIndices)
 	{
-		Set<Integer> selectedFilteredIndices = new HashSet<Integer>(selectedIndices.size());
+		Set<Integer> activeIndices = new HashSet<Integer>(selectedIndices.size());
 		
 		for (int selectedIndex : selectedIndices) {
-			if (filteredIndices.contains(selectedIndex)) {
-				selectedFilteredIndices.add(selectedIndex);
+			if (availableIndices.contains(selectedIndex)) {
+				activeIndices.add(selectedIndex);
 			}
 		}
 		
-		return selectedFilteredIndices;
+		return activeIndices;
+	}
+	
+	/**
+	 * Creates set of inactive indices.
+	 * @param availableIndices
+	 * @param selectedIndices
+	 * @return
+	 */
+	public Set<Integer> createInactiveIndexSet(Set<Integer> availableIndices, Set<Integer> selectedIndices)
+	{
+		// Copy all available indices.
+		Set<Integer> inactiveIndices = new HashSet<Integer>(availableIndices);
+		
+		// Remove all selected indices.
+		inactiveIndices.removeAll(selectedIndices);
+		
+		return inactiveIndices;
 	}
 	
 	/**
 	 * Updtes set of discarded indices.
-	 * @param filteredIndices
+	 * @param availableIndices
 	 */
-	public void updateDiscardedIndexSet()
+	private void updateDiscardedIndexSet()
 	{
-		this.discardedIndices = createDiscardedIndexSet(this.filteredIndices);
+		this.discardedIndices = createDiscardedIndexSet(this.availableIndices);
 	}
 	
 	/**
 	 * Creates set of discarded indices.
 	 * Picks every index from 0 to the number of LDA configurations that's not in 
 	 * the set of filtered indices.
-	 * @param filteredIndices
+	 * @param availableIndices
 	 * @return
 	 */
-	public Set<Integer> createDiscardedIndexSet(Set<Integer> filteredIndices)
+	public Set<Integer> createDiscardedIndexSet(Set<Integer> availableIndices)
 	{
 		Set<Integer> discardedIndices = new HashSet<Integer>();
 		
 		for (int i = 0; i < ldaConfigurations.size(); i++) {
-			if (!filteredIndices.contains(i))
+			if (!availableIndices.contains(i))
 				discardedIndices.add(i);
 		}
 		
@@ -276,124 +337,91 @@ public class AnalysisDataspace
 	 * Updates matrix of discarded coordinate.
 	 * @param discardedIndices
 	 */
-	public void updateDiscardedCoordinateMatrix(Set<Integer> discardedIndices)
+	private void updateDiscardedCoordinateMatrix(Set<Integer> discardedIndices)
 	{
-		this.discardedCoordinates = createDiscardedCoordinateMatrix(discardedIndices);
-	}
-	
-	/**
-	 * Creates matrix of coordinates of discarded (non-filtered) datapoints.
-	 * @param discardedIndices
-	 * @return
-	 */
-	public double[][] createDiscardedCoordinateMatrix(Set<Integer> discardedIndices)
-	{
-		double[][] discardedCoordinates = new double[coordinates.length][discardedIndices.size()];
-		
-		int count = 0;
-		for (int discardedIndex : discardedIndices) {
-			// Copy MDS coordinates.
-			for (int column = 0; column < coordinates.length; column++) {
-				discardedCoordinates[column][count] = coordinates[column][discardedIndex];
-			}
-			
-			count++;
-		}
-		
-		return discardedCoordinates;
+		this.discardedCoordinates = createCoordinateMatrix(discardedIndices);
 	}
 	
 	/**
 	 * Updates selected LDA configuration set.
-	 * @param selectedFilteredIndices
+	 * @param activeIndices
 	 */
-	public void updateSelectedLDAConfigurations()
+	private void updateActiveLDAConfigurations()
 	{
-		this.selectedLDAConfigurations = createSelectedLDAConfigurations(this.selectedFilteredIndices);
+		this.activeLDAConfigurations = createLDAConfigurations(this.activeIndices);
+	}
+	
+	private void updateInactiveLDAConfigurations()
+	{
+		this.inactiveLDAConfigurations = createLDAConfigurations(this.inactiveIndices);
 	}
 	
 	/**
-	 * Creates list of LDA configurations out of sets of filtered and selected indices. 
-	 * @param selectedFilteredIndices
+	 * Creates list of LDA configurations out of index set. 
+	 * @param indices
 	 * @return
 	 */
-	public ArrayList<LDAConfiguration> createSelectedLDAConfigurations(Set<Integer> selectedFilteredIndices)
+	public ArrayList<LDAConfiguration> createLDAConfigurations(Set<Integer> indices)
 	{
-		ArrayList<LDAConfiguration> selectedFilteredLDAConfigurations = new ArrayList<LDAConfiguration>(selectedFilteredIndices.size());
+		ArrayList<LDAConfiguration> ldaConfigurations = new ArrayList<LDAConfiguration>(indices.size());
 		
-		for (int index : selectedFilteredIndices) {
-			selectedFilteredLDAConfigurations.add(ldaConfigurations.get(index));
+		for (int index : indices) {
+			ldaConfigurations.add(this.ldaConfigurations.get(index));
 		}
 		
-		return selectedFilteredLDAConfigurations;
+		return ldaConfigurations;
 	}
 	
 	/**
 	 * Updates discarded LDA configuration set.
 	 * @param discardedIndices
 	 */
-	public void updateDiscardedLDAConfigurations(Set<Integer> discardedIndices)
+	private void updateDiscardedLDAConfigurations(Set<Integer> discardedIndices)
 	{
-		this.discardedLDAConfigurations = createDiscardedLDAConfigurations(discardedIndices);
-	}
-	
-	/**
-	 * Creates list of LDA configurations out of sets of discarded indices. 
-	 * @param discardedIndices
-	 * @return
-	 */
-	public ArrayList<LDAConfiguration> createDiscardedLDAConfigurations(Set<Integer> discardedIndices)
-	{
-		ArrayList<LDAConfiguration> discardedLDAConfigurations = new ArrayList<LDAConfiguration>(discardedIndices.size());
-		
-		for (int index : discardedIndices) {
-			discardedLDAConfigurations.add(ldaConfigurations.get(index));
-		}
-		
-		return discardedLDAConfigurations;
-	}	
-	
-	/**
-	 * Updates selected distance matrix.
-	 * @param selectedFilteredIndices
-	 */
-	public void updateReductiveFilteredDistanceMatrix()
-	{
-		this.reductiveFilteredDistances = createReductiveFilteredDistanceMatrix(this.filteredIndices, this.selectedFilteredIndices);
+		this.discardedLDAConfigurations = createLDAConfigurations(discardedIndices);
 	}
 	
 	/**
 	 * Updates selected distance matrix.
-	 * @param selectedFilteredIndices
+	 * @param activeIndices
 	 */
-	public void updateSelectedDistanceMatrix()
+	private void updateInactiveDistanceMatrix()
 	{
-		this.selectedFilteredDistances = createSelectedDistanceMatrix(this.selectedFilteredIndices);
+		this.inactiveDistances = createDistanceMatrix(this.inactiveIndices);
 	}
 	
 	/**
-	 * Creates distance matrix out of sets of filtered and selected indices. 
-	 * @param filteredIndices
-	 * @param selectedIndices
+	 * Updates active distance matrix.
+	 * @param activeIndices
+	 */
+	private void updateActiveDistanceMatrix()
+	{
+		this.activeDistances = createDistanceMatrix(this.activeIndices);
+	}
+	
+	/**
+	 * Creates distance matrix out of sets of indices. 
+	 * @param availableIndices
+	 * @param indices
 	 * @return
 	 */
-	public double[][] createSelectedDistanceMatrix(Set<Integer> selectedFilteredIndices)
+	public double[][] createDistanceMatrix(Set<Integer> indices)
 	{
 		// Copy actual distance data in array.
-		double[][] filteredSelectedDistances = new double[selectedFilteredIndices.size()][selectedFilteredIndices.size()];
+		double[][] distances = new double[indices.size()][indices.size()];
 		
 		int count = 0;
-		for (int index : selectedFilteredIndices) {
+		for (int index : indices) {
 			int innerCount = 0;
-			for (int innerIndex : selectedFilteredIndices) {
-				filteredSelectedDistances[count][innerCount] = distances[index][innerIndex];
+			for (int innerIndex : indices) {
+				distances[count][innerCount] = this.distances[index][innerIndex];
 				innerCount++;
 			}
 			
 			count++;
 		}
 		
-		return filteredSelectedDistances;
+		return distances;
 	}
 	
 	/**
@@ -402,97 +430,83 @@ public class AnalysisDataspace
 	 * @param selectedIndices
 	 * @return
 	 */
-	public double[][] createReductiveFilteredDistanceMatrix(Set<Integer> filteredIndices, Set<Integer> selectedIndices)
-	{
-		// Copy actual distance data in array.
-		final int size = filteredIndices.size() - selectedIndices.size();
-		double[][] reductiveFilteredDistances = new double[size][size];
-		
-		int count = 0;
-		for (int index : filteredIndices) {
-			if (!selectedIndices.contains(index)) {
-				int innerCount = 0;
-				for (int innerIndex : filteredIndices) {
-					if (!selectedIndices.contains(innerIndex)) {
-						reductiveFilteredDistances[count][innerCount] = distances[index][innerIndex];
-						innerCount++;
-					}
-				}
-				
-				count++;
-			}
-		}
-		
-		return reductiveFilteredDistances;
-	}
+//	public double[][] createInactiveDistanceMatrix(Set<Integer> filteredIndices, Set<Integer> selectedIndices)
+//	{
+//		// Copy actual distance data in array.
+//		final int size							= filteredIndices.size() - selectedIndices.size();
+//		double[][] reductiveFilteredDistances 	= new double[size][size];
+//		
+//		int count = 0;
+//		for (int index : filteredIndices) {
+//			if (!selectedIndices.contains(index)) {
+//				int innerCount = 0;
+//				for (int innerIndex : filteredIndices) {
+//					if (!selectedIndices.contains(innerIndex)) {
+//						reductiveFilteredDistances[count][innerCount] = distances[index][innerIndex];
+//						innerCount++;
+//					}
+//				}
+//				
+//				count++;
+//			}
+//		}
+//		
+//		return reductiveFilteredDistances;
+//	}
 	
 	/**
-	 * Update selected coordinate matrix.
-	 * @param selectedIndices
+	 * Update active coordinate matrix.
 	 */
-	public void updateSelectedCoordinateMatrix()
+	private void updateActiveCoordinateMatrix()
 	{
-		this.selectedCoordinates = createSelectedCoordinateMatrix(this.selectedFilteredIndices);
+		this.activeCoordinates = createCoordinateMatrix(this.activeIndices);
 	}
 	
 	/**
-	 * Creates matrix of coordinates of selected (non-filtered) datapoints.
-	 * @param selectedIndices
+	 * Update inactive coordinate matrix.
+	 */
+	private void updateInactiveCoordinateMatrix()
+	{
+		this.inactiveCoordinates = createCoordinateMatrix(this.inactiveIndices);
+	}
+	
+	
+	/**
+	 * Creates matrix of coordinates of datapoints.
+	 * @param indices
 	 * @return
 	 */
-	public double[][] createSelectedCoordinateMatrix(Set<Integer> selectedIndices)
+	public double[][] createCoordinateMatrix(Set<Integer> indices)
 	{
-		double[][] selectedCoordinates = new double[coordinates.length][selectedIndices.size()];
+		double[][] coordinates = new double[this.coordinates.length][indices.size()];
 		
 		int count = 0;
-		for (int selectedIndex : selectedIndices) {
+		for (int index : indices) {
 			// Copy MDS coordinates.
-			for (int column = 0; column < coordinates.length; column++) {
-				selectedCoordinates[column][count] = coordinates[column][selectedIndex];
+			for (int column = 0; column < this.coordinates.length; column++) {
+				coordinates[column][count] = this.coordinates[column][index];
 			}
 			
 			count++;
 		}
 		
-		return selectedCoordinates;
+		return coordinates;
 	}
-	
+
 	/**
 	 * Updates discarded distance matrix.
 	 * @param discardedIndices
 	 * @return
 	 */
-	public void updateDiscardedDistanceMatrix(Set<Integer> discardedIndices)
+	private void updateDiscardedDistanceMatrix(Set<Integer> discardedIndices)
 	{
-		this.discardedDistances = createDiscardedDistanceMatrix(discardedIndices);
+		this.discardedDistances = createDistanceMatrix(discardedIndices);
 	}
 	
 	/**
-	 * Creates distance matrix out of sets of discarded indices.
-	 * Contains distances between discarded datasets only.
-	 * @param filteredIndices
-	 * @param selectedIndices
-	 * @return
+	 * Filter data using the given parameter thresholds.
+	 * @param parameterBoundaries
 	 */
-	public double[][] createDiscardedDistanceMatrix(Set<Integer> discardedIndices)
-	{
-		// Copy actual distance data in array.
-		double[][] discardedDistances = new double[discardedIndices.size()][discardedIndices.size()];
-		
-		int count = 0;
-		for (int index : discardedIndices) {
-			int innerCount = 0;
-			for (int innerIndex : discardedIndices) {
-				discardedDistances[count][innerCount] = distances[index][innerIndex];
-				innerCount++;
-			}
-			
-			count++;
-		}
-		
-		return discardedDistances;
-	}
-	
 	public void filterIndices(final Map<String, Pair<Double, Double>> parameterBoundaries)
 	{
 		// Iterate through all LDA configurations in workspace.
@@ -522,8 +536,8 @@ public class AnalysisDataspace
 					discardedIndices.remove(i);
 				
 				// Add to set of filtered indices, if not already in there.
-				if (!filteredIndices.contains(i))
-					filteredIndices.add(i);
+				if (!availableIndices.contains(i))
+					availableIndices.add(i);
 			}
 			
 			// Else if not in boundaries and contained in selection:
@@ -533,15 +547,17 @@ public class AnalysisDataspace
 					discardedIndices.add(i);
 				
 				// Remove from set of filtered indices, if in there.
-				if (filteredIndices.contains(i))
-					filteredIndices.remove(i);
+				if (availableIndices.contains(i))
+					availableIndices.remove(i);
 			}
 		}
 		
 		// Determine set of discarded indices.
-		discardedIndices		= createDiscardedIndexSet(filteredIndices);
-		// Determine set of filtered and selected indices.
-		selectedFilteredIndices	= createSelectedIndexSet(filteredIndices, selectedFilteredIndices);
+		discardedIndices	= createDiscardedIndexSet(availableIndices);
+		// Determine set of active indices.
+		activeIndices		= createActiveIndexSet(availableIndices, activeIndices);
+		// Determine set of inactive indices.
+		inactiveIndices		= createInactiveIndexSet(availableIndices, activeIndices);
 	}
 	
 	/**
@@ -554,27 +570,27 @@ public class AnalysisDataspace
 		 */
 		
 		// Use AnalysisController.filteredIndices to filter out data in desired parameter boundaries.
-		filteredCoordinates			= new double[coordinates.length][filteredIndices.size()];
-		filteredDistances			= new double[filteredIndices.size()][filteredIndices.size()];
-		filteredLDAConfigurations	= new ArrayList<LDAConfiguration>(filteredIndices.size());
+		availableCoordinates		= new double[coordinates.length][availableIndices.size()];
+		avaibleDistances			= new double[availableIndices.size()][availableIndices.size()];
+		availableLDAConfigurations	= new ArrayList<LDAConfiguration>(availableIndices.size());
 		
 		// Copy data corresponding to chosen LDA configurations in new arrays.
 		int count = 0;
-		for (int filteredIndex : filteredIndices) {
+		for (int filteredIndex : availableIndices) {
 			// Copy MDS coordinates.
 			for (int column = 0; column < coordinates.length; column++) {
-				filteredCoordinates[column][count] = coordinates[column][filteredIndex];
+				availableCoordinates[column][count] = coordinates[column][filteredIndex];
 			}
 			
 			// Copy distances.
 			int innerCount = 0;
-			for (int filteredInnerIndex : filteredIndices) {
-				filteredDistances[count][innerCount] = distances[filteredIndex][filteredInnerIndex];
+			for (int filteredInnerIndex : availableIndices) {
+				avaibleDistances[count][innerCount] = distances[filteredIndex][filteredInnerIndex];
 				innerCount++;
 			}
 			
 			// Copy LDA configurations.
-			filteredLDAConfigurations.add(ldaConfigurations.get(filteredIndex));
+			availableLDAConfigurations.add(ldaConfigurations.get(filteredIndex));
 			
 			count++;
 		}
@@ -584,40 +600,97 @@ public class AnalysisDataspace
 		 */
 
 		// Update set of discarded values.
-		discardedCoordinates				= createDiscardedCoordinateMatrix(discardedIndices);
-		discardedDistances					= createDiscardedDistanceMatrix(discardedIndices);
-		discardedLDAConfigurations			= createDiscardedLDAConfigurations(selectedFilteredIndices);
+		discardedCoordinates				= createCoordinateMatrix(discardedIndices);
+		discardedDistances					= createDistanceMatrix(discardedIndices);
+		discardedLDAConfigurations			= createLDAConfigurations(discardedIndices);
 		
 		/*
-		 * Update data collections for filtered and selected datapoints. 
+		 * Update data collections for available subsets (inactive and active datapoints). 
 		 */
 		
-		// Update set of filtered and selected values.
-		selectedCoordinates					= createSelectedCoordinateMatrix(selectedFilteredIndices);
-		selectedFilteredDistances			= createSelectedDistanceMatrix(selectedFilteredIndices);
-		selectedLDAConfigurations			= createSelectedLDAConfigurations(selectedFilteredIndices);
-		reductiveFilteredDistances			= createReductiveFilteredDistanceMatrix(filteredIndices, selectedFilteredIndices);
+		// Update set of active values.
+		activeCoordinates					= createCoordinateMatrix(activeIndices);
+		activeDistances						= createDistanceMatrix(activeIndices);
+		activeLDAConfigurations				= createLDAConfigurations(activeIndices);
+		// Update set of inactive values.		
+		inactiveCoordinates					= createCoordinateMatrix(inactiveIndices);
+		inactiveDistances					= createDistanceMatrix(inactiveIndices);
+		inactiveLDAConfigurations			= createLDAConfigurations(inactiveIndices);
 	}
-
+	
 	/**
-	 * Generates data series for histograms in scented widgets controlling the selected parameter boundaries.
-	 * @param key
-	 * @param parameterBinLists
-	 * @param numberOfBins
-	 * @return
+	 * Integrates selection (of LDA configuration IDs) into dataspace.
+	 * @param newlySelectedLDAConfigIDs
+	 * @param isAddition
 	 */
-	public XYChart.Series<String, Integer> generateParameterHistogramDataSeries(String key, Map<String, int[]> parameterBinLists, final int numberOfBins)
+	public boolean integrateSelection(Set<Integer> newlySelectedLDAConfigIDs, final boolean isAddition)
 	{
-		final XYChart.Series<String, Integer> data_series = new XYChart.Series<String, Integer>();
+		// Check if there is any change in the set of selected datasets.
+		boolean changeDetected = false;
 		
-		for (int i = 0; i < numberOfBins; i++) {
-			final int binContent = parameterBinLists.get(key)[i];
-			data_series.getData().add( new XYChart.Data<String, Integer>(String.valueOf(i), binContent ));
+		// 1. 	Check which elements are to be added/removed from current selection by comparing 
+		// 		with set of filtered and selected datasets.
+		
+		// 1.a.	Selection should be added:
+		if (isAddition) {
+			// Check if any of the newly selected IDs are not contained in global selection yet.
+			// If so: Add them.
+			for (LDAConfiguration selectedLDAConfiguration : this.activeLDAConfigurations) {
+				final int alreadySelectedLDAConfigID = selectedLDAConfiguration.getConfigurationID(); 
+				
+				// If newly selected set already contained in existing selection: Remove from addition set.
+				if (newlySelectedLDAConfigIDs.contains(alreadySelectedLDAConfigID)) {
+					newlySelectedLDAConfigIDs.remove(alreadySelectedLDAConfigID);
+				}
+			}
+			
+			// If set of newly selected indices still contains elements: Change detected.
+			if (newlySelectedLDAConfigIDs.size() > 0) {
+				// Update flag.
+				changeDetected = true;
+				
+				// Add missing LDA configurations to collection.
+				for (final int ldaConfigIndex : getInactiveIndices()) {
+					// Get LDA configuration for this index.
+					final LDAConfiguration ldaConfiguration = this.ldaConfigurations.get(ldaConfigIndex);
+					
+					// Check if this LDA configuration is part of the set of newly selected LDA configurations. 
+					if ( newlySelectedLDAConfigIDs.contains(ldaConfiguration.getConfigurationID()) )
+						this.activeIndices.add(ldaConfigIndex);
+				}
+			}
 		}
 		
-		return data_series;
+		// 1.b.	Selection should be removed:
+		else {
+			System.out.println("no addition");
+			// Set of dataset indices (instead of configuration IDs) to delete.
+			Set<Integer> indicesToDeleteFromSelection = new HashSet<Integer>();
+			
+			// Check if any of the newly selected IDs are contained in global selection.
+			// If so: Remove them.
+			for (final int ldaConfigIndex : this.activeIndices) {
+				// Get LDA configuration for this index.
+				final LDAConfiguration ldaConfiguration = this.ldaConfigurations.get(ldaConfigIndex); 
+				
+				// If currently examine LDAConfiguration is in set of newly selected indices:
+				// Remove LDAConfiguration from set of selected indices.
+				if (newlySelectedLDAConfigIDs.contains(ldaConfiguration.getConfigurationID())) {
+					// Update flag.
+					changeDetected = true;
+					
+					// Add dataset index to collection of indices to remove from selection.
+					indicesToDeleteFromSelection.add(ldaConfigIndex);
+				}
+			}
+			System.out.println("indices to remove: " + indicesToDeleteFromSelection);
+			// Remove set of indices to delete from set of selected indices.
+			this.activeIndices.removeAll(indicesToDeleteFromSelection);
+		}
+		
+		// 2. Return dirty bit.
+		return changeDetected;
 	}
-
 	
 	// -----------------------------------------------
 	// 				Getter and Setter
@@ -640,22 +713,22 @@ public class AnalysisDataspace
 
 	public Set<Integer> getInactiveIndices()
 	{
-		return filteredIndices;
+		return availableIndices;
 	}
 
-	public double[][] getFilteredCoordinates()
+	public double[][] getAvailableCoordinates()
 	{
-		return filteredCoordinates;
+		return availableCoordinates;
 	}
 
-	public double[][] getFilteredDistances()
+	public double[][] getAvaibleDistances()
 	{
-		return filteredDistances;
+		return avaibleDistances;
 	}
 
-	public ArrayList<LDAConfiguration> getFilteredLDAConfigurations()
+	public ArrayList<LDAConfiguration> getAvailableLDAConfigurations()
 	{
-		return filteredLDAConfigurations;
+		return availableLDAConfigurations;
 	}
 
 	public Set<Integer> getDiscardedIndices()
@@ -680,28 +753,32 @@ public class AnalysisDataspace
 
 	public Set<Integer> getActiveIndices()
 	{
-		return selectedFilteredIndices;
+		return activeIndices;
 	}
 
-	public double[][] getSelectedFilteredDistances()
+	public double[][] getActiveDistances()
 	{
-		return selectedFilteredDistances;
+		return activeDistances;
 	}
 
-	public double[][] getReductiveFilteredDistances()
+	public double[][] getInactiveDistances()
 	{
-		return reductiveFilteredDistances;
+		return inactiveDistances;
 	}
-
 	
-	public ArrayList<LDAConfiguration> getSelectedLDAConfigurations()
+	public ArrayList<LDAConfiguration> getInactiveLDAConfigurations()
 	{
-		return selectedLDAConfigurations;
+		return inactiveLDAConfigurations;
+	}
+	
+	public ArrayList<LDAConfiguration> getActiveLDAConfigurations()
+	{
+		return activeLDAConfigurations;
 	}
 
-	public double[][] getSelectedCoordinates()
+	public double[][] getActiveCoordinates()
 	{
-		return selectedCoordinates;
+		return activeCoordinates;
 	}
 
 	public boolean isGlobalExtremaIdentified()

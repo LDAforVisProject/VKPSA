@@ -185,7 +185,7 @@ public class ScentedFilter extends VisualizationComponent
 			
 			// Move upwards.
 			slider.setTranslateY(-14);
-			slider.setTranslateX(2);
+			slider.setTranslateX(7);
 			
 			// Add event handler - trigger update of visualizations (and the
 			// data preconditioning necessary for that) if filter settings
@@ -285,8 +285,6 @@ public class ScentedFilter extends VisualizationComponent
 	@Override
 	public void processSelectionManipulationRequest(double minX, double minY, double maxX, double maxY)
 	{
-		System.out.println("minX = " + minX + ", minY = " + minY + "\tmaxX = " + maxX + ", maxY = " + maxY);
-
 		// If control is not down: Ignore selected points, add all non-selected in chosen area.
 		if (!isCtrlDown) {
 			// Process filtered, non-selected data.
@@ -452,9 +450,9 @@ public class ScentedFilter extends VisualizationComponent
 				rangeSlider.setMaxWidth(newWidth);
 			}
 			else {
-				slider.setPrefWidth(newWidth);
-				slider.setMinWidth(newWidth);
-				slider.setMaxWidth(newWidth);
+				slider.setPrefWidth(newWidth - 5);
+				slider.setMinWidth(newWidth - 5);
+				slider.setMaxWidth(newWidth - 5);
 			}
 		}
 	}

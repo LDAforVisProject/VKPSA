@@ -248,7 +248,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 		this.heatmap_dynGranularity_checkbox	= heatmap_dynGranularity_checkbox;
 	
 		// Init collection of selected data points in the MDS scatterchart.
-		activeMDSPoints						= new HashMap<Integer, XYChart.Data<Number, Number>>();
+		activeMDSPoints							= new HashMap<Integer, XYChart.Data<Number, Number>>();
 		globalCoordinateExtrema_X				= new Pair<Double, Double>(Double.MAX_VALUE, Double.MIN_VALUE);
 		globalCoordinateExtrema_Y				= new Pair<Double, Double>(Double.MAX_VALUE, Double.MIN_VALUE);
 		globalCoordinateExtrema					= new double[4];
