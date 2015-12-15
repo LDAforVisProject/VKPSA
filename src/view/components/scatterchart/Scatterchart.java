@@ -8,9 +8,11 @@ import java.util.Map;
 import java.util.Set;
 
 import model.LDAConfiguration;
+import model.workspace.Workspace;
 
 import com.sun.javafx.charts.Legend;
 
+import control.analysisView.AnalysisController;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -19,10 +21,22 @@ import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TextArea;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.util.Pair;
 import view.components.VisualizationComponent;
+import view.components.VisualizationComponentType;
+import view.components.heatmap.CategoricalHeatmap;
+import view.components.heatmap.HeatmapOptionset;
+import view.components.heatmap.NumericalHeatmap;
 import view.components.legacy.mdsScatterchart.DataPointState;
+import view.components.rubberbandselection.RubberBandSelection;
 
 public abstract class Scatterchart extends VisualizationComponent
 {
@@ -30,9 +44,17 @@ public abstract class Scatterchart extends VisualizationComponent
 	 * GUI elements.
 	 */
 	
+	protected @FXML AnchorPane container_anchorPane;
+	
 	protected @FXML ScatterChart<Number, Number> scatterchart;
 	protected @FXML NumberAxis xAxis_numberaxis;
 	protected @FXML NumberAxis yAxis_numberaxis;
+	
+	/**
+	 * Density heatmap. Used as overlay when requested; not shown otherwise.
+	 */
+	NumericalHeatmap densityHeatmap;
+	HeatmapOptionset densityHeatmapOptions;
 	
 	/*
 	 * Data needed for selection.
@@ -116,6 +138,45 @@ public abstract class Scatterchart extends VisualizationComponent
 	// -----------------------------------
 	
 	/**
+	 * Initializes basic data.
+	 */
+	protected void initialize()
+	{
+		// Init flags.
+		changeInSelectionDetected				= false;
+		changeInSelectionDetected_localScope	= false;
+		isCtrlDown								= false;
+		
+		// Init other data.
+		selectionMode							= SelectionMode.GROUP;
+		pointsManipulatedInCurrSelectionStep	= new HashSet<Integer>();
+		
+		// Initialize data series.
+		initDataSeries();
+		
+		// Initialize selection.
+		initSelection();
+		
+		// Init density heatmap.
+		initDensityHeatmap();
+	}
+	
+	/**
+	 * Initiailzes density heatmap.
+	 */
+	private void initDensityHeatmap()
+	{
+		densityHeatmap = (NumericalHeatmap)VisualizationComponent.generateInstance(VisualizationComponentType.NUMERICAL_HEATMAP, this.analysisController, null, null, null);
+		densityHeatmap.embedIn(container_anchorPane);
+		
+		densityHeatmapOptions	= new HeatmapOptionset(	true, -1, 
+														Color.BLUE, Color.DARKBLUE, new Color(0.0, 0.0, 1.0, 0.5), new Color(1.0, 0.0, 0.0, 0.5),
+														"", "",
+														false, false, true);
+		densityHeatmap.applyOptions(densityHeatmapOptions);
+	}
+	
+	/**
 	 * Initializes data series.
 	 */
 	protected void initDataSeries()
@@ -196,9 +257,13 @@ public abstract class Scatterchart extends VisualizationComponent
 	protected abstract void initZoom();
 	
 	/**
-	 * Identifies global extrema based on provided data.
+	 * Identifies global extrema based on provided data. 
+	 * @param ldaConfigurations
 	 */
-	public abstract void identifyGlobalExtrema(ArrayList<LDAConfiguration> ldaConfigurations);
+	public void identifyGlobalExtrema(ArrayList<LDAConfiguration> ldaConfigurations)
+	{
+		globalExtrema = identifyExtrema(LDAConfiguration.SUPPORTED_PARAMETERS, ldaConfigurations);
+	}
 	
 	/**
 	 * Generates an list of extrema (x-minimum, x-maximum, y-minimum, y-maximum) for every parameter.
@@ -255,7 +320,7 @@ public abstract class Scatterchart extends VisualizationComponent
 		// Check if settings icon was used. Workaround due to problems with selection's mouse event handling. 
 		if (minX == maxX && minY == maxY) {
 			Pair<Integer, Integer> offsets = provideOffsets();
-			analysisController.checkIfSettingsIconWasClicked(minX + offsets.getKey(), minY + offsets.getValue(), "settings_mds_icon");
+			analysisController.checkIfSettingsIconWasClicked(minX + offsets.getKey(), minY + offsets.getValue(), "settings_paramDist_icon");
 		}
 		
 		// Set of data points to add to selection. 
@@ -476,4 +541,109 @@ public abstract class Scatterchart extends VisualizationComponent
 			break;
 		}
 	}
+	
+	/**
+	 * Initializes selection mechanism.
+	 */
+	protected void initSelection()
+	{
+		rubberbandSelection = new RubberBandSelection((Pane) scatterchart.getParent(), this);
+	}
+	
+	/**
+	 * Refreshes scatterchart component.
+	 * @param data
+	 */
+	public abstract void refresh(ScatterchartDataset data);
+	
+	@Override
+	public void processEndOfSelectionManipulation()
+	{
+		// Clear selection-step-dependent data collections.
+		pointsManipulatedInCurrSelectionStep.clear();
+		
+		// Update local scope.
+		if (changeInSelectionDetected_localScope) {
+			// Reset dirty flag.
+			changeInSelectionDetected_localScope = false;
+			
+			// Refresh local scope visualization.
+			analysisController.integrateSelection(!isCtrlDown ? activePoints.keySet() : inactivePoints.keySet(), !isCtrlDown);
+		}
+	}
+	
+	@Override
+	public void processKeyPressedEvent(KeyEvent ke)
+	{
+    	// Remember if CTRL is down.
+    	isCtrlDown = ke.isControlDown();
+	}
+
+	@Override
+	public void processKeyReleasedEvent(KeyEvent ke)
+	{
+    	// Check if CAPS was released.
+		if (ke.getCode() == KeyCode.CAPS) {
+			
+    		// Switch selection mode.
+    		if (selectionMode == SelectionMode.GROUP) {
+    			selectionMode = SelectionMode.SINGULAR;
+    		
+    			// Disable rubber band selection listener.
+    			rubberbandSelection.disable();
+    		}
+    		
+    		else {
+    			selectionMode = SelectionMode.GROUP;
+    			
+    			// Enable rubber band selection listener.
+    			rubberbandSelection.enable();
+    		}
+    	}
+    	
+		// Remember if CTRL is down.
+    	isCtrlDown = ke.isControlDown();	
+	}
+	
+	/**
+	 * Auxiliary method to add selected data points to an arbitrary data series in scatterchart. 
+	 * @param dataSeries
+	 * @param ldaConfigurations
+	 * @param xParam
+	 * @param yParam
+	 * @param isActive
+	 */
+	protected void addDataPoints(	XYChart.Series<Number, Number> dataSeries, ArrayList<LDAConfiguration> ldaConfigurations,
+									String xParam, String yParam, DataPointState state)
+	{
+        // Add selected data points.
+        for (LDAConfiguration ldaConfig : ldaConfigurations) {
+    		XYChart.Data<Number, Number> dataPoint = new XYChart.Data<Number, Number>(ldaConfig.getParameter(xParam), ldaConfig.getParameter(yParam));
+        	dataPoint.setExtraValue(ldaConfig.getConfigurationID());
+        	
+        	dataSeries.getData().add(dataPoint);
+        	if (state == DataPointState.ACTIVE)
+        		activePoints.put(ldaConfig.getConfigurationID(), dataPoint);
+        }
+	}
+	
+	/**
+	 * Refreshes density heatmap.
+	 */
+	protected abstract void refreshDensityHeatmap();
+	
+	@Override
+	public void setReferences(AnalysisController analysisController, Workspace workspace, ProgressIndicator logPI, TextArea logTA)
+	{
+		super.setReferences(workspace, logPI, logTA);
+		this.analysisController = analysisController;
+		
+		// Set references in density heatmap.
+		densityHeatmap.setReferences(workspace, logPI, logTA);
+	}
+	
+	/**
+	 * Update position of chart's heatmap layer.
+	 */
+	protected abstract void updateHeatmapPosition();
 }

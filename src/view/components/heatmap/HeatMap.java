@@ -109,7 +109,7 @@ public abstract class Heatmap extends VisualizationComponent
 	 * Applies a given option set.
 	 * @param options
 	 */
-	protected void applyOptions(HeatmapOptionset options)
+	public void applyOptions(HeatmapOptionset options)
 	{
 		// Update selection mode.
 		if (!options.isSelectionEnabled())
@@ -136,18 +136,20 @@ public abstract class Heatmap extends VisualizationComponent
      */
     public void setGranularityInformation(boolean isGranularityDynamic, int granularity, boolean update)
     {
-    	// Cast inherited properties to correct format.
-    	HeatmapOptionset hOptions	= (HeatmapOptionset)options;
-    	HeatmapDataset hData		= (HeatmapDataset)data;
-    	
-    	hOptions.setGranularityDynamic(isGranularityDynamic);
-    	hOptions.setGranularity(granularity);
-    	
-    	if (update) {
-    		// Re-compile data for new granularity.
-    		hData = new HeatmapDataset(hData.getAllLDAConfigurations(), hData.getChosenLDAConfigurations(), hOptions);
-    		// Refresh.
-    		this.refresh(hOptions, hData);
+    	if (this.data != null && this.options != null) {
+	    	// Cast inherited properties to correct format.
+	    	HeatmapOptionset hOptions	= (HeatmapOptionset)options;
+	    	HeatmapDataset hData		= (HeatmapDataset)data;
+	    	
+	    	hOptions.setGranularityDynamic(isGranularityDynamic);
+	    	hOptions.setGranularity(granularity);
+	    	
+	    	if (update) {
+	    		// Re-compile data for new granularity.
+	    		hData = new HeatmapDataset(hData.getAllLDAConfigurations(), hData.getChosenLDAConfigurations(), hOptions);
+	    		// Refresh.
+	    		this.refresh(hOptions, hData);
+	    	}
     	}
     }
 	
@@ -157,71 +159,73 @@ public abstract class Heatmap extends VisualizationComponent
 		// Cast inherited properties to correct format.
 		HeatmapOptionset hOptions 	= (HeatmapOptionset)options;
 		HeatmapDataset hData		= (HeatmapDataset)data;
-				
-		// Get GraphicsContext for drawing.
-		GraphicsContext gc					= canvas.getGraphicsContext2D();
 		
-		// Get current metadata.
-		final double[][] binMatrix			= hData.getBinMatrix();
-		final double minOccurenceCount		= hData.getMinOccurenceCount();
-		final double maxOccurenceCount		= hData.getMaxOccurenceCount();
-    	
-		// Define color spectrum.
-		// Set highlight color (red for additional selection, blue for subtractive).
-		final Color highlightColor 	= isCtrlDown ? hOptions.getSubtractiveSelectionColor() : hOptions.getAdditiveSelectionColor(); 
-		
-		// Check if settings icon was used. Workaround due to problems with selection's mouse event handling. 
-		if (minX == maxX && minY == maxY) {
-			final Pair<Integer, Integer> offsets = provideOffsets();
-			analysisController.checkIfSettingsIconWasClicked(minX + offsets.getKey(), minY + offsets.getValue(), "settings_paramDist_icon");
-		}
-		
-		// Check which cells are in selected area, highlight them.
-		for (Map.Entry<Pair<Integer, Integer>, double[]> cellCoordinateEntry : cellsToCoordinates.entrySet()) {
-			double cellMinX = cellCoordinateEntry.getValue()[0];
-			double cellMinY = cellCoordinateEntry.getValue()[1];
-			double cellMaxX = cellCoordinateEntry.getValue()[2];
-			double cellMaxY = cellCoordinateEntry.getValue()[3];
+		if (hOptions.isSelectionEnabled()) {
+			// Get GraphicsContext for drawing.
+			GraphicsContext gc					= canvas.getGraphicsContext2D();
 			
-			// Set color.
-			gc.setFill(highlightColor);
+			// Get current metadata.
+			final double[][] binMatrix			= hData.getBinMatrix();
+			final double minOccurenceCount		= hData.getMinOccurenceCount();
+			final double maxOccurenceCount		= hData.getMaxOccurenceCount();
+	    	
+			// Define color spectrum.
+			// Set highlight color (red for additional selection, blue for subtractive).
+			final Color highlightColor 	= isCtrlDown ? hOptions.getSubtractiveSelectionColor() : hOptions.getAdditiveSelectionColor(); 
 			
-			// Get cell ID/location.
-			final Pair<Integer, Integer> cellCoordinates = cellCoordinateEntry.getKey();
-			
-			if (	cellMinX > minX && cellMaxX < maxX &&
-					cellMinY > minY && cellMaxY < maxY) {
-				// Get cell's contents.
-				final Set<Integer> cellContentSet	= hData.getCellsToConfigurationIDs().get(cellCoordinateEntry.getKey()); 
-
-				// Add cell content to collection (if there is any).
-				if (cellContentSet != null) {
-					// Check if cell('s content) was already selected. If not: Highlight it, add content to selection.  
-					if (!selectedCellsCoordinates.contains(cellCoordinates)) {
-						// Highlight cell.
-						gc.fillRect(cellMinX, cellMinY, cellMaxX - cellMinX, cellMaxY - cellMinY);
-						
-						// Add to collection of selected cells.
-						selectedCellsCoordinates.add(cellCoordinates);
-					}
-				}
+			// Check if settings icon was used. Workaround due to problems with selection's mouse event handling. 
+			if (minX == maxX && minY == maxY) {
+				final Pair<Integer, Integer> offsets = provideOffsets();
+				analysisController.checkIfSettingsIconWasClicked(minX + offsets.getKey(), minY + offsets.getValue(), "settings_paramDist_icon");
 			}
 			
-			// If not in selected area anymore: Paint in original color, remove from selection.
-			else if (selectedCellsCoordinates.contains(cellCoordinates)) {
-				// Get row and column.
-				final int cellRow		= cellCoordinateEntry.getKey().getKey();
-				final int cellColumn 	= cellCoordinateEntry.getKey().getValue();
+			// Check which cells are in selected area, highlight them.
+			for (Map.Entry<Pair<Integer, Integer>, double[]> cellCoordinateEntry : cellsToCoordinates.entrySet()) {
+				double cellMinX = cellCoordinateEntry.getValue()[0];
+				double cellMinY = cellCoordinateEntry.getValue()[1];
+				double cellMaxX = cellCoordinateEntry.getValue()[2];
+				double cellMaxY = cellCoordinateEntry.getValue()[3];
 				
-				// Calculate original color.
-				Color cellColor = ColorScale.getColorForValue(binMatrix[cellRow][cellColumn], minOccurenceCount, maxOccurenceCount, hOptions.getMinColor(), hOptions.getMaxColor());
-				gc.setFill(cellColor);
+				// Set color.
+				gc.setFill(highlightColor);
 				
-				// Paint cell in original color.
-				gc.fillRect(cellMinX, cellMinY, cellMaxX - cellMinX, cellMaxY - cellMinY);
+				// Get cell ID/location.
+				final Pair<Integer, Integer> cellCoordinates = cellCoordinateEntry.getKey();
 				
-				// Remove from selection.
-				selectedCellsCoordinates.remove(cellCoordinates);
+				if (	cellMinX > minX && cellMaxX < maxX &&
+						cellMinY > minY && cellMaxY < maxY) {
+					// Get cell's contents.
+					final Set<Integer> cellContentSet	= hData.getCellsToConfigurationIDs().get(cellCoordinateEntry.getKey()); 
+	
+					// Add cell content to collection (if there is any).
+					if (cellContentSet != null) {
+						// Check if cell('s content) was already selected. If not: Highlight it, add content to selection.  
+						if (!selectedCellsCoordinates.contains(cellCoordinates)) {
+							// Highlight cell.
+							gc.fillRect(cellMinX, cellMinY, cellMaxX - cellMinX, cellMaxY - cellMinY);
+							
+							// Add to collection of selected cells.
+							selectedCellsCoordinates.add(cellCoordinates);
+						}
+					}
+				}
+				
+				// If not in selected area anymore: Paint in original color, remove from selection.
+				else if (selectedCellsCoordinates.contains(cellCoordinates)) {
+					// Get row and column.
+					final int cellRow		= cellCoordinateEntry.getKey().getKey();
+					final int cellColumn 	= cellCoordinateEntry.getKey().getValue();
+					
+					// Calculate original color.
+					Color cellColor = ColorScale.getColorForValue(binMatrix[cellRow][cellColumn], minOccurenceCount, maxOccurenceCount, hOptions.getMinColor(), hOptions.getMaxColor());
+					gc.setFill(cellColor);
+					
+					// Paint cell in original color.
+					gc.fillRect(cellMinX, cellMinY, cellMaxX - cellMinX, cellMaxY - cellMinY);
+					
+					// Remove from selection.
+					selectedCellsCoordinates.remove(cellCoordinates);
+				}
 			}
 		}
 	}

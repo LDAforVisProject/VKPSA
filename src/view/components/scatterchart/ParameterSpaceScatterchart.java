@@ -2,34 +2,18 @@ package view.components.scatterchart;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.Set;
-
-import com.sun.javafx.charts.Legend;
 
 import model.LDAConfiguration;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.ScatterChart;
-import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.util.Pair;
-import view.components.VisualizationComponent;
+import view.components.heatmap.HeatmapDataset;
+import view.components.heatmap.HeatmapOptionset;
 import view.components.legacy.mdsScatterchart.DataPointState;
-import view.components.rubberbandselection.RubberBandSelection;
 
 public class ParameterSpaceScatterchart extends Scatterchart
 {
@@ -49,36 +33,29 @@ public class ParameterSpaceScatterchart extends Scatterchart
 	{
 		System.out.println("Initializing ParameterSpaceScatterchart component.");
 		
-		// Initialize comboboxes.
-		paramX_combobox.getItems().addAll(LDAConfiguration.SUPPORTED_PARAMETERS);
-		paramY_combobox.getItems().addAll(LDAConfiguration.SUPPORTED_PARAMETERS);		
-		
-		// Init flags.
-		changeInSelectionDetected				= false;
-		changeInSelectionDetected_localScope	= false;
-		isCtrlDown								= false;
-		
-		// Init other data.
-		selectionMode							= SelectionMode.GROUP;
-		pointsManipulatedInCurrSelectionStep	= new HashSet<Integer>();
-		
+		// Initialize basic data.
+		super.initialize();		
+
 		// Init combo boxes.
 		initComboboxes();
 		
-		// Init data series.
-		initDataSeries();
-		
 		// Init scatterchart.
 		initScatterchart();
-		
-		// Init selection mechanism.
-		initSelection();
 	}
 	
 	private void initComboboxes()
 	{
+		// Initialize comboboxes.
+		paramX_combobox.getItems().addAll(LDAConfiguration.SUPPORTED_PARAMETERS);
+		paramY_combobox.getItems().addAll(LDAConfiguration.SUPPORTED_PARAMETERS);
+		
+		// Set values.
 		paramX_combobox.setValue("alpha");
 		paramY_combobox.setValue("kappa");
+		
+		// Bring comboboxes to front.
+		paramX_combobox.toFront();
+		paramY_combobox.toFront();
 	}
 
 	@Override
@@ -87,85 +64,35 @@ public class ParameterSpaceScatterchart extends Scatterchart
 		// @todo Implement zoom for ParameterSpaceScatterchart.
 	}
 	
-	private void initSelection()
-	{
-		rubberbandSelection = new RubberBandSelection((Pane) scatterchart.getParent(), this);
-	}
-
 	/**
 	 * Applies set of options to this instance.
 	 * @param options
 	 */
 	public void applyOptions(ScatterchartOptionset options)
 	{
-	}
-
-	@Override
-	public void processEndOfSelectionManipulation()
-	{
-		// Clear selection-step-dependent data collections.
-		pointsManipulatedInCurrSelectionStep.clear();
+		this.options = options;
 		
-		// Update local scope.
-		if (changeInSelectionDetected_localScope) {
-			// Reset dirty flag.
-			changeInSelectionDetected_localScope = false;
-			
-			// Refresh local scope visualization.
-			analysisController.integrateSelection(!isCtrlDown ? activePoints.keySet() : inactivePoints.keySet(), !isCtrlDown);
-		}
+		// Update density heatmap visibility.
+		densityHeatmap.getRoot().setVisible(options.showDensityHeatmap());
 	}
 
 	@Override
 	public Pair<Integer, Integer> provideOffsets()
 	{
-		return new Pair<Integer, Integer>(87, 26);
+		return new Pair<Integer, Integer>(87, 41);
 	}
 
 	@Override
-	public void processKeyPressedEvent(KeyEvent ke)
-	{
-    	// Remember if CTRL is down.
-    	isCtrlDown = ke.isControlDown();
-	}
-
-	@Override
-	public void processKeyReleasedEvent(KeyEvent ke)
-	{
-    	// Check if CAPS was released.
-		if (ke.getCode() == KeyCode.CAPS) {
-			
-    		// Switch selection mode.
-    		if (selectionMode == SelectionMode.GROUP) {
-    			selectionMode = SelectionMode.SINGULAR;
-    		
-    			// Disable rubber band selection listener.
-    			rubberbandSelection.disable();
-    		}
-    		
-    		else {
-    			selectionMode = SelectionMode.GROUP;
-    			
-    			// Enable rubber band selection listener.
-    			rubberbandSelection.enable();
-    		}
-    	}
-    	
-		// Remember if CTRL is down.
-    	isCtrlDown = ke.isControlDown();	
-	}
-
 	public void refresh(ScatterchartDataset data)
 	{
 		this.data = data;
-		
+
 		// Update information about number of datapoints.
 		discardedDataSeries.setName("Discarded (" + data.getDiscardedLDAConfigurations().size() + ")");
 		inactiveDataSeries.setName("Inactive (" + data.getInactiveLDAConfigurations().size() + ")");
 		activeDataSeries.setName("Active (" + data.getActiveLDAConfigurations().size() + ")");
 		
 		// Clear scatterchart.
-		scatterchart.getData().clear();
 		discardedDataSeries.getData().clear();
 		inactiveDataSeries.getData().clear();
 		activeDataSeries.getData().clear();
@@ -173,32 +100,65 @@ public class ParameterSpaceScatterchart extends Scatterchart
 		activePoints.clear();
 		inactivePoints.clear();
 		
-		/*
-		 * Add data to scatterchart. 
-		 */
+		// If density heatmap is not to be shown: Draw scatterchart.
+		if (!options.showDensityHeatmap()) {
+			scatterchart.getData().clear();
+			
+			/*
+			 * Add data to scatterchart. 
+			 */
+			
+			// Get parameter chosen for x- respectively y-axis.
+			final String xParam = paramX_combobox.getValue();
+			final String yParam = paramY_combobox.getValue();
+			
+	        addDataPoints(discardedDataSeries, data.getDiscardedLDAConfigurations(), xParam, yParam, DataPointState.DISCARDED);
+	        // Add filtered points points to scatterchart.
+	        addDataPoints(inactiveDataSeries, data.getInactiveLDAConfigurations(), xParam, yParam, DataPointState.INACTIVE);
+	        // Add active data points to scatterchart.
+	        addDataPoints(activeDataSeries, data.getActiveLDAConfigurations(), xParam, yParam, DataPointState.ACTIVE);
+	
+	        // Add data in scatterchart.
+	        scatterchart.getData().add(0, discardedDataSeries);
+	        scatterchart.getData().add(0, inactiveDataSeries);
+	        scatterchart.getData().add(0, activeDataSeries);
+	        
+	        // Redraw scatterchart.
+	        scatterchart.layout();
+	        scatterchart.applyCss();
+	        
+	        // Add mouse listeners.
+	//        addMouseListenersToMDSScatterchart();
+		}
 		
-		// Get parameter chosen for x- respectively y-axis.
-		final String xParam = paramX_combobox.getValue();
-		final String yParam = paramY_combobox.getValue();
+		// Otherwise: Draw heatmap.
+		else if (this.data != null) {
+			
+			densityHeatmapOptions							= new HeatmapOptionset(	options.isGranularityDynamic(), options.getGranularity(), 
+																					Color.BLUE, Color.DARKBLUE, new Color(0.0, 0.0, 1.0, 0.5), new Color(1.0, 0.0, 0.0, 0.5),
+																					paramX_combobox.getValue(), paramY_combobox.getValue(),
+																					false, false, false);
+			// Create dataset for heatmap.
+			ArrayList<LDAConfiguration> ldaDataForHeatmap	= new ArrayList<LDAConfiguration>(this.data.getAllLDAConfigurations().size());
+			
+			if ( (options.getCategoriesValue() & 1) > 0 ) {
+				ldaDataForHeatmap.addAll(this.data.getActiveLDAConfigurations());
+				System.out.println("adding active");
+			}	
+			if ( (options.getCategoriesValue() & 2) > 0 ) {
+				ldaDataForHeatmap.addAll(this.data.getInactiveLDAConfigurations());
+				System.out.println("adding inactive");
+			}
+			if ( (options.getCategoriesValue() & 4) > 0 ) {
+				ldaDataForHeatmap.addAll(this.data.getDiscardedLDAConfigurations());
+				System.out.println("adding discarded");
+			}
+			
+			HeatmapDataset densityHeatmapData				= new HeatmapDataset(this.data.getAllLDAConfigurations(), ldaDataForHeatmap, this.densityHeatmapOptions);
+			// Refresh heatmap.
+			densityHeatmap.refresh(this.densityHeatmapOptions, densityHeatmapData);
+		}
 		
-        addDataPoints(discardedDataSeries, data.getDiscardedLDAConfigurations(), xParam, yParam, DataPointState.DISCARDED);
-        // Add filtered points points to scatterchart.
-        addDataPoints(inactiveDataSeries, data.getInactiveLDAConfigurations(), xParam, yParam, DataPointState.INACTIVE);
-        // Add active data points to scatterchart.
-        addDataPoints(activeDataSeries, data.getActiveLDAConfigurations(), xParam, yParam, DataPointState.ACTIVE);
-
-        // Add data in scatterchart.
-        scatterchart.getData().add(0, discardedDataSeries);
-        scatterchart.getData().add(0, inactiveDataSeries);
-        scatterchart.getData().add(0, activeDataSeries);
-        
-        // Redraw scatterchart.
-        scatterchart.layout();
-        scatterchart.applyCss();
-        
-        // Add mouse listeners.
-//        addMouseListenersToMDSScatterchart();
-        
         // Update scatterchart ranges.
         updateScatterchartRanges();
 	}
@@ -246,28 +206,6 @@ public class ParameterSpaceScatterchart extends Scatterchart
     	yAxis_numberaxis.setMinorTickCount(2);
 	}
 	
-	/**
-	 * Auxiliary method to add selected data points to an arbitrary data series in scatterchart. 
-	 * @param dataSeries
-	 * @param ldaConfigurations
-	 * @param xParam
-	 * @param yParam
-	 * @param isActive
-	 */
-	private void addDataPoints(	XYChart.Series<Number, Number> dataSeries, ArrayList<LDAConfiguration> ldaConfigurations,
-										String xParam, String yParam, DataPointState state)
-	{
-        // Add selected data points.
-        for (LDAConfiguration ldaConfig : ldaConfigurations) {
-    		XYChart.Data<Number, Number> dataPoint = new XYChart.Data<Number, Number>(ldaConfig.getParameter(xParam), ldaConfig.getParameter(yParam));
-        	dataPoint.setExtraValue(ldaConfig.getConfigurationID());
-        	
-        	dataSeries.getData().add(dataPoint);
-        	if (state == DataPointState.ACTIVE)
-        		activePoints.put(ldaConfig.getConfigurationID(), dataPoint);
-        }
-	}
-	
 	@Override
 	public void refresh()
 	{
@@ -277,12 +215,19 @@ public class ParameterSpaceScatterchart extends Scatterchart
 	@Override
 	public void resizeContent(double width, double height)
 	{
+		final double chartWidth		= (width - 123);
+		final double chartHeight 	= (height - 79);
+		
+		// Reposition comboboxes.
 		if (paramX_combobox != null && paramY_combobox != null && xAxis_numberaxis != null && yAxis_numberaxis != null) {
 			if (width > 0)
-				paramX_combobox.setLayoutX(100 + (width - 123) / 2 - paramX_combobox.getWidth() / 2);
+				paramX_combobox.setLayoutX(100 + chartWidth / 2 - paramX_combobox.getWidth() / 2);
 			if (height > 0)
-				paramY_combobox.setLayoutY(25 + (height - 94) / 2 - paramY_combobox.getHeight() / 2);
+				paramY_combobox.setLayoutY(25 + chartHeight / 2 - paramY_combobox.getHeight() / 2);
 		}
+		
+		// Resize and -position density heatmap.
+		updateHeatmapPosition();
 	}
 
 	@Override
@@ -290,17 +235,37 @@ public class ParameterSpaceScatterchart extends Scatterchart
 	{
 		return null;
 	}
-
-	@Override
-	public void identifyGlobalExtrema(ArrayList<LDAConfiguration> ldaConfigurations)
-	{
-		globalExtrema = identifyExtrema(LDAConfiguration.SUPPORTED_PARAMETERS, ldaConfigurations);
-	}
 	
 	@FXML
 	public void updateParamValue(ActionEvent e)
 	{
 		if (this.data != null)
 			this.refresh();
-	}	
+	}
+
+	@Override
+	protected void refreshDensityHeatmap()
+	{
+		// @todo Auto-generated method stub		
+	}
+	
+	@Override
+	protected void updateHeatmapPosition()
+	{
+		final double xBorderFactor = 0.069;
+		final double yBorderFactor = 0.0625;
+		
+		final double offsetX = 26 + scatterchart.getWidth() * xBorderFactor;
+		final double offsetY = -30 - scatterchart.getHeight() * yBorderFactor;
+		
+		// Set x position and new width.
+		densityHeatmap.getRoot().setTranslateX(offsetX);
+		final double newWidth = (scatterchart.getWidth() ) * (1 - xBorderFactor * 1.7);
+		
+		// Set y positiona and new height.
+		densityHeatmap.getRoot().setTranslateY(offsetY);
+		final double newHeight = (scatterchart.getHeight() + offsetY) * (1 - yBorderFactor / 3.5);
+		
+		densityHeatmap.resizeContent(newWidth, newHeight);
+	}
 }

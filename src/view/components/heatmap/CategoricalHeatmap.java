@@ -65,7 +65,7 @@ public class CategoricalHeatmap extends Heatmap
 	}
 
 	@Override
-	protected void applyOptions(HeatmapOptionset options)
+	public void applyOptions(HeatmapOptionset options)
 	{
 		super.applyOptions(options);
 		
@@ -237,7 +237,7 @@ public class CategoricalHeatmap extends Heatmap
 			topicDistanceLoadingTask = new Task_LoadTopicDistancesForSelection(workspace, WorkspaceAction.LOAD_SPECIFIC_TOPIC_DISTANCES, null, ldaConfigurations);
 			topicDistanceLoadingTask.addListener(this);
 			
-			// Write list to file.
+			// Start thread.
 			(new Thread(topicDistanceLoadingTask)).start();
 		}
 	}

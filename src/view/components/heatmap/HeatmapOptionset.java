@@ -47,9 +47,24 @@ public class HeatmapOptionset extends VisualizationComponentOptionset
 	//			Methods	
 	// -------------------------------
 	
+	/**
+	 * Create new option set for heatmap.
+	 * @param isGranularityDynamic
+	 * @param granularity
+	 * @param minColor
+	 * @param maxColor
+	 * @param subtractiveSelectionColor
+	 * @param additiveSelectionColor
+	 * @param key1
+	 * @param key2
+	 * @param isSelectionEnabled
+	 * @param relativeMode
+	 * @param showAxes
+	 */
 	public HeatmapOptionset(boolean isGranularityDynamic, int granularity, 
 							Color minColor, Color maxColor, Color subtractiveSelectionColor, Color additiveSelectionColor,
-							String key1, String key2, boolean isSelectionEnabled, boolean relativeMode, boolean showAxes)
+							String key1, String key2, 
+							boolean isSelectionEnabled, boolean relativeMode, boolean showAxes)
 	{
 		super(isSelectionEnabled, showAxes, relativeMode);
 		

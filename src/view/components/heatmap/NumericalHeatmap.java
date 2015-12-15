@@ -47,7 +47,7 @@ public class NumericalHeatmap extends Heatmap
 	 * @param options
 	 */
 	@Override
-	protected void applyOptions(HeatmapOptionset options)
+	public void applyOptions(HeatmapOptionset options)
 	{
 		super.applyOptions(options);
 		

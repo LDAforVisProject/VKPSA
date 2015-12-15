@@ -3,8 +3,6 @@ package control.analysisView;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -12,22 +10,14 @@ import java.util.Set;
 import model.AnalysisDataspace;
 import model.LDAConfiguration;
 import model.workspace.Workspace;
-
-import org.controlsfx.control.RangeSlider;
-
 import control.Controller;
 import control.analysisView.localScope.LocalScopeVisualizationType;
 import view.components.VisualizationComponent;
 import view.components.VisualizationComponentType;
 import view.components.heatmap.CategoricalHeatmap;
-import view.components.heatmap.NumericalHeatmap;
-import view.components.heatmap.HeatmapDataset;
 import view.components.heatmap.HeatmapOptionset;
 import view.components.legacy.DistancesBarchart;
 import view.components.legacy.LocalScopeInstance;
-import view.components.legacy.heatmap.HeatMap;
-import view.components.legacy.heatmap.HeatmapDataBinding;
-import view.components.legacy.heatmap.HeatmapDataType;
 import view.components.legacy.mdsScatterchart.MDSScatterchart;
 import view.components.scatterchart.ScatterchartDataset;
 import view.components.scatterchart.ScatterchartOptionset;
@@ -38,32 +28,28 @@ import view.components.scentedFilter.ScentedFilterOptionset;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
-import javafx.scene.chart.StackedBarChart;
-import javafx.scene.chart.ValueAxis;
 import javafx.scene.control.Accordion;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.DragEvent;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -187,9 +173,6 @@ public class AnalysisController extends Controller
 	 * Parameter Space - Distribution.
 	 */
 	
-	// Component for heatmap showing filtered data:
-	private NumericalHeatmap parameterspace_heatmap_filtered;
-	
 	/**
 	 * ParameterSpaceScatterchart for display of parameter values.
 	 */
@@ -197,10 +180,18 @@ public class AnalysisController extends Controller
 	
 	// Heatmap setting controls (and metadata).
 	private @FXML ToggleButton button_relativeView_paramDist;
-	private @FXML ComboBox<String> combobox_parameterSpace_distribution_xAxis;
-	private @FXML ComboBox<String> combobox_parameterSpace_distribution_yAxis;
-	private @FXML Slider slider_parameterSpace_distribution_granularity;
-	private @FXML CheckBox checkbox_parameterSpace_distribution_dynAdjustment;
+	
+	/*
+	 *  Controls for parameter space density heatmap.
+	 */
+	// ...for granularity.
+	private @FXML CheckBox paramSpace_dhmGranularity_checkbox;
+	private @FXML CheckBox paramSpace_dhmVisibility_checkbox;
+	private @FXML Slider paramSpace_dhmGranularity_slider;
+	// ...for category selection.
+	private @FXML CheckBox paramSpace_dhmCategories_active_checkbox;
+	private @FXML CheckBox paramSpace_dhmCategories_inactive_checkbox;
+	private @FXML CheckBox paramSpace_dhmCategories_discarded_checkbox;
 	
 	/*
 	 * Local scope.
@@ -243,7 +234,6 @@ public class AnalysisController extends Controller
 	private @FXML ImageView settings_mds_icon;
 	private @FXML ImageView settings_distEval_icon;
 	private @FXML ImageView settings_paramDist_icon;
-	private @FXML ImageView settings_paramDistCorr_icon;
 	private @FXML ImageView settings_localScope_icon;
 	
 	
@@ -337,9 +327,15 @@ public class AnalysisController extends Controller
 		initFilterControls();
 		initMDSScatterchart();
 		initDistanceBarchart();
-		initParameterSpaceHeatmaps();
+		initParameterSpaceScatterchart();
 		initLocalScopeView();
 		initComparisonHeatmaps();
+		
+		// Bring setting icons to front.
+		settings_mds_icon.toFront();
+		settings_distEval_icon.toFront();
+		settings_paramDist_icon.toFront();
+		settings_localScope_icon.toFront();
 	}
 	
 	private void initComparisonHeatmaps()
@@ -402,29 +398,13 @@ public class AnalysisController extends Controller
 													button_relativeView_distEval, checkbox_logarithmicDistanceBarchart);
 	}
 	
-	private void initParameterSpaceHeatmaps()
+	private void initParameterSpaceScatterchart()
 	{
-		combobox_parameterSpace_distribution_xAxis.getItems().clear();
-		combobox_parameterSpace_distribution_yAxis.getItems().clear();
-		
-		// Add supported parameters to axis comboboxes. 
-		for (String param : LDAConfiguration.SUPPORTED_PARAMETERS) {
-			combobox_parameterSpace_distribution_xAxis.getItems().add(param);
-			combobox_parameterSpace_distribution_yAxis.getItems().add(param);
-		}
-		
-		// Set default axes.
-		combobox_parameterSpace_distribution_xAxis.setValue("alpha");
-		combobox_parameterSpace_distribution_yAxis.setValue("eta");
-		
-		// Init heatmaps.
-		parameterspace_heatmap_filtered	= (NumericalHeatmap) VisualizationComponent.generateInstance(VisualizationComponentType.NUMERICAL_HEATMAP, this, null, null, null);
-		// Embed heatmaps in parent.
-		parameterspace_heatmap_filtered.embedIn(paramSpace_distribution_anchorPane_filtered);
-
 		// Init parameter space scatterchart.
 		paramSpaceScatterchart = (ParameterSpaceScatterchart) VisualizationComponent.generateInstance(VisualizationComponentType.PARAMSPACE_SCATTERCHART, this, null, null, null);
-		paramSpaceScatterchart.applyOptions(new ScatterchartOptionset(true, true, false));
+		paramSpaceScatterchart.applyOptions(new ScatterchartOptionset(	true, true, false,
+																		paramSpace_dhmVisibility_checkbox.isSelected(), paramSpace_dhmGranularity_checkbox.isSelected(), (int)paramSpace_dhmGranularity_slider.getValue(),
+																		calculatePSScatterchartCategoriesValue()));
 		paramSpaceScatterchart.embedIn(paramSpace_distribution_anchorPane_selected);
 				
 		/*
@@ -432,20 +412,36 @@ public class AnalysisController extends Controller
 		 */
 		
 		// Add listener to determine position during after release.
-		slider_parameterSpace_distribution_granularity.addEventHandler(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
+		paramSpace_dhmGranularity_slider.addEventHandler(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) 
             {
-            	parameterspace_heatmap_filtered.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
+            	refreshParameterSpaceScatterchart();
             }
         });
 		
 		// Add listener to determine position during mouse drag.
-		slider_parameterSpace_distribution_granularity.addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
+		paramSpace_dhmGranularity_slider.addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) 
             {
-            	parameterspace_heatmap_filtered.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
+            	refreshParameterSpaceScatterchart();
             };
         });
+		// Add listener to determine position during after release.
+		// dhmcontrol
+//		slider_parameterSpace_distribution_granularity.addEventHandler(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
+//            public void handle(MouseEvent event) 
+//            {
+//            	parameterspace_heatmap_filtered.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
+//            }
+//        });
+//		
+//		// Add listener to determine position during mouse drag.
+//		slider_parameterSpace_distribution_granularity.addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
+//            public void handle(MouseEvent event) 
+//            {
+//            	parameterspace_heatmap_filtered.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
+//            };
+//        });
 	}
 	
 	/**
@@ -488,9 +484,8 @@ public class AnalysisController extends Controller
 									true);
 
 		// 	Parameter space scatterchart:
-		refreshParameterspaceHeatmaps();
 		paramSpaceScatterchart.refresh(new ScatterchartDataset(	dataspace.getLDAConfigurations(), dataspace.getDiscardedLDAConfigurations(),
-																	dataspace.getInactiveLDAConfigurations(), dataspace.getActiveLDAConfigurations()));
+																dataspace.getInactiveLDAConfigurations(), dataspace.getActiveLDAConfigurations()));
 		
 		//	Local scope:
 		localScopeInstance.refresh(dataspace.getActiveLDAConfigurations());
@@ -546,7 +541,6 @@ public class AnalysisController extends Controller
 										true);
 			
 			//	Paramer space scatterchart:
-			refreshParameterspaceHeatmaps();
 			paramSpaceScatterchart.refresh(new ScatterchartDataset(	dataspace.getLDAConfigurations(), dataspace.getDiscardedLDAConfigurations(),
 																	dataspace.getInactiveLDAConfigurations(), dataspace.getActiveLDAConfigurations()));
 			
@@ -659,7 +653,6 @@ public class AnalysisController extends Controller
 										dataspace.getActiveCoordinates(), dataspace.getActiveIndices(), 
 										dataspace.getDiscardedCoordinates(), dataspace.getDiscardedIndices());
 		// 	Parameter space heatmap:
-		refreshParameterspaceHeatmaps();
 		paramSpaceScatterchart.refresh(new ScatterchartDataset(	dataspace.getLDAConfigurations(), dataspace.getDiscardedLDAConfigurations(),
 																dataspace.getInactiveLDAConfigurations(), dataspace.getActiveLDAConfigurations()));
 		
@@ -669,20 +662,6 @@ public class AnalysisController extends Controller
 		
 		// 	Parameter histograms:
 		refreshScentedFilters();
-	}
-	
-	/**
-	 * Refreshes both heatmaps in parameter space using the current default values.
-	 */
-	private void refreshParameterspaceHeatmaps()
-	{
-		// Refresh heatmap using filtered data:
-		HeatmapOptionset fOptions 	= new HeatmapOptionset(	checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int)slider_parameterSpace_distribution_granularity.getValue(), 
-															Color.GREY, Color.GREY, Color.gray(0.5, 0.5), new Color(0.0, 0.0, 1.0, 0.5), 
-															combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(),
-															true, button_relativeView_paramDist.isSelected(), true);
-		HeatmapDataset fData		= new HeatmapDataset(dataspace.getLDAConfigurations(), dataspace.getAvailableLDAConfigurations(), fOptions);
-		parameterspace_heatmap_filtered.refresh(fOptions, fData);
 	}
 	
 	/**
@@ -732,44 +711,6 @@ public class AnalysisController extends Controller
 		dataspace.filterIndices(parameterBoundaries);
 	}
 	
-	/**
-	 * Colours a parameter histogram barchart in the desired colors (one for filtered, one for discarded).
-	 * @param barchart
-	 * @param seriesIndex Index of series to be colored. 0 for discarded, 1 for filtered data points.
-	 */
-	private void colorParameterHistogramBarchart(StackedBarChart<String, Integer> barchart, int seriesIndex)
-	{
-		// Color bars (todo: color according to defined options).
-		for (Node node : barchart.lookupAll(".chart-bar")) {
-			switch (seriesIndex)
-			{
-				// Selectede data.
-				case 2:
-					if (node.getUserData() == null || node.getUserData().toString() == "active") {
-						node.setUserData("active");
-						node.setStyle("-fx-bar-fill: blue;");
-					}
-				break;
-				
-				// Discarded data.
-				case 1:
-					if (node.getUserData() == null || node.getUserData().toString() == "discarded") {
-						node.setUserData("discarded");
-						node.setStyle("-fx-bar-fill: lightgrey;");
-					}
-				break;
-				
-				// Filtered data.
-				case 0:
-					if (node.getUserData() == null || node.getUserData().toString() == "inactive") {
-						node.setUserData("inactive");
-						node.setStyle("-fx-bar-fill: darkgrey;");
-					}
-				break;
-			}
-		}
-	}
-
 	@Override
 	public void resizeContent(double width, double height)
 	{
@@ -780,8 +721,6 @@ public class AnalysisController extends Controller
 	{
 		switch (node.getId()) {
 			case "paramSpace_distribution_anchorPane_filtered":
-				// Adapt size.
-				parameterspace_heatmap_filtered.resizeContent(width, height);
 			break;
 			
 			case "paramSpace_distribution_anchorPane_selected":
@@ -840,17 +779,6 @@ public class AnalysisController extends Controller
 	}
 	
 	@FXML
-	public void updateHeatmap(ActionEvent e)
-	{
-		if (	parameterspace_heatmap_filtered != null 			&&
-				combobox_parameterSpace_distribution_xAxis != null 	&& 
-				combobox_parameterSpace_distribution_yAxis != null) {
-			// Refresh heatmaps.
-			refreshParameterspaceHeatmaps();
-		}
-	}
-	
-	@FXML
 	public void changeVisualizationViewMode(ActionEvent e)
 	{
 		Node source = (Node) e.getSource();
@@ -861,7 +789,6 @@ public class AnalysisController extends Controller
 			break;
 
 			case "button_relativeView_paramDist":
-				updateHeatmap(e);
 			break;
 		}
 	}
@@ -879,10 +806,6 @@ public class AnalysisController extends Controller
 	@FXML
 	public void changeParameterDistributionGranularityMode(ActionEvent e)
 	{
-		slider_parameterSpace_distribution_granularity.setDisable(checkbox_parameterSpace_distribution_dynAdjustment.isSelected());
-
-		// Propagate information to heatmaps.
-		parameterspace_heatmap_filtered.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
 	}
 	
 	/**
@@ -895,6 +818,18 @@ public class AnalysisController extends Controller
 		slider_mds_distribution_granularity.setDisable(checkbox_mdsHeatmap_distribution_dynAdjustment.isSelected());
 		mdsScatterchart.setHeatmapGranularityInformation(checkbox_mdsHeatmap_distribution_dynAdjustment.isSelected(), (int) slider_mds_distribution_granularity.getValue(), true);
 	}
+	
+	/**
+	 * Processes new information about granularity of parameter space scatterchart heatmap.
+	 * @param e
+	 */
+	@FXML
+	public void changePSHeatmapGranularityMode(ActionEvent e)
+	{
+		System.out.println("wat");
+		paramSpace_dhmGranularity_slider.setDisable(false); // !paramSpace_dhmGranularity_checkbox.isSelected()
+		refreshParameterSpaceScatterchart();
+	}	
 
 	/**
 	 * Toggles MDS heatmap visibility.
@@ -917,7 +852,6 @@ public class AnalysisController extends Controller
             {
             	mdsScatterchart.processKeyPressedEvent(ke);
             	distancesBarchart.processKeyPressedEvent(ke);
-            	parameterspace_heatmap_filtered.processKeyPressedEvent(ke);
             	tmcHeatmap.processKeyPressedEvent(ke);
             	for (ScentedFilter filter : filters)
             		filter.processKeyPressedEvent(ke);
@@ -930,7 +864,6 @@ public class AnalysisController extends Controller
             {
             	mdsScatterchart.processKeyReleasedEvent(ke);
             	distancesBarchart.processKeyReleasedEvent(ke);
-            	parameterspace_heatmap_filtered.processKeyReleasedEvent(ke);
             	tmcHeatmap.processKeyReleasedEvent(ke);
             	for (ScentedFilter filter : filters)
             		filter.processKeyReleasedEvent(ke);
@@ -974,7 +907,6 @@ public class AnalysisController extends Controller
 		if(	(iconID == "settings_mds_icon" 				&& settings_mds_icon.getBoundsInParent().contains(x, y))			||
 			(iconID == "settings_distEval_icon" 		&& settings_distEval_icon.getBoundsInParent().contains(x, y))		||
 			(iconID == "settings_paramDist_icon" 		&& settings_paramDist_icon.getBoundsInParent().contains(x, y))		||
-			(iconID == "settings_paramDistCorr_icon" 	&& settings_paramDistCorr_icon.getBoundsInParent().contains(x, y))	||
 			(iconID == "settings_localScope_icon" 		&& settings_localScope_icon.getBoundsInParent().contains(x, y))
 		) {
 			// Open corresponding settings panel.
@@ -1069,10 +1001,6 @@ public class AnalysisController extends Controller
 			
 			case "localScope_containingAnchorPane":
 				settings_localScope_icon.setVisible(true);
-			break;
-			
-			case "paramSpace_correlation_anchorPane":
-				settings_paramDistCorr_icon.setVisible(true);
 			break;			
 		}
 	}
@@ -1100,10 +1028,6 @@ public class AnalysisController extends Controller
 			case "localScope_containingAnchorPane":
 				settings_localScope_icon.setVisible(false);
 			break;
-			
-			case "paramSpace_correlation_anchorPane":
-				settings_paramDistCorr_icon.setVisible(false);
-			break;			
 		}		
 	}
 
@@ -1158,7 +1082,6 @@ public class AnalysisController extends Controller
 		//	...for TMC heatmap.
 		tmcHeatmap.setReferences(workspace, logPI, logTA);
 		// ...for parameter space visualizations. 
-		parameterspace_heatmap_filtered.setReferences(workspace, logPI, logTA);
 		paramSpaceScatterchart.setReferences(workspace, logPI, logTA);
 		//	...for local scope instance.
 		localScopeInstance.setReferences(workspace, logPI, logTA);
@@ -1166,5 +1089,53 @@ public class AnalysisController extends Controller
 		for (ScentedFilter filter : filters) {
 			filter.setReferences(workspace, logPI, logTA);
 		}
+	}
+	
+	/**
+	 * Changes visibility of heatmap in parameter space scatterchart.
+	 * @param e
+	 */
+	@FXML
+	public void changePSHeatmapVisibility(ActionEvent e)
+	{
+		refreshParameterSpaceScatterchart();
+	}
+	
+	/**
+	 * Refreshs parameter space scatterchart using existing data.
+	 */
+	private void refreshParameterSpaceScatterchart()
+	{
+		
+		paramSpaceScatterchart.applyOptions(new ScatterchartOptionset(	true, true, false,
+											paramSpace_dhmVisibility_checkbox.isSelected(), paramSpace_dhmGranularity_checkbox.isSelected(), (int)paramSpace_dhmGranularity_slider.getValue(),
+											calculatePSScatterchartCategoriesValue()));
+		paramSpaceScatterchart.refresh();
+	}
+	
+	/**
+	 * Updates data categories used in parameter space scatterchart.
+	 * @param e
+	 */
+	@FXML
+	public void updateParamSpaceDHMCategories(ActionEvent e)
+	{
+		System.out.println("refreshing");
+		refreshParameterSpaceScatterchart();
+	}
+	
+	/**
+	 * Calculate the categories value for parameter space scatterchart's density heatmap.
+	 * @return
+	 */
+	private int calculatePSScatterchartCategoriesValue()
+	{
+		int value = 0;
+		
+		value += paramSpace_dhmCategories_active_checkbox.isSelected() 		? 1 : 0;
+		value += paramSpace_dhmCategories_inactive_checkbox.isSelected() 	? 2 : 0;
+		value += paramSpace_dhmCategories_discarded_checkbox.isSelected() 	? 4 : 0;
+		
+		return value;
 	}
 }

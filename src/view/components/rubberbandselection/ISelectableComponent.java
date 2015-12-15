@@ -36,4 +36,5 @@ public interface ISelectableComponent
 	 * @param ke
 	 */
 	public void processKeyReleasedEvent(KeyEvent ke);
+	
 }

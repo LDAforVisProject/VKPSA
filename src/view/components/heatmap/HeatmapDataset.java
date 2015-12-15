@@ -5,13 +5,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
 import view.components.VisualizationComponentDataset;
 import javafx.util.Pair;
-import mdsj.Data;
 import model.LDAConfiguration;
 
 /**
@@ -68,7 +66,7 @@ public class HeatmapDataset extends VisualizationComponentDataset
 	 * @param chosenLDAConfigurations
 	 * @param options
 	 */
-	public HeatmapDataset(	ArrayList<LDAConfiguration> allLDAConfigurations, ArrayList<LDAConfiguration> chosenLDAConfigurations, HeatmapOptionset options)
+	public HeatmapDataset(ArrayList<LDAConfiguration> allLDAConfigurations, ArrayList<LDAConfiguration> chosenLDAConfigurations, HeatmapOptionset options)
 	{
 		super(allLDAConfigurations);
 		

@@ -2,6 +2,7 @@ package view.components.rubberbandselection;
 
 import javax.xml.soap.Node;
 
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -28,14 +29,22 @@ public class RubberBandSelection
     protected EventHandler<MouseEvent> onMouseReleasedEventHandler;
     protected EventHandler<MouseEvent> onMouseDraggedEventHandler;
     
-    // Selectable component as listener.
-    ISelectableComponent listener;
+    /**
+     * Selectable component as listener. 
+     */
+    protected ISelectableComponent listener;
+    
+    /**
+     * Lock in case selection is opened outside of defined window.
+     */
+    protected boolean isLocked;
     
     public RubberBandSelection(Pane pane, ISelectableComponent listener) 
     {
     	this.dragContext	= new DragContext();
         this.pane			= pane;
         this.listener		= listener;
+        this.isLocked		= false;
         
         rect 				= new Rectangle( 0,0,0,0);
         rect.setStroke(Color.BLUE);
@@ -72,6 +81,21 @@ public class RubberBandSelection
     	pane.removeEventHandler(MouseEvent.MOUSE_RELEASED, onMouseReleasedEventHandler);
     }
     
+    /**
+     * Checks whether selected point is inside of defined/allowed area in targeted node.
+     * @param x
+     * @param y
+     * @return
+     */
+    protected boolean isInAllowedArea(double x, double y)
+    {
+    	Pair<Integer, Integer> offset 	= listener.provideOffsets();
+    	double adjustedX 				= x - offset.getKey();
+    	double adjustedY 				= y - offset.getKey();
+    	
+    	return (adjustedX >= 0) && (adjustedY >= 0);
+    }
+    
     protected void initEventHandler()
     {
     	onMousePressedEventHandler = new EventHandler<MouseEvent>() 
@@ -79,18 +103,21 @@ public class RubberBandSelection
 	        @Override
 	        public void handle(MouseEvent event) 
 	        {
-	        	dragContext.mouseAnchorX = event.getX();
-	            dragContext.mouseAnchorY = event.getY();
-	
-	            rect.setX(dragContext.mouseAnchorX);
-	            rect.setY(dragContext.mouseAnchorY);
-	            rect.setWidth(0);
-	            rect.setHeight(0);
-	
-	            pane.getChildren().add( rect);
-	            
-	            // Translate coordinates.
-	            translateToVisualization(dragContext.mouseAnchorX, dragContext.mouseAnchorY, dragContext.mouseAnchorX, dragContext.mouseAnchorY);
+	        	isLocked = false; //!isInAllowedArea(event.getX(), event.getY()); 
+	        	if (!isLocked) {
+		        	dragContext.mouseAnchorX = event.getX();
+		            dragContext.mouseAnchorY = event.getY();
+		
+		            rect.setX(dragContext.mouseAnchorX);
+		            rect.setY(dragContext.mouseAnchorY);
+		            rect.setWidth(0);
+		            rect.setHeight(0);
+		
+		            pane.getChildren().add(rect);
+		            
+		            // Translate coordinates.
+		            translateToVisualization(dragContext.mouseAnchorX, dragContext.mouseAnchorY, dragContext.mouseAnchorX, dragContext.mouseAnchorY);
+	        	}
 	        }
 	    };
 	
@@ -99,16 +126,18 @@ public class RubberBandSelection
 	        @Override
 	        public void handle(MouseEvent event) 
 	        {
-	            // reset selection rectangle
-	            rect.setX(0);
-	            rect.setY(0);
-	            rect.setWidth(0);
-	            rect.setHeight(0);
-	
-	            pane.getChildren().remove( rect);
-	            
-	            // Translate coordinates.
-	            signalEndOfSelection();
+	        	if (!isLocked) {
+		            // reset selection rectangle
+		            rect.setX(0);
+		            rect.setY(0);
+		            rect.setWidth(0);
+		            rect.setHeight(0);
+		
+		            pane.getChildren().remove(rect);
+		            
+		            // Translate coordinates.
+		            signalEndOfSelection();
+	        	}
 	        }
 	    };
 	
@@ -117,29 +146,31 @@ public class RubberBandSelection
 	        @Override
 	        public void handle(MouseEvent event) 
 	        {
-	        	double sceneX = event.getX();
-	            double sceneY = event.getY();
-	            
-	            double offsetX = sceneX - dragContext.mouseAnchorX;
-	            double offsetY = sceneY - dragContext.mouseAnchorY;
-	
-	            if( offsetX > 0)
-	                rect.setWidth( offsetX);
-	            else {
-	                rect.setX( sceneX);
-	                rect.setWidth(dragContext.mouseAnchorX - rect.getX());
-	            }
-	
-	            if( offsetY > 0) {
-	                rect.setHeight( offsetY);
-	            } 
-	            else {
-	                rect.setY( sceneY);
-	                rect.setHeight(dragContext.mouseAnchorY - rect.getY());
-	            }
-	            
-	            // Translate coordinates.
-	            translateToVisualization(sceneX, sceneY, dragContext.mouseAnchorX, dragContext.mouseAnchorY);
+	        	if (!isLocked) {
+		        	double sceneX = event.getX();
+		            double sceneY = event.getY();
+		            
+		            double offsetX = sceneX - dragContext.mouseAnchorX;
+		            double offsetY = sceneY - dragContext.mouseAnchorY;
+		
+		            if( offsetX > 0)
+		                rect.setWidth( offsetX);
+		            else {
+		                rect.setX( sceneX);
+		                rect.setWidth(dragContext.mouseAnchorX - rect.getX());
+		            }
+		
+		            if( offsetY > 0) {
+		                rect.setHeight( offsetY);
+		            } 
+		            else {
+		                rect.setY( sceneY);
+		                rect.setHeight(dragContext.mouseAnchorY - rect.getY());
+		            }
+		            
+		            // Translate coordinates.
+		            translateToVisualization(sceneX, sceneY, dragContext.mouseAnchorX, dragContext.mouseAnchorY);
+	        	}
 	        }
 	    };
     }
