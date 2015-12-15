@@ -135,7 +135,7 @@ public class ParameterSpaceScatterchart extends Scatterchart
 		else if (this.data != null) {
 			
 			densityHeatmapOptions							= new HeatmapOptionset(	options.isGranularityDynamic(), options.getGranularity(), 
-																					Color.BLUE, Color.DARKBLUE, new Color(0.0, 0.0, 1.0, 0.5), new Color(1.0, 0.0, 0.0, 0.5),
+																					options.getDHMMinColor(), options.getDHMMaxColor(), new Color(0.0, 0.0, 1.0, 0.5), new Color(1.0, 0.0, 0.0, 0.5),
 																					paramX_combobox.getValue(), paramY_combobox.getValue(),
 																					false, false, false);
 			// Create dataset for heatmap.
@@ -143,15 +143,12 @@ public class ParameterSpaceScatterchart extends Scatterchart
 			
 			if ( (options.getCategoriesValue() & 1) > 0 ) {
 				ldaDataForHeatmap.addAll(this.data.getActiveLDAConfigurations());
-				System.out.println("adding active");
 			}	
 			if ( (options.getCategoriesValue() & 2) > 0 ) {
 				ldaDataForHeatmap.addAll(this.data.getInactiveLDAConfigurations());
-				System.out.println("adding inactive");
 			}
 			if ( (options.getCategoriesValue() & 4) > 0 ) {
 				ldaDataForHeatmap.addAll(this.data.getDiscardedLDAConfigurations());
-				System.out.println("adding discarded");
 			}
 			
 			HeatmapDataset densityHeatmapData				= new HeatmapDataset(this.data.getAllLDAConfigurations(), ldaDataForHeatmap, this.densityHeatmapOptions);
@@ -264,7 +261,7 @@ public class ParameterSpaceScatterchart extends Scatterchart
 		
 		// Set y positiona and new height.
 		densityHeatmap.getRoot().setTranslateY(offsetY);
-		final double newHeight = (scatterchart.getHeight() + offsetY) * (1 - yBorderFactor / 3.5);
+		final double newHeight = (scatterchart.getHeight() + offsetY) * (1 - yBorderFactor / 4.0);
 		
 		densityHeatmap.resizeContent(newWidth, newHeight);
 	}

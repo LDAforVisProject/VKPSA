@@ -106,6 +106,15 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	 */
 	private CheckBox heatmap_dynGranularity_checkbox;
 	
+	/**
+	 * Lower end of density heatmap's color spectrum.
+	 */
+	private Color dhmMinColor;
+	/**
+	 * Upper end of density heatmap's color spectrum.
+	 */
+	private Color dhmMaxColor;
+	
 	/*
 	 * Constants.
 	 */
@@ -237,7 +246,8 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	
 	public MDSScatterchart(	AnalysisController analysisController, ScatterChart<Number, Number> scatterchart,
 							Canvas heatmap_canvas, 
-							CheckBox heatmap_dynGranularity_checkbox, Slider heatmapGranularity_slider)
+							CheckBox heatmap_dynGranularity_checkbox, Slider heatmapGranularity_slider,
+							Color dhmMinColor, Color dhmMaxColor)
 	{
 		super(analysisController);
 		
@@ -246,7 +256,9 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 		
 		this.heatmapGranularity_slider			= heatmapGranularity_slider;
 		this.heatmap_dynGranularity_checkbox	= heatmap_dynGranularity_checkbox;
-	
+		this.dhmMinColor						= dhmMinColor;
+		this.dhmMaxColor						= dhmMaxColor;
+		
 		// Init collection of selected data points in the MDS scatterchart.
 		activeMDSPoints							= new HashMap<Integer, XYChart.Data<Number, Number>>();
 		globalCoordinateExtrema_X				= new Pair<Double, Double>(Double.MAX_VALUE, Double.MIN_VALUE);
@@ -276,6 +288,20 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 		initHeatmap();
 	}
 
+	/**
+	 * Updates color spectrum.
+	 * @param minColor
+	 * @param maxColor
+	 */
+	public void updateDHMColorSpectrum(Color minColor, Color maxColor)
+	{
+		this.dhmMinColor = minColor;
+		this.dhmMaxColor = maxColor;
+		
+		if (heatmap != null)
+			heatmap.updateColorSpectrum(minColor, maxColor);
+	}
+	
 	/**
 	 * Updates references to lables in scatterchart legend.
 	 * Sets color according to data series.
@@ -382,7 +408,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	
 	private void initHeatmap()
 	{
-		heatmap = new HeatMap(this.analysisController, heatmap_canvas, (NumberAxis)null, (NumberAxis)null, HeatmapDataType.MDSCoordinates);
+		heatmap = new HeatMap(this.analysisController, heatmap_canvas, (NumberAxis)null, (NumberAxis)null, HeatmapDataType.MDSCoordinates, dhmMinColor, dhmMaxColor);
 		
 		/*
 		 * Init option controls.

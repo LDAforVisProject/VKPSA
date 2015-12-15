@@ -63,6 +63,15 @@ public class HeatMap extends VisualizationComponent_Legacy implements ISelectabl
 	 */
 	private RubberBandSelection rubberbandSelection;
 	
+	/**
+	 * Lower end of color spectrum.
+	 */
+	private Color minColor;
+	/**
+	 * Upper end of color spectrum.
+	 */
+	private Color maxColor;
+	
 	/*
 	 * Actual data to be binned and drawn. 
 	 */
@@ -140,7 +149,8 @@ public class HeatMap extends VisualizationComponent_Legacy implements ISelectabl
 	 * Methods.
 	 */
 	
-	public HeatMap(AnalysisController analysisController, Canvas canvas, NumberAxis xAxis, NumberAxis yAxis, HeatmapDataType dataType)
+	public HeatMap(	AnalysisController analysisController, Canvas canvas, NumberAxis xAxis, NumberAxis yAxis, HeatmapDataType dataType, 
+					Color minColor, Color maxColor)
     {
 		super(analysisController);
 		
@@ -148,6 +158,8 @@ public class HeatMap extends VisualizationComponent_Legacy implements ISelectabl
 		this.xAxis							= xAxis;
 		this.yAxis							= yAxis;
 		this.dataType						= dataType;
+		this.minColor						= minColor;
+		this.maxColor						= maxColor;
 		
 		// Init granularity settings.
 		this.adjustGranularityDynamically	= true;
@@ -174,6 +186,19 @@ public class HeatMap extends VisualizationComponent_Legacy implements ISelectabl
         	rubberbandSelection.disable();
 	}
 
+	/**
+	 * Updates color spectrum.
+	 * @param minColor
+	 * @param maxColor
+	 */
+	public void updateColorSpectrum(Color minColor, Color maxColor)
+	{
+		this.minColor = minColor;
+		this.maxColor = maxColor;
+		
+		refresh(false);
+	}
+	
 	private void initAxes()
 	{
 		if (xAxis != null && yAxis != null) {
@@ -413,8 +438,8 @@ public class HeatMap extends VisualizationComponent_Legacy implements ISelectabl
     	gc.setStroke(Color.BLACK);
     	
     	// Set base colors for heatmap, dependent on data binding type.
-    	Color minColor = dataBinding == HeatmapDataBinding.FILTERED ? Color.LIGHTBLUE 	: Color.RED;
-    	Color maxColor = dataBinding == HeatmapDataBinding.FILTERED ? Color.DARKBLUE	: Color.DARKRED;
+    	//Color minColor = dataBinding == HeatmapDataBinding.FILTERED ? Color.LIGHTBLUE : Color.RED;
+    	//Color maxColor = dataBinding == HeatmapDataBinding.FILTERED ? Color.DARKBLUE	: Color.DARKRED;
     	
     	// Adjust tick values at both axes.
     	if (xAxis != null && yAxis != null) {

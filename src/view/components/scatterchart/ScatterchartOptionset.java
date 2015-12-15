@@ -1,5 +1,6 @@
 package view.components.scatterchart;
 
+import javafx.scene.paint.Color;
 import view.components.VisualizationComponentOptionset;
 
 public class ScatterchartOptionset extends VisualizationComponentOptionset
@@ -22,11 +23,21 @@ public class ScatterchartOptionset extends VisualizationComponentOptionset
 	/**
 	 * Describes which categories (active, inactive, discarded) are to be used for 
 	 */
-	int categoriesValue;
+	private int categoriesValue;
+	
+	/**
+	 * Lower end of density heatmap's color spectrum.
+	 */
+	private Color dhmMinColor;
+	/**
+	 * Upper end of density heatmap's color spectrum.
+	 */	
+	private Color dhmMaxColor;
 	
 	public ScatterchartOptionset(	boolean isSelectionEnabled, boolean showAxes, boolean relativeMode,
 									boolean showDensityHeatmap, boolean isGranularityDynamic, int granularity,
-									int categoriesValue)
+									int categoriesValue,
+									Color dhmMinColor, Color dhmMaxColor)
 	{
 		super(isSelectionEnabled, showAxes, relativeMode);
 	
@@ -34,6 +45,8 @@ public class ScatterchartOptionset extends VisualizationComponentOptionset
 		this.isGranularityDynamic	= isGranularityDynamic;
 		this.granularity			= granularity;
 		this.categoriesValue		= categoriesValue;
+		this.dhmMinColor			= dhmMinColor;
+		this.dhmMaxColor			= dhmMaxColor;
 	}
 
 	public boolean showDensityHeatmap()
@@ -54,6 +67,16 @@ public class ScatterchartOptionset extends VisualizationComponentOptionset
 	public int getCategoriesValue()
 	{
 		return categoriesValue;
+	}
+
+	public Color getDHMMinColor()
+	{
+		return dhmMinColor;
+	}
+
+	public Color getDHMMaxColor()
+	{
+		return dhmMaxColor;
 	}
 
 }

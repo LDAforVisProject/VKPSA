@@ -26,12 +26,12 @@
                            <children>
                               <Accordion fx:id="accordion_options" layoutX="34.0" layoutY="13.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="45.0">
                                 <panes>
-                                  <TitledPane fx:id="filter_titledPane" animated="false" onMouseClicked="#selectSettingsPane" style="-fx-background-color: #ffffff;" text="Result Space | Filter">
+                                  <TitledPane fx:id="filter_titledPane" animated="false" onMouseClicked="#selectSettingsPane" style="-fx-background-color: #ffffff;" text="Filter">
                                     <content>
                                       <AnchorPane fx:id="settings_filter_anchorPane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: #ffffff;" />
                                     </content>
                                   </TitledPane>
-                                  <TitledPane fx:id="mdsDistEval_titledPane" animated="false" onMouseClicked="#selectSettingsPane" style="-fx-background-color: #ffffff;" text="Result Space | MDS &amp; Distance Evaluation">
+                                  <TitledPane fx:id="mdsDistEval_titledPane" animated="false" onMouseClicked="#selectSettingsPane" style="-fx-background-color: #ffffff;" text="Result Space | Topic Models &amp; Distance Evaluation">
                                     <content>
                                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: #ffffff;">
                                              <children>
@@ -42,10 +42,10 @@
                                                             <Font name="System Bold" size="12.0" />
                                                          </font>
                                                          <VBox.margin>
-                                                            <Insets bottom="10.0" />
+                                                            <Insets bottom="8.0" />
                                                          </VBox.margin>
                                                       </Label>
-                                                      <GridPane>
+                                                      <GridPane prefHeight="78.0" prefWidth="302.0">
                                                         <columnConstraints>
                                                           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                                           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -74,10 +74,10 @@
                                                             <Font name="System Bold" size="12.0" />
                                                          </font>
                                                          <VBox.margin>
-                                                            <Insets bottom="10.0" />
+                                                            <Insets bottom="8.0" />
                                                          </VBox.margin>
                                                       </Label>
-                                                      <GridPane>
+                                                      <GridPane prefHeight="54.0" prefWidth="302.0">
                                                         <columnConstraints>
                                                           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                                           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -98,22 +98,23 @@
                                                             <Insets bottom="10.0" top="10.0" />
                                                          </VBox.margin>
                                                       </Separator>
-                                                      <Label text="MDS View">
+                                                      <Label text="Scatterplot Density Heatmap">
                                                          <font>
                                                             <Font name="System Bold" size="12.0" />
                                                          </font>
                                                          <VBox.margin>
-                                                            <Insets bottom="10.0" />
+                                                            <Insets bottom="8.0" />
                                                          </VBox.margin>
                                                       </Label>
-                                                      <GridPane prefHeight="84.0" prefWidth="379.0" vgap="5.0">
+                                                      <GridPane prefHeight="110.0" prefWidth="302.0" vgap="5.0">
                                                         <columnConstraints>
                                                           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                                           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                                         </columnConstraints>
                                                         <rowConstraints>
-                                                          <RowConstraints maxHeight="60.0" minHeight="0.0" prefHeight="18.0" vgrow="SOMETIMES" />
-                                                          <RowConstraints maxHeight="60.0" minHeight="0.0" prefHeight="52.0" vgrow="SOMETIMES" />
+                                                          <RowConstraints maxHeight="60.0" minHeight="0.0" prefHeight="17.0" vgrow="SOMETIMES" />
+                                                          <RowConstraints maxHeight="65.0" minHeight="0.0" prefHeight="53.0" vgrow="SOMETIMES" />
+                                                            <RowConstraints maxHeight="60.0" minHeight="2.0" prefHeight="29.0" vgrow="SOMETIMES" />
                                                         </rowConstraints>
                                                          <children>
                                                             <Label text="DHM granularity" GridPane.rowIndex="1" />
@@ -139,6 +140,18 @@
                                                                   <RowConstraints maxHeight="39.0" minHeight="3.0" prefHeight="26.0" vgrow="SOMETIMES" />
                                                                </rowConstraints>
                                                             </GridPane>
+                                                            <Label text="Color spectrum" GridPane.rowIndex="2" />
+                                                            <HBox GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                                               <children>
+                                                                  <ColorPicker fx:id="mdsHeatmap_dhmColor_min_colChooser" onAction="#updateGlobalScatterchartDHMColorSpectrum" prefHeight="25.0" prefWidth="40.0" promptText="updateGlobalScatterchartDHMColorSpectrum" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                                                  <Label text="to">
+                                                                     <HBox.margin>
+                                                                        <Insets left="10.0" right="10.0" top="5.0" />
+                                                                     </HBox.margin>
+                                                                  </Label>
+                                                                  <ColorPicker fx:id="mdsHeatmap_dhmColor_max_colChooser" onAction="#updateGlobalScatterchartDHMColorSpectrum" prefHeight="25.0" prefWidth="40.0" />
+                                                               </children>
+                                                            </HBox>
                                                          </children>
                                                       </GridPane>
                                                    </children>
@@ -147,50 +160,7 @@
                                           </AnchorPane>
                                     </content>
                                   </TitledPane>
-                                  <TitledPane fx:id="localScope_titledPane" animated="false" onMouseClicked="#selectSettingsPane" style="-fx-background-color: #ffffff;" text="Result Space | Local Scope">
-                                    <content>
-                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: #ffffff;">
-                                             <children>
-                                                <VBox layoutX="14.0" layoutY="14.0" prefHeight="200.0" prefWidth="354.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                   <children>
-                                                      <Label text="General">
-                                                         <font>
-                                                            <Font name="System Bold" size="12.0" />
-                                                         </font>
-                                                         <VBox.margin>
-                                                            <Insets bottom="10.0" />
-                                                         </VBox.margin>
-                                                      </Label>
-                                                      <GridPane hgap="5.0">
-                                                        <columnConstraints>
-                                                          <ColumnConstraints hgrow="SOMETIMES" maxWidth="239.99999237060547" minWidth="10.0" prefWidth="175.99999237060547" />
-                                                          <ColumnConstraints hgrow="SOMETIMES" maxWidth="224.0" minWidth="10.0" prefWidth="116.0" />
-                                                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="117.0" minWidth="10.0" prefWidth="68.0" />
-                                                        </columnConstraints>
-                                                        <rowConstraints>
-                                                            <RowConstraints maxHeight="34.0" minHeight="10.0" prefHeight="34.0" vgrow="SOMETIMES" />
-                                                          <RowConstraints maxHeight="34.0" minHeight="10.0" prefHeight="34.0" vgrow="SOMETIMES" />
-                                                        </rowConstraints>
-                                                         <children>
-                                                            <Label text="Max. number of topics" GridPane.rowIndex="1" />
-                                                            <Slider fx:id="slider_localScope_numTopicsToUse" disable="true" maxWidth="120.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="50.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                                                               <GridPane.margin>
-                                                                  <Insets top="10.0" />
-                                                               </GridPane.margin>
-                                                            </Slider>
-                                                            <TextField fx:id="textfield_localScope_numTopicsToUse" disable="true" maxWidth="40.0" text="50" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                                                            <Label text="Number of keywords" />
-                                                            <Slider fx:id="slider_localScope_numKeywordsToUse" maxWidth="120.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="10.0" GridPane.columnIndex="1" />
-                                                            <TextField fx:id="textfield_localScope_numKeywordsToUse" maxWidth="40.0" text="10" GridPane.columnIndex="2" />
-                                                         </children>
-                                                      </GridPane>
-                                                   </children>
-                                                </VBox>
-                                             </children>
-                                          </AnchorPane>
-                                    </content>
-                                  </TitledPane>
-                                    <TitledPane fx:id="paramSpace_titledPane" animated="false" onMouseClicked="#selectSettingsPane" style="-fx-background-color: #ffffff;" text="Parameter Space">
+                                    <TitledPane fx:id="paramSpace_titledPane" animated="false" onMouseClicked="#selectSettingsPane" style="-fx-background-color: #ffffff;" text="Parameter Space | Distribution">
                                       <content>
                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: #ffffff;">
                                              <children>
@@ -204,7 +174,7 @@
                                                             <Insets bottom="10.0" />
                                                          </VBox.margin>
                                                       </Label>
-                                                      <GridPane prefHeight="174.0" prefWidth="302.0">
+                                                      <GridPane prefHeight="213.0" prefWidth="302.0">
                                                         <columnConstraints>
                                                           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                                           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -212,7 +182,8 @@
                                                         <rowConstraints>
                                                             <RowConstraints maxHeight="165.0" minHeight="10.0" prefHeight="36.99999237060547" vgrow="SOMETIMES" />
                                                             <RowConstraints maxHeight="210.0" minHeight="10.0" prefHeight="88.00000762939453" vgrow="SOMETIMES" />
-                                                            <RowConstraints maxHeight="210.0" minHeight="10.0" prefHeight="88.00000762939453" vgrow="SOMETIMES" />
+                                                            <RowConstraints maxHeight="210.0" minHeight="10.0" prefHeight="93.0" vgrow="SOMETIMES" />
+                                                            <RowConstraints maxHeight="210.0" minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
                                                         </rowConstraints>
                                                          <children>
                                                             <Label text="Show DHM" />
@@ -258,6 +229,18 @@
                                                                   </CheckBox>
                                                                </children>
                                                             </VBox>
+                                                            <HBox GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                                               <children>
+                                                                  <ColorPicker fx:id="paramSpace_dhmColor_min_colChooser" onAction="#updatePSScatterchartDHMColorSpectrum" prefHeight="25.0" prefWidth="40.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                                                  <Label text="to">
+                                                                     <HBox.margin>
+                                                                        <Insets left="10.0" right="10.0" top="5.0" />
+                                                                     </HBox.margin>
+                                                                  </Label>
+                                                                  <ColorPicker fx:id="paramSpace_dhmColor_max_colChooser" onAction="#updatePSScatterchartDHMColorSpectrum" prefHeight="25.0" prefWidth="40.0" />
+                                                               </children>
+                                                            </HBox>
+                                                            <Label text="Color spectrum" GridPane.rowIndex="3" />
                                                          </children>
                                                       </GridPane>
                                                    </children>
@@ -266,6 +249,85 @@
                                           </AnchorPane>
                                       </content>
                                     </TitledPane>
+                                  <TitledPane fx:id="localScope_titledPane" animated="false" onMouseClicked="#selectSettingsPane" style="-fx-background-color: #ffffff;" text="Result Space | Detail View">
+                                    <content>
+                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: #ffffff;">
+                                             <children>
+                                                <VBox layoutX="14.0" layoutY="14.0" prefHeight="200.0" prefWidth="354.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                   <children>
+                                                      <Label text="General">
+                                                         <font>
+                                                            <Font name="System Bold" size="12.0" />
+                                                         </font>
+                                                         <VBox.margin>
+                                                            <Insets bottom="8.0" />
+                                                         </VBox.margin>
+                                                      </Label>
+                                                      <GridPane hgap="5.0">
+                                                        <columnConstraints>
+                                                          <ColumnConstraints hgrow="SOMETIMES" maxWidth="239.99999237060547" minWidth="10.0" prefWidth="175.99999237060547" />
+                                                          <ColumnConstraints hgrow="SOMETIMES" maxWidth="224.0" minWidth="10.0" prefWidth="116.0" />
+                                                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="117.0" minWidth="10.0" prefWidth="68.0" />
+                                                        </columnConstraints>
+                                                        <rowConstraints>
+                                                            <RowConstraints maxHeight="34.0" minHeight="10.0" prefHeight="34.0" vgrow="SOMETIMES" />
+                                                          <RowConstraints maxHeight="34.0" minHeight="10.0" prefHeight="34.0" vgrow="SOMETIMES" />
+                                                        </rowConstraints>
+                                                         <children>
+                                                            <Label text="Max. number of topics" GridPane.rowIndex="1" />
+                                                            <Slider fx:id="slider_localScope_numTopicsToUse" disable="true" maxWidth="120.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="50.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                                               <GridPane.margin>
+                                                                  <Insets top="10.0" />
+                                                               </GridPane.margin>
+                                                            </Slider>
+                                                            <TextField fx:id="textfield_localScope_numTopicsToUse" disable="true" maxWidth="40.0" text="50" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                                            <Label text="Number of keywords" />
+                                                            <Slider fx:id="slider_localScope_numKeywordsToUse" maxWidth="120.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="10.0" GridPane.columnIndex="1" />
+                                                            <TextField fx:id="textfield_localScope_numKeywordsToUse" maxWidth="40.0" text="10" GridPane.columnIndex="2" />
+                                                         </children>
+                                                      </GridPane>
+                                                      <Separator prefWidth="200.0">
+                                                         <VBox.margin>
+                                                            <Insets bottom="10.0" top="10.0" />
+                                                         </VBox.margin>
+                                                      </Separator>
+                                                      <Label text="Topic Model Comparison Heatmap">
+                                                         <font>
+                                                            <Font name="System Bold" size="12.0" />
+                                                         </font>
+                                                         <VBox.margin>
+                                                            <Insets bottom="8.0" />
+                                                         </VBox.margin>
+                                                      </Label>
+                                                      <GridPane hgap="5.0" prefHeight="28.0" prefWidth="302.0">
+                                                         <children>
+                                                            <Label text="Color spectrum" />
+                                                            <HBox GridPane.columnIndex="1">
+                                                               <children>
+                                                                  <ColorPicker fx:id="tmc_color_min_colChooser" onAction="#updateTMCHeatmapColorSpectrum" prefHeight="25.0" prefWidth="40.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                                                  <Label text="to">
+                                                                     <HBox.margin>
+                                                                        <Insets left="10.0" right="10.0" top="5.0" />
+                                                                     </HBox.margin>
+                                                                  </Label>
+                                                                  <ColorPicker fx:id="tmc_color_max_colChooser" onAction="#updateTMCHeatmapColorSpectrum" prefHeight="25.0" prefWidth="40.0" />
+                                                               </children>
+                                                            </HBox>
+                                                         </children>
+                                                         <columnConstraints>
+                                                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="239.99999237060547" minWidth="10.0" prefWidth="154.0" />
+                                                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="224.0" minWidth="10.0" prefWidth="143.0" />
+                                                         </columnConstraints>
+                                                         <rowConstraints>
+                                                            <RowConstraints maxHeight="34.0" minHeight="10.0" prefHeight="34.0" vgrow="SOMETIMES" />
+                                                         </rowConstraints>
+                                                      </GridPane>
+                                                   </children>
+                                                </VBox>
+                                             </children>
+                                          </AnchorPane>
+                                    </content>
+                                  </TitledPane>
                                 </panes>
                               </Accordion>
                               <Label layoutX="45.0" layoutY="12.0" text="Settings" AnchorPane.leftAnchor="45.0" AnchorPane.topAnchor="12.0">
@@ -290,7 +352,7 @@
                                             <items>
                                               <AnchorPane fx:id="mds_anchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff;">
                                                    <children>
-                                                      <Label layoutX="7.0" layoutY="5.0" text="Topic Models | Result Space" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                                      <Label layoutX="7.0" layoutY="5.0" text="Result Space | Topic Models" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0">
                                                          <font>
                                                             <Font name="System Bold" size="12.0" />
                                                          </font>
@@ -305,7 +367,7 @@
                                                       </ScatterChart>
                                                       <Canvas height="50.0" layoutX="216.0" layoutY="221.0" width="50.0" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="28.0" />
                                                       <Canvas fx:id="mdsHeatmap_canvas" height="180.0" layoutX="43.0" layoutY="48.0" visible="false" width="288.0" />
-                                                      <ImageView fx:id="settings_mds_icon" fitHeight="15.0" fitWidth="15.0" layoutX="81.0" layoutY="6.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="170.0" AnchorPane.topAnchor="6.0">
+                                                      <ImageView fx:id="settings_mds_icon" fitHeight="15.0" fitWidth="15.0" layoutX="81.0" layoutY="6.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="180.0" AnchorPane.topAnchor="6.0">
                                                          <image>
                                                             <Image url="@icons/cog.png" />
                                                          </image>
@@ -326,7 +388,7 @@
                                                          </image>
                                                       </ImageView>
                                                       <AnchorPane fx:id="paramSpace_distribution_anchorPane_selected" layoutY="32.0" prefHeight="227.0" prefWidth="411.0" style="-fx-background-color: #fff; -fx-border-color: #ccc;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
-                                                      <Label layoutX="8.0" layoutY="7.0" text="Topic Models | Parameter Space" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="7.0">
+                                                      <Label layoutX="8.0" layoutY="7.0" text="Parameter Space | Distribution" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="7.0">
                                                          <font>
                                                             <Font name="System Bold" size="12.0" />
                                                          </font>
@@ -376,7 +438,7 @@
                                                             <AnchorPane fx:id="paramSpace_distribution_anchorPane_filtered" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #fff;" />
                                                           <AnchorPane fx:id="distEval_anchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff;">
                                                                <children>
-                                                                  <Label layoutX="7.0" layoutY="4.0" text="Distance Evaluation" AnchorPane.topAnchor="7.0">
+                                                                  <Label layoutX="7.0" layoutY="4.0" text="Result Space | Distance Evaluation" AnchorPane.topAnchor="7.0">
                                                                      <font>
                                                                         <Font name="System Bold" size="12.0" />
                                                                      </font>
@@ -394,7 +456,7 @@
                                                                         <Font size="10.0" />
                                                                      </font>
                                                                   </ToggleButton>
-                                                                  <ImageView fx:id="settings_distEval_icon" fitHeight="15.0" fitWidth="15.0" layoutX="133.0" layoutY="9.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="132.0" AnchorPane.topAnchor="8.0">
+                                                                  <ImageView fx:id="settings_distEval_icon" fitHeight="15.0" fitWidth="15.0" layoutX="133.0" layoutY="9.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="203.0" AnchorPane.topAnchor="8.0">
                                                                      <image>
                                                                         <Image url="@icons/cog.png" />
                                                                      </image>
