@@ -1107,6 +1107,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	 */
 	public void setHeatmapGranularityInformation(boolean selected, int value, boolean update)
 	{
+		System.out.println("and down here");
 		heatmap.setGranularityInformation(selected, value, update);
 	}
 
@@ -1141,9 +1142,9 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 		final double yBorderFactor = 0.05;
 		
 		// Set x position and new width.
-		final double offsetX = 43 + scatterchart.getWidth() * xBorderFactor;
+		final double offsetX = 48 + scatterchart.getWidth() * xBorderFactor;
 		heatmap_canvas.setLayoutX(offsetX);
-		heatmap_canvas.setWidth( (scatterchart.getWidth() - 15 - offsetX) * (1 - xBorderFactor));
+		heatmap_canvas.setWidth( (scatterchart.getWidth() - 10 - offsetX) * (1 - xBorderFactor));
 		
 		// Set y positiona and new height.
 		final double offsetY = scatterchart.getHeight() * yBorderFactor;

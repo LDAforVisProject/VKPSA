@@ -98,6 +98,11 @@ public class DistancesBarchart extends VisualizationComponent_Legacy implements 
 	 */
 	private Set<String> selectedBars;
 	
+	/**
+	 * Defines whether logarithmic scaling is enabled.
+	 */
+	private boolean isLogarithmicScalingEnabled;
+	
 	/*
 	 * Actual data.
 	 */
@@ -145,9 +150,9 @@ public class DistancesBarchart extends VisualizationComponent_Legacy implements 
 	private XYChart.Series<String, Number> activeDataSeries;
 
 	
-	/*
-	 * Methods.
-	 */
+	// -------------------------------------------------
+	// 					Methods
+	// -------------------------------------------------
 	
 	public DistancesBarchart(	AnalysisController analysisController, BarChart<String, Number> barchart_distances, 
 								NumberAxis numberaxis_distanceEvaluation_yaxis,
@@ -327,15 +332,16 @@ public class DistancesBarchart extends VisualizationComponent_Legacy implements 
 	 */
 	public void refresh(Set<Integer> discardedIndices, Set<Integer> filteredIndices, Set<Integer> selectedIndices, 
 						double discardedDistances[][], double filteredDistances[][], double[][] selectedFilteredDistances, 
-						boolean haveFilterSettingsChanged)
+						boolean haveFilterSettingsChanged, boolean isLogarithmicScalingEnabled)
 	{
 		// Set/update references.
-		this.discardedIndices			= discardedIndices;
-		this.filteredIndices			= filteredIndices;
-		this.selectedIndices			= selectedIndices;
-		this.discardedDistances			= discardedDistances;
-		this.filteredDistances			= filteredDistances;
-		this.selectedFilteredDistances	= selectedFilteredDistances;
+		this.discardedIndices				= discardedIndices;
+		this.filteredIndices				= filteredIndices;
+		this.selectedIndices				= selectedIndices;
+		this.discardedDistances				= discardedDistances;
+		this.filteredDistances				= filteredDistances;
+		this.selectedFilteredDistances		= selectedFilteredDistances;
+		this.isLogarithmicScalingEnabled	= isLogarithmicScalingEnabled;
 		
 		//	Clear old barchart data.
 		barchart.getData().clear();
@@ -484,7 +490,7 @@ public class DistancesBarchart extends VisualizationComponent_Legacy implements 
 		 */
 		
 		// If logarithmic scaling is enabled:
-		if (checkbox_useLogarithmicScaling.isSelected()) {
+		if (isLogarithmicScalingEnabled) {
 			// Scale bin count values accordingly.
 			for (int i = 0; i < distanceBinList.length; i++) {
 				distanceBinList[i] = distanceBinList[i] > 0 ? (int) Math.log(distanceBinList[i]) : 0;
@@ -651,7 +657,7 @@ public class DistancesBarchart extends VisualizationComponent_Legacy implements 
 		// Refresh chart.
 		refresh(discardedIndices, filteredIndices, selectedIndices,
 				discardedDistances, filteredDistances, selectedFilteredDistances,
-				false);
+				false, isLogarithmicScalingEnabled);
 	}
 	
 	/**
@@ -663,7 +669,22 @@ public class DistancesBarchart extends VisualizationComponent_Legacy implements 
 		// Refresh chart.
 		refresh(discardedIndices, filteredIndices, selectedIndices,
 				discardedDistances, filteredDistances, selectedFilteredDistances,
-				false);
+				false, isLogarithmicScalingEnabled);
+	}
+
+	/**
+	 * Checks if logarithmic scaling is enabled.
+	 * Rescales values, if necessary. 
+	 * @param isLogarithmicScalingEnabled
+	 */
+	public void changeScalingType(boolean isLogarithmicScalingEnabled)
+	{
+		this.isLogarithmicScalingEnabled = isLogarithmicScalingEnabled;
+		
+		// Refresh chart.
+		refresh(discardedIndices, filteredIndices, selectedIndices,
+				discardedDistances, filteredDistances, selectedFilteredDistances,
+				false, isLogarithmicScalingEnabled);
 	}
 
 	@Override

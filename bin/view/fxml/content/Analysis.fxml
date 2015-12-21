@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane maxHeight="694.0" maxWidth="1366.0" prefHeight="694.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.analysisView.AnalysisController">
+<AnchorPane fx:id="analysisRoot_anchorPane" maxHeight="694.0" maxWidth="1366.0" prefHeight="694.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.analysisView.AnalysisController">
    <children>
       <SplitPane dividerPositions="0.77" orientation="VERTICAL" prefHeight="850.0" prefWidth="1440.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
@@ -61,7 +61,7 @@
                                                             <ComboBox disable="true" prefWidth="150.0" GridPane.columnIndex="1" />
                                                             <ComboBox disable="true" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                                             <Label text="Enable logarithmic scaling" GridPane.rowIndex="2" />
-                                                            <CheckBox fx:id="checkbox_logarithmicDistanceBarchart" mnemonicParsing="false" onAction="#changeScalingType" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                                            <CheckBox fx:id="checkbox_logarithmicDistanceBarchart" mnemonicParsing="false" onAction="#changeDBCScalingType" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                                          </children>
                                                       </GridPane>
                                                       <Separator prefWidth="200.0">
@@ -119,10 +119,10 @@
                                                          <children>
                                                             <Label text="DHM granularity" GridPane.rowIndex="1" />
                                                             <Label text="Show density heatmap" />
-                                                            <CheckBox fx:id="showMSDHeatmap_checkbox" mnemonicParsing="false" onAction="#changeMDSHeatmapVisibility" GridPane.columnIndex="1" />
+                                                            <CheckBox fx:id="showMSDHeatmap_checkbox" mnemonicParsing="false" onAction="#changeGlobalScatterplotDHMVisibility" GridPane.columnIndex="1" />
                                                             <GridPane prefHeight="50.0" prefWidth="185.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                                                <children>
-                                                                  <CheckBox fx:id="checkbox_mdsHeatmap_distribution_dynAdjustment" mnemonicParsing="false" onAction="#changeHeatmapGranularityMode" selected="true" text="Adjust dynamically">
+                                                                  <CheckBox fx:id="checkbox_mdsHeatmap_distribution_dynAdjustment" mnemonicParsing="false" onAction="#changeGlobalScatterplotDHMGranularityMode" selected="true" text="Adjust dynamically">
                                                                      <GridPane.margin>
                                                                         <Insets bottom="5.0" />
                                                                      </GridPane.margin>
@@ -330,14 +330,14 @@
                                   </TitledPane>
                                 </panes>
                               </Accordion>
-                              <Label layoutX="45.0" layoutY="12.0" text="Settings" AnchorPane.leftAnchor="45.0" AnchorPane.topAnchor="12.0">
+                              <Label layoutX="45.0" layoutY="12.0" text="Filter" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="12.0">
                                  <font>
                                     <Font name="System Bold" size="12.0" />
                                  </font>
                               </Label>
-                              <ImageView fitHeight="25.0" fitWidth="25.0" layoutX="10.0" layoutY="9.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="9.0">
+                              <ImageView fitHeight="35.0" fitWidth="40.0" layoutX="10.0" layoutY="9.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="3.0">
                                  <image>
-                                    <Image url="@icons/cog.png" />
+                                    <Image url="@icons/filter_slider.gif" />
                                  </image>
                               </ImageView>
                            </children>
@@ -350,24 +350,28 @@
                                        <children>
                                           <SplitPane dividerPositions="0.5" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <items>
-                                              <AnchorPane fx:id="mds_anchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff;">
+                                              <AnchorPane fx:id="mds_anchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff; -fx-border: #ccc;">
                                                    <children>
                                                       <Label layoutX="7.0" layoutY="5.0" text="Result Space | Topic Models" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0">
                                                          <font>
                                                             <Font name="System Bold" size="12.0" />
                                                          </font>
                                                       </Label>
-                                                      <ScatterChart fx:id="mds_scatterchart" animated="false" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="30.0">
-                                                        <xAxis>
-                                                          <NumberAxis side="BOTTOM" />
-                                                        </xAxis>
-                                                        <yAxis>
-                                                          <NumberAxis side="LEFT" tickUnit="1.0" />
-                                                        </yAxis>
-                                                      </ScatterChart>
-                                                      <Canvas height="50.0" layoutX="216.0" layoutY="221.0" width="50.0" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="28.0" />
-                                                      <Canvas fx:id="mdsHeatmap_canvas" height="180.0" layoutX="43.0" layoutY="48.0" visible="false" width="288.0" />
-                                                      <ImageView fx:id="settings_mds_icon" fitHeight="15.0" fitWidth="15.0" layoutX="81.0" layoutY="6.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="180.0" AnchorPane.topAnchor="6.0">
+                                                      <AnchorPane layoutY="6.0" prefHeight="259.0" prefWidth="411.0" style="-fx-border-color: #ccc;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
+                                                         <children>
+                                                            <Canvas height="50.0" layoutX="333.0" layoutY="173.0" width="50.0" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="28.0" />
+                                                            <ScatterChart fx:id="mds_scatterchart" animated="false" layoutY="24.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="0.0">
+                                                              <xAxis>
+                                                                <NumberAxis side="BOTTOM" />
+                                                              </xAxis>
+                                                              <yAxis>
+                                                                <NumberAxis side="LEFT" tickUnit="1.0" />
+                                                              </yAxis>
+                                                            </ScatterChart>
+                                                            <Canvas fx:id="mdsHeatmap_canvas" height="180.0" layoutX="43.0" layoutY="19.0" visible="false" width="288.0" />
+                                                         </children>
+                                                      </AnchorPane>
+                                                      <ImageView fx:id="settings_mds_icon" fitHeight="15.0" fitWidth="15.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="180.0" AnchorPane.topAnchor="6.0">
                                                          <image>
                                                             <Image url="@icons/cog.png" />
                                                          </image>

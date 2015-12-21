@@ -63,6 +63,7 @@ public abstract class VisualizationComponent extends Controller implements ISele
 		FXML_PATHS.put(VisualizationComponentType.CATEGORICAL_HEATMAP, "/view/fxml/components/CategoricalHeatmap.fxml");
 		FXML_PATHS.put(VisualizationComponentType.SCENTED_FILTER, "/view/fxml/components/ScentedFilter.fxml");
 		FXML_PATHS.put(VisualizationComponentType.PARAMSPACE_SCATTERCHART, "/view/fxml/components/ParameterSpaceScatterchart.fxml");
+		FXML_PATHS.put(VisualizationComponentType.SETTINGS_PANEL, "/view/fxml/components/SettingsPanel.fxml");
 	}
 	
 	/**

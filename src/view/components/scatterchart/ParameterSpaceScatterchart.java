@@ -249,19 +249,19 @@ public class ParameterSpaceScatterchart extends Scatterchart
 	@Override
 	protected void updateHeatmapPosition()
 	{
-		final double xBorderFactor = 0.069;
-		final double yBorderFactor = 0.0625;
+		final double xBorderFactor = 0.0675;
+		final double yBorderFactor = 0.05;
 		
 		final double offsetX = 26 + scatterchart.getWidth() * xBorderFactor;
 		final double offsetY = -30 - scatterchart.getHeight() * yBorderFactor;
 		
 		// Set x position and new width.
 		densityHeatmap.getRoot().setTranslateX(offsetX);
-		final double newWidth = (scatterchart.getWidth() ) * (1 - xBorderFactor * 1.7);
+		final double newWidth = (scatterchart.getWidth() - 14 ) * (1 - xBorderFactor * 1.5);
 		
 		// Set y positiona and new height.
 		densityHeatmap.getRoot().setTranslateY(offsetY);
-		final double newHeight = (scatterchart.getHeight() + offsetY) * (1 - yBorderFactor / 4.0);
+		final double newHeight = (scatterchart.getHeight() - 14) * (1 - yBorderFactor * 2.0);
 		
 		densityHeatmap.resizeContent(newWidth, newHeight);
 	}

@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.controlsfx.control.PopOver;
+
 import model.AnalysisDataspace;
 import model.LDAConfiguration;
 import model.workspace.Workspace;
@@ -25,6 +27,7 @@ import view.components.scatterchart.ParameterSpaceScatterchart;
 import view.components.scentedFilter.ScentedFilter;
 import view.components.scentedFilter.ScentedFilterDataset;
 import view.components.scentedFilter.ScentedFilterOptionset;
+import view.components.settingsPopup.SettingsPanel;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -78,6 +81,11 @@ public class AnalysisController extends Controller
 	/*
 	 * Anchorpanes hosting visualizations. 
 	 */
+	
+	/**
+	 * Root pane.
+	 */
+	private @FXML AnchorPane analysisRoot_anchorPane;
 	
 	/**
 	 * For settings.
@@ -262,6 +270,18 @@ public class AnalysisController extends Controller
 	private @FXML ImageView settings_paramDist_icon;
 	private @FXML ImageView settings_localScope_icon;
 	
+	/*
+	 * Settings panel and related elements.
+	 */
+	
+	/**
+	 * Settings panel. 
+	 */
+	private SettingsPanel settingsPanel;
+	/**
+	 * Popover for settings panel.
+	 */
+	private PopOver settingsPopOver;
 	
 	// -----------------------------------------------
 	// 				Data.
@@ -350,6 +370,7 @@ public class AnalysisController extends Controller
 	 */
 	private void initUIElements() 
 	{
+		initSettingsPanel();
 		initFilterControls();
 		initMDSScatterchart();
 		initDistanceBarchart();
@@ -362,6 +383,15 @@ public class AnalysisController extends Controller
 		settings_distEval_icon.toFront();
 		settings_paramDist_icon.toFront();
 		settings_localScope_icon.toFront();
+	}
+	
+	private void initSettingsPanel()
+	{
+		settingsPanel 	= (SettingsPanel)VisualizationComponent.generateInstance(VisualizationComponentType.SETTINGS_PANEL, this, null, null, null);
+		settingsPopOver = new PopOver(settingsPanel.getRoot());
+		
+		settingsPanel.init();
+		settingsPopOver.detach();
 	}
 	
 	private void initComparisonHeatmaps()
@@ -506,7 +536,7 @@ public class AnalysisController extends Controller
 		//	Distance evaluation barchart:
 		distancesBarchart.refresh(	dataspace.getDiscardedIndices(), dataspace.getInactiveIndices(), dataspace.getActiveIndices(),
 									dataspace.getDiscardedDistances(), dataspace.getAvaibleDistances(), dataspace.getActiveDistances(), 
-									true);
+									true, settingsPanel.isDBCLogarithmicallyScaled());
 
 		// 	Parameter space scatterchart:
 		paramSpaceScatterchart.refresh(new ScatterchartDataset(	dataspace.getLDAConfigurations(), dataspace.getDiscardedLDAConfigurations(),
@@ -563,7 +593,7 @@ public class AnalysisController extends Controller
 			//	Distances barchart:
 			distancesBarchart.refresh(	dataspace.getDiscardedIndices(), dataspace.getInactiveIndices(), dataspace.getActiveIndices(),
 										dataspace.getDiscardedDistances(), dataspace.getAvaibleDistances(), dataspace.getActiveDistances(), 
-										true);
+										true, settingsPanel.isDBCLogarithmicallyScaled());
 			
 			//	Paramer space scatterchart:
 			paramSpaceScatterchart.refresh(new ScatterchartDataset(	dataspace.getLDAConfigurations(), dataspace.getDiscardedLDAConfigurations(),
@@ -671,7 +701,7 @@ public class AnalysisController extends Controller
 		// 	Distances barchart:
 		distancesBarchart.refresh(		dataspace.getDiscardedIndices(), dataspace.getInactiveIndices(), dataspace.getActiveIndices(),
 										dataspace.getDiscardedDistances(), dataspace.getAvaibleDistances(), dataspace.getActiveDistances(), 
-										true);
+										true, settingsPanel.isDBCLogarithmicallyScaled());
 		// 	MDS scatterchart:
 		globalScatterplot.refresh(		dataspace.getCoordinates(),
 										dataspace.getAvailableCoordinates(), dataspace.getInactiveIndices(), 
@@ -834,18 +864,18 @@ public class AnalysisController extends Controller
 	}
 	
 	@FXML
-	public void changeScalingType(ActionEvent e)
+	public void changeDBCScalingType(ActionEvent e)
 	{
 		distancesBarchart.changeScalingType();
 	}
 	
 	/**
-	 * Processes new information about granularity of parameter space distribution heatmap.
-	 * @param e
+	 * Changes distance barchart's scaling type.
+	 * @param isLogarithmic
 	 */
-	@FXML
-	public void changeParameterDistributionGranularityMode(ActionEvent e)
+	public void changeDBCScalingType(boolean isLogarithmicScalingEnabled)
 	{
+		distancesBarchart.changeScalingType(isLogarithmicScalingEnabled);
 	}
 	
 	/**
@@ -853,10 +883,21 @@ public class AnalysisController extends Controller
 	 * @param e
 	 */
 	@FXML
-	public void changeHeatmapGranularityMode(ActionEvent e)
+	public void changeGlobalScatterplotDHMGranularityMode(ActionEvent e)
 	{
 		slider_mds_distribution_granularity.setDisable(checkbox_mdsHeatmap_distribution_dynAdjustment.isSelected());
 		globalScatterplot.setHeatmapGranularityInformation(checkbox_mdsHeatmap_distribution_dynAdjustment.isSelected(), (int) slider_mds_distribution_granularity.getValue(), true);
+	}
+	
+	/**
+	 * Processes new information about granularity of density heatmap in global scatterchart.
+	 * @param isGranularityDynamic
+	 * @param granularity
+	 */
+	public void changeGlobalScatterplotDHMGranularity(boolean isGranularityDynamic, int granularity)
+	{
+		System.out.println("and here");
+		globalScatterplot.setHeatmapGranularityInformation(isGranularityDynamic, granularity, true);
 	}
 	
 	/**
@@ -866,7 +907,6 @@ public class AnalysisController extends Controller
 	@FXML
 	public void changePSHeatmapGranularityMode(ActionEvent e)
 	{
-		System.out.println("wat");
 		paramSpace_dhmGranularity_slider.setDisable(false); // !paramSpace_dhmGranularity_checkbox.isSelected()
 		refreshParameterSpaceScatterchart();
 	}	
@@ -876,9 +916,18 @@ public class AnalysisController extends Controller
 	 * @param e
 	 */
 	@FXML
-	public void changeMDSHeatmapVisibility(ActionEvent e)
+	public void changeGlobalScatterplotDHMVisibility(ActionEvent e)
 	{
 		globalScatterplot.setHeatmapVisiblity(showMSDHeatmap_checkbox.isSelected());
+	}
+	
+	/**
+	 * Toggles global scatterplot's density heatmap visiblity.
+	 * @param isVisible
+	 */
+	public void changeGlobalScatterplotDHMVisibility(boolean isVisible)
+	{
+		globalScatterplot.setHeatmapVisiblity(isVisible);
 	}
 	
 	/**
@@ -934,7 +983,13 @@ public class AnalysisController extends Controller
 	@FXML
 	public void switchToSettingsPane(MouseEvent e)
 	{
+		settingsPopOver.show(analysisRoot_anchorPane);
+		settingsPopOver.setX(e.getSceneX());
+		settingsPopOver.setY(e.getSceneY());
+		settingsPopOver.detach();
+		
 		openSettingsPane( ((Node)e.getSource()).getId() );
+		settingsPanel.openSettingsPane(((Node)e.getSource()).getId());
 	}
 	
 	/**
@@ -943,12 +998,17 @@ public class AnalysisController extends Controller
 	 * @param y
 	 */
 	public void checkIfSettingsIconWasClicked(double x, double y, String iconID)
-	{
+	{		
 		if(	(iconID == "settings_mds_icon" 				&& settings_mds_icon.getBoundsInParent().contains(x, y))			||
 			(iconID == "settings_distEval_icon" 		&& settings_distEval_icon.getBoundsInParent().contains(x, y))		||
 			(iconID == "settings_paramDist_icon" 		&& settings_paramDist_icon.getBoundsInParent().contains(x, y))		||
 			(iconID == "settings_localScope_icon" 		&& settings_localScope_icon.getBoundsInParent().contains(x, y))
 		) {
+			settingsPopOver.show(analysisRoot_anchorPane);
+			settingsPopOver.setX(0);
+			settingsPopOver.setY(0);
+			settingsPopOver.detach();
+			
 			// Open corresponding settings panel.
 			openSettingsPane(iconID);
 		}
@@ -1129,6 +1189,8 @@ public class AnalysisController extends Controller
 		for (ScentedFilter filter : filters) {
 			filter.setReferences(workspace, logPI, logTA);
 		}
+		// ... for settings panel.
+		settingsPanel.setReferences(workspace, logPI, logTA);
 	}
 	
 	/**
