@@ -1107,7 +1107,6 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	 */
 	public void setHeatmapGranularityInformation(boolean selected, int value, boolean update)
 	{
-		System.out.println("and down here");
 		heatmap.setGranularityInformation(selected, value, update);
 	}
 

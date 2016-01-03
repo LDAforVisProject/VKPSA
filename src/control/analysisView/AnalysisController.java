@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import javax.xml.transform.Source;
+
 import org.controlsfx.control.PopOver;
 
 import model.AnalysisDataspace;
@@ -74,9 +76,6 @@ public class AnalysisController extends Controller
 	private @FXML Accordion accordion_options;
 	// Panes in accordion.
 	private @FXML TitledPane filter_titledPane;
-	private @FXML TitledPane mdsDistEval_titledPane;
-	private @FXML TitledPane localScope_titledPane;
-	private @FXML TitledPane paramSpace_titledPane;
 	
 	/*
 	 * Anchorpanes hosting visualizations. 
@@ -144,28 +143,6 @@ public class AnalysisController extends Controller
 	 */
 	private @FXML Canvas mdsHeatmap_canvas;
 	
-	// Controls for MDS heatmap.
-	/**
-	 * Checkbox for heatmap.
-	 */
-	private @FXML CheckBox checkbox_mdsHeatmap_distribution_dynAdjustment;
-	/**
-	 * Slider specifying MDS heatmap granularity.
-	 */
-	private @FXML Slider slider_mds_distribution_granularity;
-	/**
-	 * Specifies whether or not the MDS heatmap is to be shown.
-	 */
-	private @FXML CheckBox showMSDHeatmap_checkbox;
-	/**
-	 * Color chooser for lower end of heatmap values.
-	 */
-	private @FXML ColorPicker mdsHeatmap_dhmColor_min_colChooser;
-	/**
-	 * Color chooser for upper end of heatmap values.
-	 */
-	private @FXML ColorPicker mdsHeatmap_dhmColor_max_colChooser;
-	
 	/*
 	 * Distances barchart. 
 	 */
@@ -198,25 +175,6 @@ public class AnalysisController extends Controller
 	// Heatmap setting controls (and metadata).
 	private @FXML ToggleButton button_relativeView_paramDist;
 	
-	//  Controls for parameter space density heatmap: ...
-	// ...for granularity.
-	private @FXML CheckBox paramSpace_dhmGranularity_checkbox;
-	private @FXML CheckBox paramSpace_dhmVisibility_checkbox;
-	private @FXML Slider paramSpace_dhmGranularity_slider;
-	// ...for category selection.
-	private @FXML CheckBox paramSpace_dhmCategories_active_checkbox;
-	private @FXML CheckBox paramSpace_dhmCategories_inactive_checkbox;
-	private @FXML CheckBox paramSpace_dhmCategories_discarded_checkbox;
-	// ...for color spectrum.
-	/**
-	 * Color chooser for lower end of heatmap values.
-	 */
-	private @FXML ColorPicker paramSpace_dhmColor_min_colChooser;
-	/**
-	 * Color chooser for upper end of heatmap values.
-	 */
-	private @FXML ColorPicker paramSpace_dhmColor_max_colChooser;
-	
 	/*
 	 * Local scope.
 	 */
@@ -226,28 +184,11 @@ public class AnalysisController extends Controller
 	 */	
 	CategoricalHeatmap tmcHeatmap;
 	
-	// TMC options:
-	/**
-	 * Color chooser for lower end of heatmap values.
-	 */
-	private @FXML ColorPicker tmc_color_min_colChooser;
-	/**
-	 * Color chooser for lower end of heatmap values.
-	 */
-	private @FXML ColorPicker tmc_color_max_colChooser;
-	
 	/**
 	 * Parallel tag cloud in local scope.
 	 */
 	private LocalScopeInstance localScopeInstance;
-	
-	// Local scope options.
-	 
-	private @FXML Slider slider_localScope_numTopicsToUse;
-	private @FXML TextField textfield_localScope_numTopicsToUse;
-	private @FXML Slider slider_localScope_numKeywordsToUse;
-	private @FXML TextField textfield_localScope_numKeywordsToUse;
-	
+
 	/*
 	 * Filter controls.
 	 */
@@ -404,8 +345,8 @@ public class AnalysisController extends Controller
 	{
 		// Create new instance of local scope.
 		localScopeInstance = new LocalScopeInstance(this, 	localScope_ptc_anchorPane, localscope_tmc_anchorPane,
-															slider_localScope_numTopicsToUse, textfield_localScope_numTopicsToUse,
-															slider_localScope_numKeywordsToUse, textfield_localScope_numKeywordsToUse);
+															settingsPanel.getLocalScopeTopicNumberSlider(), settingsPanel.getLocalScopeTopicNumberTextField(),
+															settingsPanel.getLocalScopeKeywordNumberSlider(), settingsPanel.getLocalScopeTopicNumberTextField());
 		localScopeInstance.load();
 	}
 
@@ -444,14 +385,10 @@ public class AnalysisController extends Controller
 
 	private void initMDSScatterchart()
 	{
-		// Init color chooser.
-		mdsHeatmap_dhmColor_min_colChooser.setValue(Color.RED);
-		mdsHeatmap_dhmColor_max_colChooser.setValue(Color.DARKRED);
-		
-		// Init scatterchart.
-		globalScatterplot = new MDSScatterchart(	this, mds_scatterchart, mdsHeatmap_canvas,
-													checkbox_mdsHeatmap_distribution_dynAdjustment, slider_mds_distribution_granularity,
-													mdsHeatmap_dhmColor_min_colChooser.getValue(), mdsHeatmap_dhmColor_max_colChooser.getValue());
+		// Init scatterchart. checkbox_mdsHeatmap_distribution_dynAdjustment
+		globalScatterplot = new MDSScatterchart(	this, mds_scatterchart, mdsHeatmap_canvas, 
+													settingsPanel.getGlobalScatterchartDHMGranularityCheckbox(), settingsPanel.getGlobalScatterchartDHMGranularitySlider(),
+													settingsPanel.getGlobalScatterchartDHMMinColor(), settingsPanel.getGlobalScatterchartDHMMaxColor());
 	}
 	
 	private void initDistanceBarchart()
@@ -462,41 +399,13 @@ public class AnalysisController extends Controller
 	
 	private void initParameterSpaceScatterchart()
 	{
-		// Init color chooser.
-		paramSpace_dhmColor_min_colChooser.setValue(Color.RED);
-		paramSpace_dhmColor_max_colChooser.setValue(Color.DARKRED);
-		
 		// Init parameter space scatterchart.
 		paramSpaceScatterchart = (ParameterSpaceScatterchart) VisualizationComponent.generateInstance(VisualizationComponentType.PARAMSPACE_SCATTERCHART, this, null, null, null);
 		paramSpaceScatterchart.applyOptions(new ScatterchartOptionset(	true, true, false,
-																		paramSpace_dhmVisibility_checkbox.isSelected(), paramSpace_dhmGranularity_checkbox.isSelected(), (int)paramSpace_dhmGranularity_slider.getValue(),
-																		calculatePSScatterchartCategoriesValue(),
-																		paramSpace_dhmColor_min_colChooser.getValue(), paramSpace_dhmColor_max_colChooser.getValue()));
+																		settingsPanel.isParamSpaceDHMVisible(), settingsPanel.isParamSpaceDHMGranularityDynamic(), settingsPanel.getParamSpaceDHMGranularityValue(),
+																		settingsPanel.calculatePSScatterchartCategoriesValue(),
+																		settingsPanel.getParamSpaceDHMMinColor(), settingsPanel.getParamSpaceDHMMaxColor()));
 		paramSpaceScatterchart.embedIn(paramSpace_distribution_anchorPane_selected);
-				
-		/*
-		 * Init option controls.
-		 */
-		
-		// Add listener to determine position during after release.
-		paramSpace_dhmGranularity_slider.addEventHandler(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
-            public void handle(MouseEvent event) 
-            {
-            	refreshParameterSpaceScatterchart();
-            }
-        });
-		
-		// Add listener to determine position during mouse drag.
-		paramSpace_dhmGranularity_slider.addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
-            public void handle(MouseEvent event) 
-            {
-            	refreshParameterSpaceScatterchart();
-            };
-        });
-		
-		// Init color chooser.
-		tmc_color_min_colChooser.setValue(Color.LIGHTBLUE);
-		tmc_color_max_colChooser.setValue(Color.DARKBLUE);
 	}
 	
 	/**
@@ -728,7 +637,7 @@ public class AnalysisController extends Controller
 		// If data sets were selected:
 		if (selectedLDAConfigurations.size() > 0) {
 			HeatmapOptionset tmcOptions = new HeatmapOptionset(	true, -1, 
-																tmc_color_min_colChooser.getValue(), tmc_color_max_colChooser.getValue(), new Color(0.0, 0.0, 1.0, 0.5), new Color(1.0, 0.0, 0.0, 0.5),
+																settingsPanel.getTMCMinColor(), settingsPanel.getTMCMaxColor(), new Color(0.0, 0.0, 1.0, 0.5), new Color(1.0, 0.0, 0.0, 0.5),
 																"", "",
 																true, false, true);
 			// Instruct heatmap to fetch topic distance data asynchronously.
@@ -743,7 +652,23 @@ public class AnalysisController extends Controller
 	{
 		// Update colors by refreshing the TMC heatmap.
 		HeatmapOptionset tmcOptions = new HeatmapOptionset(	true, -1, 
-															tmc_color_min_colChooser.getValue(), tmc_color_max_colChooser.getValue(), new Color(0.0, 0.0, 1.0, 0.5), new Color(1.0, 0.0, 0.0, 0.5),
+															settingsPanel.getTMCMinColor(), settingsPanel.getTMCMaxColor(), new Color(0.0, 0.0, 1.0, 0.5), new Color(1.0, 0.0, 0.0, 0.5),
+															"", "",
+															true, false, true);
+		tmcHeatmap.applyOptions(tmcOptions);
+		tmcHeatmap.refresh();
+	}
+	
+	/**
+	 * Refreshes heatmap for topic model comparison. Uses available data. 
+	 * @param minColor
+	 * @param maxColor
+	 */
+	private void refreshTMCHeatmap(Color minColor, Color maxColor)
+	{
+		// Update colors by refreshing the TMC heatmap.
+		HeatmapOptionset tmcOptions = new HeatmapOptionset(	true, -1, 
+															minColor, maxColor, new Color(0.0, 0.0, 1.0, 0.5), new Color(1.0, 0.0, 0.0, 0.5),
 															"", "",
 															true, false, true);
 		tmcHeatmap.applyOptions(tmcOptions);
@@ -770,9 +695,6 @@ public class AnalysisController extends Controller
 		// Get parameter boundaries.
 		Map<String, Pair<Double, Double>> parameterBoundaries = new HashMap<String, Pair<Double, Double>>();
 		
-//		for (String param : rangeSliders.keySet()) {
-//			parameterBoundaries.put(param, new Pair<Double, Double>(rangeSliders.get(param).getLowValue(), rangeSliders.get(param).getHighValue()));
-//		}
 		for (ScentedFilter filter : filters) {
 			filter.addThresholdsToMap(parameterBoundaries);
 		}
@@ -879,48 +801,15 @@ public class AnalysisController extends Controller
 	}
 	
 	/**
-	 * Processes new information about granularity of MDS heatmap.
-	 * @param e
-	 */
-	@FXML
-	public void changeGlobalScatterplotDHMGranularityMode(ActionEvent e)
-	{
-		slider_mds_distribution_granularity.setDisable(checkbox_mdsHeatmap_distribution_dynAdjustment.isSelected());
-		globalScatterplot.setHeatmapGranularityInformation(checkbox_mdsHeatmap_distribution_dynAdjustment.isSelected(), (int) slider_mds_distribution_granularity.getValue(), true);
-	}
-	
-	/**
 	 * Processes new information about granularity of density heatmap in global scatterchart.
 	 * @param isGranularityDynamic
 	 * @param granularity
 	 */
 	public void changeGlobalScatterplotDHMGranularity(boolean isGranularityDynamic, int granularity)
 	{
-		System.out.println("and here");
 		globalScatterplot.setHeatmapGranularityInformation(isGranularityDynamic, granularity, true);
 	}
-	
-	/**
-	 * Processes new information about granularity of parameter space scatterchart heatmap.
-	 * @param e
-	 */
-	@FXML
-	public void changePSHeatmapGranularityMode(ActionEvent e)
-	{
-		paramSpace_dhmGranularity_slider.setDisable(false); // !paramSpace_dhmGranularity_checkbox.isSelected()
-		refreshParameterSpaceScatterchart();
-	}	
 
-	/**
-	 * Toggles MDS heatmap visibility.
-	 * @param e
-	 */
-	@FXML
-	public void changeGlobalScatterplotDHMVisibility(ActionEvent e)
-	{
-		globalScatterplot.setHeatmapVisiblity(showMSDHeatmap_checkbox.isSelected());
-	}
-	
 	/**
 	 * Toggles global scatterplot's density heatmap visiblity.
 	 * @param isVisible
@@ -988,7 +877,6 @@ public class AnalysisController extends Controller
 		settingsPopOver.setY(e.getSceneY());
 		settingsPopOver.detach();
 		
-		openSettingsPane( ((Node)e.getSource()).getId() );
 		settingsPanel.openSettingsPane(((Node)e.getSource()).getId());
 	}
 	
@@ -1008,47 +896,6 @@ public class AnalysisController extends Controller
 			settingsPopOver.setX(0);
 			settingsPopOver.setY(0);
 			settingsPopOver.detach();
-			
-			// Open corresponding settings panel.
-			openSettingsPane(iconID);
-		}
-	}
-	
-	/**
-	 * Opens pane in settings panel.
-	 * @param paneID
-	 */
-	private void openSettingsPane(String paneID)
-	{	
-		// Reset title styles.
-		resetSettingsPanelsFontStyles();
-		
-		// Select new pane.
-		switch (paneID) {
-			case "settings_mds_icon":
-				accordion_options.setExpandedPane(mdsDistEval_titledPane);
-				mdsDistEval_titledPane.lookup(".title").setStyle("-fx-font-weight:bold");
-			break;
-			
-			case "settings_distEval_icon":
-				accordion_options.setExpandedPane(mdsDistEval_titledPane);
-				mdsDistEval_titledPane.lookup(".title").setStyle("-fx-font-weight:bold");
-			break;
-				
-			case "settings_paramDist_icon":
-				accordion_options.setExpandedPane(paramSpace_titledPane);
-				paramSpace_titledPane.lookup(".title").setStyle("-fx-font-weight:bold");
-			break;
-				
-			case "settings_paramDistCorr_icon":
-				accordion_options.setExpandedPane(paramSpace_titledPane);
-				paramSpace_titledPane.lookup(".title").setStyle("-fx-font-weight:bold");
-			break;
-				
-			case "settings_localScope_icon":
-				accordion_options.setExpandedPane(localScope_titledPane);
-				localScope_titledPane.lookup(".title").setStyle("-fx-font-weight:bold");
-			break;
 		}
 	}
 	
@@ -1059,10 +906,6 @@ public class AnalysisController extends Controller
 	{
 		// Change all font weights back to normal.
 		filter_titledPane.lookup(".title").setStyle("-fx-font-weight:normal");
-		mdsDistEval_titledPane.lookup(".title").setStyle("-fx-font-weight:normal");
-		paramSpace_titledPane.lookup(".title").setStyle("-fx-font-weight:normal");
-		paramSpace_titledPane.lookup(".title").setStyle("-fx-font-weight:normal");
-		localScope_titledPane.lookup(".title").setStyle("-fx-font-weight:normal");
 	}
 	
 	/**
@@ -1206,69 +1049,32 @@ public class AnalysisController extends Controller
 	/**
 	 * Refreshs parameter space scatterchart using existing data.
 	 */
-	private void refreshParameterSpaceScatterchart()
+	public void refreshParameterSpaceScatterchart()
 	{
-		
 		paramSpaceScatterchart.applyOptions(new ScatterchartOptionset(	true, true, false,
-											paramSpace_dhmVisibility_checkbox.isSelected(), paramSpace_dhmGranularity_checkbox.isSelected(), (int)paramSpace_dhmGranularity_slider.getValue(),
-											calculatePSScatterchartCategoriesValue(),
-											paramSpace_dhmColor_min_colChooser.getValue(), paramSpace_dhmColor_max_colChooser.getValue()));
+											settingsPanel.isParamSpaceDHMVisible(), settingsPanel.isParamSpaceDHMGranularityDynamic(), settingsPanel.getParamSpaceDHMGranularityValue(),
+											settingsPanel.calculatePSScatterchartCategoriesValue(),
+											settingsPanel.getParamSpaceDHMMinColor(), settingsPanel.getParamSpaceDHMMaxColor()));
 		paramSpaceScatterchart.refresh();
 	}
 	
 	/**
-	 * Updates data categories used in parameter space scatterchart.
-	 * @param e
+	 * Update color in global scatterchart density heatmap.
+	 * @param minColor
+	 * @param maxColor
 	 */
-	@FXML
-	public void updateParamSpaceDHMCategories(ActionEvent e)
+	public void updateTMCHeatmapColorSpectrum(Color minColor, Color maxColor)
 	{
-		System.out.println("refreshing");
-		refreshParameterSpaceScatterchart();
-	}
-	
-	/**
-	 * Calculate the categories value for parameter space scatterchart's density heatmap.
-	 * @return
-	 */
-	private int calculatePSScatterchartCategoriesValue()
-	{
-		int value = 0;
-		
-		value += paramSpace_dhmCategories_active_checkbox.isSelected() 		? 1 : 0;
-		value += paramSpace_dhmCategories_inactive_checkbox.isSelected() 	? 2 : 0;
-		value += paramSpace_dhmCategories_discarded_checkbox.isSelected() 	? 4 : 0;
-		
-		return value;
-	}
-	
-	/**
-	 * Update color in TMC heatmap.
-	 * @param e
-	 */
-	@FXML
-	public void updateTMCHeatmapColorSpectrum(ActionEvent e)
-	{
-		refreshTMCHeatmap();
+		refreshTMCHeatmap(minColor, maxColor);
 	}
 	
 	/**
 	 * Update color in global scatterchart density heatmap.
-	 * @param e
-	 */	
-	@FXML
-	public void updateGlobalScatterchartDHMColorSpectrum(ActionEvent e)
+	 * @param minColor
+	 * @param maxColor
+	 */
+	public void updateGlobalScatterchartDHMColorSpectrum(Color minColor, Color maxColor)
 	{
-		globalScatterplot.updateDHMColorSpectrum(mdsHeatmap_dhmColor_min_colChooser.getValue(), mdsHeatmap_dhmColor_max_colChooser.getValue());
-	}
-	
-	/**
-	 * Update color in parameter space scatterchart density heatmap.
-	 * @param e
-	 */		
-	@FXML
-	public void updatePSScatterchartDHMColorSpectrum(ActionEvent e)
-	{
-		refreshParameterSpaceScatterchart();
+		globalScatterplot.updateDHMColorSpectrum(minColor, maxColor);
 	}
 }

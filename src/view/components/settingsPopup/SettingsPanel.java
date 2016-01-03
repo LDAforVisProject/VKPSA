@@ -16,6 +16,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
 import javafx.util.Pair;
 import view.components.VisualizationComponent;
 
@@ -154,6 +155,27 @@ public class SettingsPanel extends VisualizationComponent
 	 */
 	public void init()
 	{
+		// Init color chooser...
+		//	...for param. space scatterchart:
+		paramSpace_dhmColor_min_colChooser.setValue(Color.RED);
+		paramSpace_dhmColor_max_colChooser.setValue(Color.DARKRED);
+		// ...for topic model comparison:
+		tmc_color_min_colChooser.setValue(Color.LIGHTBLUE);
+		tmc_color_max_colChooser.setValue(Color.DARKBLUE);
+		// ...for global scatterchart:
+		mdsHeatmap_dhmColor_min_colChooser.setValue(Color.RED);
+		mdsHeatmap_dhmColor_max_colChooser.setValue(Color.DARKRED);
+		
+		// Init event listener (e.g. for updates after slider changes).
+		initEventListener();
+	}
+	
+	private void initEventListener()
+	{
+		/*
+		 * Event listener for global scatterchart's DHM granularity slider.
+		 */
+		
 		globalScatterchartDHM_granularity_slider.addEventHandler(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) 
             {
@@ -166,6 +188,26 @@ public class SettingsPanel extends VisualizationComponent
             public void handle(MouseEvent event) 
             {
             	analysisController.changeGlobalScatterplotDHMGranularity(globalScatterchartDHM_granularity_checkbox.isSelected(), (int)globalScatterchartDHM_granularity_slider.getValue());
+            };
+        });
+		
+		/*
+		 * Event listener for parameter space scatterchart's DHM granularity slider.
+		 */
+		
+		// Add listener to determine position during after release.
+		paramSpace_dhmGranularity_slider.addEventHandler(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent event) 
+            {
+            	analysisController.refreshParameterSpaceScatterchart();
+            }
+        });
+		
+		// Add listener to determine position during mouse drag.
+		paramSpace_dhmGranularity_slider.addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent event) 
+            {
+            	analysisController.refreshParameterSpaceScatterchart();
             };
         });
 	}
@@ -205,8 +247,6 @@ public class SettingsPanel extends VisualizationComponent
 	@Override
 	public void refresh()
 	{
-		// @todo Auto-generated method stub
-		
 	}
 
 	@Override
@@ -258,7 +298,7 @@ public class SettingsPanel extends VisualizationComponent
 	@FXML
 	public void updateGlobalScatterchartDHMColorSpectrum(ActionEvent e)
 	{
-		// @todo Implement settings listener.
+		analysisController.updateGlobalScatterchartDHMColorSpectrum(mdsHeatmap_dhmColor_min_colChooser.getValue(), mdsHeatmap_dhmColor_max_colChooser.getValue());
 	}
 	
 	/**
@@ -269,6 +309,8 @@ public class SettingsPanel extends VisualizationComponent
 	public void changePSHeatmapGranularityMode(ActionEvent e)
 	{
 		// @todo Implement settings listener.
+		paramSpace_dhmGranularity_slider.setDisable(paramSpace_dhmGranularity_checkbox.isSelected());
+		analysisController.refreshParameterSpaceScatterchart();
 	}
 	
 	/**
@@ -278,7 +320,7 @@ public class SettingsPanel extends VisualizationComponent
 	@FXML
 	public void changePSHeatmapVisibility(ActionEvent e)
 	{
-		// @todo Implement settings listener.
+		analysisController.refreshParameterSpaceScatterchart();
 	}
 	
 	/**
@@ -288,7 +330,7 @@ public class SettingsPanel extends VisualizationComponent
 	@FXML
 	public void updateParamSpaceDHMCategories(ActionEvent e)
 	{
-		// @todo Implement settings listener.
+		analysisController.refreshParameterSpaceScatterchart();
 	}
 	
 	/**
@@ -298,7 +340,7 @@ public class SettingsPanel extends VisualizationComponent
 	@FXML
 	public void updatePSScatterchartDHMColorSpectrum(ActionEvent e)
 	{
-		//  @todo Implement settings listener.
+		analysisController.refreshParameterSpaceScatterchart();
 	}
 	
 	/**
@@ -308,7 +350,7 @@ public class SettingsPanel extends VisualizationComponent
 	@FXML
 	public void updateTMCHeatmapColorSpectrum(ActionEvent e)
 	{
-		//  @todo Implement settings listener.
+		analysisController.updateTMCHeatmapColorSpectrum(tmc_color_min_colChooser.getValue(), tmc_color_max_colChooser.getValue());
 	}
 	
 	/**
@@ -319,6 +361,11 @@ public class SettingsPanel extends VisualizationComponent
 	public void selectSettingsPane(MouseEvent e) 
 	{
 		//  @todo Implement settings listener.
+		// Reset title styles.
+		resetSettingsPanelsFontStyles();
+		
+		// Set new font style.
+		((TitledPane) e.getSource()).lookup(".title").setStyle("-fx-font-weight:bold");
 	}
 	
 	/**
@@ -375,8 +422,103 @@ public class SettingsPanel extends VisualizationComponent
 	 * Getter and setter.
 	 */
 	
+	/**
+	 * Calculate the categories value for parameter space scatterchart's density heatmap.
+	 * @return
+	 */
+	public int calculatePSScatterchartCategoriesValue()
+	{
+		int value = 0;
+		
+		value += paramSpace_dhmCategories_active_checkbox.isSelected() 		? 1 : 0;
+		value += paramSpace_dhmCategories_inactive_checkbox.isSelected() 	? 2 : 0;
+		value += paramSpace_dhmCategories_discarded_checkbox.isSelected() 	? 4 : 0;
+		
+		return value;
+	}
+	
 	public boolean isDBCLogarithmicallyScaled()
 	{
 		return distanceBarchart_logarithmicScaling_checkbox.isSelected(); 
+	}
+	
+	public boolean isParamSpaceDHMVisible()
+	{
+		return paramSpace_dhmVisibility_checkbox.isSelected();
+	}
+	
+	public boolean isParamSpaceDHMGranularityDynamic()
+	{
+		return paramSpace_dhmGranularity_checkbox.isSelected();
+	}
+	
+	public int getParamSpaceDHMGranularityValue()
+	{
+		return (int)paramSpace_dhmGranularity_slider.getValue();
+	}
+	
+	public Color getParamSpaceDHMMinColor()
+	{
+		return paramSpace_dhmColor_min_colChooser.getValue();
+	}
+	
+	public Color getParamSpaceDHMMaxColor()
+	{
+		return paramSpace_dhmColor_max_colChooser.getValue();
+	}
+	
+	public Slider getLocalScopeTopicNumberSlider()
+	{
+		return slider_localScope_numTopicsToUse;
+	}
+	
+	public Slider getLocalScopeKeywordNumberSlider()
+	{
+		return slider_localScope_numKeywordsToUse;
+	}
+	
+	public TextField getLocalScopeTopicNumberTextField()
+	{
+		return textfield_localScope_numTopicsToUse;
+	}
+	
+	public TextField getLocalScopeKeywordNumberTextField()
+	{
+		return textfield_localScope_numKeywordsToUse;
+	}
+	
+	public boolean isGlobalScatterchartDHMGranularityDynamic()
+	{
+		return globalScatterchartDHM_granularity_checkbox.isSelected();
+	}
+	
+	public CheckBox getGlobalScatterchartDHMGranularityCheckbox()
+	{
+		return globalScatterchartDHM_granularity_checkbox;
+	}
+	
+	public Slider getGlobalScatterchartDHMGranularitySlider()
+	{
+		return globalScatterchartDHM_granularity_slider;
+	}
+	
+	public Color getGlobalScatterchartDHMMinColor()
+	{
+		return mdsHeatmap_dhmColor_min_colChooser.getValue();
+	}
+	
+	public Color getGlobalScatterchartDHMMaxColor()
+	{
+		return mdsHeatmap_dhmColor_max_colChooser.getValue();
+	}
+	
+	public Color getTMCMinColor()
+	{
+		return tmc_color_min_colChooser.getValue();
+	}
+	
+	public Color getTMCMaxColor()
+	{
+		return tmc_color_max_colChooser.getValue();
 	}
 }
