@@ -35,6 +35,11 @@ public class Task_LoadTopicDistancesForSelection extends WorkspaceTask
 	 */
 	private ArrayList<LDAConfiguration> ldaConfigurationsToLoad;
 	
+	/**
+	 * Topic distance minimum and maximum. 
+	 */
+	private Pair<Double, Double> topicDistanceExtrema;
+	
 
 	/*
 	 * --------------------------------------------------------------
@@ -56,8 +61,10 @@ public class Task_LoadTopicDistancesForSelection extends WorkspaceTask
 		// Get DB.
 		DBManagement db = workspace.getDatabaseManagement();
 		
+		// Load and store topic distance extrema.
+		this.topicDistanceExtrema														= db.loadTopicDistanceExtrema(); 
 		// Load topic distances. 
-		Pair<Map<Pair<Integer, Integer>, Integer>, double[][]> topicDistancesDataset = db.loadTopicDistances(ldaConfigurationsToLoad);
+		Pair<Map<Pair<Integer, Integer>, Integer>, double[][]> topicDistancesDataset	= db.loadTopicDistances(ldaConfigurationsToLoad);
 		
 		// Fetch translation LDA config ID/topic ID to spatial ID.
 		spatialIDsForLDATopicConfiguration		= topicDistancesDataset.getKey(); 
@@ -80,5 +87,10 @@ public class Task_LoadTopicDistancesForSelection extends WorkspaceTask
 	public ArrayList<LDAConfiguration> getLDAConfigurationsToLoad()
 	{
 		return ldaConfigurationsToLoad;
+	}
+
+	public Pair<Double, Double> getTopicDistanceExtrema()
+	{
+		return topicDistanceExtrema;
 	}
 }

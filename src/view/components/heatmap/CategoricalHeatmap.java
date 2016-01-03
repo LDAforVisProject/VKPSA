@@ -170,8 +170,10 @@ public class CategoricalHeatmap extends Heatmap
     	// Prepare drawing.
     	GraphicsContext gc			= canvas.getGraphicsContext2D();
     	double binMatrix[][]		= data.getBinMatrix();
-    	double minOccurenceCount	= data.getMinOccurenceCount();
-    	double maxOccurenceCount	= data.getMaxOccurenceCount();
+    	double minOccurenceCount	= data.getGlobalExtrema() == null ? data.getMinOccurenceCount() : data.getGlobalExtrema().getKey();
+    	double maxOccurenceCount	= data.getGlobalExtrema() == null ? data.getMaxOccurenceCount() : data.getGlobalExtrema().getValue();
+    	
+    	//CONTINUE HERE: Test if global extrema normalization for TMC heatmap works properly. Should be complete as it is.
     	
     	// Set stroke color.
     	gc.setStroke(Color.BLACK);
@@ -249,7 +251,8 @@ public class CategoricalHeatmap extends Heatmap
 			log("Loaded topic distance data.");
 			
 			// Create dataset.
-			this.data = new HeatmapDataset(topicDistanceLoadingTask.getLDAConfigurationsToLoad(), topicDistanceLoadingTask.getSpatialIDsForLDATopicConfiguration(), topicDistanceLoadingTask.getTopicDistances(), (HeatmapOptionset)options);
+			this.data = new HeatmapDataset(	topicDistanceLoadingTask.getLDAConfigurationsToLoad(), topicDistanceLoadingTask.getSpatialIDsForLDATopicConfiguration(), 
+											topicDistanceLoadingTask.getTopicDistances(), topicDistanceLoadingTask.getTopicDistanceExtrema(), (HeatmapOptionset)options);
 			// Refresh heatmap.
 			this.refresh();
 		}

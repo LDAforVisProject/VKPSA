@@ -42,6 +42,11 @@ public class HeatmapDataset extends VisualizationComponentDataset
 	 */
 	private Map<Pair<Integer, Integer>, Set<Pair<Integer, Integer>>> cellsToTopicConfigurationIDs;
 	
+	/**
+	 * Global extrema. Optional, currently used for categorical heatmap only. 
+	 */
+	Pair<Double, Double> globalExtrema;
+	
 	/*
 	 * Binned data.
 	 */
@@ -228,16 +233,19 @@ public class HeatmapDataset extends VisualizationComponentDataset
 	 * @param spatialIDs
 	 * @param distances
 	 * @param options
+	 * @param globalExtrema
 	 */
 	public HeatmapDataset(	ArrayList<LDAConfiguration> allLDAConfigurations, 
 							Map<Pair<Integer, Integer>, Integer> spatialIDs,
-							double distances[][], HeatmapOptionset options)
+							double distances[][], Pair<Double, Double> globalExtrema,
+							HeatmapOptionset options)
 	{
 		super(allLDAConfigurations);
 		
     	this.chosenLDAConfigurations		= null;
     	this.cellsToConfigurationIDs 		= new HashMap<Pair<Integer,Integer>, Set<Integer>>();
 		this.cellsToTopicConfigurationIDs	= new HashMap<Pair<Integer,Integer>, Set<Pair<Integer,Integer>>>();
+		this.globalExtrema					= globalExtrema;
 		
     	this.minOccurenceCount			= Integer.MAX_VALUE;
 		this.maxOccurenceCount			= Integer.MIN_VALUE;
@@ -250,7 +258,7 @@ public class HeatmapDataset extends VisualizationComponentDataset
 		// 1. Accept distance matrix as bin matrix.
 		binMatrix = distances;
 		
-		// 2. Determine minimal and maximal occurence count.
+		// 2. Determine minimal and maximal occurence count/value.
 		for (int i = 0; i < binMatrix.length; i++) {
 			for (int j = 0; j < binMatrix[i].length; j++) {
 				maxOccurenceCount = binMatrix[i][j] > maxOccurenceCount ? binMatrix[i][j] : maxOccurenceCount;
@@ -355,6 +363,11 @@ public class HeatmapDataset extends VisualizationComponentDataset
 	public Map<Pair<Integer, Integer>, Set<Integer>> getCellsToConfigurationIDs()
 	{
 		return cellsToConfigurationIDs;
+	}
+
+	public Pair<Double, Double> getGlobalExtrema()
+	{
+		return globalExtrema;
 	}
 
 	public Map<Pair<Integer, Integer>, Set<Pair<Integer, Integer>>> getCellsToTopicConfigurationIDs()

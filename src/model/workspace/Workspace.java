@@ -38,15 +38,6 @@ import model.workspace.tasks.Task_LoadSpecificDatasets;
 import model.workspace.tasks.Task_LoadTopicDistancesForSelection;
 import model.workspace.tasks.WorkspaceTask;
 
-// -----------------------------------------------
-// 		ROADMAP / Todos, in sequential order
-// -----------------------------------------------
-
-// BACKEND / data view:
-// @todo Idea for optimization: Truncate parameter file list / instruct Python script to process only a defined part of it. Execute parallel script instances.
-
-// FRONTEND / analysis view:
-
 /**
  * Encompasses:
  * 	- Name and path of specified directory

@@ -982,6 +982,37 @@ public class DBManagement
 	}
 	
 	/**
+	 * Loads topic distance maximum and minimum.
+	 * @return Pair of extrema. Ordering: Minimum, maximum.
+	 */
+	public Pair<Double, Double> loadTopicDistanceExtrema()
+	{
+		double max = -1;
+		double min = -1;
+		
+		System.out.println("in here");
+		try {
+			PreparedStatement statement	= connection.prepareStatement(	"select max(distance) maxDist from topicDistances;");
+			// Execute statement.
+			ResultSet rs				= statement.executeQuery();
+			// Process value.
+			max							= rs.getDouble("maxDist");
+			
+			statement					= connection.prepareStatement(	"select min(distance) minDist from topicDistances;");
+			// Execute statement.
+			rs							= statement.executeQuery();
+			// Process value.
+			min							= rs.getDouble("minDist");
+		}
+		
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return new Pair<Double, Double>(min, max);
+	}
+	
+	/**
 	 * Loads topic distances for selected set of LDA configurations.
 	 * @param selectedLDAConfigurations
 	 * @return Map translating LDA config ID and topic ID to to the corresponding spatial ID (i.e. row/topic number).
