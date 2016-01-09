@@ -1021,7 +1021,6 @@ public class AnalysisController extends Controller
 	{
 		// Refresh filters for primitive parameters.
 		for (ScentedFilter filter : filters.subList(0, 3)) {
-			System.out.println("bla");
 			filter.refresh(new ScentedFilterDataset(dataspace.getLDAConfigurations(), dataspace.getInactiveIndices(), dataspace.getActiveIndices()));
 		}
 		// Refresh filters for derived parameters.

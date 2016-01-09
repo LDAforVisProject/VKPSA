@@ -536,7 +536,6 @@ public class AnalysisDataspace
 				}
 				// Otherwise (derived attribute): Check parameter, get custom information.
 				else if (entry.getKey().equals("distance")) {
-					System.out.println("distance found");
 					value = averageDistances[i];
 				}
 				

@@ -149,20 +149,6 @@ public class ScentedFilterDataset extends VisualizationComponentDataset
 				parameterBinList_discarded[index_key]++;
 		}
 		
-			System.out.println("deriv = " + isDerived);
-			int count = 0;
-			for (double i : parameterBinList_active)
-				count += i;
-			System.out.println("active = " + count);
-			count = 0;
-			for (double i : parameterBinList_inactive)
-				count += i;
-			System.out.println("inactive = " + count);
-			count = 0;
-			for (double i : parameterBinList_discarded)
-				count += i;
-			System.out.println("discarded = " + count);
-		
 		// Apply log transformation.
 //		for (int i = 0; i < parameterBinList_active.length; i++)
 //			parameterBinList_active[i] 		= Math.log(parameterBinList_active[i]);
