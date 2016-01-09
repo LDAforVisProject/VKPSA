@@ -16,7 +16,7 @@
 
 <AnchorPane fx:id="analysisRoot_anchorPane" maxHeight="694.0" maxWidth="1366.0" prefHeight="694.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.analysisView.AnalysisController">
    <children>
-      <SplitPane dividerPositions="0.77" orientation="VERTICAL" prefHeight="850.0" prefWidth="1440.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <SplitPane dividerPositions="0.9320809248554913" orientation="VERTICAL" prefHeight="850.0" prefWidth="1440.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                <children>
@@ -51,7 +51,21 @@
                                 <items>
                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                                        <children>
-                                          <SplitPane dividerPositions="0.5" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                          <SplitPane orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                       </children>
+                                    </AnchorPane>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="612.0" prefWidth="776.0" style="-fx-background-color: #ffffff;">
+                                       <children>
+                                          <SplitPane orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                       </children>
+                                    </AnchorPane>
+                                </items>
+                              </SplitPane>
+                              <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="526.0" prefWidth="1033.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                <items>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="96.0" prefWidth="774.0">
+                                       <children>
+                                          <SplitPane dividerPositions="0.2925170068027211, 0.5053449951409135, 0.7133138969873664" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <items>
                                               <AnchorPane fx:id="mds_anchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff; -fx-border: #ccc;">
                                                    <children>
@@ -102,22 +116,27 @@
                                                       </Label>
                                                    </children>
                                                 </AnchorPane>
-                                            </items>
-                                          </SplitPane>
-                                       </children>
-                                    </AnchorPane>
-                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="612.0" prefWidth="776.0" style="-fx-background-color: #ffffff;">
-                                       <children>
-                                          <SplitPane dividerPositions="0.5" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                            <items>
-                                              <AnchorPane fx:id="localScope_containingAnchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff;">
+                                              <AnchorPane fx:id="distEval_anchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="39.0" prefWidth="610.0" style="-fx-background-color: #ffffff;">
                                                    <children>
-                                                      <Label layoutX="10.0" layoutY="5.0" text="Detail View" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                                      <Label layoutX="7.0" layoutY="4.0" text="Result Space | Distance Evaluation" AnchorPane.topAnchor="7.0">
                                                          <font>
                                                             <Font name="System Bold" size="12.0" />
                                                          </font>
                                                       </Label>
-                                                      <ImageView fx:id="settings_localScope_icon" fitHeight="15.0" fitWidth="15.0" layoutX="91.0" layoutY="6.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="92.0" AnchorPane.topAnchor="7.0">
+                                                      <BarChart fx:id="barchart_distances" animated="false" layoutX="-173.0" layoutY="-88.0" style="-fx-background-color: #fff;" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="30.0">
+                                                        <xAxis>
+                                                          <CategoryAxis side="BOTTOM" />
+                                                        </xAxis>
+                                                        <yAxis>
+                                                          <NumberAxis fx:id="numberaxis_distanceEvaluation_yaxis" side="LEFT" />
+                                                        </yAxis>
+                                                      </BarChart>
+                                                      <ToggleButton fx:id="button_relativeView_distEval" layoutX="268.0" layoutY="3.0" mnemonicParsing="false" onAction="#changeVisualizationViewMode" text="Relative view" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                                         <font>
+                                                            <Font size="10.0" />
+                                                         </font>
+                                                      </ToggleButton>
+                                                      <ImageView fx:id="settings_distEval_icon" fitHeight="15.0" fitWidth="15.0" layoutX="133.0" layoutY="9.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="203.0" AnchorPane.topAnchor="8.0">
                                                          <image>
                                                             <Image url="@icons/cog.png" />
                                                          </image>
@@ -125,65 +144,42 @@
                                                             <Cursor fx:constant="HAND" />
                                                          </cursor>
                                                       </ImageView>
-                                                      <SplitPane dividerPositions="0.29797979797979796" layoutY="31.0" prefHeight="228.0" prefWidth="562.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
-                                                        <items>
-                                                          <AnchorPane fx:id="localscope_tmc_anchorPane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" style="-fx-background-color: #fff;" />
-                                                          <AnchorPane fx:id="localScope_ptc_anchorPane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
-                                                        </items>
-                                                      </SplitPane>
                                                    </children>
                                                 </AnchorPane>
-                                              <AnchorPane fx:id="paramSpace_distribution_anchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff;">
+                                              <AnchorPane fx:id="localScope_containingAnchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff;">
                                                    <children>
-                                                      <ToggleButton fx:id="button_relativeView_paramDist" mnemonicParsing="false" onAction="#changeVisualizationViewMode" text="Relative view" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
-                                                         <font>
-                                                            <Font size="10.0" />
-                                                         </font>
-                                                      </ToggleButton>
-                                                      <SplitPane dividerPositions="0.5" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
-                                                         <items>
-                                                            <AnchorPane fx:id="paramSpace_distribution_anchorPane_filtered" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #fff;" />
-                                                          <AnchorPane fx:id="distEval_anchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff;">
-                                                               <children>
-                                                                  <Label layoutX="7.0" layoutY="4.0" text="Result Space | Distance Evaluation" AnchorPane.topAnchor="7.0">
-                                                                     <font>
-                                                                        <Font name="System Bold" size="12.0" />
-                                                                     </font>
-                                                                  </Label>
-                                                                  <BarChart fx:id="barchart_distances" animated="false" layoutX="-173.0" layoutY="-88.0" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="30.0">
-                                                                    <xAxis>
-                                                                      <CategoryAxis side="BOTTOM" />
-                                                                    </xAxis>
-                                                                    <yAxis>
-                                                                      <NumberAxis fx:id="numberaxis_distanceEvaluation_yaxis" side="LEFT" />
-                                                                    </yAxis>
-                                                                  </BarChart>
-                                                                  <ToggleButton fx:id="button_relativeView_distEval" layoutX="268.0" layoutY="3.0" mnemonicParsing="false" onAction="#changeVisualizationViewMode" text="Relative view" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
-                                                                     <font>
-                                                                        <Font size="10.0" />
-                                                                     </font>
-                                                                  </ToggleButton>
-                                                                  <ImageView fx:id="settings_distEval_icon" fitHeight="15.0" fitWidth="15.0" layoutX="133.0" layoutY="9.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="203.0" AnchorPane.topAnchor="8.0">
-                                                                     <image>
-                                                                        <Image url="@icons/cog.png" />
-                                                                     </image>
-                                                                     <cursor>
-                                                                        <Cursor fx:constant="HAND" />
-                                                                     </cursor>
-                                                                  </ImageView>
-                                                               </children>
-                                                            </AnchorPane>
-                                                         </items>
-                                                      </SplitPane>
-                                                      <Label layoutX="70.0" layoutY="15.0" text="Parameter | Distribution" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="7.0">
+                                                      <Label layoutX="10.0" layoutY="5.0" text="Topic Model Comparison" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0">
                                                          <font>
                                                             <Font name="System Bold" size="12.0" />
                                                          </font>
                                                       </Label>
+                                                      <ImageView fx:id="settings_localScope_icon" fitHeight="15.0" fitWidth="15.0" layoutX="91.0" layoutY="6.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="162.0" AnchorPane.topAnchor="7.0">
+                                                         <image>
+                                                            <Image url="@icons/cog.png" />
+                                                         </image>
+                                                         <cursor>
+                                                            <Cursor fx:constant="HAND" />
+                                                         </cursor>
+                                                      </ImageView>
+                                                      <SplitPane layoutY="31.0" prefHeight="228.0" prefWidth="562.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
+                                                        <items>
+                                                          <AnchorPane fx:id="localscope_tmc_anchorPane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" style="-fx-background-color: #fff;" />
+                                                        </items>
+                                                      </SplitPane>
                                                    </children>
                                                 </AnchorPane>
                                             </items>
                                           </SplitPane>
+                                       </children>
+                                    </AnchorPane>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #fff;">
+                                       <children>
+                                        <AnchorPane fx:id="localScope_ptc_anchorPane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" style="-fx-border-color: #ccc; -fx-background-color: #fff;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                                          <Label layoutX="12.0" layoutY="5.0" text="Topic Comparison" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                             <font>
+                                                <Font name="System Bold" size="12.0" />
+                                             </font>
+                                          </Label>
                                        </children>
                                     </AnchorPane>
                                 </items>

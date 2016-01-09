@@ -55,7 +55,12 @@ public class AnalysisDataspace
 	/**
 	 * Stores filtered distances.
 	 */
-	private double avaibleDistances[][];
+	private double availableDistances[][];
+	/**
+	 * Stores average cohesive distances.
+	 */
+	private double averageDistances[];
+	
 	/**
 	 * List of filtered LDA configurations.
 	 */
@@ -249,6 +254,9 @@ public class AnalysisDataspace
 		updateInactiveDistanceMatrix();
 		updateInactiveLDAConfigurations();
 		updateInactiveCoordinateMatrix();
+		
+		// Update list of average distances.
+		averageDistances = calculateAverageDistances();
 	}
 	
 	/**
@@ -509,14 +517,29 @@ public class AnalysisDataspace
 	 */
 	public void filterIndices(final Map<String, Pair<Double, Double>> parameterBoundaries)
 	{
+		// Make sure that derived attributes are calculated.
+		if (averageDistances == null)
+			averageDistances = calculateAverageDistances();
+		
 		// Iterate through all LDA configurations in workspace.
 		for (int i = 0; i < ldaConfigurations.size(); i++) {
-			LDAConfiguration ldaConfig	= ldaConfigurations.get(i);
-			boolean fitsBoundaries		= true;
+			LDAConfiguration ldaConfig			= ldaConfigurations.get(i);
+			boolean fitsBoundaries				= true;
 			
 			// Check if this particular LDA configuration is in bounds of all specified parameter thresholds.
 			for (Map.Entry<String, Pair<Double, Double>> entry : parameterBoundaries.entrySet()) {
-				double value	= ldaConfig.getParameter(entry.getKey());
+				double value	= -1;
+				
+				// If primitive attribute: Access value directly through LDA object.
+				if (LDAConfiguration.supports(entry.getKey())) {
+					value = ldaConfig.getParameter(entry.getKey());	
+				}
+				// Otherwise (derived attribute): Check parameter, get custom information.
+				else if (entry.getKey().equals("distance")) {
+					System.out.println("distance found");
+					value = averageDistances[i];
+				}
+				
 				double min		= entry.getValue().getKey();
 				double max		= entry.getValue().getValue();
 				
@@ -571,7 +594,7 @@ public class AnalysisDataspace
 		
 		// Use AnalysisController.filteredIndices to filter out data in desired parameter boundaries.
 		availableCoordinates		= new double[coordinates.length][availableIndices.size()];
-		avaibleDistances			= new double[availableIndices.size()][availableIndices.size()];
+		availableDistances			= new double[availableIndices.size()][availableIndices.size()];
 		availableLDAConfigurations	= new ArrayList<LDAConfiguration>(availableIndices.size());
 		
 		// Copy data corresponding to chosen LDA configurations in new arrays.
@@ -585,7 +608,7 @@ public class AnalysisDataspace
 			// Copy distances.
 			int innerCount = 0;
 			for (int filteredInnerIndex : availableIndices) {
-				avaibleDistances[count][innerCount] = distances[filteredIndex][filteredInnerIndex];
+				availableDistances[count][innerCount] = distances[filteredIndex][filteredInnerIndex];
 				innerCount++;
 			}
 			
@@ -616,6 +639,9 @@ public class AnalysisDataspace
 		inactiveCoordinates					= createCoordinateMatrix(inactiveIndices);
 		inactiveDistances					= createDistanceMatrix(inactiveIndices);
 		inactiveLDAConfigurations			= createLDAConfigurations(inactiveIndices);
+		
+		// Update list of average cohesive distances.
+		averageDistances					= calculateAverageDistances();
 	}
 	
 	/**
@@ -692,6 +718,44 @@ public class AnalysisDataspace
 		return changeDetected;
 	}
 	
+	/**
+	 * Calculates average cohesive distances within each data series (active, inactive, discarded).
+	 * @return
+	 */
+	private double[] calculateAverageDistances()
+	{
+		double[] averageDistances = new double[ldaConfigurations.size()];
+		
+		// Calculate distances of active datasets.
+		for (int i : activeIndices) {
+			double distanceSum = 0;
+			for (int j = 0; j < distances.length; j++) {
+				distanceSum += distances[i][j];
+			}
+			averageDistances[i] = distanceSum / (activeIndices.size() - 1);
+		}
+		
+		// Calculate distances of inactive datasets.
+		for (int i : inactiveIndices) {
+			double distanceSum = 0;
+			for (int j = 0; j < distances.length; j++) {
+				distanceSum += distances[i][j];
+			}
+			averageDistances[i] = distanceSum / (inactiveIndices.size() - 1);
+		}
+		
+		// Calculate distances of discarded datasets.
+		for (int i : discardedIndices) {
+			double distanceSum = 0;
+			for (int j = 0; j < distances.length; j++) {
+				distanceSum += distances[i][j];
+			}
+			averageDistances[i] = distanceSum / (discardedIndices.size() - 1);
+		}		
+		
+		return averageDistances;
+	}
+	
 	// -----------------------------------------------
 	// 				Getter and Setter
 	// -----------------------------------------------
@@ -723,7 +787,7 @@ public class AnalysisDataspace
 
 	public double[][] getAvaibleDistances()
 	{
-		return avaibleDistances;
+		return availableDistances;
 	}
 
 	public ArrayList<LDAConfiguration> getAvailableLDAConfigurations()
@@ -789,5 +853,10 @@ public class AnalysisDataspace
 	public AnalysisController getController()
 	{
 		return controller;
+	}
+
+	public double[] getAverageDistances()
+	{
+		return averageDistances;
 	}
 }

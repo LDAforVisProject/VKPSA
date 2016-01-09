@@ -1057,7 +1057,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	@Override
 	public Pair<Integer, Integer> provideOffsets()
 	{
-		return new Pair<Integer, Integer>(55, 44);
+		return new Pair<Integer, Integer>(55, 24);
 	}
 	
 	/**

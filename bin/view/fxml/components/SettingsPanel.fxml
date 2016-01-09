@@ -46,7 +46,7 @@
                                     <ComboBox disable="true" prefWidth="150.0" GridPane.columnIndex="1" />
                                     <ComboBox disable="true" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                     <Label text="Enable logarithmic scaling" GridPane.rowIndex="2" />
-                                    <CheckBox fx:id="distanceBarchart_logarithmicScaling_checkbox" mnemonicParsing="false" onAction="#changeDBCScalingType" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                    <CheckBox fx:id="distanceBarchart_logarithmicScaling_checkbox" mnemonicParsing="false" onAction="#changeDBCScalingType" selected="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                  </children>
                                  <columnConstraints>
                                     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />

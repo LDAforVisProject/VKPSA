@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.logging.Filter;
 
 import model.AnalysisDataspace;
 import model.LDAConfiguration;
@@ -50,7 +51,7 @@ public class ScentedFilter extends VisualizationComponent
 	/**
 	 * Barchart displaying histogram.
 	 */
-	private @FXML StackedBarChart<String, Integer> barchart;
+	private @FXML StackedBarChart<String, Number> barchart;
 	
 	/**
 	 * Range slider for value interval control.
@@ -64,15 +65,15 @@ public class ScentedFilter extends VisualizationComponent
 	/**
 	 * Series containing all data.
 	 */
-	private XYChart.Series<String, Integer> discardedDataSeries;
+	private XYChart.Series<String, Number> discardedDataSeries;
 	/**
 	 * Series containing filtered data.
 	 */
-	private XYChart.Series<String, Integer> inactiveDataSeries;
+	private XYChart.Series<String, Number> inactiveDataSeries;
 	/**
 	 * Series containing active data.
 	 */
-	private XYChart.Series<String, Integer> activeDataSeries;
+	private XYChart.Series<String, Number> activeDataSeries;
 
 	
 	/*
@@ -289,7 +290,7 @@ public class ScentedFilter extends VisualizationComponent
 		if (!isCtrlDown) {
 			// Process filtered, non-selected data.
 			for (int i = 0; i < inactiveDataSeries.getData().size(); i++) {
-				Data<String, Integer> barData 	= inactiveDataSeries.getData().get(i);
+				Data<String, Number> barData 	= inactiveDataSeries.getData().get(i);
 				Node dataNode 					= barData.getNode();
 				String barKey					= "inactive_" + i;
 				
@@ -320,7 +321,7 @@ public class ScentedFilter extends VisualizationComponent
 			// Process filtered, non-selected data.
 			for (int i = 0; i < activeDataSeries.getData().size(); i++) {
 			//for (Data<String, Integer> data : activeDataSeries.getData()) {
-				Data<String, Integer> barData 	= activeDataSeries.getData().get(i);
+				Data<String, Number> barData 	= activeDataSeries.getData().get(i);
 				Node dataNode 					= barData.getNode();
 				String barKey					= "active_" + i;
 				
@@ -359,10 +360,10 @@ public class ScentedFilter extends VisualizationComponent
 			selectedLocalIndices.addAll(data.getBarToDataAssociations().get(seriesPraefix + description));
 			
 			// Remove glow from all bars.
-			for (Data<String, Integer> data : inactiveDataSeries.getData()) {
+			for (Data<String, Number> data : inactiveDataSeries.getData()) {
 				setBarHighlighting(data.getNode(), false, null);	
 			}
-			for (Data<String, Integer> data : activeDataSeries.getData()) {
+			for (Data<String, Number> data : activeDataSeries.getData()) {
 				setBarHighlighting(data.getNode(), false, null);	
 			}
 		}
@@ -464,20 +465,24 @@ public class ScentedFilter extends VisualizationComponent
 	public void refresh(ScentedFilterDataset data)
 	{
 		this.data = data;
-
+		
 		/*
 		 * Bin data.
 		 */
 		
-		ArrayList<int[]> binnedData = data.binData(	options.getParamID(), options.getNumberOfBins(),
-													options.useRangeSlider() ? rangeSlider.getMin() : slider.getMin(),
-													options.useRangeSlider() ? rangeSlider.getMax() : slider.getMax());
+		ArrayList<double[]> binnedData = data.binData(	options.getParamID(), options.getNumberOfBins(),
+														options.useRangeSlider() ? rangeSlider.getMin() : slider.getMin(),
+														options.useRangeSlider() ? rangeSlider.getMax() : slider.getMax());
 		
 		/*
 		 * Adjust controls to new extrema.
 		 */
 		if (!isAdjustedToExtrema) {
-			adjustControlExtrema(data.getLDAConfigurations());
+			if (!data.isDerived())
+				adjustControlExtrema(data.getLDAConfigurations());
+			else
+				adjustDerivedControlExtrema(data.getDerivedData());
+			
 			isAdjustedToExtrema = true;
 		}
 			
@@ -502,6 +507,8 @@ public class ScentedFilter extends VisualizationComponent
 	
 	/**
 	 * Adjusts minimal and maximal control values so that they fit the loaded data set.
+	 * Operates on primitive parameters.
+	 * @param ldaConfigurations
 	 */
 	public void adjustControlExtrema(ArrayList<LDAConfiguration> ldaConfigurations)
 	{
@@ -530,6 +537,44 @@ public class ScentedFilter extends VisualizationComponent
 		
 		isAdjustedToExtrema = true;
 	}
+	
+	/**
+	 * Adjusts minimal and maximal control values so that they fit the loaded data set.
+	 * Operates on derived parameters. 
+	 * @param derivedData
+	 */
+	public void adjustDerivedControlExtrema(double[] derivedData)
+	{
+		if (options != null) {
+			// Update values of range slider.
+			double min		= Double.MAX_VALUE;
+			double max		= Double.MIN_VALUE;
+						
+			for (int i = 0; i < derivedData.length; i++) {
+				min = min > derivedData[i] ? derivedData[i] : min;
+				max = max < derivedData[i] ? derivedData[i] : max;
+			}
+			
+			System.out.println ("min = " + min + ", max = " + max);
+			
+			// Set range slider values.
+			if (options.useRangeSlider()) {
+				rangeSlider.setMin(min);
+				rangeSlider.setMax(max);
+			}
+			else {
+				slider.setMin(min);
+				slider.setMax(max);
+			}
+			
+			// Update text values.
+			min_textfield.setText(String.valueOf(min));
+			max_textfield.setText(String.valueOf(max));
+		}
+		
+		isAdjustedToExtrema = true;
+	}
+	
 	/**
 	 * Generates parameter histogram in/for specified barcharts.
 	 * @param paramterBinLists
@@ -537,10 +582,10 @@ public class ScentedFilter extends VisualizationComponent
 	 * @param seriesIndex
 	 * @return Newly added data series.
 	 */
-	private XYChart.Series<String, Integer> addParameterHistogramDataSeries(int[] parameterBinList, final int numberOfBins, final int seriesIndex)
+	private XYChart.Series<String, Number> addParameterHistogramDataSeries(double[] parameterBinList, final int numberOfBins, final int seriesIndex)
 	{
 		// Add data series to barcharts.
-		XYChart.Series<String, Integer> dataSeries = generateParameterHistogramDataSeries(parameterBinList, numberOfBins);
+		XYChart.Series<String, Number> dataSeries = generateParameterHistogramDataSeries(parameterBinList, numberOfBins);
 		barchart.getData().add(dataSeries);
 		
 		// Color data.
@@ -556,13 +601,13 @@ public class ScentedFilter extends VisualizationComponent
 	 * @param numberOfBins
 	 * @return
 	 */
-	private XYChart.Series<String, Integer> generateParameterHistogramDataSeries(int[] parameterBinList, final int numberOfBins)
+	private XYChart.Series<String, Number> generateParameterHistogramDataSeries(double[] parameterBinList, final int numberOfBins)
 	{
-		final XYChart.Series<String, Integer> data_series = new XYChart.Series<String, Integer>();
+		final XYChart.Series<String, Number> data_series = new XYChart.Series<String, Number>();
 		
 		for (int i = 0; i < numberOfBins; i++) {
-			final int binContent = parameterBinList[i];
-			data_series.getData().add( new XYChart.Data<String, Integer>(String.valueOf(i), binContent ));
+			final double binContent = parameterBinList[i];
+			data_series.getData().add( new XYChart.Data<String, Number>(String.valueOf(i), binContent ));
 		}
 		
 		return data_series;
@@ -573,7 +618,7 @@ public class ScentedFilter extends VisualizationComponent
 	 * @param barchart
 	 * @param seriesIndex Index of series to be colored. 0 for discarded, 1 for filtered data points.
 	 */
-	private void colorParameterHistogramBarchart(StackedBarChart<String, Integer> barchart, int seriesIndex)
+	private void colorParameterHistogramBarchart(StackedBarChart<String, Number> barchart, int seriesIndex)
 	{
 		// Color bars (todo: color according to defined options).
 		for (Node node : barchart.lookupAll(".chart-bar")) {

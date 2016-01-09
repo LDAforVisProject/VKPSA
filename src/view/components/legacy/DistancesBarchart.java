@@ -205,6 +205,7 @@ public class DistancesBarchart extends VisualizationComponent_Legacy implements 
 		barchart.setBarGap(0);
 		barchart.setCategoryGap(5);
 		
+		
 		// Disable auto-ranging (absolute view is default).
 		barchart.getXAxis().setAutoRanging(true);
 		barchart.getYAxis().setAutoRanging(false);
@@ -481,9 +482,9 @@ public class DistancesBarchart extends VisualizationComponent_Legacy implements 
 		}
 		
 		// Transform absolute numbers in bins to percentages.
-		for (int i = 0; i < distanceBinList.length; i++) {
-			distanceBinList[i] /= ( (double)distances.length / 100);
-		}
+//		for (int i = 0; i < distanceBinList.length; i++) {
+//			distanceBinList[i] /= ( (double)distances.length / 100);
+//		}
 		
 		/*
 		 * Update UI. 
@@ -493,7 +494,7 @@ public class DistancesBarchart extends VisualizationComponent_Legacy implements 
 		if (isLogarithmicScalingEnabled) {
 			// Scale bin count values accordingly.
 			for (int i = 0; i < distanceBinList.length; i++) {
-				distanceBinList[i] = distanceBinList[i] > 0 ? (int) Math.log(distanceBinList[i]) : 0;
+				distanceBinList[i] = distanceBinList[i] > 0 ? (int) Math.log(distanceBinList[i]) + 1 : 0;
 			}
 		}
 		
@@ -616,12 +617,13 @@ public class DistancesBarchart extends VisualizationComponent_Legacy implements 
 	 */
 	private void adjustYAxisRange()
 	{
-		numberaxis_distanceEvaluation_yaxis.setLowerBound(0);
-		numberaxis_distanceEvaluation_yaxis.setUpperBound(100);
+//		numberaxis_distanceEvaluation_yaxis.setLowerBound(0);
+//		numberaxis_distanceEvaluation_yaxis.setUpperBound(100);
+		numberaxis_distanceEvaluation_yaxis.setAutoRanging(true);
 		
     	// Adjust tick width.
     	final int numberOfTicks = 4;
-    	numberaxis_distanceEvaluation_yaxis.setTickUnit( (float)100 / numberOfTicks);
+    	//numberaxis_distanceEvaluation_yaxis.setTickUnit( (float)100 / numberOfTicks);
     	numberaxis_distanceEvaluation_yaxis.setMinorTickCount(2);
 	}
 	

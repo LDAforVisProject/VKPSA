@@ -186,6 +186,21 @@ public class LDAConfiguration
 		return configList;
 	}
 	
+	/**
+	 * Tells whether a parameter is supported or not.
+	 * @param param
+	 * @return
+	 */
+	public static boolean supports(String param)
+	{
+		for (String supParam : SUPPORTED_PARAMETERS) {
+			if (supParam.equals(param))
+				return true;
+		}
+		
+		return false;
+	}
+	
 	// -----------------------------------------------
 	// 				Getter and setter
 	// -----------------------------------------------	
@@ -267,6 +282,10 @@ public class LDAConfiguration
 			
 			case "kappa":
 				symbol = "κ";
+			break;
+			
+			case "distance":
+				symbol = "δ";
 			break;
 			
 			default:

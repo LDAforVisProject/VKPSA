@@ -990,7 +990,6 @@ public class DBManagement
 		double max = -1;
 		double min = -1;
 		
-		System.out.println("in here");
 		try {
 			PreparedStatement statement	= connection.prepareStatement(	"select max(distance) maxDist from topicDistances;");
 			// Execute statement.

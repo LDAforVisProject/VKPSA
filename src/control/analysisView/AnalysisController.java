@@ -46,6 +46,7 @@ import javafx.scene.control.Accordion;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.Separator;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -104,14 +105,6 @@ public class AnalysisController extends Controller
 	 */
 	private @FXML AnchorPane distEval_anchorPane;
 	
-	/**
-	 * For both parameter space distribution heatmaps.
-	 */
-	private @FXML AnchorPane paramSpace_distribution_anchorPane;
-	/**
-	 * For the parameter space distribution heatmap (using filtered data).
-	 */
-	private @FXML AnchorPane paramSpace_distribution_anchorPane_filtered;
 	/**
 	 * For the parameter space distribution heatmap (using selected data).
 	 */
@@ -275,7 +268,6 @@ public class AnalysisController extends Controller
 		// Define list of anchor panes / other elements to add resize listeners to.
 		ArrayList<Pane> anchorPanesToResize = new ArrayList<Pane>();
 		
-		anchorPanesToResize.add(paramSpace_distribution_anchorPane_filtered);
 		anchorPanesToResize.add(paramSpace_distribution_anchorPane_selected);
 		anchorPanesToResize.add(mds_anchorPane);
 		anchorPanesToResize.add(localscope_tmc_anchorPane);
@@ -367,13 +359,26 @@ public class AnalysisController extends Controller
 			if (param != "kappa")
 				filter.applyOptions(new ScentedFilterOptionset(param, true, 0, 15, 50, true, true, false));
 			else
-				filter.applyOptions(new ScentedFilterOptionset(param, false, 2, 25, 50, true, true, false));
+				filter.applyOptions(new ScentedFilterOptionset(param, true, 2, 25, 50, true, true, false));
 			
 			// Add to collection of filters.
 			filters.add(filter);
 			// Embed in containing VBox.
 			filter.embedIn(filters_vbox);
 		}
+		
+		// Add seperating line.
+		Separator separator = new Separator();
+		separator.setTranslateX(15);
+		filters_vbox.getChildren().add(separator);
+		
+		// Add distance filter - note: Is derived data.
+		ScentedFilter distanceFilter = (ScentedFilter) VisualizationComponent.generateInstance(VisualizationComponentType.SCENTED_FILTER, this, this.workspace, this.log_protocol_progressindicator, this.log_protocol_textarea);
+		distanceFilter.applyOptions(new ScentedFilterOptionset("distance", true, 0, 15, 50, true, true, false));
+		// Add to collection of filters.
+		filters.add(distanceFilter);
+		// Embed in containing VBox.
+		distanceFilter.embedIn(filters_vbox);
 		
 		// Add containing VBox to pane.
 		settings_filter_anchorPane.getChildren().add(filters_vbox);
@@ -419,15 +424,14 @@ public class AnalysisController extends Controller
 		// Set references to data collections.
 		dataspace.setDataReferences(workspace.getLDAConfigurations(),  workspace.getMDSCoordinates(), workspace.getDistances());
 		
-		// Call initialization procedure.
-		init();
-		
 		// Draw entire data set. Used as initialization call, executed by Workspace instance.
 		if (filterData) {
 			// Filter data.
 			applyFilter();
 		}
-		
+
+		// Call initialization procedure.
+		init();
 		
 		/*
 		 * Refresh visualizations.
@@ -475,12 +479,15 @@ public class AnalysisController extends Controller
 			// Mark global extrema as found.
 			globalExtremaIdentified = true;
 
-			for (ScentedFilter filter : filters) {
+			// Adjust controls for filters for primitive attribute.
+			for (ScentedFilter filter : filters.subList(0, 3)) {
 				// Adjust global extrema for controls.
 				filter.adjustControlExtrema(dataspace.getLDAConfigurations());
 				// Set initial width.
 				filter.resizeContent(300, 0);
 			}
+			// Adjust controls for filters with derived attributes.
+			filters.get(3).adjustDerivedControlExtrema(dataspace.getAverageDistances());
 		}
 	}
 	
@@ -695,6 +702,7 @@ public class AnalysisController extends Controller
 		// Get parameter boundaries.
 		Map<String, Pair<Double, Double>> parameterBoundaries = new HashMap<String, Pair<Double, Double>>();
 		
+		// Here: Consider only filter for primitive attributes.
 		for (ScentedFilter filter : filters) {
 			filter.addThresholdsToMap(parameterBoundaries);
 		}
@@ -1011,9 +1019,15 @@ public class AnalysisController extends Controller
 	 */
 	private void refreshScentedFilters()
 	{
-		for (ScentedFilter filter : filters) {
+		// Refresh filters for primitive parameters.
+		for (ScentedFilter filter : filters.subList(0, 3)) {
+			System.out.println("bla");
 			filter.refresh(new ScentedFilterDataset(dataspace.getLDAConfigurations(), dataspace.getInactiveIndices(), dataspace.getActiveIndices()));
 		}
+		// Refresh filters for derived parameters.
+		//	Distance filter:
+		filters.get(3).refresh(new ScentedFilterDataset(dataspace.getLDAConfigurations(), dataspace.getInactiveIndices(), dataspace.getActiveIndices(),
+														dataspace.getAverageDistances()));
 	}
 	
 	@Override

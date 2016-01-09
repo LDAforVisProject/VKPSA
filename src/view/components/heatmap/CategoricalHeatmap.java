@@ -251,6 +251,7 @@ public class CategoricalHeatmap extends Heatmap
 			log("Loaded topic distance data.");
 			
 			// Create dataset.
+			System.out.println(topicDistanceLoadingTask);
 			this.data = new HeatmapDataset(	topicDistanceLoadingTask.getLDAConfigurationsToLoad(), topicDistanceLoadingTask.getSpatialIDsForLDATopicConfiguration(), 
 											topicDistanceLoadingTask.getTopicDistances(), topicDistanceLoadingTask.getTopicDistanceExtrema(), (HeatmapOptionset)options);
 			// Refresh heatmap.

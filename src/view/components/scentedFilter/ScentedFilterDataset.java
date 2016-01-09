@@ -11,6 +11,11 @@ import model.LDAConfiguration;
 public class ScentedFilterDataset extends VisualizationComponentDataset
 {
 	/**
+	 * Indicates whether dataset refers to primitive (LDA-based) or derived (calculated in postprocessing) parameter.
+	 */
+	private boolean isDerived;
+	
+	/**
 	 * Indices of inactive datasets.
 	 */
 	private Set<Integer> inactiveIndices;
@@ -24,30 +29,65 @@ public class ScentedFilterDataset extends VisualizationComponentDataset
 	 */
 	private Map<String, ArrayList<Integer>> barToDataAssociations;
 	
+	/**
+	 * Optional. Holds derived data (necessary if filter accesses non-primitive/derived data). 
+	 */
+	private double[] derivedData;
+	
 	
 	// -------------------------------
 	//			Methods
 	// -------------------------------
 	
+	/**
+	 * Generates dataset for filter accessing an primitive parameter.
+	 * @param data
+	 * @param inactiveIndices
+	 * @param activeIndices
+	 */
 	public ScentedFilterDataset(ArrayList<LDAConfiguration> data, Set<Integer> inactiveIndices, Set<Integer> activeIndices)
 	{
 		super(data);
-		
+	
+		this.isDerived				= false;
 		this.inactiveIndices 		= inactiveIndices;
 		this.activeIndices 			= activeIndices;
-		barToDataAssociations		= new LinkedHashMap<String, ArrayList<Integer>>();
+		this.barToDataAssociations	= new LinkedHashMap<String, ArrayList<Integer>>();
 	}
 	
 	/**
-	 * Bins data.
+	 * Generates dataset for filter accessing an primitive parameter.
+	 * @param data
+	 * @param inactiveIndices
+	 * @param activeIndices
+	 * @param derivedData List of derived data elements (one for each LDA configuration). Has to match data in length.
+	 */
+	public ScentedFilterDataset(ArrayList<LDAConfiguration> data, Set<Integer> inactiveIndices, Set<Integer> activeIndices, double[] derivedData)
+	{
+		super(data);
+	
+		this.isDerived				= true;
+		this.inactiveIndices 		= inactiveIndices;
+		this.activeIndices 			= activeIndices;
+		this.barToDataAssociations	= new LinkedHashMap<String, ArrayList<Integer>>();
+		this.derivedData			= derivedData;
+		
+		// Check for equality in length of provided LDA configurations and provided derived data.
+		if (data.size() != derivedData.length) {
+			System.out.println("### ERROR ### List of LDA configurations and list of derived data elements have to match in length.");
+		}
+	}
+	
+	/**
+	 * Bins data. Accesses data directly through parameters in LDA configuration objects.
 	 * @param ldaConfigurations
 	 * @param inactiveIndices
 	 * @param activeIndices
 	 * @return List of three arrays: (1) Inactive bin list, (2) active bin list, (3) discarded bin list.
 	 */
-	public ArrayList<int[]> binData( String param, int numberOfBins, final double min, final double max)
+	public ArrayList<double[]> binData( String param, int numberOfBins, final double min, final double max)
 	{
-		ArrayList<int[]> binnedData = new ArrayList<int[]>();
+		ArrayList<double[]> binnedData = new ArrayList<double[]>();
 		
 		// Init barToDataAssociations collection.
 		for (int i = 0; i < numberOfBins; i++) {
@@ -56,14 +96,18 @@ public class ScentedFilterDataset extends VisualizationComponentDataset
 		}
 		
 		// Map storing one bin list for each parameter, counting only filtered datasets.
-		int[] parameterBinList_inactive		= new int[numberOfBins];
+		double[] parameterBinList_inactive		= new double[numberOfBins];
 		// Map storing one bin list for each parameter, counting only selected datasets.
-		int[] parameterBinList_active		= new int[numberOfBins];
+		double[] parameterBinList_active		= new double[numberOfBins];
 		// Map storing one bin list for each parameter, counting only discarded datasets.
-		int[] parameterBinList_discarded	= new int[numberOfBins];
+		double[] parameterBinList_discarded		= new double[numberOfBins];
 		
-		// Bin data.
-		double binInterval	= (max - min) / numberOfBins;
+		/*
+		 *  Bin data.
+		 */
+		
+		// Calculate bin interval.
+		final double binInterval			= (max - min) / numberOfBins;
 		
 		// ...iterate over all LDA configurations.
 		for (int i = 0; i < allLDAConfigurations.size(); i++) {
@@ -72,7 +116,13 @@ public class ScentedFilterDataset extends VisualizationComponentDataset
 			boolean isActiveDataset		= activeIndices.contains(i);
 
 			// Calculate index of bin in which to store the current value.
-			int index_key		= (int) ( (allLDAConfigurations.get(i).getParameter(param) - min) / binInterval);
+			int index_key		= -1;
+			// If primitive parameter is accessed: Get value directly from LDA configuration instance.
+			if (!isDerived)
+				index_key		= (int) ( (allLDAConfigurations.get(i).getParameter(param) - min) / binInterval);
+			else
+				index_key		= (int) ( (derivedData[i] - min) / binInterval);
+			
 			// Check if element is highest allowed entry.
 			index_key			= index_key < numberOfBins ? index_key : numberOfBins - 1;
 			// Check if element is lowest allowed entry.
@@ -98,6 +148,28 @@ public class ScentedFilterDataset extends VisualizationComponentDataset
 			else
 				parameterBinList_discarded[index_key]++;
 		}
+		
+			System.out.println("deriv = " + isDerived);
+			int count = 0;
+			for (double i : parameterBinList_active)
+				count += i;
+			System.out.println("active = " + count);
+			count = 0;
+			for (double i : parameterBinList_inactive)
+				count += i;
+			System.out.println("inactive = " + count);
+			count = 0;
+			for (double i : parameterBinList_discarded)
+				count += i;
+			System.out.println("discarded = " + count);
+		
+		// Apply log transformation.
+//		for (int i = 0; i < parameterBinList_active.length; i++)
+//			parameterBinList_active[i] 		= Math.log(parameterBinList_active[i]);
+//		for (int i = 0; i < parameterBinList_inactive.length; i++)
+//			parameterBinList_inactive[i] 	= Math.log(parameterBinList_inactive[i]);
+//		for (int i = 0; i < parameterBinList_discarded.length; i++)
+//			parameterBinList_discarded[i] 	= Math.log(parameterBinList_discarded[i]);
 		
 		binnedData.add(parameterBinList_inactive);
 		binnedData.add(parameterBinList_active);
@@ -129,5 +201,15 @@ public class ScentedFilterDataset extends VisualizationComponentDataset
 	public void clearBarToDataAssociations()
 	{
 		this.barToDataAssociations.clear();
+	}
+
+	public boolean isDerived()
+	{
+		return isDerived;
+	}
+
+	public double[] getDerivedData()
+	{
+		return derivedData;
 	}
 }
