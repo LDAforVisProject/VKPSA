@@ -65,7 +65,7 @@
                                 <items>
                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="96.0" prefWidth="774.0">
                                        <children>
-                                          <SplitPane dividerPositions="0.2925170068027211, 0.5053449951409135, 0.7133138969873664" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                          <SplitPane dividerPositions="0.2925170068027211, 0.5053449951409135" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <items>
                                               <AnchorPane fx:id="mds_anchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff; -fx-border: #ccc;">
                                                    <children>
@@ -114,36 +114,6 @@
                                                             <Font name="System Bold" size="12.0" />
                                                          </font>
                                                       </Label>
-                                                   </children>
-                                                </AnchorPane>
-                                              <AnchorPane fx:id="distEval_anchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="39.0" prefWidth="610.0" style="-fx-background-color: #ffffff;">
-                                                   <children>
-                                                      <Label layoutX="7.0" layoutY="4.0" text="Result Space | Distance Evaluation" AnchorPane.topAnchor="7.0">
-                                                         <font>
-                                                            <Font name="System Bold" size="12.0" />
-                                                         </font>
-                                                      </Label>
-                                                      <BarChart fx:id="barchart_distances" animated="false" layoutX="-173.0" layoutY="-88.0" style="-fx-background-color: #fff;" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="30.0">
-                                                        <xAxis>
-                                                          <CategoryAxis side="BOTTOM" />
-                                                        </xAxis>
-                                                        <yAxis>
-                                                          <NumberAxis fx:id="numberaxis_distanceEvaluation_yaxis" side="LEFT" />
-                                                        </yAxis>
-                                                      </BarChart>
-                                                      <ToggleButton fx:id="button_relativeView_distEval" layoutX="268.0" layoutY="3.0" mnemonicParsing="false" onAction="#changeVisualizationViewMode" text="Relative view" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
-                                                         <font>
-                                                            <Font size="10.0" />
-                                                         </font>
-                                                      </ToggleButton>
-                                                      <ImageView fx:id="settings_distEval_icon" fitHeight="15.0" fitWidth="15.0" layoutX="133.0" layoutY="9.0" onMouseClicked="#switchToSettingsPane" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.leftAnchor="203.0" AnchorPane.topAnchor="8.0">
-                                                         <image>
-                                                            <Image url="@icons/cog.png" />
-                                                         </image>
-                                                         <cursor>
-                                                            <Cursor fx:constant="HAND" />
-                                                         </cursor>
-                                                      </ImageView>
                                                    </children>
                                                 </AnchorPane>
                                               <AnchorPane fx:id="localScope_containingAnchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff;">

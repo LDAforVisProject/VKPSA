@@ -136,17 +136,6 @@ public class AnalysisController extends Controller
 	 */
 	private @FXML Canvas mdsHeatmap_canvas;
 	
-	/*
-	 * Distances barchart. 
-	 */
-	
-	/**
-	 * DistancesBarchart componenet.
-	 */
-	private DistancesBarchart distancesBarchart;
-	
-	private @FXML BarChart<String, Number> barchart_distances;
-	private @FXML NumberAxis numberaxis_distanceEvaluation_yaxis;
 	private @FXML CheckBox checkbox_logarithmicDistanceBarchart;
 	
 	/*
@@ -200,7 +189,6 @@ public class AnalysisController extends Controller
 	 */
 	
 	private @FXML ImageView settings_mds_icon;
-	private @FXML ImageView settings_distEval_icon;
 	private @FXML ImageView settings_paramDist_icon;
 	private @FXML ImageView settings_localScope_icon;
 	
@@ -306,14 +294,12 @@ public class AnalysisController extends Controller
 		initSettingsPanel();
 		initFilterControls();
 		initMDSScatterchart();
-		initDistanceBarchart();
 		initParameterSpaceScatterchart();
 		initLocalScopeView();
 		initComparisonHeatmaps();
 		
 		// Bring setting icons to front.
 		settings_mds_icon.toFront();
-		settings_distEval_icon.toFront();
 		settings_paramDist_icon.toFront();
 		settings_localScope_icon.toFront();
 	}
@@ -396,12 +382,6 @@ public class AnalysisController extends Controller
 													settingsPanel.getGlobalScatterchartDHMMinColor(), settingsPanel.getGlobalScatterchartDHMMaxColor());
 	}
 	
-	private void initDistanceBarchart()
-	{
-		distancesBarchart = new DistancesBarchart(	this, barchart_distances, numberaxis_distanceEvaluation_yaxis, 
-													button_relativeView_distEval, checkbox_logarithmicDistanceBarchart);
-	}
-	
 	private void initParameterSpaceScatterchart()
 	{
 		// Init parameter space scatterchart.
@@ -446,11 +426,6 @@ public class AnalysisController extends Controller
 									dataspace.getActiveCoordinates(), dataspace.getActiveIndices(), 
 									dataspace.getDiscardedCoordinates(), dataspace.getDiscardedIndices());
 
-		//	Distance evaluation barchart:
-		distancesBarchart.refresh(	dataspace.getDiscardedIndices(), dataspace.getInactiveIndices(), dataspace.getActiveIndices(),
-									dataspace.getDiscardedDistances(), dataspace.getAvaibleDistances(), dataspace.getActiveDistances(), 
-									true, settingsPanel.isDBCLogarithmicallyScaled());
-
 		// 	Parameter space scatterchart:
 		paramSpaceScatterchart.refresh(new ScatterchartDataset(	dataspace.getLDAConfigurations(), dataspace.getDiscardedLDAConfigurations(),
 																dataspace.getInactiveLDAConfigurations(), dataspace.getActiveLDAConfigurations()));
@@ -469,7 +444,6 @@ public class AnalysisController extends Controller
 		// If not done already: Discover global extrema, adapt components.
 		if (!globalExtremaIdentified) {
 			// Identify global extrema.
-			distancesBarchart.identifyGlobalExtrema(dataspace.getDistances());
 			globalScatterplot.identifyGlobalExtrema(dataspace.getCoordinates());
 			paramSpaceScatterchart.identifyGlobalExtrema(dataspace.getLDAConfigurations());
 			
@@ -505,11 +479,6 @@ public class AnalysisController extends Controller
 			dataspace.updateAfterSelection(selectedIndices);
 			
 			// Refresh other (than MDSScatterchart) visualizations.
-			
-			//	Distances barchart:
-			distancesBarchart.refresh(	dataspace.getDiscardedIndices(), dataspace.getInactiveIndices(), dataspace.getActiveIndices(),
-										dataspace.getDiscardedDistances(), dataspace.getAvaibleDistances(), dataspace.getActiveDistances(), 
-										true, settingsPanel.isDBCLogarithmicallyScaled());
 			
 			//	Paramer space scatterchart:
 			paramSpaceScatterchart.refresh(new ScatterchartDataset(	dataspace.getLDAConfigurations(), dataspace.getDiscardedLDAConfigurations(),
@@ -614,10 +583,6 @@ public class AnalysisController extends Controller
 		dataspace.updateAfterSelection(null);
 
 		// 4.	Refresh visualizations.
-		// 	Distances barchart:
-		distancesBarchart.refresh(		dataspace.getDiscardedIndices(), dataspace.getInactiveIndices(), dataspace.getActiveIndices(),
-										dataspace.getDiscardedDistances(), dataspace.getAvaibleDistances(), dataspace.getActiveDistances(), 
-										true, settingsPanel.isDBCLogarithmicallyScaled());
 		// 	MDS scatterchart:
 		globalScatterplot.refresh(		dataspace.getCoordinates(),
 										dataspace.getAvailableCoordinates(), dataspace.getInactiveIndices(), 
@@ -784,28 +749,9 @@ public class AnalysisController extends Controller
 		Node source = (Node) e.getSource();
 		
 		switch (source.getId()) {
-			case "button_relativeView_distEval":
-				distancesBarchart.changeViewMode();
-			break;
-
 			case "button_relativeView_paramDist":
 			break;
 		}
-	}
-	
-	@FXML
-	public void changeDBCScalingType(ActionEvent e)
-	{
-		distancesBarchart.changeScalingType();
-	}
-	
-	/**
-	 * Changes distance barchart's scaling type.
-	 * @param isLogarithmic
-	 */
-	public void changeDBCScalingType(boolean isLogarithmicScalingEnabled)
-	{
-		distancesBarchart.changeScalingType(isLogarithmicScalingEnabled);
 	}
 	
 	/**
@@ -837,7 +783,6 @@ public class AnalysisController extends Controller
             public void handle(KeyEvent ke) 
             {
             	globalScatterplot.processKeyPressedEvent(ke);
-            	distancesBarchart.processKeyPressedEvent(ke);
             	tmcHeatmap.processKeyPressedEvent(ke);
             	for (ScentedFilter filter : filters)
             		filter.processKeyPressedEvent(ke);
@@ -849,7 +794,6 @@ public class AnalysisController extends Controller
             public void handle(KeyEvent ke) 
             {
             	globalScatterplot.processKeyReleasedEvent(ke);
-            	distancesBarchart.processKeyReleasedEvent(ke);
             	tmcHeatmap.processKeyReleasedEvent(ke);
             	for (ScentedFilter filter : filters)
             		filter.processKeyReleasedEvent(ke);
@@ -896,7 +840,6 @@ public class AnalysisController extends Controller
 	public void checkIfSettingsIconWasClicked(double x, double y, String iconID)
 	{		
 		if(	(iconID == "settings_mds_icon" 				&& settings_mds_icon.getBoundsInParent().contains(x, y))			||
-			(iconID == "settings_distEval_icon" 		&& settings_distEval_icon.getBoundsInParent().contains(x, y))		||
 			(iconID == "settings_paramDist_icon" 		&& settings_paramDist_icon.getBoundsInParent().contains(x, y))		||
 			(iconID == "settings_localScope_icon" 		&& settings_localScope_icon.getBoundsInParent().contains(x, y))
 		) {
@@ -942,10 +885,6 @@ public class AnalysisController extends Controller
 				settings_mds_icon.setVisible(true);
 			break;
 			
-			case "distEval_anchorPane":
-				settings_distEval_icon.setVisible(true);
-			break;
-			
 			case "paramSpace_anchorPane":
 				settings_paramDist_icon.setVisible(true);
 			break;
@@ -966,10 +905,6 @@ public class AnalysisController extends Controller
 		switch ( ((Node)e.getSource()).getId() ) {
 			case "mds_anchorPane":
 				settings_mds_icon.setVisible(false);
-			break;
-			
-			case "distEval_anchorPane":
-				settings_distEval_icon.setVisible(false);
 			break;
 			
 			case "paramSpace_distribution_anchorPane":

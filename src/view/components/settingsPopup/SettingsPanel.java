@@ -267,7 +267,7 @@ public class SettingsPanel extends VisualizationComponent
 	@FXML
 	public void changeDBCScalingType(ActionEvent e)
 	{
-		analysisController.changeDBCScalingType(distanceBarchart_logarithmicScaling_checkbox.isSelected());
+		// @todo Remove GUI option.
 	}
 	
 	/**

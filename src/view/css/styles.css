@@ -21,3 +21,7 @@
     -fx-background-radius: 4px;
     -fx-padding: 4px;
 }
+
+.range-slider .range-bar {
+	-fx-background-insets: 2;	
+}

@@ -731,7 +731,7 @@ public class AnalysisDataspace
 			for (int j = 0; j < distances.length; j++) {
 				distanceSum += distances[i][j];
 			}
-			averageDistances[i] = distanceSum / (activeIndices.size() - 1);
+			averageDistances[i] = distanceSum / (distances.length - 1);
 		}
 		
 		// Calculate distances of inactive datasets.
@@ -740,7 +740,7 @@ public class AnalysisDataspace
 			for (int j = 0; j < distances.length; j++) {
 				distanceSum += distances[i][j];
 			}
-			averageDistances[i] = distanceSum / (inactiveIndices.size() - 1);
+			averageDistances[i] = distanceSum / (distances.length - 1);
 		}
 		
 		// Calculate distances of discarded datasets.
@@ -749,7 +749,7 @@ public class AnalysisDataspace
 			for (int j = 0; j < distances.length; j++) {
 				distanceSum += distances[i][j];
 			}
-			averageDistances[i] = distanceSum / (discardedIndices.size() - 1);
+			averageDistances[i] = distanceSum / (distances.length - 1);
 		}		
 		
 		return averageDistances;
