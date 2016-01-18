@@ -22,6 +22,7 @@ public class RubberBandSelection
 	protected final DragContext dragContext;
     protected Rectangle rect;
     protected Pane pane;
+    protected boolean isEnabled;
 
     protected EventHandler<MouseEvent> test;
     
@@ -45,8 +46,9 @@ public class RubberBandSelection
         this.pane			= pane;
         this.listener		= listener;
         this.isLocked		= false;
+        this.isEnabled		= true;
         
-        rect 				= new Rectangle( 0,0,0,0);
+        rect 				= new Rectangle(0, 0, 0, 0);
         rect.setStroke(Color.BLUE);
         rect.setStrokeWidth(1);
         rect.setStrokeLineCap(StrokeLineCap.ROUND);
@@ -66,9 +68,12 @@ public class RubberBandSelection
      */
 	public void enable()
     {
-	    pane.addEventHandler(MouseEvent.MOUSE_PRESSED, onMousePressedEventHandler);
-	    pane.addEventHandler(MouseEvent.MOUSE_DRAGGED, onMouseDraggedEventHandler);
-	    pane.addEventHandler(MouseEvent.MOUSE_RELEASED, onMouseReleasedEventHandler);
+		if (!isEnabled) {
+			this.isEnabled = true;
+		    pane.addEventHandler(MouseEvent.MOUSE_PRESSED, onMousePressedEventHandler);
+		    pane.addEventHandler(MouseEvent.MOUSE_DRAGGED, onMouseDraggedEventHandler);
+		    pane.addEventHandler(MouseEvent.MOUSE_RELEASED, onMouseReleasedEventHandler);
+		}
     }
 
     /**
@@ -76,9 +81,26 @@ public class RubberBandSelection
      */
     public void disable()
     {
-    	pane.removeEventHandler(MouseEvent.MOUSE_PRESSED, onMousePressedEventHandler);
-    	pane.removeEventHandler(MouseEvent.MOUSE_DRAGGED, onMouseDraggedEventHandler);
-    	pane.removeEventHandler(MouseEvent.MOUSE_RELEASED, onMouseReleasedEventHandler);
+    	if (isEnabled) {
+	    	this.isEnabled = false;
+	    	pane.removeEventHandler(MouseEvent.MOUSE_PRESSED, onMousePressedEventHandler);
+	    	pane.removeEventHandler(MouseEvent.MOUSE_DRAGGED, onMouseDraggedEventHandler);
+	    	pane.removeEventHandler(MouseEvent.MOUSE_RELEASED, onMouseReleasedEventHandler);
+    	}
+    }
+    
+    /**
+     * Toggles status of rubber band selector.
+     * @return Old status.
+     */
+    public boolean toggle()
+    {
+    	if (isEnabled)
+    		disable();
+    	else
+    		enable();
+    	
+    	return !isEnabled;
     }
     
     /**

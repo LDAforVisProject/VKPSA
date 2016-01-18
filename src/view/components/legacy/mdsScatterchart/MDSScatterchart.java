@@ -23,6 +23,7 @@ import java.util.Set;
 
 
 
+
 import com.sun.javafx.charts.Legend;
 
 import javafx.collections.ListChangeListener;
@@ -38,6 +39,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyCode;
@@ -64,6 +66,11 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	/*
 	 * GUI elements.
 	 */
+	
+	/**
+	 * Scroll pane used for zoom.
+	 */
+	private ScrollPane scrollPane;
 	
 	/**
 	 * ScatterChart used for visualization.
@@ -245,7 +252,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	// -----------------------------------------------
 	
 	public MDSScatterchart(	AnalysisController analysisController, ScatterChart<Number, Number> scatterchart,
-							Canvas heatmap_canvas, 
+							Canvas heatmap_canvas, ScrollPane scrollPane,
 							CheckBox heatmap_dynGranularity_checkbox, Slider heatmapGranularity_slider,
 							Color dhmMinColor, Color dhmMaxColor)
 	{
@@ -253,6 +260,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 		
 		this.scatterchart						= scatterchart;
 		this.heatmap_canvas						= heatmap_canvas;
+		this.scrollPane							= scrollPane;
 		
 		this.heatmapGranularity_slider			= heatmapGranularity_slider;
 		this.heatmap_dynGranularity_checkbox	= heatmap_dynGranularity_checkbox;
@@ -436,8 +444,12 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	 */
 	private void initZoom()
 	{
+		// Disable panning.
+		scrollPane.setPannable(false);
+		
 		scatterchart.setOnScroll(new EventHandler<ScrollEvent>() {
 		    public void handle(ScrollEvent event) {
+		    	System.out.println("zooming");
 		        event.consume();
 		        
 		        if (event.getDeltaY() == 0) {
@@ -446,48 +458,36 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 
 		        double scaleFactor = (event.getDeltaY() > 0) ? MDSScatterchart.ZOOM_DELTA : 1 / MDSScatterchart.ZOOM_DELTA;
 
-		        XYChart.Data<Number, Number> firstData = null;
-		        
-		        for (Series<Number, Number> ds : scatterchart.getData()) {
-		        	System.out.println(ds.getName());
-		        }
-		        
 //		        IDEA for pin-point-zoom: Maps seems to zoom to the middle. So:
 //		        	- Add to translation the difference between middle of the chart and the desired (mouse event!) Point.
 //		        	- Keep track of where the new "middle" is; use for following zooms.
 //		        -> Start with first iteration and work that out. All other follows once after the initial task works.
-		        
-		        // Get first data point.
-		        System.out.println(scatterchart.getData().isEmpty());
-		        System.out.println(scatterchart.getData().get(2) != null);
-		        System.out.println(scatterchart.getData().get(2).getData().isEmpty());
-
-		        if (!scatterchart.getData().isEmpty())
-		        	if (scatterchart.getData().get(2) != null)
-		        		if (!scatterchart.getData().get(2).getData().isEmpty())
-		        			firstData = scatterchart.getData().get(2).getData().get(0);
-		        	
+		
 		        double x = event.getX();
 		        
 		        
 		        scatterchart.setAnimated(false);
-		        if (firstData != null) {
+		  
 		        System.out.println("--------" + event.getX() + ", " + event.getY());
 //		        System.out.println("BEFORE ****** " + scatterchart.getLayoutX() + " / " + scatterchart.getLayoutY());
 		        System.out.println("BEFORE ****** " + scatterchart.getWidth() + " / " + scatterchart.getHeight());
-		        System.out.println("BEFORE ****** " + firstData.getNode().getBoundsInLocal().getMinX() + " / " + firstData.getNode().getBoundsInLocal().getMinY());
-		        
+		      
 		        // Update chart's scale factor.
-		        scatterchart.setScaleX(scatterchart.getScaleX() * scaleFactor);
-		        scatterchart.setScaleY(scatterchart.getScaleY() * scaleFactor);
+		        double width 	= scatterchart.getWidth();
+		        double height	= scatterchart.getHeight();
+		        
+		        scatterchart.setMinWidth(width * scaleFactor);
+		        scatterchart.setMaxWidth(width * scaleFactor);
+		        scatterchart.setMinHeight(height * scaleFactor);
+		        scatterchart.setMaxHeight(height * scaleFactor);
+//		        scatterchart.setScaleX(scatterchart.getScaleX() * scaleFactor);
+//		        scatterchart.setScaleY(scatterchart.getScaleY() * scaleFactor);
 		        
 //		        System.out.println("AFTER ****** " + scatterchart.getLayoutX() + " / " + scatterchart.getLayoutY());
-		        System.out.println("AFTER ****** " + firstData.getNode().getBoundsInLocal().getMinX() + " / " + firstData.getNode().getBoundsInLocal().getMinY());
 		        System.out.println("AFTER ****** " + scatterchart.getWidth() + " / " + scatterchart.getHeight());
 		        System.out.println("--------" + event.getX() + ", " + event.getY());
 		        
 		        double translationX = x - (x - 0) * scaleFactor;
-		        }
 		    }
 		});
 
@@ -572,6 +572,12 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	{
     	// Remember if CTRL is down.
     	isCtrlDown = ke.isControlDown();
+    	
+    	// If key is space: Activate panning, de-activate selection listener.
+    	if (ke.getCharacter().equals(" ")) {
+    		rubberbandSelection.disable();
+    		scrollPane.setPannable(true);
+    	}
 	}
 	
 	/**
@@ -600,6 +606,11 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
     		}
     	}
     	
+		else if (ke.getCode() == KeyCode.SPACE) {
+			rubberbandSelection.enable();
+    		scrollPane.setPannable(false);
+		}
+		
 		// Remember if CTRL is down.
     	isCtrlDown = ke.isControlDown();
 	}

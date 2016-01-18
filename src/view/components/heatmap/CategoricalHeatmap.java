@@ -160,6 +160,28 @@ public class CategoricalHeatmap extends Heatmap
     		parent_anchorpane.getChildren().add(yLabel);
     	}
 	}
+	
+	/**
+	 * Clears canvas.
+	 */
+	public void clear()
+	{
+		// Reset data.
+		this.data 		= null;
+		this.options	= null;
+		
+    	// Clear canvas.
+		canvas.getGraphicsContext2D().clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+		// Clear axis labels.
+    	for (Label label : xAxisLabels) {
+    		parent_anchorpane.getChildren().remove(label);
+    	}
+    	for (Label label : yAxisLabels) {
+    		parent_anchorpane.getChildren().remove(label);
+    	}
+    	xAxisLabels.clear();
+    	yAxisLabels.clear();
+	}
 
 	@Override
 	protected void draw(HeatmapDataset data, boolean useBorders)
@@ -172,8 +194,6 @@ public class CategoricalHeatmap extends Heatmap
     	double binMatrix[][]		= data.getBinMatrix();
     	double minOccurenceCount	= data.getGlobalExtrema() == null ? data.getMinOccurenceCount() : data.getGlobalExtrema().getKey();
     	double maxOccurenceCount	= data.getGlobalExtrema() == null ? data.getMaxOccurenceCount() : data.getGlobalExtrema().getValue();
-    	
-    	//CONTINUE HERE: Test if global extrema normalization for TMC heatmap works properly. Should be complete as it is.
     	
     	// Set stroke color.
     	gc.setStroke(Color.BLACK);

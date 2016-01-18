@@ -555,8 +555,6 @@ public class ScentedFilter extends VisualizationComponent
 				max = max < derivedData[i] ? derivedData[i] : max;
 			}
 			
-			System.out.println ("min = " + min + ", max = " + max);
-			
 			// Set range slider values.
 			if (options.useRangeSlider()) {
 				rangeSlider.setMin(min);

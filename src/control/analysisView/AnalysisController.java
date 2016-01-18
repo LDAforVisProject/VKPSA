@@ -46,6 +46,7 @@ import javafx.scene.control.Accordion;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextArea;
@@ -100,6 +101,8 @@ public class AnalysisController extends Controller
 	 * For MDS scatterchart.
 	 */
 	private @FXML AnchorPane mds_anchorPane;
+	private @FXML ScrollPane mds_content_scrollPane;
+	
 	/**
 	 * For distance evaluation barchart.
 	 */
@@ -377,7 +380,8 @@ public class AnalysisController extends Controller
 	private void initMDSScatterchart()
 	{
 		// Init scatterchart. checkbox_mdsHeatmap_distribution_dynAdjustment
-		globalScatterplot = new MDSScatterchart(	this, mds_scatterchart, mdsHeatmap_canvas, 
+		mds_content_scrollPane.toBack();
+		globalScatterplot = new MDSScatterchart(	this, mds_scatterchart, mdsHeatmap_canvas, mds_content_scrollPane,
 													settingsPanel.getGlobalScatterchartDHMGranularityCheckbox(), settingsPanel.getGlobalScatterchartDHMGranularitySlider(),
 													settingsPanel.getGlobalScatterchartDHMMinColor(), settingsPanel.getGlobalScatterchartDHMMaxColor());
 	}
@@ -615,6 +619,9 @@ public class AnalysisController extends Controller
 			// Instruct heatmap to fetch topic distance data asynchronously.
 			tmcHeatmap.fetchTopicDistanceData(selectedLDAConfigurations, tmcOptions);
 		}
+		
+		else
+			tmcHeatmap.clear();
 	}
 	
 	/**
@@ -782,6 +789,7 @@ public class AnalysisController extends Controller
 		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
             public void handle(KeyEvent ke) 
             {
+            	//System.out.println(ke.getCode());
             	globalScatterplot.processKeyPressedEvent(ke);
             	tmcHeatmap.processKeyPressedEvent(ke);
             	for (ScentedFilter filter : filters)
@@ -790,9 +798,17 @@ public class AnalysisController extends Controller
             }
 		});
 		
+		scene.setOnKeyTyped(new EventHandler<KeyEvent>() {
+            public void handle(KeyEvent ke) 
+            {
+            	globalScatterplot.processKeyPressedEvent(ke);
+            }
+		});
+		
 		scene.setOnKeyReleased(new EventHandler<KeyEvent>() {
             public void handle(KeyEvent ke) 
             {
+            	System.out.println(ke.getCode());
             	globalScatterplot.processKeyReleasedEvent(ke);
             	tmcHeatmap.processKeyReleasedEvent(ke);
             	for (ScentedFilter filter : filters)
