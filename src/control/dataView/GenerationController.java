@@ -223,6 +223,9 @@ public class GenerationController extends DataSubViewController
 			// Set initial values.
 			numberOfDatasetsToGenerate	= Integer.parseInt(numberOfDatasets_textfield.getText());
 			numberOfDivisions			= Integer.parseInt(numberOfDivisions_textfield.getText());
+			
+			// Disable number of divisions by default (since random sampling is enabled by default).
+			numberOfDivisions_textfield.setDisable(true);
 		}
 		
 		catch (NumberFormatException e) {
@@ -313,7 +316,7 @@ public class GenerationController extends DataSubViewController
 			parameterValues_low.put(param, rs.getLowValue() >= rangeSliders.get(param).getMin() ? rs.getLowValue() : rangeSliders.get(param).getMin());
 			parameterValues_high.put(param, rs.getHighValue() <= rangeSliders.get(param).getMax() ? rs.getHighValue() : rangeSliders.get(param).getMax());
 		}
-		
+			
     	switch (parameter) 
     	{
     		case "alpha":
@@ -343,10 +346,18 @@ public class GenerationController extends DataSubViewController
 			{
 				// If sampling mode == random: Number of datasets to generate equals number of divisions for each parameter.
 				case "Random":
+					// Disable divisions textfield.
+					numberOfDivisions_textfield.setDisable(true);
+					
+					// Update number of divisions.
 					numberOfDivisions = numberOfDatasetsToGenerate;
 				break;
 				
 				case "Cartesian":
+					// Enable divisions textfield.
+					numberOfDivisions_textfield.setDisable(false);
+					
+					// Update number of divisions.
 					numberOfDivisions			= (int) Math.pow(numberOfDatasetsToGenerate,  1.0 / LDAConfiguration.SUPPORTED_PARAMETERS.length);
 					
 					// Round down number of datasets to nearest possible value.

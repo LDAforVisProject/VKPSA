@@ -463,8 +463,6 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 		        // Store current width and height.
 		        final double totalWidth		= scatterchart.getWidth();
 		        final double totalHeight	= scatterchart.getHeight();
-		        
-		        System.out.println("--------" + event.getX() + ", " + event.getY());
 		      
 		        // Update chart's scale factor.
 		        double width 	= scatterchart.getWidth();
@@ -476,6 +474,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 		        scatterchart.setMinHeight(height * scaleFactor);
 		        scatterchart.setMaxHeight(height * scaleFactor);
 		        
+		        // Force redraw of entire scrollpane.
 		        scrollPane.applyCss();
 		        scrollPane.layout();
 		        
