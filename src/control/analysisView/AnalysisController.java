@@ -45,6 +45,7 @@ import javafx.scene.chart.ScatterChart;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
+import javafx.scene.control.Control;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
@@ -55,6 +56,7 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.DragEvent;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -97,11 +99,22 @@ public class AnalysisController extends Controller
 	 */
 	private @FXML AnchorPane settings_filter_anchorPane;
 	
+	
+	// For MDS scatterchart.
+	// --------------------
 	/**
-	 * For MDS scatterchart.
+	 * AnchorPane holding scroll pane (important for zoom). 
 	 */
 	private @FXML AnchorPane mds_anchorPane;
+	/**
+	 * ScrollPane holding component.
+	 */
 	private @FXML ScrollPane mds_content_scrollPane;
+	/**
+	 * AnchorPane holding actual scatterchart. 
+	 */
+	private @FXML AnchorPane mds_content_anchorPane;
+	// --------------------
 	
 	/**
 	 * For distance evaluation barchart.
@@ -258,7 +271,7 @@ public class AnalysisController extends Controller
 	{
 		// Define list of anchor panes / other elements to add resize listeners to.
 		ArrayList<Pane> anchorPanesToResize = new ArrayList<Pane>();
-		
+
 		anchorPanesToResize.add(paramSpace_distribution_anchorPane_selected);
 		anchorPanesToResize.add(mds_anchorPane);
 		anchorPanesToResize.add(localscope_tmc_anchorPane);
@@ -702,6 +715,10 @@ public class AnalysisController extends Controller
 			
 			// Resize scatter plot.
 			case "mds_anchorPane":
+				// Update content anchor pane. Deduct 5 pixels for scroll bars.
+				mds_content_anchorPane.setPrefWidth(mds_content_scrollPane.getWidth() - 5);
+				mds_content_anchorPane.setPrefHeight(mds_content_scrollPane.getHeight() - 5);
+				
 	        	// Update MDS heatmap position/indentation.
 				globalScatterplot.updateHeatmapPosition();
 				// Redraw heatmap.
@@ -786,36 +803,59 @@ public class AnalysisController extends Controller
 	 */
 	public void addKeyListener()
 	{
-		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+		/*
+		 * Consume space bar key event in scroll pane, manually propagate event to
+		 * AnalysisController's key event processing. 
+		 */
+		EventHandler<KeyEvent> mdsScrollPaneKEHandler = (new EventHandler<KeyEvent>() {
             public void handle(KeyEvent ke) 
             {
-            	//System.out.println(ke.getCode());
-            	globalScatterplot.processKeyPressedEvent(ke);
-            	tmcHeatmap.processKeyPressedEvent(ke);
-            	for (ScentedFilter filter : filters)
-            		filter.processKeyPressedEvent(ke);
-            	paramSpaceScatterchart.processKeyPressedEvent(ke);
+            	if (ke.getCode() == KeyCode.SPACE || ke.getCharacter().equals(" ")) {
+	            	notifyKeyEventSubscribers(ke);
+	            	ke.consume();
+            	}
             }
 		});
 		
-		scene.setOnKeyTyped(new EventHandler<KeyEvent>() {
+		mds_content_scrollPane.setOnKeyPressed(mdsScrollPaneKEHandler);
+		mds_content_scrollPane.setOnKeyTyped(mdsScrollPaneKEHandler);
+		mds_content_scrollPane.setOnKeyReleased(mdsScrollPaneKEHandler);
+		
+		/**
+		 * Process key events.
+		 */
+		
+		EventHandler<KeyEvent> defaultKEHandler = (new EventHandler<KeyEvent>() {
             public void handle(KeyEvent ke) 
             {
-            	globalScatterplot.processKeyPressedEvent(ke);
+            	notifyKeyEventSubscribers(ke);
             }
 		});
 		
-		scene.setOnKeyReleased(new EventHandler<KeyEvent>() {
-            public void handle(KeyEvent ke) 
-            {
-            	System.out.println(ke.getCode());
-            	globalScatterplot.processKeyReleasedEvent(ke);
-            	tmcHeatmap.processKeyReleasedEvent(ke);
-            	for (ScentedFilter filter : filters)
-            		filter.processKeyReleasedEvent(ke);
-            	paramSpaceScatterchart.processKeyReleasedEvent(ke);
-            }
-		});
+		scene.setOnKeyPressed(defaultKEHandler);
+		scene.setOnKeyTyped(defaultKEHandler);
+		scene.setOnKeyReleased(defaultKEHandler);
+	}
+	
+	/**
+	 * Notifies all subscribers about key events.
+	 * @param ke
+	 */
+	private void notifyKeyEventSubscribers(KeyEvent ke)
+	{
+		if (ke.getEventType() == KeyEvent.KEY_PRESSED || ke.getEventType() == KeyEvent.KEY_RELEASED) {
+	    	globalScatterplot.processKeyReleasedEvent(ke);
+	    	tmcHeatmap.processKeyReleasedEvent(ke);
+	    	for (ScentedFilter filter : filters)
+	    		filter.processKeyReleasedEvent(ke);
+	    	paramSpaceScatterchart.processKeyReleasedEvent(ke);
+		}
+		
+		else if (ke.getEventType() == KeyEvent.KEY_TYPED) {
+			globalScatterplot.processKeyPressedEvent(ke);
+		}
+		
+    	ke.consume();
 	}
 	
 	public ArrayList<LDAConfiguration> getLDAConfigurations()

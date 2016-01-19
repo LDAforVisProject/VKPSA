@@ -360,6 +360,8 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 
 	private void initScatterchart()
 	{
+		scatterchart.setAnimated(false);
+		
 		// Init scatterchart.
 		scatterchart_xAxis = (NumberAxis) scatterchart.getXAxis();
         scatterchart_yAxis = (NumberAxis) scatterchart.getYAxis();
@@ -449,45 +451,37 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 		
 		scatterchart.setOnScroll(new EventHandler<ScrollEvent>() {
 		    public void handle(ScrollEvent event) {
-		    	System.out.println("zooming");
 		        event.consume();
 		        
 		        if (event.getDeltaY() == 0) {
 		            return;
 		        }
 
-		        double scaleFactor = (event.getDeltaY() > 0) ? MDSScatterchart.ZOOM_DELTA : 1 / MDSScatterchart.ZOOM_DELTA;
+		        // Calculate scale factor.
+		        final double scaleFactor 	= event.getDeltaY() > 0 ? MDSScatterchart.ZOOM_DELTA : 1 / MDSScatterchart.ZOOM_DELTA;
 
-//		        IDEA for pin-point-zoom: Maps seems to zoom to the middle. So:
-//		        	- Add to translation the difference between middle of the chart and the desired (mouse event!) Point.
-//		        	- Keep track of where the new "middle" is; use for following zooms.
-//		        -> Start with first iteration and work that out. All other follows once after the initial task works.
-		
-		        double x = event.getX();
+		        // Store current width and height.
+		        final double totalWidth		= scatterchart.getWidth();
+		        final double totalHeight	= scatterchart.getHeight();
 		        
-		        
-		        scatterchart.setAnimated(false);
-		  
 		        System.out.println("--------" + event.getX() + ", " + event.getY());
-//		        System.out.println("BEFORE ****** " + scatterchart.getLayoutX() + " / " + scatterchart.getLayoutY());
-		        System.out.println("BEFORE ****** " + scatterchart.getWidth() + " / " + scatterchart.getHeight());
 		      
 		        // Update chart's scale factor.
 		        double width 	= scatterchart.getWidth();
 		        double height	= scatterchart.getHeight();
 		        
+		        // Resize scatterchart.
 		        scatterchart.setMinWidth(width * scaleFactor);
 		        scatterchart.setMaxWidth(width * scaleFactor);
 		        scatterchart.setMinHeight(height * scaleFactor);
 		        scatterchart.setMaxHeight(height * scaleFactor);
-//		        scatterchart.setScaleX(scatterchart.getScaleX() * scaleFactor);
-//		        scatterchart.setScaleY(scatterchart.getScaleY() * scaleFactor);
 		        
-//		        System.out.println("AFTER ****** " + scatterchart.getLayoutX() + " / " + scatterchart.getLayoutY());
-		        System.out.println("AFTER ****** " + scatterchart.getWidth() + " / " + scatterchart.getHeight());
-		        System.out.println("--------" + event.getX() + ", " + event.getY());
+		        scrollPane.applyCss();
+		        scrollPane.layout();
 		        
-		        double translationX = x - (x - 0) * scaleFactor;
+		        // Scroll to mouse coordinates.
+		        scrollPane.setHvalue(event.getX() / totalWidth);
+		        scrollPane.setVvalue(event.getY() / totalHeight);
 		    }
 		});
 
