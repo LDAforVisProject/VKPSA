@@ -137,7 +137,7 @@ public class Topic
 		double result = 0;
         // Assume all words are present in self._keywordProbabilityMap as well as objectToCompare._keywordProbabilityMap.
 		for (Map.Entry<String, Double> item : keywordProbabilityMap.entrySet()) {
-            result += Math.sqrt(item.getValue() * topicToCompare.keywordProbabilityMap.get(item.getKey()));
+			result += Math.sqrt(item.getValue() * topicToCompare.keywordProbabilityMap.get(item.getKey()));
 		}
 		
         return (Math.log(result) / log2) * (-1);

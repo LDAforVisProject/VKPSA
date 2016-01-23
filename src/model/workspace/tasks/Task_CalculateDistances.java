@@ -61,9 +61,11 @@ public class Task_CalculateDistances extends WorkspaceTask
 		boolean calculateAllDistances = additionalOptionSet == null	|| 
 										additionalOptionSet != null && (additionalOptionSet.get("forceDistanceRecalculation") == 1);
 		
-	
-//		for (int i : listOfLDAConfigsWithoutDistances)
-//			System.out.println("\tblub - " + i);
+		System.out.println("ldaConfigCount = " + ldaConfigurations.size());
+		System.out.println("without distances = " + listOfLDAConfigsWithoutDistances.size());
+		System.out.println("datasetMap.size = " + datasetMap.size());
+		System.out.println("calculateAllDistances = " + calculateAllDistances);
+		
 		
 		/*
 		 * Compare all datasets with each other, calculate distances.
