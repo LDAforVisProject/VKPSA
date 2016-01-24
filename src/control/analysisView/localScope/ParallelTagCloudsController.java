@@ -526,7 +526,7 @@ public class ParallelTagCloudsController extends LocalScopeVisualizationControll
 							double proportion	= probability > nextProbability ? nextProbability / probability : probability / nextProbability; 
 							
 							// Line width is proportional to the difference in probability between these two topics.
-							gc.setLineWidth(defaultLineWidth * Math.pow(proportion, 2));
+							gc.setLineWidth(defaultLineWidth); // * Math.pow(proportion, 2));
 							
 							// Line color is dependent on the overall importance of this keyword.
 							final int colorExponent					= 3;

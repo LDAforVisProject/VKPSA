@@ -438,7 +438,7 @@ public class AnalysisController extends Controller
 		refreshScentedFilters();
 		
 		// 	MDS scatterchart:
-		globalScatterplot.refresh(	dataspace.getCoordinates(),
+		globalScatterplot.refresh(	dataspace.getCoordinates(), dataspace.getReferenceTMIndex(),
 									dataspace.getAvailableCoordinates(), dataspace.getInactiveIndices(), 
 									dataspace.getActiveCoordinates(), dataspace.getActiveIndices(), 
 									dataspace.getDiscardedCoordinates(), dataspace.getDiscardedIndices());
@@ -601,7 +601,7 @@ public class AnalysisController extends Controller
 
 		// 4.	Refresh visualizations.
 		// 	MDS scatterchart:
-		globalScatterplot.refresh(		dataspace.getCoordinates(),
+		globalScatterplot.refresh(		dataspace.getCoordinates(), dataspace.getReferenceTMIndex(),
 										dataspace.getAvailableCoordinates(), dataspace.getInactiveIndices(), 
 										dataspace.getActiveCoordinates(), dataspace.getActiveIndices(), 
 										dataspace.getDiscardedCoordinates(), dataspace.getDiscardedIndices());

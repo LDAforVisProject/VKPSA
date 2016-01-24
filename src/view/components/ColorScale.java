@@ -112,13 +112,14 @@ public class ColorScale extends ImageView
      */
     public static Color getColorForValue(double value, double min, double max, Color minColor, Color maxColor) 
     {
-    	if (value != 0 && value != -1 && (value < min || value > max) ) {
+    	if (value == 0 || value == -1) {
+    		return Color.TRANSPARENT;
+        }
+    	
+    	else if (value < min || value > max) {
             return Color.BLACK ;
         }
-        
-        else if (value == 0 || value == -1) 
-        	return Color.TRANSPARENT;
-        
+    	
         else {
         	final double hue		= minColor.getHue() + (maxColor.getHue() - minColor.getHue()) * (value - min) / (max - min);
         	final double saturation	= (value - min) / (max - min);

@@ -86,32 +86,32 @@ public class Main extends Application
 		// 					Run VKPSA
 		// -----------------------------------------------
 		
-		DBManagement dbm = new DBManagement("D:\\Workspace\\Scientific Computing\\VKPSA_data - Copy\\vkpsa.db");
-		dbm.importReferenceTopicModel("D:\\Workspace\\Scientific Computing\\VKPSA_data - Copy\\referenceTopicModel.csv");
+//		DBManagement dbm = new DBManagement("D:\\Workspace\\Scientific Computing\\VKPSA_data - Copy\\vkpsa.db");
+//		dbm.importReferenceTopicModel("D:\\Workspace\\Scientific Computing\\VKPSA_data - Copy\\referenceTopicModel.csv");
 		
-//		try {
-//			// Load core .fxml file. 
-//			FXMLLoader fxmlLoader			= new FXMLLoader();
-//			Pane root 						= (Pane) fxmlLoader.load(getClass().getResource("/view/fxml/SII_Core.fxml").openStream());
-//			CoreController coreController	= (CoreController) fxmlLoader.getController();
-//			Scene scene						= new Scene(root);
-//			
-//			coreController.setScene(scene);
-//			coreController.setInitialWorkspaceDirectory(args[0]);
-//			primaryStage.setTitle("VKPSA");
-//	        primaryStage.setScene(scene);
-//	        primaryStage.show();
-//	        
-//	        // Add CSS sheet.
-//			scene.getStylesheets().add(getClass().getResource("/view/css/styles.css").toExternalForm());
-//			
-//			// Add resize listeners.
-//			addResizeListeners(scene, coreController);
-//		}
-//		
-//		catch(Exception e) {
-//			e.printStackTrace();
-//		}
+		try {
+			// Load core .fxml file. 
+			FXMLLoader fxmlLoader			= new FXMLLoader();
+			Pane root 						= (Pane) fxmlLoader.load(getClass().getResource("/view/fxml/SII_Core.fxml").openStream());
+			CoreController coreController	= (CoreController) fxmlLoader.getController();
+			Scene scene						= new Scene(root);
+			
+			coreController.setScene(scene);
+			coreController.setInitialWorkspaceDirectory(args[0]);
+			primaryStage.setTitle("VKPSA");
+	        primaryStage.setScene(scene);
+	        primaryStage.show();
+	        
+	        // Add CSS sheet.
+			scene.getStylesheets().add(getClass().getResource("/view/css/styles.css").toExternalForm());
+			
+			// Add resize listeners.
+			addResizeListeners(scene, coreController);
+		}
+		
+		catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void addResizeListeners(Scene scene, final CoreController coreController)

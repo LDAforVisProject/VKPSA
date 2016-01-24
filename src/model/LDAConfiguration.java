@@ -32,6 +32,11 @@ public class LDAConfiguration
 	        tempParameterMap.put("alpha", -1);
 	        PARAMETER_MAP 							= Collections.unmodifiableMap(tempParameterMap);
 	}
+	
+	/**
+	 * Workaround for the time being: Hardcode ID of LDA configuration representing reference topic model. 
+	 */
+	public static final int REFERENCE_TOPICMODEL_CONFIGID = 2222;
 	   
 	
 	// -----------------------------------------------	

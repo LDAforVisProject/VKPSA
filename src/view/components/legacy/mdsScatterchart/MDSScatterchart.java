@@ -24,6 +24,9 @@ import java.util.Set;
 
 
 
+
+import model.LDAConfiguration;
+
 import com.sun.javafx.charts.Legend;
 
 import javafx.collections.ListChangeListener;
@@ -245,6 +248,11 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	 * EventHandler for click on a discarded point.
 	 */
 	private EventHandler<MouseEvent> singleSelectionMode_discardedPointHandler;
+
+	/**
+	 * Index to reference topic model.
+	 */
+	private int	referenceTMIndex;
 	
 	
 	// -----------------------------------------------
@@ -386,6 +394,52 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
         initZoom();
 	}
 	
+	/**
+	 * Marks reference topic model.
+	 */
+	private void markReferenceTM()
+	{
+		XYChart.Data<Number, Number> referenceData 	= null;
+		boolean isActive							= false;
+		
+		for (XYChart.Data<Number, Number> data : activeDataSeries.getData()) {
+			if (referenceTMIndex == (int) data.getExtraValue() ) {
+				referenceData 	= data;
+				isActive		= true; 
+				break;
+			}
+		}
+		for (XYChart.Data<Number, Number> data : inactiveDataSeries.getData()) {
+			if (referenceTMIndex == (int) data.getExtraValue() ) {
+				referenceData 	= data;
+				isActive		= false;
+				break;
+			}
+		}
+		
+		if (referenceData != null) {
+			 // Setting the uniform variable for the glow width and height
+			final int depth 			= 20;
+			final double scaleFactor	= 2.5;
+			Color color					= isActive ? Color.BLUE : Color.GREY;
+			
+			referenceData.getNode().setScaleX(scaleFactor);
+			referenceData.getNode().setScaleY(scaleFactor);
+			
+			DropShadow borderGlow = new DropShadow();
+			borderGlow.setOffsetY(0f);
+			borderGlow.setOffsetX(0f);
+			
+			borderGlow.setRadius(50);
+			borderGlow.setColor(color);
+			borderGlow.setWidth(depth);
+			borderGlow.setHeight(depth); 
+			
+			// Apply the borderGlow effect to the JavaFX node.
+			referenceData.getNode().setEffect(borderGlow);
+		}
+	}
+
 	/**
 	 * Highlights one particular LDA configuration.
 	 * @param index 
@@ -661,7 +715,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	 * @param discardedCoordinates
 	 * @param discardedIndices 
 	 */
-	public void refresh(double coordinates[][],
+	public void refresh(double coordinates[][], int referenceTMIndex,
 						double filteredCoordinates[][], Set<Integer> filteredIndices,
 						double activeCoordinates[][], Set<Integer> activeIndices,
 						double discardedCoordinates[][], Set<Integer> discardedIndices)
@@ -673,6 +727,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 		this.activeIndices			= activeIndices;
 		this.discardedCoordinates	= discardedCoordinates;
 		this.discardedIndices		= discardedIndices;
+		this.referenceTMIndex		= referenceTMIndex;
 		
 		// Update information about number of datapoints.
 		discardedDataSeries.setName("Discarded (" + discardedIndices.size() + ")");
@@ -697,7 +752,6 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	        addActiveDataPoints();
 
 	        // Add data in scatterchart.
-//	        scatterchart.getData().addAll(activeDataSeries, inactiveDataSeries, discardedDataSeries);
 	        scatterchart.getData().add(0, discardedDataSeries);
 	        scatterchart.getData().add(0, inactiveDataSeries);
 	        scatterchart.getData().add(0, activeDataSeries);
@@ -716,6 +770,8 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
         // Update scatterchart ranges.
         updateMDSScatterchartRanges();
 	
+        // Highlight reference topic model.
+        markReferenceTM();
 	}
 	
 	/**
@@ -1001,6 +1057,9 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
     		
     		// Update data series names with number of datasets.
     		updateLegendLabels();
+    		
+    		// Highlight reference TM.
+    		markReferenceTM();
 		}
 	}
 	

@@ -158,6 +158,9 @@ public class ParameterSpaceScatterchart extends Scatterchart
 		
         // Update scatterchart ranges.
         updateScatterchartRanges();
+        
+        // Mark reference TM.
+        markReferenceTM();
 	}
 	
 	

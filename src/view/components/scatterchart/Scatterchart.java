@@ -23,6 +23,7 @@ import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextArea;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -569,6 +570,9 @@ public abstract class Scatterchart extends VisualizationComponent
 			
 			// Refresh local scope visualization.
 			analysisController.integrateSelection(!isCtrlDown ? activePoints.keySet() : inactivePoints.keySet(), !isCtrlDown);
+			
+			// Mark reference topic model.
+			markReferenceTM();
 		}
 	}
 	
@@ -605,6 +609,52 @@ public abstract class Scatterchart extends VisualizationComponent
     	isCtrlDown = ke.isControlDown();	
 	}
 	
+	/**
+	 * Highlights reference topic model.
+	 */
+	protected void markReferenceTM()
+	{
+		XYChart.Data<Number, Number> referenceData 	= null;
+		boolean isActive							= false;
+		
+		for (XYChart.Data<Number, Number> data : activeDataSeries.getData()) {
+			if (LDAConfiguration.REFERENCE_TOPICMODEL_CONFIGID == (int) data.getExtraValue() ) {
+				referenceData 	= data;
+				isActive		= true; 
+				break;
+			}
+		}
+		for (XYChart.Data<Number, Number> data : inactiveDataSeries.getData()) {
+			if (LDAConfiguration.REFERENCE_TOPICMODEL_CONFIGID == (int) data.getExtraValue() ) {
+				referenceData 	= data;
+				isActive		= false;
+				break;
+			}
+		}
+		
+		if (referenceData != null) {
+			 // Setting the uniform variable for the glow width and height
+			final int depth 			= 20;
+			final double scaleFactor	= 2.5;
+			Color color					= isActive ? Color.BLUE : Color.GREY;
+			
+			referenceData.getNode().setScaleX(scaleFactor);
+			referenceData.getNode().setScaleY(scaleFactor);
+			
+			DropShadow borderGlow = new DropShadow();
+			borderGlow.setOffsetY(0f);
+			borderGlow.setOffsetX(0f);
+			
+			borderGlow.setRadius(50);
+			borderGlow.setColor(color);
+			borderGlow.setWidth(depth);
+			borderGlow.setHeight(depth); 
+			
+			// Apply the borderGlow effect to the JavaFX node.
+			referenceData.getNode().setEffect(borderGlow);
+		}
+	}
+
 	/**
 	 * Auxiliary method to add selected data points to an arbitrary data series in scatterchart. 
 	 * @param dataSeries

@@ -261,7 +261,8 @@ public class HeatmapDataset extends VisualizationComponentDataset
 		// 2. Determine minimal and maximal occurence count/value.
 		for (int i = 0; i < binMatrix.length; i++) {
 			for (int j = 0; j < binMatrix[i].length; j++) {
-				maxOccurenceCount = binMatrix[i][j] > maxOccurenceCount ? binMatrix[i][j] : maxOccurenceCount;
+				maxOccurenceCount = (binMatrix[i][j] > maxOccurenceCount) && Double.isFinite(binMatrix[i][j]) 
+																		? binMatrix[i][j] : maxOccurenceCount;
 				minOccurenceCount = (binMatrix[i][j] < minOccurenceCount) && (binMatrix[i][j] > 0)  
 																		? binMatrix[i][j] : minOccurenceCount;
 			}	

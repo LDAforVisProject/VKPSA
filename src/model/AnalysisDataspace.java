@@ -144,6 +144,12 @@ public class AnalysisDataspace
 	 */
 	private AnalysisController controller; 
 	
+	/**
+	 * Index of reference TM in data collections.
+	 */
+	private int referenceTMIndex;
+	
+	
 	
 	// -----------------------------------------------
 	// 			Initialization procedures.
@@ -172,6 +178,16 @@ public class AnalysisDataspace
 		this.coordinates		= coordinates;
 		// Load current distance data from workspace.
 		this.distances			= distances;
+		
+		// Find reference model index.
+		this.referenceTMIndex	= -1;
+		for (int i = 0; i < ldaConfigurations.size(); i++) {
+			if (ldaConfigurations.get(i).getConfigurationID() == LDAConfiguration.REFERENCE_TOPICMODEL_CONFIGID) {
+				referenceTMIndex = i;
+				break;
+			}
+		}
+			
 	}
 	
 	public void parseData()
@@ -542,8 +558,8 @@ public class AnalysisDataspace
 				double min		= entry.getValue().getKey();
 				double max		= entry.getValue().getValue();
 				
-				// Exclude LDA configuration if limits are exceeded.
-				if (value < min || value > max) {
+				// Exclude LDA configuration if limits are exceeded (except reference TM, which is always permitted).
+				if ( (value < min || value > max) && ldaConfig.getConfigurationID() != LDAConfiguration.REFERENCE_TOPICMODEL_CONFIGID) {
 					fitsBoundaries = false;
 					
 					// Stop loop.
@@ -759,6 +775,11 @@ public class AnalysisDataspace
 	// 				Getter and Setter
 	// -----------------------------------------------
 
+	public int getReferenceTMIndex()
+	{
+		return referenceTMIndex;
+	}
+	
 	public double[][] getCoordinates()
 	{
 		return coordinates;

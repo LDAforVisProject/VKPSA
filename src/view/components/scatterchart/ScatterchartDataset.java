@@ -12,7 +12,7 @@ public class ScatterchartDataset extends VisualizationComponentDataset
 	private ArrayList<LDAConfiguration> activeLDAConfigurations;
 	
 	public ScatterchartDataset(	ArrayList<LDAConfiguration> allLDAConfigurations, ArrayList<LDAConfiguration> discardedLDAConfigurations,
-									ArrayList<LDAConfiguration> inactiveLDAConfigurations, ArrayList<LDAConfiguration> activeLDAConfigurations)
+								ArrayList<LDAConfiguration> inactiveLDAConfigurations, ArrayList<LDAConfiguration> activeLDAConfigurations)
 	{
 		super(allLDAConfigurations);
 		

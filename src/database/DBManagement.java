@@ -125,12 +125,13 @@ public class DBManagement
 		// Remember original size of keyword probability map.
 		final int originalKPMapSize					= keywordProbabilities.size();
 		
-		// 1. Insert new reference topic model.
-		// @todo
-		
 		try {
-			// 2. Process reference topic model data.
+			// Load reference topic model data.
 			List<String> lines = Files.readAllLines(new File(filepath).toPath());
+			
+			/*
+			 * 1. Adjust keyword probabilities. 
+			 */
 			
 			// One line <-> one manually defined topic.
 			for (String line : lines) {
@@ -149,8 +150,6 @@ public class DBManagement
 				for (String kw : keywords) {
 					// Keyword not found: Assign manually.
 					if(!keywordProbabilities.containsKey(kw)) {
-						System.out.println("Missing: " + kw);
-						
 						// Manual assignemnts:
 						switch (kw) 
 						{
@@ -169,7 +168,7 @@ public class DBManagement
 								topic.put("time-varying_datum", adjustedProb);
 							break;
 							
-							case "time-focus+context_techniques":
+							case "focus+context_techniques":
 								adjustedProb = probPerKeyword / 5;
 								
 								topic.put("focus_and_context", adjustedProb);
@@ -206,12 +205,11 @@ public class DBManagement
 							break;
 							
 							case "multiple_views":
-								adjustedProb = probPerKeyword / 9;
+								adjustedProb = probPerKeyword / 8;
 								
 								topic.put("multiple-view", adjustedProb);
-								topic.put("multi-linked_view", adjustedProb);
+								topic.put("multi-linked_view", topic.get("multi-linked_view") + adjustedProb);
 								topic.put("multiple_view", adjustedProb);
-								topic.put("multi-linked_view", adjustedProb);
 								topic.put("multiple-view_technique", adjustedProb);
 								topic.put("multiview", adjustedProb);
 								topic.put("multi-view", adjustedProb);
@@ -330,7 +328,7 @@ public class DBManagement
 							break;
 							
 							case "visual_analysis":
-								adjustedProb = probPerKeyword / 11;
+								adjustedProb = probPerKeyword / 10;
 								
 								topic.put("visual_data_analysi", adjustedProb);
 								topic.put("visual_exploratory_data_analysi", adjustedProb);
@@ -342,7 +340,6 @@ public class DBManagement
 								topic.put("linked_view_visual_analytic", adjustedProb);
 								topic.put("interactive_visual_exploration_and_analysi", adjustedProb);
 								topic.put("visual_analytic", adjustedProb);
-								topic.put("interactive_visual_analysi", adjustedProb);
 							break;
 							
 							case "principal_component_analysis":
@@ -363,7 +360,7 @@ public class DBManagement
 								
 								topic.put("linked_related_view", adjustedProb);
 								topic.put("coordinated_linked_view", adjustedProb);
-								topic.put("multi-linked_view", adjustedProb);
+								topic.put("multi-linked_view", topic.get("multi-linked_view") + adjustedProb);
 								topic.put("linked_view_visual_analytic", adjustedProb);
 								topic.put("linked_view", adjustedProb);
 								topic.put("linked-view", adjustedProb);
@@ -446,7 +443,7 @@ public class DBManagement
 							break;							
 							
 							case "vector_fields":
-								adjustedProb = probPerKeyword / 8;
+								adjustedProb = probPerKeyword / 7;
 								
 								topic.put("multivector_field", adjustedProb);
 								topic.put("vector_field_datum", adjustedProb);
@@ -454,12 +451,11 @@ public class DBManagement
 								topic.put("vector_field_visualization", adjustedProb);
 								topic.put("time-dependent_vector_field", adjustedProb);
 								topic.put("vector_field_topology", adjustedProb);
-								topic.put("eigenvector_field", adjustedProb);
 								topic.put("vector_field", adjustedProb);
 							break;
 							
 							case "streamlines":
-								adjustedProb = probPerKeyword / 12;
+								adjustedProb = probPerKeyword / 11;
 								
 								topic.put("streamline_datum", adjustedProb);
 								topic.put("streamline-like", adjustedProb);
@@ -467,7 +463,6 @@ public class DBManagement
 								topic.put("closed_streamline", adjustedProb);
 								topic.put("adaptive_streamline", adjustedProb);
 								topic.put("streamline_visualization", adjustedProb);
-								topic.put("streamlined", adjustedProb);
 								topic.put("hyperstreamline_placement", adjustedProb);
 								topic.put("streamline", adjustedProb);
 								topic.put("hyperstreamline", adjustedProb);
@@ -476,14 +471,13 @@ public class DBManagement
 							break;		
 							
 							case "3d_vector_field_visualization":
-								adjustedProb = probPerKeyword / 12;
+								adjustedProb = probPerKeyword / 5;
 								
-								topic.put("vector_field_visualization", adjustedProb);
-								topic.put("vector_field", adjustedProb);
-								topic.put("vector_field_topology", adjustedProb);
-								topic.put("time-dependent_vector_field", adjustedProb);
-								topic.put("vector_field_datum", adjustedProb);
-								topic.put("multivector_field", adjustedProb);
+								topic.put("vector_field_visualization", topic.get("vector_field_visualization") + adjustedProb);
+								topic.put("vector_field", topic.get("vector_field") + adjustedProb);
+								topic.put("vector_field_topology", topic.get("vector_field_topology") + adjustedProb);
+								topic.put("vector_field_datum", topic.get("vector_field_datum") + adjustedProb);
+								topic.put("multivector_field", topic.get("multivector_field") + adjustedProb);
 							break;								
 						}
 										
@@ -499,20 +493,82 @@ public class DBManagement
 					System.out.println("### ERROR ### Non-existent keyword used in manual replacement.");
 				}
 				
-				System.out.println();
-				
 				// Add to topic collection.
 				topicModel.add(topic);
 			}
 			
-			// 3. Insert new topic.
-			// @todo
+			/*
+			 * 2. Insert new LDA configuration and topics.
+			 */
+			
+			System.out.println("Inserting new LDA configuration and respective topics.");
+			
+			// Define ID for reference LDA configuration.
+			final int referenceModelConfigID 	= 2222;
+			// Number of topics in reference model.
+			final int numberOfTopics			= 16; 
+			
+			// Prepare statements for data insertion.
+			PreparedStatement ldaConfigInsertStatement 	= connection.prepareStatement(	"insert into ldaConfigurations (ldaConfigurationID, alpha, kappa, eta) " + 
+																						"values (" + referenceModelConfigID + ", 0, " + numberOfTopics +", 0);");
+			PreparedStatement topicInsertStatement 		= connection.prepareStatement(	"insert into topics (topicID, ldaConfigurationID) values (?, ?);");
+			
+			// Set auto-commit to false.
+			connection.setAutoCommit(false);
+			
+			// Insert LDA configuration.
+			ldaConfigInsertStatement.execute();
+			
+			// Add topic insert statements.
+			for (int i = 0; i < numberOfTopics; i++) {
+				topicInsertStatement.setInt(1, i);
+				topicInsertStatement.setInt(2, referenceModelConfigID);
+				topicInsertStatement.addBatch();
+			}
+			// Insert new topics.
+			topicInsertStatement.executeBatch();
+			
+			/*
+			 * 3. Map keywords to keyword IDs, insert KIT data. 
+			 */
+			
+			System.out.println("Inserting new keyword/probability data.");
+			
+			PreparedStatement kitInsertStatement 	= connection.prepareStatement(	"insert into keywordInTopic (topicID, keywordID, probability, ldaConfigurationID) " + 
+																					"values (?, ?, ?, " + referenceModelConfigID + ");");
+			// Fetch keywords and their corresponding IDs.
+			Map<String, Integer> kitData			= readKeywordsAsIndexedMap();
+			
+			// Iterate over topics.
+			int currTopicID = 0;
+			for (Map<String, Double> topicData : topicModel) {
+				// Iterate over keywords in topic.
+				for (Map.Entry<String, Double> keywordProbability : topicData.entrySet()) {
+					// Add insert statetement (with keyword resolved to keyword ID).
+					kitInsertStatement.setInt(1, currTopicID);
+					kitInsertStatement.setInt(2, kitData.get(keywordProbability.getKey()));
+					kitInsertStatement.setDouble(3, keywordProbability.getValue());
+					// Add to batch.
+					kitInsertStatement.addBatch();
+				}
+				
+				currTopicID++;
+			}
+			// Execute KIT data batch.
+			kitInsertStatement.executeBatch();
+			
+			// Commit transaction.
+			connection.commit();
+			
+			// Re-enable auto-commit.
+			connection.setAutoCommit(true);	
 		}
 		
 		catch (Exception e) {
+			e.printStackTrace();
 		}
-
-	
+		
+		System.out.println("Import finished.");
 	}
 	
 	/**
@@ -887,6 +943,38 @@ public class DBManagement
 	}
 	
 	/**
+	 * Reads and returns map of keywords (and the respective keywordID) in dedicated keyword table.
+	 * @return
+	 */
+	private Map<String, Integer> readKeywordsAsIndexedMap()
+	{
+		// Read number of keywords.
+		if (numberOfKeywordsPerTopic <= 0) {
+			readNumberOfKeywords(true);
+		}
+		
+		// Allocate memory.
+		Map<String, Integer> keywords = new HashMap<String, Integer>(numberOfKeywordsPerTopic);
+		
+		// Get keywords.
+		try {
+			PreparedStatement pstmt = connection.prepareStatement("select keyword, keywordID from keywords");
+			ResultSet rs			= pstmt.executeQuery();
+			
+			// Loop through result set.
+			while (rs.next()) {
+				keywords.put(rs.getString("keyword"), rs.getInt("keywordID"));
+			}
+		}
+		
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return keywords;
+	}
+	
+	/**
 	 * Load keyword in topic data from database.
 	 * @param ldaConfiguration
 	 * @param maxNumberOfKeywords
@@ -1003,8 +1091,7 @@ public class DBManagement
 						listOfLDAConfigsWithoutDistances.contains(ldaConfigurations.get(i).getConfigurationID()) || 
 						listOfLDAConfigsWithoutDistances.contains(ldaConfigurations.get(j).getConfigurationID()) ) {
 						
-						// Set values for row.
-						System.out.println("storing " + ldaConfigurations.get(i).getConfigurationID() + " to " + ldaConfigurations.get(j).getConfigurationID()); 
+						// Set values for row. 
 						statement.setInt(1, ldaConfigurations.get(i).getConfigurationID());
 						statement.setInt(2, ldaConfigurations.get(j).getConfigurationID());
 						statement.setDouble(3, distances[i][j]);
@@ -1300,13 +1387,15 @@ public class DBManagement
 		double min = -1;
 		
 		try {
-			PreparedStatement statement	= connection.prepareStatement(	"select max(distance) maxDist from topicDistances;");
+			// Avoid infinity values introduced by reference topic model(s) when looking for maximum.
+			PreparedStatement statement	= connection.prepareStatement(	"select max(distance) maxDist from topicDistances " + 
+																		"where cast(distance as string) not like '%Inf%';");
 			// Execute statement.
 			ResultSet rs				= statement.executeQuery();
 			// Process value.
 			max							= rs.getDouble("maxDist");
 			
-			statement					= connection.prepareStatement(	"select min(distance) minDist from topicDistances;");
+			statement					= connection.prepareStatement("select min(distance) minDist from topicDistances;");
 			// Execute statement.
 			rs							= statement.executeQuery();
 			// Process value.
