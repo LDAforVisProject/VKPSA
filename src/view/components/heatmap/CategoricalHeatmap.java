@@ -66,8 +66,7 @@ public class CategoricalHeatmap extends Heatmap
 	/**
 	 * Map holding coordinates of LDA configuration matches.
 	 */
-	Map<Pair<Integer, Integer>, double[]> ldaMatchCoordinates;
-	
+	private Map<Pair<Integer, Integer>, double[]> ldaMatchCoordinates;
 	
 	// -----------------------------------------------
 	//					Methods
@@ -108,9 +107,8 @@ public class CategoricalHeatmap extends Heatmap
 		canvas.addEventHandler(MouseEvent.MOUSE_MOVED, new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) 
             {
-            	GraphicsContext gc		= canvas.getGraphicsContext2D();
-            	HeatmapDataset hData 	= (HeatmapDataset) data;
-            	
+            	GraphicsContext gc									= canvas.getGraphicsContext2D();
+        		
             	// Make copy of old LDA match.
 				Pair<Integer, Integer> oldHoveredOverLDAConfigIDs	= 	hoveredOverLDAConfigIDs != null ?
 																		new Pair<Integer, Integer>(hoveredOverLDAConfigIDs.getKey(), hoveredOverLDAConfigIDs.getValue()) : null;
@@ -120,10 +118,17 @@ public class CategoricalHeatmap extends Heatmap
             	
             	// Check if newly detected LDA config. IDs are different from old ones.
 				if (ldaMatch != null && (oldHoveredOverLDAConfigIDs == null || !oldHoveredOverLDAConfigIDs.equals(ldaMatch)) ) {
-					// If so: Update reference, then highlight/mark currently selected LDA configuration match.
+					// If so: Update reference, then ...
 					hoveredOverLDAConfigIDs = ldaMatch;
-
-					System.out.println("LDA config. IDs = " + hoveredOverLDAConfigIDs.getKey() + "/" + hoveredOverLDAConfigIDs.getValue());            					
+					
+					// ...redraw (to remove previous marker drawings) and finally...
+					draw((HeatmapDataset) data, false, false);
+					gc.setFill(new Color(1, 0, 0, 0.5));
+	        		
+					// ...highlight/mark currently selected LDA configuration match.
+					gc.fillRect(	ldaMatchCoordinates.get(ldaMatch)[0], ldaMatchCoordinates.get(ldaMatch)[1],
+									ldaMatchCoordinates.get(ldaMatch)[2] - ldaMatchCoordinates.get(ldaMatch)[0], 
+									ldaMatchCoordinates.get(ldaMatch)[3] - ldaMatchCoordinates.get(ldaMatch)[1]);
 				}
             }
         });
@@ -298,19 +303,21 @@ public class CategoricalHeatmap extends Heatmap
     	xAxisLabels.clear();
     	yAxisLabels.clear();
 	}
-
+	
 	@Override
-	protected void draw(HeatmapDataset data, boolean useBorders)
+	protected void draw(HeatmapDataset data, boolean useBorders, boolean updateBlockCoordinates)
 	{
 		// Cast option set.
     	HeatmapOptionset hOptions = (HeatmapOptionset)options;
     	
     	// Prepare map for match coordinates.
-    	ldaMatchCoordinates.clear();
-    	for (LDAConfiguration lda1 : data.getAllLDAConfigurations()) {
-    		for (LDAConfiguration lda2 : data.getAllLDAConfigurations()) {
-        		ldaMatchCoordinates.put(new Pair<Integer, Integer>(lda1.getConfigurationID(), lda2.getConfigurationID()), null);
-        	}	
+    	if (updateBlockCoordinates) {
+	    	ldaMatchCoordinates.clear();
+	    	for (LDAConfiguration lda1 : data.getAllLDAConfigurations()) {
+	    		for (LDAConfiguration lda2 : data.getAllLDAConfigurations()) {
+	        		ldaMatchCoordinates.put(new Pair<Integer, Integer>(lda1.getConfigurationID(), lda2.getConfigurationID()), null);
+	        	}	
+	    	}
     	}
     	
     	// Prepare drawing.
@@ -363,12 +370,19 @@ public class CategoricalHeatmap extends Heatmap
 				cellsToCoordinates.put(cellIndices, cellCoordinates);
 				
 				// Update coordinates of LDA matches.
-				updateLDAMatchCoordinates(data, cellIndices); 
+				if (updateBlockCoordinates)
+					updateLDAMatchCoordinates(data, cellIndices); 
 			}	
 		}
 		
 		// Update labels.
     	updateLabels(data, cellsToCoordinates);
+	}
+	
+	@Override
+	protected void draw(HeatmapDataset data, boolean useBorders)
+	{
+		draw(data, useBorders, true);
 	}
 	
 	/**
@@ -395,7 +409,17 @@ public class CategoricalHeatmap extends Heatmap
 		if (matchCoordinates == null) {
 			ldaMatchCoordinates.put(ldaMatchID, cellCoordinates);
 		}
+		
 		// If not null: Compare coordinates to find maximum/minimum.
+		else {
+			double[] updateMatchCoordinates = new double[4];
+			updateMatchCoordinates[0] 		= matchCoordinates[0] > cellCoordinates[0] ? cellCoordinates[0] : matchCoordinates[0];
+			updateMatchCoordinates[1] 		= matchCoordinates[1] > cellCoordinates[1] ? cellCoordinates[1] : matchCoordinates[1];
+			updateMatchCoordinates[2] 		= matchCoordinates[2] < cellCoordinates[2] ? cellCoordinates[2] : matchCoordinates[2];
+			updateMatchCoordinates[3] 		= matchCoordinates[3] < cellCoordinates[3] ? cellCoordinates[3] : matchCoordinates[3];
+			
+			ldaMatchCoordinates.put(ldaMatchID, updateMatchCoordinates);
+		}
 	}
 	
 	/**

@@ -59,11 +59,12 @@ public class NumericalHeatmap extends Heatmap
     	yAxis.setVisible(options.getShowAxes());
 	}
 
-    /**
-     * Draw data to canvas.
-     * @param data
-     * @param useBorders 
-     */
+	@Override
+    protected void draw(HeatmapDataset data, boolean useBorders, boolean updateBlockCoordinates)
+    {
+		draw(data, useBorders);
+    }
+    
 	@Override
     protected void draw(HeatmapDataset data, boolean useBorders)
     {

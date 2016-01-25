@@ -130,6 +130,14 @@ public abstract class Heatmap extends VisualizationComponent
      */
 	protected abstract void draw(HeatmapDataset data, boolean useBorders);
 	
+	 /**
+     * Draw data to canvas. Allows distinction between draw operation including block update or not.
+     * @param data
+     * @param useBorders
+     * @param updateBlockCoordinates 
+     */
+	protected abstract void draw(HeatmapDataset data, boolean useBorders, boolean updateBlockCoordinates);
+	
     /**
      * Manipulates heatmap's granularity information.
      * @param isGranularityDynamic
