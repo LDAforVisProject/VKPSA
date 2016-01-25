@@ -521,9 +521,8 @@ public class AnalysisController extends Controller
 	 * Integrates data/heatmap cells selected in TMC heatmap into dataspace and displays the
 	 * selection in local scope.
 	 * @param selectedTopicConfigIDs
-	 * @param isCtrlDown Determines whether currently transferred data should be added or subtracted from current data set.
 	 */
-	public void integrateTMCHeatmapSelection(Set<Pair<Integer, Integer>> selectedTopicConfigIDs, boolean isCtrlDown)
+	public void integrateTMCHeatmapSelection(Set<Pair<Integer, Integer>> selectedTopicConfigIDs)
 	{
 		localScopeInstance.refreshPTC(selectedTopicConfigIDs);
 	}

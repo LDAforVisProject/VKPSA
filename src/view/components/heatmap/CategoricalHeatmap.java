@@ -61,7 +61,11 @@ public class CategoricalHeatmap extends Heatmap
 	 * IDs of LDA configuration match currently hovered over.
 	 * Is marked/highlighted; may be selected by single click.
 	 */
-	private Pair<Integer, Integer> hoveredOverLDAConfigIDs;
+	private Pair<Integer, Integer> hoveredOverLDAMatchID;
+	/**
+	 * Set of LDA match IDs currently selected.
+	 */
+	private Set<Pair<Integer, Integer>> selectedLDAConfigIDs;
 	
 	/**
 	 * Map holding coordinates of LDA configuration matches.
@@ -77,8 +81,9 @@ public class CategoricalHeatmap extends Heatmap
 	{
 		super.initialize(location, resources);
 		
-		// Initialize collection of LDA matches.
-		ldaMatchCoordinates = new LinkedHashMap<Pair<Integer,Integer>, double[]>();
+		// Initialize collections for dealing with LDA matches.
+		ldaMatchCoordinates 			= new LinkedHashMap<Pair<Integer,Integer>, double[]>();
+		selectedLDAConfigIDs	= new HashSet<Pair<Integer,Integer>>();
 	}
 	
 	/**
@@ -100,6 +105,12 @@ public class CategoricalHeatmap extends Heatmap
             public void handle(MouseEvent event) 
             {
             	rootNode.getScene().setCursor(Cursor.DEFAULT);
+            	// Clear selection.
+            	selectedLDAConfigIDs.clear();
+            	// Redraw.
+            	if (data != null)
+            		draw((HeatmapDataset) data, false, false);
+            	
             }
         });
 		
@@ -110,8 +121,8 @@ public class CategoricalHeatmap extends Heatmap
             	GraphicsContext gc									= canvas.getGraphicsContext2D();
         		
             	// Make copy of old LDA match.
-				Pair<Integer, Integer> oldHoveredOverLDAConfigIDs	= 	hoveredOverLDAConfigIDs != null ?
-																		new Pair<Integer, Integer>(hoveredOverLDAConfigIDs.getKey(), hoveredOverLDAConfigIDs.getValue()) : null;
+				Pair<Integer, Integer> oldHoveredOverLDAConfigIDs	= 	hoveredOverLDAMatchID != null ?
+																		new Pair<Integer, Integer>(hoveredOverLDAMatchID.getKey(), hoveredOverLDAMatchID.getValue()) : null;
 																	
 				// Resolve mouse position to LDA match.
             	Pair<Integer, Integer> ldaMatch 					= resolveMousePositionToLDAMatch(event.getX(), event.getY());
@@ -119,17 +130,55 @@ public class CategoricalHeatmap extends Heatmap
             	// Check if newly detected LDA config. IDs are different from old ones.
 				if (ldaMatch != null && (oldHoveredOverLDAConfigIDs == null || !oldHoveredOverLDAConfigIDs.equals(ldaMatch)) ) {
 					// If so: Update reference, then ...
-					hoveredOverLDAConfigIDs = ldaMatch;
+					hoveredOverLDAMatchID = ldaMatch;
 					
 					// ...redraw (to remove previous marker drawings) and finally...
 					draw((HeatmapDataset) data, false, false);
+					
+	        		// ...highlight/mark currently selected LDA configuration match.
 					gc.setFill(new Color(1, 0, 0, 0.5));
-	        		
-					// ...highlight/mark currently selected LDA configuration match.
 					gc.fillRect(	ldaMatchCoordinates.get(ldaMatch)[0], ldaMatchCoordinates.get(ldaMatch)[1],
 									ldaMatchCoordinates.get(ldaMatch)[2] - ldaMatchCoordinates.get(ldaMatch)[0], 
 									ldaMatchCoordinates.get(ldaMatch)[3] - ldaMatchCoordinates.get(ldaMatch)[1]);
 				}
+            }
+        });
+		
+		// Add listener for mouse click.
+		canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent event) 
+            {
+            	// Clear selection, if control is not pressed.
+            	if (!isCtrlDown)
+            		selectedLDAConfigIDs.clear();
+            	
+            	// Add to current selection.
+            	selectedLDAConfigIDs.add(hoveredOverLDAMatchID);
+            	
+        		// Gather content in all selected cells.
+        		Set<Pair<Integer, Integer>> selectedTopicConfigIDs = new HashSet<Pair<Integer,Integer>>();
+        		
+        		// Convert selected LDA matches to set of LDA configuration IDs.
+        		Set<Integer> selectedLDAConfigurationIDs = new HashSet<Integer>();
+        		for(Pair<Integer, Integer> ldaMatch : selectedLDAConfigIDs) {
+        			if ( !selectedLDAConfigurationIDs.contains(ldaMatch.getKey()) )
+        				selectedLDAConfigurationIDs.add(ldaMatch.getKey());
+        			if ( !selectedLDAConfigurationIDs.contains(ldaMatch.getValue()) )
+        				selectedLDAConfigurationIDs.add(ldaMatch.getValue());
+        		}
+        		
+        		// Cross-reference with LDAConfiguration objects to get number of topics.
+        		for (LDAConfiguration ldaConfig : data.getAllLDAConfigurations()) {
+        			if ( selectedLDAConfigurationIDs.contains(ldaConfig.getConfigurationID()) ) {
+        				for (int i = 0; i < ldaConfig.getKappa(); i++) {
+        					selectedTopicConfigIDs.add(new Pair<Integer, Integer>(ldaConfig.getConfigurationID(), i));
+        				}
+        			}
+        		}
+        		
+        		// Pass references to selected data onward to AnalysisController.
+        		if (selectedTopicConfigIDs.size() > 0)
+        			analysisController.integrateTMCHeatmapSelection(selectedTopicConfigIDs);
             }
         });
 	}
@@ -377,6 +426,15 @@ public class CategoricalHeatmap extends Heatmap
 		
 		// Update labels.
     	updateLabels(data, cellsToCoordinates);
+    	
+    	// Draw selected LDA matches.
+    	gc.setFill(new Color(1, 0, 0, 0.5));
+    	for (Pair<Integer, Integer> ldaMatch : selectedLDAConfigIDs) {
+    		gc.fillRect(ldaMatchCoordinates.get(ldaMatch)[0], ldaMatchCoordinates.get(ldaMatch)[1],
+						ldaMatchCoordinates.get(ldaMatch)[2] - ldaMatchCoordinates.get(ldaMatch)[0], 
+						ldaMatchCoordinates.get(ldaMatch)[3] - ldaMatchCoordinates.get(ldaMatch)[1]);	
+    	}
+		
 	}
 	
 	@Override
@@ -434,6 +492,12 @@ public class CategoricalHeatmap extends Heatmap
 		if (ldaConfigurations.size() > 0) {
 			this.options = options;
 			
+			// If new LDA configuration mash-up: Clean old selection.
+			hasDataChanged = data == null || !(ldaConfigurations.equals(data.getAllLDAConfigurations())); 
+			if (hasDataChanged) {
+				selectedLDAConfigIDs.clear();
+			}
+			
 			// Load topic distance data for selection.
 			topicDistanceLoadingTask = new Task_LoadTopicDistancesForSelection(workspace, WorkspaceAction.LOAD_SPECIFIC_TOPIC_DISTANCES, null, ldaConfigurations);
 			topicDistanceLoadingTask.addListener(this);
@@ -451,8 +515,10 @@ public class CategoricalHeatmap extends Heatmap
 			
 			// Create dataset.
 			System.out.println(topicDistanceLoadingTask);
+		
 			this.data = new HeatmapDataset(	topicDistanceLoadingTask.getLDAConfigurationsToLoad(), topicDistanceLoadingTask.getSpatialIDsForLDATopicConfiguration(), 
 											topicDistanceLoadingTask.getTopicDistances(), topicDistanceLoadingTask.getTopicDistanceExtrema(), (HeatmapOptionset)options);
+			
 			// Refresh heatmap.
 			this.refresh();
 		}

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import model.LDAConfiguration;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -42,6 +43,11 @@ public abstract class Heatmap extends VisualizationComponent
 	 * Store which cells were selected.
 	 */
 	protected Set<Pair<Integer, Integer>> selectedCellsCoordinates;
+	
+	/**
+	 * Flag indicating if new dataset differs from old one in terms of LDA configurations involved.
+	 */
+	protected boolean hasDataChanged;
 	
 	
 	// -----------------------------------------------
@@ -85,8 +91,8 @@ public abstract class Heatmap extends VisualizationComponent
 	 */
 	public void refresh(HeatmapOptionset options, HeatmapDataset data)
 	{
-		this.options 	= options;
-		this.data		= data;
+		this.options 		= options;
+		this.data			= data;
     	
 		// Apply options.
 		applyOptions(options);

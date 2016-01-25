@@ -395,4 +395,27 @@ public class HeatmapDataset extends VisualizationComponentDataset
 	{
 		return cellsToTopicConfigurationIDs;
 	}
+
+	/**
+	 * Compares dataset to other dataset in terms of LDA configurations involved.
+	 * @param data
+	 * @return True, if involved LDA configurations are the same (order nonwithstanding).
+	 */
+	public boolean compareTo(VisualizationComponentDataset data)
+	{
+		if (data == null || data.getAllLDAConfigurations().size() != this.allLDAConfigurations.size())
+			return false;
+		
+		ArrayList<Integer> ldaConfigIDs1 = new ArrayList<Integer>();
+		ArrayList<Integer> ldaConfigIDs2 = new ArrayList<Integer>();
+		for (int i = 0; i < allLDAConfigurations.size(); i++) {
+			ldaConfigIDs1.add(allLDAConfigurations.get(i).getConfigurationID());
+			ldaConfigIDs2.add(data.getAllLDAConfigurations().get(i).getConfigurationID());
+		}
+		
+		Collections.sort(ldaConfigIDs1);
+		Collections.sort(ldaConfigIDs2);
+		
+		return ldaConfigIDs1.equals(ldaConfigIDs2);
+	}
 }
