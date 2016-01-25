@@ -5,6 +5,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -128,7 +131,7 @@ public class HeatmapDataset extends VisualizationComponentDataset
 			final Pair<Integer, Integer> mapCellKey = new Pair<Integer, Integer>(index_key1, index_key2);
 			// 	Add entry in map, if it doesn't exist already.
 			if (!cellsToConfigurationIDs.containsKey(mapCellKey)) {
-				cellsToConfigurationIDs.put(mapCellKey, new HashSet<Integer>());
+				cellsToConfigurationIDs.put(mapCellKey, new LinkedHashSet<Integer>());
 			}
 			// 	Add to collection of datasets in this cell.
 			cellsToConfigurationIDs.get(mapCellKey).add(ldaConfig.getConfigurationID());
@@ -274,11 +277,11 @@ public class HeatmapDataset extends VisualizationComponentDataset
 		for (int i = 0; i < binMatrix.length; i++) {
 			for (int j = 0; j < binMatrix.length; j++) {
 				cellsToTopicConfigurationIDs.put(new Pair<Integer, Integer>(i, j), new HashSet<Pair<Integer,Integer>>());
-				cellsToConfigurationIDs.put(new Pair<Integer, Integer>(i, j), new HashSet<Integer>());
+				cellsToConfigurationIDs.put(new Pair<Integer, Integer>(i, j), new LinkedHashSet<Integer>());
 			}
 		}
 		
-		// 	b. Map topic configurations to cells..
+		// 	b. Map topic configurations to cells and cells to LDA configuration.
 		for (Pair<Integer, Integer> topicConfig : spatialIDs.keySet()) {
 			// Fetch spatial ID for this topic configuration ID.
 			int spatialID = spatialIDs.get(topicConfig);
@@ -300,6 +303,23 @@ public class HeatmapDataset extends VisualizationComponentDataset
 				cellsToTopicConfigurationIDs.get(cellID).add(topicConfig);
 				cellsToConfigurationIDs.get(cellID).add(topicConfig.getKey());
 			}
+		}
+		
+		// c. Post-processing: Switch sequence of LDA configuration Ids for all cells above the diagonale.
+		for (int i = 0; i < binMatrix.length; i++) {
+			for (int j = i + 1; j < binMatrix.length; j++) {
+				// Get LDA configuration IDs.
+				final Pair<Integer, Integer> cellID = new Pair<Integer, Integer>(i, j);
+				List<Integer> configIDList 			= new ArrayList<Integer>(cellsToConfigurationIDs.get(cellID));
+				// Prepare new, reversed set.
+				Set<Integer> reversedConfigIDSet	= new LinkedHashSet<Integer>();
+				
+				// Fill reversed set.
+				for (int k = configIDList.size() - 1; k >= 0; k--)
+					reversedConfigIDSet.add(configIDList.get(k));
+				// Replace set by reversed set in global collection.
+				cellsToConfigurationIDs.put(cellID, reversedConfigIDSet);	
+			}	
 		}
 		
 		// 4. Sort list of LDA configurations in ascending order.

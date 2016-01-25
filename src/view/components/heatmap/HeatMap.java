@@ -114,9 +114,9 @@ public abstract class Heatmap extends VisualizationComponent
 		this.options = options;
 		
 		// Update selection mode.
-		if (!options.isSelectionEnabled())
+		if (!options.isSelectionEnabled() && rubberbandSelection != null)
         	rubberbandSelection.disable();
-        else
+        else if (rubberbandSelection != null)
         	rubberbandSelection.enable();
     	
     	// Update granularity information.
