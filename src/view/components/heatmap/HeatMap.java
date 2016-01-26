@@ -21,7 +21,7 @@ import view.components.ColorScale;
 import view.components.VisualizationComponent;
 import view.components.rubberbandselection.RubberBandSelection;
 
-public abstract class Heatmap extends VisualizationComponent
+public abstract class HeatMap extends VisualizationComponent
 {
 	/*
 	 * GUI elements.

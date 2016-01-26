@@ -12,7 +12,7 @@ import javafx.util.Pair;
  * Heatmap, offering various transformation methods for converting various
  * data sources into a usable (double[n][n]) format.
  */
-public class NumericalHeatmap extends Heatmap
+public class NumericalHeatmap extends HeatMap
 {
 	/*
 	 * GUI elements.

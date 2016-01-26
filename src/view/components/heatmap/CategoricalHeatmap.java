@@ -30,7 +30,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.util.Pair;
 
-public class CategoricalHeatmap extends Heatmap
+public class CategoricalHeatmap extends HeatMap
 {
 	/*
 	 * GUI elements.
@@ -539,7 +539,7 @@ public class CategoricalHeatmap extends Heatmap
 		
 		// Pass references to selected data onward to AnalysisController.
 		if (selectedTopicConfigIDs.size() > 0)
-			analysisController.integrateTMCHeatmapSelection(selectedTopicConfigIDs, !isCtrlDown);
+			analysisController.integrateTMCHeatmapSelection(selectedTopicConfigIDs);
 		
 		// Clear collection of selected cell (coordinates).
 		selectedCellsCoordinates.clear();

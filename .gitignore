@@ -16,3 +16,6 @@ hs_err_pid*
 
 # No database files.
 *.db
+
+# No classpath files. #
+*.classpath
