@@ -31,31 +31,45 @@ import javax.swing.JSpinner;
  */
 public class NumericSpinner extends HBox 
 {
+	/**
+	 * Listener for value changes.
+	 */
+	private ISpinnerListener listener;
 
-    public static final String ARROW = "NumberSpinnerArrow";
-    public static final String NUMBER_FIELD = "NumberField";
-    public static final String NUMBER_SPINNER = "NumberSpinner";
-    public static final String SPINNER_BUTTON_UP = "SpinnerButtonUp";
-    public static final String SPINNER_BUTTON_DOWN = "SpinnerButtonDown";
-    private final String BUTTONS_BOX = "ButtonsBox";
+    public static final String ARROW 				= "NumberSpinnerArrow";
+    public static final String NUMBER_FIELD 		= "NumberField";
+    public static final String NUMBER_SPINNER 		= "NumberSpinner";
+    public static final String SPINNER_BUTTON_UP 	= "SpinnerButtonUp";
+    public static final String SPINNER_BUTTON_DOWN 	= "SpinnerButtonDown";
+    
+    private final String BUTTONS_BOX 				= "ButtonsBox";
+    private final double ARROW_SIZE 				= 4;
+    
     private NumberTextField numberField;
-    private ObjectProperty<BigDecimal> stepWitdhProperty = new SimpleObjectProperty<>();
-    private final double ARROW_SIZE = 4;
+    private ObjectProperty<BigDecimal> stepWitdhProperty;
+    
     private final Button incrementButton;
     private final Button decrementButton;
     private final NumberBinding buttonHeight;
     private final NumberBinding spacing;
 
-    public NumericSpinner() {
+  
+    public NumericSpinner()
+    {
         this(BigDecimal.ZERO, BigDecimal.ONE);
     }
 
-    public NumericSpinner(BigDecimal value, BigDecimal stepWidth) {
+    public NumericSpinner(BigDecimal value, BigDecimal stepWidth) 
+    {
         this(value, stepWidth, NumberFormat.getInstance());
     }
 
-    public NumericSpinner(BigDecimal value, BigDecimal stepWidth, NumberFormat nf) {
+    public NumericSpinner(BigDecimal value, BigDecimal stepWidth, NumberFormat nf)
+    {
         super();
+        
+        stepWitdhProperty = new SimpleObjectProperty<>();
+        
         this.setId(NUMBER_SPINNER);
         this.stepWitdhProperty.set(stepWidth);
 
@@ -65,7 +79,6 @@ public class NumericSpinner extends HBox
 
         // Enable arrow keys for dec/inc
         numberField.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
-
             @Override
             public void handle(KeyEvent keyEvent) {
                 if (keyEvent.getCode() == KeyCode.DOWN) {
@@ -133,7 +146,6 @@ public class NumericSpinner extends HBox
 
         decrementButton.setFocusTraversable(false);
         decrementButton.setOnAction(new EventHandler<ActionEvent>() {
-
             @Override
             public void handle(ActionEvent ae) {
                 decrement();
@@ -152,40 +164,51 @@ public class NumericSpinner extends HBox
     /**
      * increment number value by stepWidth
      */
-    private void increment() {
+    private void increment()
+    {
     	BigDecimal value 	= numberField.getNumber();
         value 				= value.add(stepWitdhProperty.get());
         numberField.setNumber(value);
+        
+        if (listener != null)
+        	listener.processSpinnerValue(value, this.getId());
     }
 
     /**
      * decrement number value by stepWidth
      */
-    private void decrement() {
+    private void decrement()
+    {
         BigDecimal value	= numberField.getNumber();
         value 				= value.subtract(stepWitdhProperty.get());
         numberField.setNumber(value);
+        
+        if (listener != null)
+        	listener.processSpinnerValue(value, this.getId());
+    }
+    
+    /**
+     * Registers listener to value changes.
+     * @param listener
+     */
+    public void registerListener(ISpinnerListener listener)
+    {
+    	this.listener = listener;
     }
 
-    public final void setNumber(BigDecimal value) {
+    public final void setNumber(BigDecimal value)
+    {
         numberField.setNumber(value);
     }
 
-    public ObjectProperty<BigDecimal> numberProperty() {
+    public ObjectProperty<BigDecimal> numberProperty()
+    {
         return numberField.numberProperty();
     }
 
-    public final BigDecimal getNumber() {
+    public final BigDecimal getNumber()
+    {
         return numberField.getNumber();
-    }
-
-    // debugging layout bounds
-    public void dumpSizes() {
-        System.out.println("numberField (layout)=" + numberField.getLayoutBounds());
-        System.out.println("buttonInc (layout)=" + incrementButton.getLayoutBounds());
-        System.out.println("buttonDec (layout)=" + decrementButton.getLayoutBounds());
-        System.out.println("binding=" + buttonHeight.toString());
-        System.out.println("spacing=" + spacing.toString());
     }
     
     public void setStepWidth(BigDecimal stepWidth)

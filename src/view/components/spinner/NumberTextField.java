@@ -25,11 +25,13 @@ public class NumberTextField extends TextField
     private final NumberFormat nf;
     private ObjectProperty<BigDecimal> number = new SimpleObjectProperty<>();
 
-    public final BigDecimal getNumber() {
+    public final BigDecimal getNumber() 
+    {
         return number.get();
     }
 
-    public final void setNumber(BigDecimal value) {
+    public final void setNumber(BigDecimal value) 
+    {
         number.set(value);
     }
 

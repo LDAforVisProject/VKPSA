@@ -153,6 +153,10 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 		max_spinner.setPrefWidth(55);
 		max_spinner.setLayoutX(100);
 		max_spinner.setLayoutY(30);
+		
+		// Register listener.
+		min_spinner.registerListener(this);
+		max_spinner.registerListener(this);
 	}
 	
 	private void initSelection()
@@ -333,11 +337,17 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 	}
 	
 	public void processSpinnerValue(BigDecimal value, String id)
-	{
+	{	
 		if (options.useRangeSlider()) {
 			if (id.equals("min_spinner")) {
 				if (value.doubleValue() <= max_spinner.getNumber().doubleValue()) {
-					
+					if (value.doubleValue() >= rangeSlider.getMin()) {
+						rangeSlider.setLowValue(value.doubleValue());
+						// Filter by values; refresh visualizations.
+				    	analysisController.refreshVisualizations(true);
+					}
+					else
+						min_spinner.setNumber( new BigDecimal(rangeSlider.getMin()) );
 				}
 				
 				else
@@ -346,18 +356,27 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 			
 			else if (id.equals("max_spinner")) {
 				if (value.doubleValue() >= min_spinner.getNumber().doubleValue()) {
-					
+					if (value.doubleValue() <= rangeSlider.getMax()) {
+						rangeSlider.setHighValue(value.doubleValue());
+						// Filter by values; refresh visualizations.
+				    	analysisController.refreshVisualizations(true);
+					}
+					else
+						max_spinner.setNumber( new BigDecimal(rangeSlider.getMax()) );
 				}
 				
 				else
-					min_spinner.setNumber(min_spinner.getNumber());
+					max_spinner.setNumber(min_spinner.getNumber());
 			}
 		}
 		
 		else {
 			min_spinner.setNumber(value);
 			max_spinner.setNumber(value);
+			
 			slider.setValue(value.doubleValue());
+			// Filter by values; refresh visualizations.
+	    	analysisController.refreshVisualizations(true);
 		}
 	}
 
