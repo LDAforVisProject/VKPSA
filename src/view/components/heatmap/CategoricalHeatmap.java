@@ -107,6 +107,7 @@ public class CategoricalHeatmap extends Heatmap
             	rootNode.getScene().setCursor(Cursor.DEFAULT);
             	// Clear selection.
             	selectedLDAConfigIDs.clear();
+            	hoveredOverLDAMatchID = null;
             	// Redraw.
             	if (data != null)
             		draw((HeatmapDataset) data, false, false);
@@ -173,6 +174,7 @@ public class CategoricalHeatmap extends Heatmap
         				for (int i = 0; i < ldaConfig.getKappa(); i++) {
         					selectedTopicConfigIDs.add(new Pair<Integer, Integer>(ldaConfig.getConfigurationID(), i));
         				}
+        				
         			}
         		}
         		
@@ -539,7 +541,7 @@ public class CategoricalHeatmap extends Heatmap
 		
 		// Pass references to selected data onward to AnalysisController.
 		if (selectedTopicConfigIDs.size() > 0)
-			analysisController.integrateTMCHeatmapSelection(selectedTopicConfigIDs, !isCtrlDown);
+			analysisController.integrateTMCHeatmapSelection(selectedTopicConfigIDs);
 		
 		// Clear collection of selected cell (coordinates).
 		selectedCellsCoordinates.clear();
