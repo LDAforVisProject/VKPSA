@@ -86,8 +86,8 @@ public class Main extends Application
 		// 					Run VKPSA
 		// -----------------------------------------------
 		
-//		DBManagement dbm = new DBManagement("D:\\Workspace\\Scientific Computing\\VKPSA_data - Copy\\vkpsa.db");
-//		dbm.importReferenceTopicModel("D:\\Workspace\\Scientific Computing\\VKPSA_data - Copy\\referenceTopicModel.csv");
+//		DBManagement dbm = new DBManagement("D:\\VKPSA_exe\\data\\vkpsa.db");
+//		dbm.importReferenceTopicModel("D:\\VKPSA_exe\\data\\referenceTopicModel.csv");
 		
 		try {
 			// Load core .fxml file. 
