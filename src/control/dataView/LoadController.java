@@ -59,6 +59,7 @@ public class LoadController extends DataSubViewController
 		this.dataViewController = dataViewController;
 		
 		// Set default directory, if specified.
+		System.out.println("initial = " + dataViewController.getInitialWorkspaceDirectory());
 		directoryChooser.setInitialDirectory(new File(dataViewController.getInitialWorkspaceDirectory()));	
 	}
 	

@@ -1,6 +1,5 @@
 package view.components.rubberbandselection;
 
-import javax.xml.soap.Node;
 
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
