@@ -1,5 +1,6 @@
 package view.components.scentedFilter;
 
+import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -26,22 +27,27 @@ import javafx.scene.control.TextField;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.util.Pair;
 import view.components.VisualizationComponent;
 import view.components.rubberbandselection.RubberBandSelection;
+import view.components.spinner.ISpinnerListener;
+import view.components.spinner.NumericSpinner;
 
-public class ScentedFilter extends VisualizationComponent
+public class ScentedFilter extends VisualizationComponent implements ISpinnerListener
 {
 	/*
 	 * GUI elements.
 	 */
 	
+	private @FXML AnchorPane root_anchorPane;
+	
 	private @FXML Label param_label;
-	private @FXML TextField min_textfield;
-	private @FXML TextField max_textfield;
+	private NumericSpinner min_spinner;
+	private NumericSpinner max_spinner;
 	
 	/**
 	 * VBox containing barchart and slider.
@@ -119,8 +125,34 @@ public class ScentedFilter extends VisualizationComponent
 		barchart.setTranslateY(10);
 		barchart.setAnimated(false);
 		
+		// Initialize spinner.
+		initSpinners();
+		
 		// Init rubberband selection.
 		initSelection();
+	}
+	
+	/**
+	 * Initialize numeric spinners.
+	 */
+	private void initSpinners()
+	{
+		min_spinner = new NumericSpinner(new BigDecimal(0), new BigDecimal(1));
+		max_spinner = new NumericSpinner(new BigDecimal(0), new BigDecimal(1));
+		
+		// Set IDs.
+		min_spinner.setId("min_spinner");
+		max_spinner.setId("max_spinner");
+		
+		// Set properties.
+		root_anchorPane.getChildren().add(min_spinner);
+		root_anchorPane.getChildren().add(max_spinner);
+		min_spinner.setPrefWidth(55);
+		min_spinner.setLayoutX(25);
+		min_spinner.setLayoutY(30);
+		max_spinner.setPrefWidth(55);
+		max_spinner.setLayoutX(100);
+		max_spinner.setLayoutY(30);
 	}
 	
 	private void initSelection()
@@ -159,7 +191,10 @@ public class ScentedFilter extends VisualizationComponent
 			
 			// Move upwards.
 			rangeSlider.setTranslateY(0);
-			rangeSlider.setTranslateX(2);
+			rangeSlider.setTranslateX(8);
+			
+			min_spinner.setStepWidth(new BigDecimal(options.getStepSize()));
+			max_spinner.setStepWidth(new BigDecimal(options.getStepSize()));
 			
 			// Add event handler - trigger update of visualizations (and the
 			// data preconditioning necessary for that) if filter settings
@@ -266,8 +301,15 @@ public class ScentedFilter extends VisualizationComponent
 		double parameterValue_high	= rs.getHighValue() <= rs.getMax() ? rs.getHighValue() 	: rs.getMax();
 		
 		// Update textfield values.
-		min_textfield.setText(String.valueOf(parameterValue_low));
-    	max_textfield.setText(String.valueOf(parameterValue_high));            		
+		if (options.getParamID() != "kappa") {
+			min_spinner.setNumber(new BigDecimal(parameterValue_low));
+			max_spinner.setNumber(new BigDecimal(parameterValue_high));	
+		}
+		
+		else {
+			min_spinner.setNumber(new BigDecimal(Math.round(parameterValue_low)));
+			max_spinner.setNumber(new BigDecimal(Math.round(parameterValue_high)));
+		}
 	}
 	
 	/**
@@ -278,9 +320,45 @@ public class ScentedFilter extends VisualizationComponent
 	{
 		double parameterValue	= s.getValue() >= s.getMin() && s.getValue() <= s.getMax()? s.getValue() : 0;
 		
-		// Update textfield values.
-		min_textfield.setText(String.valueOf(parameterValue));
-    	max_textfield.setText(String.valueOf(parameterValue));            		
+		// Update textfield values.       	
+		if (options.getParamID() != "kappa") {
+			min_spinner.setNumber(new BigDecimal(parameterValue));
+			max_spinner.setNumber(new BigDecimal(parameterValue));	
+		}
+		
+		else {
+			min_spinner.setNumber(new BigDecimal(Math.round(parameterValue)));
+			max_spinner.setNumber(new BigDecimal(Math.round(parameterValue)));
+		}
+	}
+	
+	public void processSpinnerValue(BigDecimal value, String id)
+	{
+		if (options.useRangeSlider()) {
+			if (id.equals("min_spinner")) {
+				if (value.doubleValue() <= max_spinner.getNumber().doubleValue()) {
+					
+				}
+				
+				else
+					min_spinner.setNumber(max_spinner.getNumber());
+			}
+			
+			else if (id.equals("max_spinner")) {
+				if (value.doubleValue() >= min_spinner.getNumber().doubleValue()) {
+					
+				}
+				
+				else
+					min_spinner.setNumber(min_spinner.getNumber());
+			}
+		}
+		
+		else {
+			min_spinner.setNumber(value);
+			max_spinner.setNumber(value);
+			slider.setValue(value.doubleValue());
+		}
 	}
 
 	@Override
@@ -438,7 +516,8 @@ public class ScentedFilter extends VisualizationComponent
 	public void resizeContent(double width, double height)
 	{
 		if (width > 0) {
-			final double delta	= 140;
+			// Delta between entire width and width of scented widget.
+			final double delta	= 150;
 			double newWidth 	= width - delta > 0 ? width - delta : 0;
 			
 			barchart.setPrefWidth(newWidth);
@@ -446,15 +525,18 @@ public class ScentedFilter extends VisualizationComponent
 			barchart.setPrefWidth(newWidth);
 			
 			if (options.useRangeSlider()) {			
-				rangeSlider.setPrefWidth(newWidth);
-				rangeSlider.setMinWidth(newWidth);
-				rangeSlider.setMaxWidth(newWidth);
+				rangeSlider.setPrefWidth(newWidth + 10);
+				rangeSlider.setMinWidth(newWidth + 10);
+				rangeSlider.setMaxWidth(newWidth + 10);
 			}
 			else {
 				slider.setPrefWidth(newWidth - 5);
 				slider.setMinWidth(newWidth - 5);
 				slider.setMaxWidth(newWidth - 5);
 			}
+			
+			// Place max_stepper accordingly.
+			max_spinner.setLayoutX(width - max_spinner.getWidth() + 10);
 		}
 	}
 	
@@ -531,8 +613,8 @@ public class ScentedFilter extends VisualizationComponent
 			}
 			
 			// Update text values.
-			min_textfield.setText(String.valueOf(min));
-			max_textfield.setText(String.valueOf(max));
+			min_spinner.setNumber(new BigDecimal(min));
+			max_spinner.setNumber(new BigDecimal(max));
 		}
 		
 		isAdjustedToExtrema = true;
@@ -566,8 +648,8 @@ public class ScentedFilter extends VisualizationComponent
 			}
 			
 			// Update text values.
-			min_textfield.setText(String.valueOf(min));
-			max_textfield.setText(String.valueOf(max));
+			min_spinner.setNumber(new BigDecimal(min));
+			max_spinner.setNumber(new BigDecimal(max));
 		}
 		
 		isAdjustedToExtrema = true;

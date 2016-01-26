@@ -76,7 +76,7 @@
                                                       </Label>
                                                       <ScrollPane fx:id="mds_content_scrollPane" hbarPolicy="ALWAYS" layoutY="30.0" pannable="true" prefViewportHeight="284.0" prefViewportWidth="298.0" vbarPolicy="ALWAYS" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
                                                          <content>
-                                                            <AnchorPane fx:id="mds_content_anchorPane" layoutY="6.0" prefHeight="259.0" prefWidth="411.0" style="-fx-border-color: #ccc;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
+                                                            <AnchorPane fx:id="mds_content_anchorPane" layoutY="6.0" prefHeight="259.0" prefWidth="411.0" style="-fx-border-color: #ccc; -fx-background-color: #fff;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
                                                                <children>
                                                                   <Canvas height="50.0" layoutX="333.0" layoutY="173.0" width="50.0" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="28.0" />
                                                                   <ScatterChart fx:id="mds_scatterchart" animated="false" layoutY="24.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="0.0">

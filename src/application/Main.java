@@ -29,8 +29,8 @@ public class Main extends Application
 		// 		Actual (raw and (pre-)processed) data
 		// -----------------------------------------------
 		
-		int n						= 400;
-		int numberOfTopics			= 15;
+		int n						= 1000;
+		int numberOfTopics			= 20;
 		int numberOfKeywords		= 14000;
 		int keywordStringSize		= 15;
 		int primitiveSizeInBytes	= 8;
