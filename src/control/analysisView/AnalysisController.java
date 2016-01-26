@@ -359,9 +359,9 @@ public class AnalysisController extends Controller
 
 			// Init filter.
 			if (param != "kappa")
-				filter.applyOptions(new ScentedFilterOptionset(param, true, 0, 15, 50, true, true, false));
+				filter.applyOptions(new ScentedFilterOptionset(param, true, 0, 15, 50, 0.05, true, true, false));
 			else
-				filter.applyOptions(new ScentedFilterOptionset(param, true, 2, 25, 50, true, true, false));
+				filter.applyOptions(new ScentedFilterOptionset(param, true, 2, 25, 50, 1, true, true, false));
 			
 			// Add to collection of filters.
 			filters.add(filter);
@@ -372,11 +372,12 @@ public class AnalysisController extends Controller
 		// Add seperating line.
 		Separator separator = new Separator();
 		separator.setTranslateX(15);
+		separator.setTranslateY(15);
 		filters_vbox.getChildren().add(separator);
 		
 		// Add distance filter - note: Is derived data.
 		ScentedFilter distanceFilter = (ScentedFilter) VisualizationComponent.generateInstance(VisualizationComponentType.SCENTED_FILTER, this, this.workspace, this.log_protocol_progressindicator, this.log_protocol_textarea);
-		distanceFilter.applyOptions(new ScentedFilterOptionset("distance", true, 0, 15, 50, true, true, false));
+		distanceFilter.applyOptions(new ScentedFilterOptionset("distance", true, 0, 15, 50, 0.01, true, true, false));
 		// Add to collection of filters.
 		filters.add(distanceFilter);
 		// Embed in containing VBox.
@@ -511,7 +512,7 @@ public class AnalysisController extends Controller
 		
 		// Even if no change on global scope detected: Update local scope, if requested. 
 		else if (includeLocalScope) {
-			localScopeInstance.refresh(dataspace.getActiveLDAConfigurations());
+			//localScopeInstance.refresh(dataspace.getActiveLDAConfigurations());
 			// Refresh topic model comparison heatmap.
 			refreshTMCHeatmap(dataspace.getActiveLDAConfigurations());
 		}

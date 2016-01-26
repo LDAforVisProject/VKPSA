@@ -11,6 +11,7 @@ public class ScentedFilterOptionset extends VisualizationComponentOptionset
 	
 	private boolean useRangeSlider;
 	private String paramID;
+	private double stepSize;
 	
 	/**
 	 * Minimal value available.
@@ -22,7 +23,7 @@ public class ScentedFilterOptionset extends VisualizationComponentOptionset
 	private double max;
 	
 	public ScentedFilterOptionset(	String paramID, boolean useRangeSlider, double min, double max, int numberOfBins,
-									boolean isSelectionEnabled, boolean showAxes, boolean relativeMode)
+									double stepsize, boolean isSelectionEnabled, boolean showAxes, boolean relativeMode)
 	{
 		super(isSelectionEnabled, showAxes, relativeMode);
 		
@@ -31,6 +32,7 @@ public class ScentedFilterOptionset extends VisualizationComponentOptionset
 		this.min			= min;
 		this.max			= max;
 		this.numberOfBins	= numberOfBins;
+		this.stepSize		= stepsize;
 	}
 
 	public boolean useRangeSlider()
@@ -56,5 +58,9 @@ public class ScentedFilterOptionset extends VisualizationComponentOptionset
 	public int getNumberOfBins()
 	{
 		return numberOfBins;
+	}
+
+	public double getStepSize() {
+		return stepSize;
 	}
 }

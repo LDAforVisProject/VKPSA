@@ -30,7 +30,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.util.Pair;
 
-public class CategoricalHeatmap extends Heatmap
+public class CategoricalHeatmap extends HeatMap
 {
 	/*
 	 * GUI elements.

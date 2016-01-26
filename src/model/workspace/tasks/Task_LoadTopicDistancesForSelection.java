@@ -60,12 +60,13 @@ public class Task_LoadTopicDistancesForSelection extends WorkspaceTask
 	{
 		// Get DB.
 		DBManagement db = workspace.getDatabaseManagement();
-		
+
 		// Load and store topic distance extrema.
 		this.topicDistanceExtrema														= db.loadTopicDistanceExtrema(); 
+
 		// Load topic distances. 
 		Pair<Map<Pair<Integer, Integer>, Integer>, double[][]> topicDistancesDataset	= db.loadTopicDistances(ldaConfigurationsToLoad);
-		
+
 		// Fetch translation LDA config ID/topic ID to spatial ID.
 		spatialIDsForLDATopicConfiguration		= topicDistancesDataset.getKey(); 
 		// Fetch topic distance matrix.

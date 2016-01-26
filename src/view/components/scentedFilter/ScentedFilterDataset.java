@@ -85,7 +85,7 @@ public class ScentedFilterDataset extends VisualizationComponentDataset
 	 * @param activeIndices
 	 * @return List of three arrays: (1) Inactive bin list, (2) active bin list, (3) discarded bin list.
 	 */
-	public ArrayList<double[]> binData( String param, int numberOfBins, final double min, final double max)
+	public ArrayList<double[]> binData(String param, int numberOfBins, final double min, final double max)
 	{
 		ArrayList<double[]> binnedData = new ArrayList<double[]>();
 		
@@ -150,28 +150,29 @@ public class ScentedFilterDataset extends VisualizationComponentDataset
 		}
 		
 		// Apply log transformation.
-		for (int i = 0; i < parameterBinList_active.length; i++) {
-			if (parameterBinList_active[i] == 1)
-				parameterBinList_active[i] = 1;
-			
-			else if (parameterBinList_active[i] > 1)
-				parameterBinList_active[i] = Math.log10(parameterBinList_active[i]) + 1;
+		if (param == "distance") {
+			for (int i = 0; i < parameterBinList_active.length; i++) {
+				if (parameterBinList_active[i] == 1)
+					parameterBinList_active[i] = 1;
+				
+				else if (parameterBinList_active[i] > 1)
+					parameterBinList_active[i] = Math.log10(parameterBinList_active[i]) + 1;
+			}
+			for (int i = 0; i < parameterBinList_inactive.length; i++) {
+				if (parameterBinList_inactive[i] == 1)
+					parameterBinList_inactive[i] = 1;
+				
+				else if (parameterBinList_inactive[i] > 1)
+					parameterBinList_inactive[i] = Math.log10(parameterBinList_inactive[i]) + 1;
+			}
+			for (int i = 0; i < parameterBinList_discarded.length; i++) {
+				if (parameterBinList_discarded[i] == 1)
+					parameterBinList_discarded[i] = 1;
+				
+				else if (parameterBinList_discarded[i] > 1)
+					parameterBinList_discarded[i] = Math.log10(parameterBinList_discarded[i]) + 1;				
+			}
 		}
-		for (int i = 0; i < parameterBinList_inactive.length; i++) {
-			if (parameterBinList_inactive[i] == 1)
-				parameterBinList_inactive[i] = 1;
-			
-			else if (parameterBinList_inactive[i] > 1)
-				parameterBinList_inactive[i] = Math.log10(parameterBinList_inactive[i]) + 1;
-		}
-		for (int i = 0; i < parameterBinList_discarded.length; i++) {
-			if (parameterBinList_discarded[i] == 1)
-				parameterBinList_discarded[i] = 1;
-			
-			else if (parameterBinList_discarded[i] > 1)
-				parameterBinList_discarded[i] = Math.log10(parameterBinList_discarded[i]) + 1;				
-		}
-		
 		
 		binnedData.add(parameterBinList_inactive);
 		binnedData.add(parameterBinList_active);
