@@ -82,7 +82,7 @@ public class CategoricalHeatmap extends HeatMap
 		super.initialize(location, resources);
 		
 		// Initialize collections for dealing with LDA matches.
-		ldaMatchCoordinates 			= new LinkedHashMap<Pair<Integer,Integer>, double[]>();
+		ldaMatchCoordinates 	= new LinkedHashMap<Pair<Integer,Integer>, double[]>();
 		selectedLDAConfigIDs	= new HashSet<Pair<Integer,Integer>>();
 	}
 	
@@ -119,8 +119,6 @@ public class CategoricalHeatmap extends HeatMap
 		canvas.addEventHandler(MouseEvent.MOUSE_MOVED, new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) 
             {
-            	GraphicsContext gc									= canvas.getGraphicsContext2D();
-        		
             	// Make copy of old LDA match.
 				Pair<Integer, Integer> oldHoveredOverLDAConfigIDs	= 	hoveredOverLDAMatchID != null ?
 																		new Pair<Integer, Integer>(hoveredOverLDAMatchID.getKey(), hoveredOverLDAMatchID.getValue()) : null;
@@ -133,14 +131,8 @@ public class CategoricalHeatmap extends HeatMap
 					// If so: Update reference, then ...
 					hoveredOverLDAMatchID = ldaMatch;
 					
-					// ...redraw (to remove previous marker drawings) and finally...
+					// ...redraw (to remove previous marker drawings).
 					draw((HeatmapDataset) data, false, false);
-					
-	        		// ...highlight/mark currently selected LDA configuration match.
-					gc.setFill(new Color(1, 0, 0, 0.5));
-					gc.fillRect(	ldaMatchCoordinates.get(ldaMatch)[0], ldaMatchCoordinates.get(ldaMatch)[1],
-									ldaMatchCoordinates.get(ldaMatch)[2] - ldaMatchCoordinates.get(ldaMatch)[0], 
-									ldaMatchCoordinates.get(ldaMatch)[3] - ldaMatchCoordinates.get(ldaMatch)[1]);
 				}
             }
         });
@@ -399,7 +391,10 @@ public class CategoricalHeatmap extends HeatMap
 		for (int i = 0; i < binMatrix.length; i++) {
 			for (int j = 0; j < binMatrix.length; j++) {	
 				// Remember cell indices.
-				Pair<Integer, Integer> cellIndices = new Pair<Integer, Integer>(i, j); 
+				Pair<Integer, Integer> cellIndices	= new Pair<Integer, Integer>(i, j); 
+				
+				// Fetch LDA configurations involved in current cell.
+				Pair<Integer, Integer> ldaMatchID = getLDAMatchForCell(data, cellIndices);
 				
 				// Calculate coordinates (minX, minY, maxX, maxY).
 				double[] cellCoordinates	= new double[4];
@@ -410,6 +405,12 @@ public class CategoricalHeatmap extends HeatMap
 				
 				// Set color for this cell.
 				Color cellColor = ColorScale.getColorForValue(binMatrix[i][j] == -1 ? 0 : binMatrix[i][j], minOccurenceCount, maxOccurenceCount, hOptions.getMinColor(), hOptions.getMaxColor());
+				// Adapt cell opacity to current hover events (i.e.: Lower opacity, if other LDA config. is hovered over). Ignore transparent cells.
+				if (hoveredOverLDAMatchID != null && cellColor != Color.TRANSPARENT) {
+					cellColor = Color.hsb(	cellColor.getHue(), cellColor.getSaturation(), cellColor.getBrightness(), 
+											ldaMatchID.equals(hoveredOverLDAMatchID) || selectedLDAConfigIDs.contains(ldaMatchID) ? 1 : 0.2);
+				}
+				// Fill cell.
 				gc.setFill(cellColor);
 				
 				// Draw cell.
@@ -430,14 +431,6 @@ public class CategoricalHeatmap extends HeatMap
 		
 		// Update labels.
     	updateLabels(data, cellsToCoordinates);
-    	
-    	// Draw selected LDA matches.
-    	gc.setFill(new Color(1, 0, 0, 0.5));
-    	for (Pair<Integer, Integer> ldaMatch : selectedLDAConfigIDs) {
-    		gc.fillRect(ldaMatchCoordinates.get(ldaMatch)[0], ldaMatchCoordinates.get(ldaMatch)[1],
-						ldaMatchCoordinates.get(ldaMatch)[2] - ldaMatchCoordinates.get(ldaMatch)[0], 
-						ldaMatchCoordinates.get(ldaMatch)[3] - ldaMatchCoordinates.get(ldaMatch)[1]);	
-    	}
 		
 	}
 	
@@ -448,19 +441,33 @@ public class CategoricalHeatmap extends HeatMap
 	}
 	
 	/**
-	 * Update coordinates of LDA matches for LDA match of particular cell.
+	 * Returns LDA match IDs as pair. 
+	 * @param data
 	 * @param cellIndices
+	 * @return
 	 */
-	private void updateLDAMatchCoordinates(HeatmapDataset data, Pair<Integer, Integer> cellIndices)
+	private Pair<Integer, Integer> getLDAMatchForCell(HeatmapDataset data, Pair<Integer, Integer> cellIndices)
 	{
 		// Fetch LDA configurations involved in match.
 		List<Integer> ldaConfigurationIDs 	= new ArrayList<Integer>(data.getCellsToConfigurationIDs().get(cellIndices));
 		// Convert to pair.
 		Pair<Integer, Integer> ldaMatchID	= null;
 		if (ldaConfigurationIDs.size() == 1)
-			ldaMatchID = new Pair<Integer, Integer>(ldaConfigurationIDs.get(0), ldaConfigurationIDs.get(0)) ;
+			ldaMatchID = new Pair<Integer, Integer>(ldaConfigurationIDs.get(0), ldaConfigurationIDs.get(0));
 		else if (ldaConfigurationIDs.size() == 2)
-			ldaMatchID = new Pair<Integer, Integer>(ldaConfigurationIDs.get(0), ldaConfigurationIDs.get(1)) ;
+			ldaMatchID = new Pair<Integer, Integer>(ldaConfigurationIDs.get(0), ldaConfigurationIDs.get(1));
+		
+		return ldaMatchID;
+	}
+	
+	/**
+	 * Update coordinates of LDA match associated with particular cell.
+	 * @param cellIndices
+	 */
+	private void updateLDAMatchCoordinates(HeatmapDataset data, Pair<Integer, Integer> cellIndices)
+	{
+		// Convert to pair.
+		Pair<Integer, Integer> ldaMatchID	= getLDAMatchForCell(data, cellIndices);
 		
 		// Get corresponding coordinates from map containing LDA match coordinates.
 		double[] matchCoordinates			= ldaMatchCoordinates.get(ldaMatchID);
