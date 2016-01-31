@@ -82,8 +82,6 @@ public class Dataset
 	}
 	
 	/**
-	 * @todo Add relaxed/strict enum parameter to distuingish whether the same topic may be used for
-	 * multiple other topics.
 	 * Calculates distance between two datasets using the average of all minimal distances between
 	 * one topic of one dataset and all topics of the other Workspace.
 	 * @param dataset
@@ -121,8 +119,6 @@ public class Dataset
 	}
 	
 	/**
-	 * @todo Add relaxed/strict enum parameter to distuingish whether the same topic may be used for
-	 * multiple other topics.
 	 * Calculates distance between two datasets using the Hausdorff distance.
 	 * @param dataset
 	 * @param topicDistances

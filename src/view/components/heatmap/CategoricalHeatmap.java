@@ -196,32 +196,34 @@ public class CategoricalHeatmap extends HeatMap
 		HeatmapDataset hData 							= (HeatmapDataset) this.data;
 		Pair<Integer, Integer> hoveredOverLDAConfigIDs 	= null;
 		
-	 	for (Map.Entry<Pair<Integer, Integer>, double[]> cellCoordinateEntry : cellsToCoordinates.entrySet()) {
-    		double[] coordinates = cellCoordinateEntry.getValue();
-    		
-    		// Check if cell contains mouse event.
-    		// minx, miny, maxx, maxy
-    		if (x >= coordinates[0] && x <= coordinates[2]) {
-    			if (y >= coordinates[1] && y <= coordinates[3]) {
-    				// Store all values in list.
-    				List<Integer> ldaConfigs = new ArrayList<Integer>(hData.getCellsToConfigurationIDs().get(cellCoordinateEntry.getKey()));
-    				
-    				// If only one LDA configuration ID: Match of one topic model vs. itself.
-    				if (ldaConfigs.size() == 1)
-    					hoveredOverLDAConfigIDs = new Pair<Integer, Integer>(ldaConfigs.get(0), ldaConfigs.get(0));
-        			// Otherwise: Match of one topic model vs. another.
-    				else if (ldaConfigs.size() == 2)
-    					hoveredOverLDAConfigIDs = new Pair<Integer, Integer>(ldaConfigs.get(0), ldaConfigs.get(1));
-    				else {
-    					System.out.println("### ERROR ### More than two LDA configurations in CategoricalHeatmap entry detected.");
-    					log("### ERROR ### More than two LDA configurations in CategoricalHeatmap entry detected.");
-    				}
-    				
-    				// Return match.
-    				return hoveredOverLDAConfigIDs;
-        		}	
-    		}
-    	}
+		if (hData != null) {
+		 	for (Map.Entry<Pair<Integer, Integer>, double[]> cellCoordinateEntry : cellsToCoordinates.entrySet()) {
+	    		double[] coordinates = cellCoordinateEntry.getValue();
+	    		
+	    		// Check if cell contains mouse event.
+	    		// minx, miny, maxx, maxy
+	    		if (x >= coordinates[0] && x <= coordinates[2]) {
+	    			if (y >= coordinates[1] && y <= coordinates[3]) {
+	    				// Store all values in list.
+	    				List<Integer> ldaConfigs = new ArrayList<Integer>(hData.getCellsToConfigurationIDs().get(cellCoordinateEntry.getKey()));
+	    				
+	    				// If only one LDA configuration ID: Match of one topic model vs. itself.
+	    				if (ldaConfigs.size() == 1)
+	    					hoveredOverLDAConfigIDs = new Pair<Integer, Integer>(ldaConfigs.get(0), ldaConfigs.get(0));
+	        			// Otherwise: Match of one topic model vs. another.
+	    				else if (ldaConfigs.size() == 2)
+	    					hoveredOverLDAConfigIDs = new Pair<Integer, Integer>(ldaConfigs.get(0), ldaConfigs.get(1));
+	    				else {
+	    					System.out.println("### ERROR ### More than two LDA configurations in CategoricalHeatmap entry detected.");
+	    					log("### ERROR ### More than two LDA configurations in CategoricalHeatmap entry detected.");
+	    				}
+	    				
+	    				// Return match.
+	    				return hoveredOverLDAConfigIDs;
+	        		}	
+	    		}
+	    	}
+		}
 	 	
 	 	return null;
 	}

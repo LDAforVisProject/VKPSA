@@ -18,6 +18,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.util.Pair;
 import view.components.ColorScale;
+import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
 import view.components.rubberbandselection.RubberBandSelection;
 
@@ -298,5 +299,23 @@ public abstract class HeatMap extends VisualizationComponent
 	protected Map<String, Integer> prepareOptionSet()
 	{
 		return null;
+	}
+	
+	@Override
+	public void initHoverEventListeners()
+	{
+		// @todo Implement HeatMap.initHoverEventListener.
+	}
+	
+	@Override
+	public void highlightHoveredOverDataPoints(Set<Integer> dataPointIDs, DatapointIDMode idMode)
+	{
+		// @todo Implement HeatMap.highlightHoveredOverDataPoints.		
+	}
+	
+	@Override
+	public void removeHoverHighlighting()
+	{
+		// @todo Implement HeatMap.removeHoverHighlighting.
 	}
 }

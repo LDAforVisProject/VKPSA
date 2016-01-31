@@ -3,6 +3,7 @@ package view.components.settingsPopup;
 import java.net.URL;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -18,6 +19,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.util.Pair;
+import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
 
 public class SettingsPanel extends VisualizationComponent
@@ -520,5 +522,20 @@ public class SettingsPanel extends VisualizationComponent
 	public Color getTMCMaxColor()
 	{
 		return tmc_color_max_colChooser.getValue();
+	}
+	
+	@Override
+	public void initHoverEventListeners()
+	{
+	}
+	
+	@Override
+	public void highlightHoveredOverDataPoints(Set<Integer> dataPointIDs, DatapointIDMode idMode)
+	{
+	}
+	
+	@Override
+	public void removeHoverHighlighting()
+	{
 	}
 }

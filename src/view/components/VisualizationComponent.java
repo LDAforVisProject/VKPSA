@@ -2,15 +2,19 @@ package view.components;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import view.components.rubberbandselection.ISelectableComponent;
 import view.components.rubberbandselection.RubberBandSelection;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextArea;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -169,4 +173,34 @@ public abstract class VisualizationComponent extends Controller implements ISele
 	 * Refreshes visualization, using the same data and option set already provided.
 	 */
 	public abstract void refresh();
+	
+	/**
+	 * Initializes hover listener responsible for processing and propagation of hover event information.
+	 */
+	public abstract void initHoverEventListeners();
+	
+	/**
+	 * Highlights all atomic visual entities containing the delivered data point IDs. 
+	 * @param dataPointIDs
+	 * @param idMode
+	 */
+	public abstract void highlightHoveredOverDataPoints(Set<Integer> dataPointIDs, DatapointIDMode idMode);
+	
+	/**
+	 * Wrapper for highlightHoveredOverDataPoints() - used for single data points.
+	 * @param dataPointIDs
+	 * @param idMode
+	 */
+	public void highlightHoveredOverDataPoint(int dataPointID, DatapointIDMode idMode)
+	{
+		Set<Integer> dataPointIDs = new HashSet<Integer>();
+		dataPointIDs.add(dataPointID);
+		
+		highlightHoveredOverDataPoints(dataPointIDs, idMode);
+	}
+	
+	/**
+	 * Removes highlighting / repaints with default settings.
+	 */
+	public abstract void removeHoverHighlighting();
 }

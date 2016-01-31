@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -32,6 +33,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.util.Pair;
+import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
 import view.components.rubberbandselection.RubberBandSelection;
 import view.components.spinner.ISpinnerListener;
@@ -598,12 +600,13 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 
 		// Add active data series to barcharts.
 		activeDataSeries	= addParameterHistogramDataSeries(binnedData.get(1), options.getNumberOfBins(), 0);
-		
 		// Add inactive data series to barcharts.
 		inactiveDataSeries	= addParameterHistogramDataSeries(binnedData.get(0), options.getNumberOfBins(), 1);
-		
 		// Add discarded data series to barcharts.
 		discardedDataSeries = addParameterHistogramDataSeries(binnedData.get(2), options.getNumberOfBins(), 2);
+		
+		// Add hover event listeners.
+		initHoverEventListeners();
 	}
 	
 	/**
@@ -761,5 +764,111 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 
 		// Add to map.
 		thresholdMap.put(options.getParamID(), values);
+	}
+	
+	@Override
+	public void initHoverEventListeners()
+	{
+		if (barchart != null) {
+			for (XYChart.Series<String, Number> dataSeries : barchart.getData()) {
+				for (XYChart.Data<String, Number> bar : dataSeries.getData()) {
+					addHoverEventListenersToNode(bar);
+				}
+			}
+		}
+	}
+	
+	@Override
+	public void highlightHoveredOverDataPoints(Set<Integer> dataPointIDs, DatapointIDMode idMode)
+	{
+		Set<String> barsToHighlight = new HashSet<String>();
+		
+		System.out.println("highlighting");
+		// Find bars to highlight.
+		for (int i = 0; i < options.getNumberOfBins(); i++) {
+			// Search in data available for this bar.
+			if (isBarToHighlight(i, "discarded_", dataPointIDs) ||
+				isBarToHighlight(i, "inactive_", dataPointIDs) 	||
+				isBarToHighlight(i, "active_", dataPointIDs)) {
+				barsToHighlight.add(Integer.toString(i));
+			}
+		}
+	
+		// Highlight bars.
+		if (barchart != null) {
+			for (XYChart.Series<String, Number> dataSeries : barchart.getData()) {
+				for (XYChart.Data<String, Number> bar : dataSeries.getData()) {
+					if (barsToHighlight.contains(bar.getXValue()))
+						bar.getNode().setOpacity(1);
+					else
+						bar.getNode().setOpacity(0.2);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Checks if bar should be highlighted (because there is an overlap between data points looked for
+	 * and the data represented in this bar).
+	 * @param barIndex
+	 * @param seriesPraefix
+	 * @param dataPointIDs
+	 * @return
+	 */
+	private boolean isBarToHighlight(int barIndex, String seriesPraefix, Set<Integer> dataPointIDs)
+	{
+		for ( int i : data.getBarToDataAssociations().get(seriesPraefix + Integer.toString(barIndex)) ) {
+			if (dataPointIDs.contains(i)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	@Override
+	public void removeHoverHighlighting()
+	{
+		if (barchart != null) {
+			for (XYChart.Series<String, Number> dataSeries : barchart.getData()) {
+				for (XYChart.Data<String, Number> bar : dataSeries.getData()) {
+					bar.getNode().setOpacity(1);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Add hover event listener to single node.
+	 * @param dataPoint
+	 */
+	private void addHoverEventListenersToNode(XYChart.Data<String, Number> bar)
+	{
+		bar.getNode().setOnMouseEntered(new EventHandler<MouseEvent>()
+		{
+		    @Override
+		    public void handle(MouseEvent event)
+		    {   
+		    	// Collect indices of data points in this bar.
+		    	Set<Integer> indices = new HashSet<Integer>();
+		    	indices.addAll(data.getBarToDataAssociations().get("discarded_" + bar.getXValue()));
+		    	indices.addAll(data.getBarToDataAssociations().get("inactive_" + bar.getXValue()));
+		    	indices.addAll(data.getBarToDataAssociations().get("active_" + bar.getXValue()));
+		    	
+		    	System.out.println("bar.x = " + bar.getXValue() + ", .size = " + indices.size());
+		    	
+	        	// Highlight data point.
+	        	highlightHoveredOverDataPoints(indices, DatapointIDMode.INDEX);
+		    }
+		});
+		
+		bar.getNode().setOnMouseExited(new EventHandler<MouseEvent>()
+		{
+		    @Override
+		    public void handle(MouseEvent event)
+		    {       
+	        	removeHoverHighlighting();
+		    }
+		});
 	}
 }

@@ -93,6 +93,7 @@ public class ScentedFilterDataset extends VisualizationComponentDataset
 		for (int i = 0; i < numberOfBins; i++) {
 			barToDataAssociations.put("active_" + i, new ArrayList<Integer>());
 			barToDataAssociations.put("inactive_" + i, new ArrayList<Integer>());
+			barToDataAssociations.put("discarded_" + i, new ArrayList<Integer>());
 		}
 		
 		// Map storing one bin list for each parameter, counting only filtered datasets.
@@ -114,6 +115,7 @@ public class ScentedFilterDataset extends VisualizationComponentDataset
 			// Check if dataset is filtered (as opposed to discarded).
 			boolean isInactiveDataset 	= inactiveIndices.contains(i);
 			boolean isActiveDataset		= activeIndices.contains(i);
+			boolean isDiscardedDataset	= !isInactiveDataset && !isActiveDataset;
 
 			// Calculate index of bin in which to store the current value.
 			int index_key		= -1;
@@ -145,8 +147,12 @@ public class ScentedFilterDataset extends VisualizationComponentDataset
 					barToDataAssociations.get("active_" + index_key).add(i);
 				}
 			}
-			else
+			else {
 				parameterBinList_discarded[index_key]++;
+				// A discarded dataset may be hovered over later on, so we add
+				// it's index to the collection of bar to data associations:
+				barToDataAssociations.get("discarded_" + index_key).add(i);
+			}
 		}
 		
 		// Apply log transformation.

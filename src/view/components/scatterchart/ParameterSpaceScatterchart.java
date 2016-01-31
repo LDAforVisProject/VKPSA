@@ -155,6 +155,9 @@ public class ParameterSpaceScatterchart extends Scatterchart
         
         // Mark reference TM.
         markReferenceTM();
+        
+        // Init hover event listeners.
+        initHoverEventListeners();
 	}
 	
 	

@@ -33,6 +33,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.util.Pair;
+import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
 import view.components.VisualizationComponentType;
 import view.components.heatmap.CategoricalHeatmap;
@@ -648,6 +649,10 @@ public abstract class Scatterchart extends VisualizationComponent
 			
 			// Mark reference topic model.
 			markReferenceTM();
+			
+			// Add event listeners to active and inactive data series (may contain new members).
+			initHoverEventListeners(activeDataSeries);
+			initHoverEventListeners(inactiveDataSeries);
 		}
 	}
 	
@@ -793,5 +798,78 @@ public abstract class Scatterchart extends VisualizationComponent
 		zoomContainer_scrollpane.setOnKeyPressed(scrollPaneKEHandler);
 		zoomContainer_scrollpane.setOnKeyTyped(scrollPaneKEHandler);
 		zoomContainer_scrollpane.setOnKeyReleased(scrollPaneKEHandler);
+	}
+	
+	@Override
+	public void initHoverEventListeners()
+	{
+		// Add hover event listener to all nodes.
+		if (scatterchart != null) {
+			for (XYChart.Series<Number, Number> dataSeries : scatterchart.getData()) {
+				for (XYChart.Data<Number, Number> dataPoint : dataSeries.getData()) {
+					addHoverEventListenersToNode(dataPoint);
+				}
+			}
+		}
+	}
+	
+	@Override
+	public void highlightHoveredOverDataPoints(Set<Integer> dataPointIDs, DatapointIDMode idMode)
+	{
+		for (XYChart.Series<Number, Number> dataSeries : scatterchart.getData()) {
+			for (XYChart.Data<Number, Number> dataPoint : dataSeries.getData()) {
+				if ( !dataPointIDs.contains((int)dataPoint.getExtraValue()) ) {
+					dataPoint.getNode().setOpacity(0.1);
+				}
+			}
+		}
+	}
+	
+	@Override
+	public void removeHoverHighlighting()
+	{
+		for (XYChart.Series<Number, Number> dataSeries : scatterchart.getData()) {
+			for (XYChart.Data<Number, Number> dataPoint : dataSeries.getData()) {
+				dataPoint.getNode().setOpacity(1);
+			}
+		}
+	}
+	
+	/**
+	 * Adds hover event listener to all relevant nodes.
+	 * @param dataSeries Adds listener only to specific series.
+	 */
+	private void initHoverEventListeners(XYChart.Series<Number, Number> dataSeries)
+	{
+		if (dataSeries != null) {
+			for (XYChart.Data<Number, Number> dataPoint : dataSeries.getData())
+				addHoverEventListenersToNode(dataPoint);
+		}
+	}
+	
+	/**
+	 * Add hover event listener to single node.
+	 * @param dataPoint
+	 */
+	private void addHoverEventListenersToNode(XYChart.Data<Number, Number> dataPoint)
+	{
+		dataPoint.getNode().setOnMouseEntered(new EventHandler<MouseEvent>()
+		{
+		    @Override
+		    public void handle(MouseEvent event)
+		    {       
+	        	// Highlight data point.
+	        	highlightHoveredOverDataPoint((int)dataPoint.getExtraValue(), DatapointIDMode.INDEX);
+		    }
+		});
+		
+		dataPoint.getNode().setOnMouseExited(new EventHandler<MouseEvent>()
+		{
+		    @Override
+		    public void handle(MouseEvent event)
+		    {       
+	        	removeHoverHighlighting();
+		    }
+		});
 	}
 }

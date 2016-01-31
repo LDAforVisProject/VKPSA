@@ -1,8 +1,8 @@
 package view.components.legacy.mdsScatterchart;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -10,29 +10,8 @@ import java.util.Set;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import model.LDAConfiguration;
-
 import com.sun.javafx.charts.Legend;
 
-import javafx.collections.ListChangeListener;
-import javafx.collections.ListChangeListener.Change;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -41,6 +20,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -52,11 +32,10 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.util.Pair;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import control.analysisView.AnalysisController;
+import view.components.DatapointIDMode;
 import view.components.legacy.VisualizationComponent_Legacy;
 import view.components.legacy.heatmap.HeatMap;
 import view.components.legacy.heatmap.HeatmapDataType;
@@ -211,16 +190,16 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	 */
 	private double coordinates[][];
 	/**
-	 * Reference to this workspace's filtered coordinate collection.
+	 * Reference to this workspace's inactive coordinate collection.
 	 */
 	private double inactiveCoordinates[][];
 	/**
-	 * Reference to this workspace's collection of filtered indices.
+	 * Reference to this workspace's collection of inactive indices.
 	 */
-	private Set<Integer> filteredIndices;
+	private Set<Integer> inactiveIndices;
 	
 	/**
-	 * Reference to this workspace's selected coordinate collection.
+	 * Reference to this workspace's active coordinate collection.
 	 */
 	private double activeCoordinates[][];
 	/**
@@ -342,8 +321,8 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
                 			txt = "Discarded (" + discardedIndices.size() + ")";
 	            		}
 	            		
-	            		else if (label.getText().contains("Inactive") && filteredIndices != null) {
-	            			txt = "Inactive (" + (filteredIndices.size() - activeMDSPoints.size()) + ")";
+	            		else if (label.getText().contains("Inactive") && inactiveIndices != null) {
+	            			txt = "Inactive (" + (inactiveIndices.size() - activeMDSPoints.size()) + ")";
 	            		}
 	            		
 	            		else if (label.getText().contains("Active") && activeIndices != null) {
@@ -729,7 +708,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	{	
 		// Store references to data collection.
 		this.inactiveCoordinates	= filteredCoordinates;
-		this.filteredIndices		= filteredIndices;
+		this.inactiveIndices		= filteredIndices;
 		this.activeCoordinates		= activeCoordinates;
 		this.activeIndices			= activeIndices;
 		this.discardedCoordinates	= discardedCoordinates;
@@ -779,6 +758,9 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	
         // Highlight reference topic model.
         markReferenceTM();
+        
+        // Add hover event listener to all relevant nodes.
+        initHoverEventListeners();
 	}
 	
 	/**
@@ -799,7 +781,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
         int count = 0;
 
         // Add filtered data points.
-        for (int index : filteredIndices) {
+        for (int index : inactiveIndices) {
         	// Add point only if it's not part of the set of selected indices.
         	if (!activeIndices.contains(index)) {
 	        	XYChart.Data<Number, Number> dataPoint = new XYChart.Data<Number, Number>(inactiveCoordinates[0][count], inactiveCoordinates[1][count]);
@@ -1121,6 +1103,10 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 			
 			// Refresh local scope visualization.
 			analysisController.integrateMDSSelection(activeMDSPoints.keySet(), true);
+			
+			// Add event listeners to active and inactive data series (may contain new members).
+			initHoverEventListeners(activeDataSeries);
+			initHoverEventListeners(inactiveDataSeries);
 		}
 	}
 	
@@ -1231,5 +1217,78 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 		scrollPane.setOnKeyPressed(scrollPaneKEHandler);
 		scrollPane.setOnKeyTyped(scrollPaneKEHandler);
 		scrollPane.setOnKeyReleased(scrollPaneKEHandler);
+	}
+	
+	@Override
+	public void initHoverEventListeners()
+	{
+		// Add hover event listener to all nodes.
+		if (scatterchart != null) {
+			for (XYChart.Series<Number, Number> dataSeries : scatterchart.getData()) {
+				for (XYChart.Data<Number, Number> dataPoint : dataSeries.getData()) {
+					addHoverEventListenersToNode(dataPoint);
+				}
+			}
+		}
+	}
+	
+	@Override
+	public void highlightHoveredOverDataPoints(Set<Integer> dataPointIDs, DatapointIDMode idMode)
+	{
+		for (XYChart.Series<Number, Number> dataSeries : scatterchart.getData()) {
+			for (XYChart.Data<Number, Number> dataPoint : dataSeries.getData()) {
+				if ( !dataPointIDs.contains((int)dataPoint.getExtraValue()) ) {
+					dataPoint.getNode().setOpacity(0.1);
+				}
+			}
+		}
+	}
+	
+	@Override
+	public void removeHoverHighlighting()
+	{
+		for (XYChart.Series<Number, Number> dataSeries : scatterchart.getData()) {
+			for (XYChart.Data<Number, Number> dataPoint : dataSeries.getData()) {
+				dataPoint.getNode().setOpacity(1);
+			}
+		}
+	}
+
+	/**
+	 * Adds hover event listener to all relevant nodes.
+	 * @param dataSeries Adds listener only to specific series.
+	 */
+	private void initHoverEventListeners(XYChart.Series<Number, Number> dataSeries)
+	{
+		if (dataSeries != null) {
+			for (XYChart.Data<Number, Number> dataPoint : dataSeries.getData())
+				addHoverEventListenersToNode(dataPoint);
+		}
+	}
+	
+	/**
+	 * Add hover event listener to single node.
+	 * @param dataPoint
+	 */
+	private void addHoverEventListenersToNode(XYChart.Data<Number, Number> dataPoint)
+	{
+		dataPoint.getNode().setOnMouseEntered(new EventHandler<MouseEvent>()
+		{
+		    @Override
+		    public void handle(MouseEvent event)
+		    {       
+	        	// Highlight data point.
+	        	highlightHoveredOverDataPoint((int)dataPoint.getExtraValue(), DatapointIDMode.INDEX);
+		    }
+		});
+		
+		dataPoint.getNode().setOnMouseExited(new EventHandler<MouseEvent>()
+		{
+		    @Override
+		    public void handle(MouseEvent event)
+		    {       
+	        	removeHoverHighlighting();
+		    }
+		});
 	}
 }

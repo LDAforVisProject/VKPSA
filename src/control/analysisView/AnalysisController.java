@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import javax.xml.transform.Source;
-
 import org.controlsfx.control.PopOver;
 
 import model.AnalysisDataspace;
@@ -16,11 +14,11 @@ import model.LDAConfiguration;
 import model.workspace.Workspace;
 import control.Controller;
 import control.analysisView.localScope.LocalScopeVisualizationType;
+import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
 import view.components.VisualizationComponentType;
 import view.components.heatmap.CategoricalHeatmap;
 import view.components.heatmap.HeatmapOptionset;
-import view.components.legacy.DistancesBarchart;
 import view.components.legacy.LocalScopeInstance;
 import view.components.legacy.mdsScatterchart.MDSScatterchart;
 import view.components.scatterchart.ScatterchartDataset;
@@ -33,29 +31,21 @@ import view.components.settingsPopup.SettingsPanel;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.chart.BarChart;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ColorPicker;
-import javafx.scene.control.Control;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
-import javafx.scene.control.Slider;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.DragEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -1080,5 +1070,25 @@ public class AnalysisController extends Controller
 	public void updateGlobalScatterchartDHMColorSpectrum(Color minColor, Color maxColor)
 	{
 		globalScatterplot.updateDHMColorSpectrum(minColor, maxColor);
+	}
+	
+	/**
+	 * Instructs visualization components to highlight delivered data points.
+	 * @param dataPointIDs
+	 * @param idMode
+	 */
+	public void highlightDataPoints(Set<Integer> dataPointIDs, DatapointIDMode idMode)
+	{
+		
+	}
+	
+	/**
+	 * Instructs visualization components to remove highlighting from points.
+	 * @param dataPointIDs
+	 * @param idMode
+	 */
+	public void removeHighlighting()
+	{
+		
 	}
 }

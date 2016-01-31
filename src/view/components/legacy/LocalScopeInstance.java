@@ -1,9 +1,11 @@
 package view.components.legacy;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import view.components.DatapointIDMode;
 import model.LDAConfiguration;
 import model.workspace.Workspace;
 import javafx.event.EventHandler;
@@ -363,5 +365,23 @@ public class LocalScopeInstance extends VisualizationComponent_Legacy
 		this.log_protocol_textarea 			= logTA;
 		
 		ptcController.setReferences(workspace, logPI, logTA);
+	}
+
+	@Override
+	public void initHoverEventListeners()
+	{
+		// @todo Implement LocalScopeInstance.initHoverEventListener.	
+	}
+
+	@Override
+	public void highlightHoveredOverDataPoints(Set<Integer> dataPointIDs, DatapointIDMode idMode)
+	{
+		// @todo Implement LocalScopeInstance.highlightHoveredOverDataPoints.		
+	}
+
+	@Override
+	public void removeHoverHighlighting()
+	{
+		// @todo Implement LocalScopeInstance.removeHoverHighlighting.
 	}
 }

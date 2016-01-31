@@ -8,6 +8,7 @@ import java.util.Set;
 
 import control.analysisView.AnalysisController;
 import view.components.ColorScale;
+import view.components.DatapointIDMode;
 import view.components.legacy.BinnedOccurenceEntity;
 import view.components.legacy.VisualizationComponent_Legacy;
 import view.components.rubberbandselection.ISelectableComponent;
@@ -610,5 +611,20 @@ public class HeatMap extends VisualizationComponent_Legacy implements ISelectabl
 	public void processKeyReleasedEvent(KeyEvent ke)
 	{
 		isCtrlDown = ke.isControlDown();
+	}
+
+	@Override
+	public void initHoverEventListeners()
+	{		
+	}
+
+	@Override
+	public void highlightHoveredOverDataPoints(Set<Integer> dataPointIDs, DatapointIDMode idMode)
+	{
+	}
+
+	@Override
+	public void removeHoverHighlighting()
+	{		
 	}
 }

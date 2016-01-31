@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import view.components.DatapointIDMode;
 import model.LDAConfiguration;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
@@ -438,5 +439,20 @@ public class DistanceDifferenceCorrelationLinechart extends	VisualizationCompone
 		
 		
 		return normalizedDistanceAverages;
+	}
+
+	@Override
+	public void initHoverEventListeners()
+	{		
+	}
+
+	@Override
+	public void highlightHoveredOverDataPoints(Set<Integer> dataPointIDs, DatapointIDMode idMode)
+	{
+	}
+
+	@Override
+	public void removeHoverHighlighting()
+	{		
 	}
 }
