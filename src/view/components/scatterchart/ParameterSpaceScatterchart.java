@@ -57,12 +57,6 @@ public class ParameterSpaceScatterchart extends Scatterchart
 		paramX_combobox.toFront();
 		paramY_combobox.toFront();
 	}
-
-	@Override
-	protected void initZoom()
-	{
-		// @todo Implement zoom for ParameterSpaceScatterchart.
-	}
 	
 	/**
 	 * Applies set of options to this instance.
@@ -79,7 +73,7 @@ public class ParameterSpaceScatterchart extends Scatterchart
 	@Override
 	public Pair<Integer, Integer> provideOffsets()
 	{
-		return new Pair<Integer, Integer>(87, 41);
+		return new Pair<Integer, Integer>(50, 15);
 	}
 
 	@Override
@@ -225,6 +219,10 @@ public class ParameterSpaceScatterchart extends Scatterchart
 			if (height > 0)
 				paramY_combobox.setLayoutY(25 + chartHeight / 2 - paramY_combobox.getHeight() / 2);
 		}
+		
+		// Resize scatterchart.
+		zoomContainer_anchorpane.setPrefWidth(zoomContainer_scrollpane.getWidth() - 10);
+		zoomContainer_anchorpane.setPrefHeight(zoomContainer_scrollpane.getHeight() - 10);
 		
 		// Resize and -position density heatmap.
 		updateHeatmapPosition();

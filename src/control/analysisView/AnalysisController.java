@@ -807,7 +807,7 @@ public class AnalysisController extends Controller
 		 * Consume space bar key event in scroll pane, manually propagate event to
 		 * AnalysisController's key event processing. 
 		 */
-		EventHandler<KeyEvent> mdsScrollPaneKEHandler = (new EventHandler<KeyEvent>() {
+		EventHandler<KeyEvent> scrollPaneKEHandler = (new EventHandler<KeyEvent>() {
             public void handle(KeyEvent ke) 
             {
             	if (ke.getCode() == KeyCode.SPACE || ke.getCharacter().equals(" ")) {
@@ -817,9 +817,8 @@ public class AnalysisController extends Controller
             }
 		});
 		
-		mds_content_scrollPane.setOnKeyPressed(mdsScrollPaneKEHandler);
-		mds_content_scrollPane.setOnKeyTyped(mdsScrollPaneKEHandler);
-		mds_content_scrollPane.setOnKeyReleased(mdsScrollPaneKEHandler);
+		globalScatterplot.setSpaceKeyHandler(scrollPaneKEHandler);
+		paramSpaceScatterchart.setSpaceKeyHandler(scrollPaneKEHandler);
 		
 		/**
 		 * Process key events.
@@ -853,6 +852,7 @@ public class AnalysisController extends Controller
 		
 		else if (ke.getEventType() == KeyEvent.KEY_TYPED) {
 			globalScatterplot.processKeyPressedEvent(ke);
+			paramSpaceScatterchart.processKeyPressedEvent(ke);
 		}
 		
     	ke.consume();

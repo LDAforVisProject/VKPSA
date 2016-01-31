@@ -125,7 +125,7 @@ public class RubberBandSelection
 	        @Override
 	        public void handle(MouseEvent event) 
 	        {
-	        	isLocked = false; //!isInAllowedArea(event.getX(), event.getY()); 
+	        	isLocked = event.isSecondaryButtonDown(); //!isInAllowedArea(event.getX(), event.getY()); 
 	        	if (!isLocked) {
 		        	dragContext.mouseAnchorX = event.getX();
 		            dragContext.mouseAnchorY = event.getY();

@@ -10,13 +10,21 @@
    <children>
       <ComboBox fx:id="paramX_combobox" layoutX="116.0" layoutY="169.0" onAction="#updateParamValue" prefHeight="25.0" prefWidth="75.0" promptText="kappa" AnchorPane.topAnchor="5.0" />
       <ComboBox fx:id="paramY_combobox" layoutX="-18.0" layoutY="71.0" onAction="#updateParamValue" prefHeight="25.0" prefWidth="75.0" promptText="alpha" rotate="270.0" AnchorPane.leftAnchor="-18.0" />
-      <ScatterChart fx:id="scatterchart" animated="false" layoutX="55.0" layoutY="14.0" prefHeight="150.0" prefWidth="200.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="35.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="25.0">
-        <xAxis>
-          <NumberAxis side="BOTTOM" fx:id="xAxis_numberaxis" />
-        </xAxis>
-        <yAxis>
-          <NumberAxis fx:id="yAxis_numberaxis" side="LEFT" />
-        </yAxis>
-      </ScatterChart>
+      <ScrollPane fx:id="zoomContainer_scrollpane" hbarPolicy="ALWAYS" layoutX="35.0" layoutY="25.0" prefHeight="159.0" prefViewportHeight="164.0" prefViewportWidth="219.0" prefWidth="217.0" style="-fx-background-color: #fff; -fx-border-color: #ccc;" vbarPolicy="ALWAYS" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="35.0">
+         <content>
+            <AnchorPane fx:id="zoomContainer_anchorpane" prefHeight="148.0" prefWidth="188.0" style="-fx-background-color: #fff;">
+               <children>
+                  <ScatterChart fx:id="scatterchart" animated="false" prefHeight="142.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <xAxis>
+                      <NumberAxis side="BOTTOM" fx:id="xAxis_numberaxis" />
+                    </xAxis>
+                    <yAxis>
+                      <NumberAxis fx:id="yAxis_numberaxis" side="LEFT" />
+                    </yAxis>
+                  </ScatterChart>
+               </children>
+            </AnchorPane>
+         </content>
+      </ScrollPane>
    </children>
 </AnchorPane>

@@ -25,6 +25,8 @@ import java.util.Set;
 
 
 
+
+
 import model.LDAConfiguration;
 
 import com.sun.javafx.charts.Legend;
@@ -50,7 +52,9 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.util.Pair;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import control.analysisView.AnalysisController;
 import view.components.legacy.VisualizationComponent_Legacy;
@@ -543,11 +547,14 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 		    	lastMouseEvent = event;
 		    	
 		    	if (event.isSecondaryButtonDown() == true) {
-		            scatterchart.setScaleX(1.0);
-		            scatterchart.setScaleY(1.0);
-		            
-		            scatterchart.setTranslateX(0);
-					scatterchart.setTranslateY(0);
+			        scatterchart.setMinWidth(scrollPane.getWidth() - 20);
+			        scatterchart.setMaxWidth(scrollPane.getWidth() - 20);
+			        scatterchart.setMinHeight(scrollPane.getHeight() - 20);
+			        scatterchart.setMaxHeight(scrollPane.getHeight() - 20);
+			        
+			        // Scroll to zero coordinate.
+			        scrollPane.setHvalue(0);
+			        scrollPane.setVvalue(0);
 		        }
 		    }
 		});
@@ -1212,5 +1219,17 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 		final double offsetY = scatterchart.getHeight() * yBorderFactor;
 		heatmap_canvas.setTranslateY(offsetY);
 		heatmap_canvas.setHeight((scatterchart.getHeight() - 95 - offsetY) * (1 - yBorderFactor));
+	}
+	
+	/**
+	 * Set customized key handler for space bar events in scroll pane.
+	 * Needed so scroll pane doesn't use space key event to scroll.
+	 * @param scrollPaneKEHandler
+	 */
+	public void setSpaceKeyHandler(EventHandler<KeyEvent> scrollPaneKEHandler)
+	{
+		scrollPane.setOnKeyPressed(scrollPaneKEHandler);
+		scrollPane.setOnKeyTyped(scrollPaneKEHandler);
+		scrollPane.setOnKeyReleased(scrollPaneKEHandler);
 	}
 }

@@ -22,11 +22,13 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -37,6 +39,7 @@ import view.components.heatmap.CategoricalHeatmap;
 import view.components.heatmap.HeatmapOptionset;
 import view.components.heatmap.NumericalHeatmap;
 import view.components.legacy.mdsScatterchart.DataPointState;
+import view.components.legacy.mdsScatterchart.MDSScatterchart;
 import view.components.rubberbandselection.RubberBandSelection;
 
 public abstract class Scatterchart extends VisualizationComponent
@@ -47,6 +50,15 @@ public abstract class Scatterchart extends VisualizationComponent
 	
 	protected @FXML AnchorPane container_anchorPane;
 	
+	/**
+	 * Scroll pane used for zoom.
+	 */
+	protected @FXML ScrollPane zoomContainer_scrollpane;
+	/**
+	 * Anchor pane holding actual scatterchart.
+	 */
+	protected @FXML AnchorPane zoomContainer_anchorpane;
+	
 	protected @FXML ScatterChart<Number, Number> scatterchart;
 	protected @FXML NumberAxis xAxis_numberaxis;
 	protected @FXML NumberAxis yAxis_numberaxis;
@@ -56,6 +68,11 @@ public abstract class Scatterchart extends VisualizationComponent
 	 */
 	NumericalHeatmap densityHeatmap;
 	HeatmapOptionset densityHeatmapOptions;
+	
+	/**
+	 * Describes zoom factor.
+	 */
+	private static final float ZOOM_DELTA					= 1.1F;
 	
 	/*
 	 * Data needed for selection.
@@ -255,7 +272,65 @@ public abstract class Scatterchart extends VisualizationComponent
 	/**
 	 * Initializes zoom in scatterchart.
 	 */
-	protected abstract void initZoom();
+	protected void initZoom()
+	{
+		// Disable panning.
+		zoomContainer_scrollpane.setPannable(false);
+				
+		// Resize on mouse wheel action.
+		scatterchart.setOnScroll(new EventHandler<ScrollEvent>() {
+		    public void handle(ScrollEvent event) {
+		        event.consume();
+		        
+		        if (event.getDeltaY() == 0) {
+		            return;
+		        }
+
+		        // Calculate scale factor.
+		        final double scaleFactor 	= event.getDeltaY() > 0 ? Scatterchart.ZOOM_DELTA : 1 / Scatterchart.ZOOM_DELTA;
+
+		        // Store current width and height.
+		        final double totalWidth		= scatterchart.getWidth();
+		        final double totalHeight	= scatterchart.getHeight();
+		      
+		        // Update chart's scale factor.
+		        double width 	= scatterchart.getWidth();
+		        double height	= scatterchart.getHeight();
+		        
+		        // Resize scatterchart.
+		        scatterchart.setMinWidth(width * scaleFactor);
+		        scatterchart.setMaxWidth(width * scaleFactor);
+		        scatterchart.setMinHeight(height * scaleFactor);
+		        scatterchart.setMaxHeight(height * scaleFactor);
+		        
+		        // Force redraw of entire scrollpane.
+		        zoomContainer_scrollpane.applyCss();
+		        zoomContainer_scrollpane.layout();
+		        
+		        // Scroll to mouse coordinates.
+		        zoomContainer_scrollpane.setHvalue(event.getX() / totalWidth);
+		        zoomContainer_scrollpane.setVvalue(event.getY() / totalHeight);
+		    }
+		});
+		
+		// Reset zoom after right click.
+		scatterchart.setOnMousePressed(new EventHandler<MouseEvent>() {
+		    public void handle(MouseEvent event) {
+		    	lastMouseEvent = event;
+		    	
+		    	if (event.isSecondaryButtonDown() == true) {
+			        scatterchart.setMinWidth(zoomContainer_scrollpane.getWidth() - 20);
+			        scatterchart.setMaxWidth(zoomContainer_scrollpane.getWidth() - 20);
+			        scatterchart.setMinHeight(zoomContainer_scrollpane.getHeight() - 20);
+			        scatterchart.setMaxHeight(zoomContainer_scrollpane.getHeight() - 20);
+			        
+			        // Scroll to zero coordinate.
+			        zoomContainer_scrollpane.setHvalue(0);
+			        zoomContainer_scrollpane.setVvalue(0);
+		        }
+		    }
+		});
+	}
 	
 	/**
 	 * Identifies global extrema based on provided data. 
@@ -581,6 +656,12 @@ public abstract class Scatterchart extends VisualizationComponent
 	{
     	// Remember if CTRL is down.
     	isCtrlDown = ke.isControlDown();
+    	
+    	// If key is space: Activate panning, de-activate selection listener.
+    	if (ke.getCharacter().equals(" ")) {
+    		rubberbandSelection.disable();
+    		zoomContainer_scrollpane.setPannable(true);
+    	}
 	}
 
 	@Override
@@ -604,6 +685,11 @@ public abstract class Scatterchart extends VisualizationComponent
     			rubberbandSelection.enable();
     		}
     	}
+		
+		else if (ke.getCode() == KeyCode.SPACE) {
+			rubberbandSelection.enable();
+    		zoomContainer_scrollpane.setPannable(false);
+		}
     	
 		// Remember if CTRL is down.
     	isCtrlDown = ke.isControlDown();	
@@ -696,4 +782,16 @@ public abstract class Scatterchart extends VisualizationComponent
 	 * Update position of chart's heatmap layer.
 	 */
 	protected abstract void updateHeatmapPosition();
+	
+	/**
+	 * Set customized key handler for space bar events in scroll pane.
+	 * Needed so scroll pane doesn't use space key event to scroll.
+	 * @param scrollPaneKEHandler
+	 */
+	public void setSpaceKeyHandler(EventHandler<KeyEvent> scrollPaneKEHandler)
+	{
+		zoomContainer_scrollpane.setOnKeyPressed(scrollPaneKEHandler);
+		zoomContainer_scrollpane.setOnKeyTyped(scrollPaneKEHandler);
+		zoomContainer_scrollpane.setOnKeyReleased(scrollPaneKEHandler);
+	}
 }
