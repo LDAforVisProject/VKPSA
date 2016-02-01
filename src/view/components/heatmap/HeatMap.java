@@ -50,6 +50,10 @@ public abstract class HeatMap extends VisualizationComponent
 	 */
 	protected boolean hasDataChanged;
 	
+	/**
+	 * Workaround: Flag determining whether there is a 
+	 */
+	protected boolean isDisplayingExternalHoverEvent;
 	
 	// -----------------------------------------------
 	//					Methods
@@ -69,6 +73,9 @@ public abstract class HeatMap extends VisualizationComponent
 		
 		// Init selection tools.
 		initSelection();
+		
+		// Prepare workaround for hover highlighting.
+		isDisplayingExternalHoverEvent = false;
 	}
 	
 	/**
@@ -299,23 +306,5 @@ public abstract class HeatMap extends VisualizationComponent
 	protected Map<String, Integer> prepareOptionSet()
 	{
 		return null;
-	}
-	
-	@Override
-	public void initHoverEventListeners()
-	{
-		// @todo Implement HeatMap.initHoverEventListener.
-	}
-	
-	@Override
-	public void highlightHoveredOverDataPoints(Set<Integer> dataPointIDs, DatapointIDMode idMode)
-	{
-		// @todo Implement HeatMap.highlightHoveredOverDataPoints.		
-	}
-	
-	@Override
-	public void removeHoverHighlighting()
-	{
-		// @todo Implement HeatMap.removeHoverHighlighting.
 	}
 }

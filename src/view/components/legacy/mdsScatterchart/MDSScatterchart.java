@@ -10,6 +10,9 @@ import java.util.Set;
 
 
 
+
+
+
 import com.sun.javafx.charts.Legend;
 
 import javafx.event.EventHandler;
@@ -36,6 +39,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import control.analysisView.AnalysisController;
 import view.components.DatapointIDMode;
+import view.components.VisualizationComponent;
+import view.components.VisualizationComponentType;
 import view.components.legacy.VisualizationComponent_Legacy;
 import view.components.legacy.heatmap.HeatMap;
 import view.components.legacy.heatmap.HeatmapDataType;
@@ -1235,12 +1240,18 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	@Override
 	public void highlightHoveredOverDataPoints(Set<Integer> dataPointIDs, DatapointIDMode idMode)
 	{
-		for (XYChart.Series<Number, Number> dataSeries : scatterchart.getData()) {
-			for (XYChart.Data<Number, Number> dataPoint : dataSeries.getData()) {
-				if ( !dataPointIDs.contains((int)dataPoint.getExtraValue()) ) {
-					dataPoint.getNode().setOpacity(0.1);
+		if (idMode == DatapointIDMode.INDEX) {
+			for (XYChart.Series<Number, Number> dataSeries : scatterchart.getData()) {
+				for (XYChart.Data<Number, Number> dataPoint : dataSeries.getData()) {
+					if ( !dataPointIDs.contains((int)dataPoint.getExtraValue()) ) {
+						dataPoint.getNode().setOpacity(VisualizationComponent.HOVER_OPACITY_FACTOR);
+					}
 				}
 			}
+		}
+		
+		else {
+			System.out.println("### ERROR ### DatapointIDMode.INDEX not supported for MDSScatterchart.");
 		}
 	}
 	
@@ -1279,6 +1290,9 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 		    {       
 	        	// Highlight data point.
 	        	highlightHoveredOverDataPoint((int)dataPoint.getExtraValue(), DatapointIDMode.INDEX);
+	        	
+	        	// Notify AnalysisController about hover action.
+	        	analysisController.highlightDataPoints((int)dataPoint.getExtraValue(), DatapointIDMode.INDEX, VisualizationComponentType.GLOBAL_SCATTERCHART);
 		    }
 		});
 		
@@ -1287,7 +1301,11 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 		    @Override
 		    public void handle(MouseEvent event)
 		    {       
-	        	removeHoverHighlighting();
+		    	// Remove highlighting.
+	        	removeHoverHighlighting();	        	
+	        	
+	        	// Notify AnalysisController about end of hover action.
+	        	analysisController.removeHighlighting(VisualizationComponentType.GLOBAL_SCATTERCHART);
 		    }
 		});
 	}

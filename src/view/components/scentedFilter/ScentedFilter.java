@@ -35,6 +35,7 @@ import javafx.scene.paint.Color;
 import javafx.util.Pair;
 import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
+import view.components.VisualizationComponentType;
 import view.components.rubberbandselection.RubberBandSelection;
 import view.components.spinner.ISpinnerListener;
 import view.components.spinner.NumericSpinner;
@@ -781,29 +782,35 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 	@Override
 	public void highlightHoveredOverDataPoints(Set<Integer> dataPointIDs, DatapointIDMode idMode)
 	{
-		Set<String> barsToHighlight = new HashSet<String>();
-		
-		System.out.println("highlighting");
-		// Find bars to highlight.
-		for (int i = 0; i < options.getNumberOfBins(); i++) {
-			// Search in data available for this bar.
-			if (isBarToHighlight(i, "discarded_", dataPointIDs) ||
-				isBarToHighlight(i, "inactive_", dataPointIDs) 	||
-				isBarToHighlight(i, "active_", dataPointIDs)) {
-				barsToHighlight.add(Integer.toString(i));
-			}
-		}
-	
-		// Highlight bars.
-		if (barchart != null) {
-			for (XYChart.Series<String, Number> dataSeries : barchart.getData()) {
-				for (XYChart.Data<String, Number> bar : dataSeries.getData()) {
-					if (barsToHighlight.contains(bar.getXValue()))
-						bar.getNode().setOpacity(1);
-					else
-						bar.getNode().setOpacity(0.2);
+		if (idMode == DatapointIDMode.INDEX) {
+			Set<String> barsToHighlight = new HashSet<String>();
+			
+			// Find bars to highlight.
+			for (int i = 0; i < options.getNumberOfBins(); i++) {
+				// Search in data available for this bar.
+				if (isBarToHighlight(i, "discarded_", dataPointIDs) ||
+					isBarToHighlight(i, "inactive_", dataPointIDs) 	||
+					isBarToHighlight(i, "active_", dataPointIDs)) {
+					barsToHighlight.add(Integer.toString(i));
 				}
 			}
+		
+			// Highlight bars.
+			if (barchart != null) {
+				for (XYChart.Series<String, Number> dataSeries : barchart.getData()) {
+					for (XYChart.Data<String, Number> bar : dataSeries.getData()) {
+						if (barsToHighlight.contains(bar.getXValue()))
+							bar.getNode().setOpacity(1);
+						else
+							bar.getNode().setOpacity(VisualizationComponent.HOVER_OPACITY_FACTOR);
+					}
+				}
+			}
+		}
+		
+		else {
+			System.out.println("### ERROR ### DatapointIDMode.CONFIG_ID not supported for ScentedFilter.");
+			log("### ERROR ### DatapointIDMode.CONFIG_ID not supported for ScentedFilter.");
 		}
 	}
 	
@@ -855,10 +862,11 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 		    	indices.addAll(data.getBarToDataAssociations().get("inactive_" + bar.getXValue()));
 		    	indices.addAll(data.getBarToDataAssociations().get("active_" + bar.getXValue()));
 		    	
-		    	System.out.println("bar.x = " + bar.getXValue() + ", .size = " + indices.size());
-		    	
 	        	// Highlight data point.
 	        	highlightHoveredOverDataPoints(indices, DatapointIDMode.INDEX);
+	        	
+	        	// Notify AnalysisController about hover action.
+	        	analysisController.highlightDataPoints(indices, DatapointIDMode.INDEX, VisualizationComponentType.SCENTED_FILTER);
 		    }
 		});
 		
@@ -867,7 +875,11 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 		    @Override
 		    public void handle(MouseEvent event)
 		    {       
+		    	// Remove highlighting.
 	        	removeHoverHighlighting();
+	        	
+	        	// Notify AnalysisController about end of hover action.
+	        	analysisController.removeHighlighting(VisualizationComponentType.SCENTED_FILTER);
 		    }
 		});
 	}

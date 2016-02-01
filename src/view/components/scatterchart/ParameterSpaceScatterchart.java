@@ -247,7 +247,7 @@ public class ParameterSpaceScatterchart extends Scatterchart
 	@Override
 	protected void refreshDensityHeatmap()
 	{
-		// @todo Auto-generated method stub		
+		// @todo Implement ParameterSpaceScatterchart::refreshDensityHeatmap().
 	}
 	
 	@Override

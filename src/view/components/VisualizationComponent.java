@@ -54,6 +54,11 @@ public abstract class VisualizationComponent extends Controller implements ISele
 	 */
 	
 	/**
+	 * Determines factor opacity of points not hovered over should be multiplied with if other points are hovered over. 
+	 */
+	public static final double HOVER_OPACITY_FACTOR = 1 / 25.0;
+	
+	/**
 	 * Signifies whether the ctrl key is down at any given time.
 	 */
 	protected boolean isCtrlDown;

@@ -816,12 +816,18 @@ public abstract class Scatterchart extends VisualizationComponent
 	@Override
 	public void highlightHoveredOverDataPoints(Set<Integer> dataPointIDs, DatapointIDMode idMode)
 	{
-		for (XYChart.Series<Number, Number> dataSeries : scatterchart.getData()) {
-			for (XYChart.Data<Number, Number> dataPoint : dataSeries.getData()) {
-				if ( !dataPointIDs.contains((int)dataPoint.getExtraValue()) ) {
-					dataPoint.getNode().setOpacity(0.1);
+		if (idMode == DatapointIDMode.CONFIG_ID) {
+			for (XYChart.Series<Number, Number> dataSeries : scatterchart.getData()) {
+				for (XYChart.Data<Number, Number> dataPoint : dataSeries.getData()) {
+					if ( !dataPointIDs.contains((int)dataPoint.getExtraValue()) )
+						dataPoint.getNode().setOpacity(VisualizationComponent.HOVER_OPACITY_FACTOR);
 				}
 			}
+		}
+		
+		else {
+			System.out.println("### ERROR ### DatapointIDMode.INDEX not supported for Scatterchart.");
+			log("### ERROR ### DatapointIDMode.INDEX not supported for Scatterchart.");
 		}
 	}
 	
@@ -859,7 +865,10 @@ public abstract class Scatterchart extends VisualizationComponent
 		    public void handle(MouseEvent event)
 		    {       
 	        	// Highlight data point.
-	        	highlightHoveredOverDataPoint((int)dataPoint.getExtraValue(), DatapointIDMode.INDEX);
+	        	highlightHoveredOverDataPoint((int)dataPoint.getExtraValue(), DatapointIDMode.CONFIG_ID);
+	        	
+	        	// Notify AnalysisController about hover action.
+	        	analysisController.highlightDataPoints((int)dataPoint.getExtraValue(), DatapointIDMode.CONFIG_ID, VisualizationComponentType.PARAMSPACE_SCATTERCHART);
 		    }
 		});
 		
@@ -868,7 +877,11 @@ public abstract class Scatterchart extends VisualizationComponent
 		    @Override
 		    public void handle(MouseEvent event)
 		    {       
+		    	// Remove highlighting.
 	        	removeHoverHighlighting();
+	        	
+	        	// Notify AnalysisController about end of hover action.
+	        	analysisController.removeHighlighting(VisualizationComponentType.PARAMSPACE_SCATTERCHART);
 		    }
 		});
 	}

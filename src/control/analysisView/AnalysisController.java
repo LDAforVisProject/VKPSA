@@ -3,6 +3,7 @@ package control.analysisView;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -1073,22 +1074,99 @@ public class AnalysisController extends Controller
 	}
 	
 	/**
+	 * Wrapper method for AnalysisController::highlightDataPoints(...).
+	 * @param dataPointID
+	 * @param idMode
+	 * @param visType
+	 */
+	public void highlightDataPoints(int dataPointID, DatapointIDMode idMode, VisualizationComponentType visType)
+	{
+		Set<Integer> dataPointIDs = new HashSet<Integer>();
+		dataPointIDs.add(dataPointID);
+		
+		// Call actual method.
+		highlightDataPoints(dataPointIDs, idMode, visType);
+	}
+	
+	/**
 	 * Instructs visualization components to highlight delivered data points.
 	 * @param dataPointIDs
 	 * @param idMode
+	 * @param sourceVisType
 	 */
-	public void highlightDataPoints(Set<Integer> dataPointIDs, DatapointIDMode idMode)
+	public void highlightDataPoints(Set<Integer> dataPointIDs, DatapointIDMode idMode, VisualizationComponentType sourceVisType)
 	{
+		/*
+		 * 1. Translate configuration IDs to indices.
+		 */
 		
+		Set<Integer> dataPointConfigIDs = null;
+		Set<Integer> dataPointIndices	= null;
+
+		if (idMode == DatapointIDMode.CONFIG_ID) {
+			dataPointConfigIDs 	= dataPointIDs;
+			dataPointIndices	= new HashSet<Integer>();
+			
+			// If element with index i has configuration ID contained in dataPointIDs:
+			// Add to collection of indices to highlight.
+			for (int i = 0; i < dataspace.getLDAConfigurations().size(); i++) {
+				int configID = dataspace.getLDAConfigurations().get(i).getConfigurationID();
+				if (dataPointIDs.contains(configID))
+					dataPointIndices.add(i);
+			}
+		}
+		
+		else if (idMode == DatapointIDMode.INDEX) {
+			dataPointConfigIDs 	= new HashSet<Integer>();
+			dataPointIndices 	= dataPointIDs;
+			
+			// Grab configuration ID of element at index i, add to collection of indices
+			// to highlight.
+			for (int i : dataPointIDs) {
+				int configID = dataspace.getLDAConfigurations().get(i).getConfigurationID();
+				dataPointConfigIDs.add(configID);
+			}
+		}
+		
+		/*
+		 * 2. Propagate information about hover event.
+		 */
+		
+		if (sourceVisType != VisualizationComponentType.GLOBAL_SCATTERCHART)
+			globalScatterplot.highlightHoveredOverDataPoints(dataPointIndices, DatapointIDMode.INDEX);
+		
+		if (sourceVisType != VisualizationComponentType.PARAMSPACE_SCATTERCHART)
+			paramSpaceScatterchart.highlightHoveredOverDataPoints(dataPointConfigIDs, DatapointIDMode.CONFIG_ID);
+		
+		// Workaround due to convenience: Apply on filters regardless - since only one of them was 
+		// being manipulated, we want the others to be updated too.
+		for (ScentedFilter filter : filters) {
+			filter.highlightHoveredOverDataPoints(dataPointIndices, DatapointIDMode.INDEX);
+		}
+		
+		if (sourceVisType != VisualizationComponentType.CATEGORICAL_HEATMAP)
+			tmcHeatmap.highlightHoveredOverDataPoints(dataPointConfigIDs, DatapointIDMode.CONFIG_ID);
 	}
 	
 	/**
 	 * Instructs visualization components to remove highlighting from points.
-	 * @param dataPointIDs
-	 * @param idMode
+	 * @param sourceVisType
 	 */
-	public void removeHighlighting()
+	public void removeHighlighting(VisualizationComponentType sourceVisType)
 	{
+		if (sourceVisType != VisualizationComponentType.GLOBAL_SCATTERCHART)
+			globalScatterplot.removeHoverHighlighting();
 		
+		if (sourceVisType != VisualizationComponentType.PARAMSPACE_SCATTERCHART)
+			paramSpaceScatterchart.removeHoverHighlighting();
+		
+		// Workaround due to convenience: Apply on filters regardless - since only one of them was 
+		// being manipulated, we want the others to be updated too.
+		for (ScentedFilter filter : filters) {
+			filter.removeHoverHighlighting();
+		}
+		
+		if (sourceVisType != VisualizationComponentType.CATEGORICAL_HEATMAP)
+			tmcHeatmap.removeHoverHighlighting();
 	}
 }

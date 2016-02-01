@@ -16,6 +16,9 @@ import model.workspace.WorkspaceAction;
 import model.workspace.tasks.Task_LoadTopicDistancesForSelection;
 import model.workspace.tasks.Task_LoadTopicDistancesForSelection_CD;
 import view.components.ColorScale;
+import view.components.DatapointIDMode;
+import view.components.VisualizationComponent;
+import view.components.VisualizationComponentType;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -63,9 +66,9 @@ public class CategoricalHeatmap extends HeatMap
 	 */
 	private Pair<Integer, Integer> hoveredOverLDAMatchID;
 	/**
-	 * Set of LDA match IDs currently selected.
+	 * Set of LDA match IDs currently highlighted (through selection or cross-vis. highlighting at hover event).
 	 */
-	private Set<Pair<Integer, Integer>> selectedLDAConfigIDs;
+	private Set<Pair<Integer, Integer>> highlightedLDAConfigIDs;
 	
 	/**
 	 * Map holding coordinates of LDA configuration matches.
@@ -83,7 +86,7 @@ public class CategoricalHeatmap extends HeatMap
 		
 		// Initialize collections for dealing with LDA matches.
 		ldaMatchCoordinates 	= new LinkedHashMap<Pair<Integer,Integer>, double[]>();
-		selectedLDAConfigIDs	= new HashSet<Pair<Integer,Integer>>();
+		highlightedLDAConfigIDs	= new HashSet<Pair<Integer,Integer>>();
 	}
 	
 	/**
@@ -104,13 +107,18 @@ public class CategoricalHeatmap extends HeatMap
 		canvas.addEventHandler(MouseEvent.MOUSE_EXITED, new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) 
             {
+            	// Change cursor back to default.
             	rootNode.getScene().setCursor(Cursor.DEFAULT);
             	// Clear selection.
-            	selectedLDAConfigIDs.clear();
+            	highlightedLDAConfigIDs.clear();
             	hoveredOverLDAMatchID = null;
+            	
             	// Redraw.
             	if (data != null)
             		draw((HeatmapDataset) data, false, false);
+            	
+	        	// Notify AnalysisController about end of hover action.
+	        	analysisController.removeHighlighting(VisualizationComponentType.CATEGORICAL_HEATMAP);
             	
             }
         });
@@ -122,7 +130,6 @@ public class CategoricalHeatmap extends HeatMap
             	// Make copy of old LDA match.
 				Pair<Integer, Integer> oldHoveredOverLDAConfigIDs	= 	hoveredOverLDAMatchID != null ?
 																		new Pair<Integer, Integer>(hoveredOverLDAMatchID.getKey(), hoveredOverLDAMatchID.getValue()) : null;
-																	
 				// Resolve mouse position to LDA match.
             	Pair<Integer, Integer> ldaMatch 					= resolveMousePositionToLDAMatch(event.getX(), event.getY());
             	
@@ -133,6 +140,17 @@ public class CategoricalHeatmap extends HeatMap
 					
 					// ...redraw (to remove previous marker drawings).
 					draw((HeatmapDataset) data, false, false);
+					
+		        	// Notify AnalysisController about end of hover action.
+					if (oldHoveredOverLDAConfigIDs != null)
+						analysisController.removeHighlighting(VisualizationComponentType.CATEGORICAL_HEATMAP);
+		        	
+					// Prepare data for propagation of hover action information.
+					Set<Integer> dataPoints = new HashSet<Integer>();
+					dataPoints.add(hoveredOverLDAMatchID.getKey());
+					dataPoints.add(hoveredOverLDAMatchID.getValue());
+		        	// Notify AnalysisController about hover action.
+		        	analysisController.highlightDataPoints(dataPoints, DatapointIDMode.CONFIG_ID, VisualizationComponentType.CATEGORICAL_HEATMAP);
 				}
             }
         });
@@ -143,17 +161,17 @@ public class CategoricalHeatmap extends HeatMap
             {
             	// Clear selection, if control is not pressed.
             	if (!isCtrlDown)
-            		selectedLDAConfigIDs.clear();
+            		highlightedLDAConfigIDs.clear();
             	
             	// Add to current selection.
-            	selectedLDAConfigIDs.add(hoveredOverLDAMatchID);
+            	highlightedLDAConfigIDs.add(hoveredOverLDAMatchID);
             	
         		// Gather content in all selected cells.
         		Set<Pair<Integer, Integer>> selectedTopicConfigIDs = new HashSet<Pair<Integer,Integer>>();
         		
         		// Convert selected LDA matches to set of LDA configuration IDs.
         		Set<Integer> selectedLDAConfigurationIDs = new HashSet<Integer>();
-        		for(Pair<Integer, Integer> ldaMatch : selectedLDAConfigIDs) {
+        		for(Pair<Integer, Integer> ldaMatch : highlightedLDAConfigIDs) {
         			if ( !selectedLDAConfigurationIDs.contains(ldaMatch.getKey()) )
         				selectedLDAConfigurationIDs.add(ldaMatch.getKey());
         			if ( !selectedLDAConfigurationIDs.contains(ldaMatch.getValue()) )
@@ -376,7 +394,6 @@ public class CategoricalHeatmap extends HeatMap
     	
     	// Adjust tick values for both axes.
     	if (hOptions.getShowAxes()) {
-	    	
     	}
     	
     	// Clear canvas.
@@ -386,17 +403,15 @@ public class CategoricalHeatmap extends HeatMap
 		final double cellWidth	= canvas.getWidth() / binMatrix.length; 
 		final double cellHeight	= canvas.getHeight() / binMatrix.length;
 		
-		//cellsToCoordinates.clear();
 		// Draw each cell in its corresponding place.
 		for (int i = 0; i < binMatrix.length; i++) {
 			for (int j = 0; j < binMatrix.length; j++) {	
 				// Remember cell indices.
 				Pair<Integer, Integer> cellIndices	= new Pair<Integer, Integer>(i, j); 
-				
 				// Fetch LDA configurations involved in current cell.
-				Pair<Integer, Integer> ldaMatchID = getLDAMatchForCell(data, cellIndices);
+				Pair<Integer, Integer> ldaMatchID 	= getLDAMatchForCell(data, cellIndices);
 				
-				// Calculate coordinates (minX, minY, maxX, maxY).
+				// Calculate cell coordinates (minX, minY, maxX, maxY).
 				double[] cellCoordinates	= new double[4];
 				cellCoordinates[0]			= cellWidth * i + 1;
 				cellCoordinates[1]			= cellHeight * j - 1;
@@ -406,13 +421,15 @@ public class CategoricalHeatmap extends HeatMap
 				// Set color for this cell.
 				Color cellColor = ColorScale.getColorForValue(binMatrix[i][j] == -1 ? 0 : binMatrix[i][j], minOccurenceCount, maxOccurenceCount, hOptions.getMinColor(), hOptions.getMaxColor());
 				// Adapt cell opacity to current hover events (i.e.: Lower opacity, if other LDA config. is hovered over). Ignore transparent cells.
-				if (hoveredOverLDAMatchID != null && cellColor != Color.TRANSPARENT) {
+				if ( (	hoveredOverLDAMatchID != null || 
+						highlightedLDAConfigIDs != null && isDisplayingExternalHoverEvent ) && 
+						cellColor != Color.TRANSPARENT) {
 					cellColor = Color.hsb(	cellColor.getHue(), cellColor.getSaturation(), cellColor.getBrightness(), 
-											ldaMatchID.equals(hoveredOverLDAMatchID) || selectedLDAConfigIDs.contains(ldaMatchID) ? 1 : 0.2);
+											ldaMatchID.equals(hoveredOverLDAMatchID) || highlightedLDAConfigIDs.contains(ldaMatchID) ? 1 : VisualizationComponent.HOVER_OPACITY_FACTOR);
 				}
-				// Fill cell.
-				gc.setFill(cellColor);
 				
+				// Set fill color.
+				gc.setFill(cellColor);
 				// Draw cell.
 				gc.fillRect(cellCoordinates[0], cellCoordinates[1], cellWidth, cellHeight);
 				
@@ -506,7 +523,7 @@ public class CategoricalHeatmap extends HeatMap
 			// If new LDA configuration mash-up: Clean old selection.
 			hasDataChanged = data == null || !(ldaConfigurations.equals(data.getAllLDAConfigurations())); 
 			if (hasDataChanged) {
-				selectedLDAConfigIDs.clear();
+				highlightedLDAConfigIDs.clear();
 			}
 			
 			// Load topic distance data for selection.
@@ -554,5 +571,59 @@ public class CategoricalHeatmap extends HeatMap
 		
 		// Clear collection of selected cell (coordinates).
 		selectedCellsCoordinates.clear();
+	}
+	
+	@Override
+	public void initHoverEventListeners()
+	{
+		// Hover listener is already implemented as part of selection mechanism.
+	}
+	
+	@Override
+	public void highlightHoveredOverDataPoints(Set<Integer> dataPointIDs, DatapointIDMode idMode)
+	{
+		isDisplayingExternalHoverEvent = true;
+		
+		if (idMode == DatapointIDMode.CONFIG_ID) {
+			if (data != null) {
+				highlightedLDAConfigIDs.clear();
+				
+				// Iterate over all LDA configurations.
+				for (LDAConfiguration lda1 : data.getAllLDAConfigurations()) {
+					// If LDA configuration is to highlight:
+					if ( dataPointIDs.contains(lda1.getConfigurationID()) ) {
+						// Store all LDA matches with this LDA configuration in collection of LDA matches to highlight.
+						for (LDAConfiguration lda2 : data.getAllLDAConfigurations()) {
+							highlightedLDAConfigIDs.add(new Pair<Integer, Integer>(lda1.getConfigurationID(), lda2.getConfigurationID()));
+							highlightedLDAConfigIDs.add(new Pair<Integer, Integer>(lda2.getConfigurationID(), lda1.getConfigurationID()));
+						}		
+					}
+				}
+				
+				// Redraw.
+				if (data != null)					
+					draw((HeatmapDataset) data, false, false);
+			}
+		}
+		
+		else {
+			System.out.println("### ERROR ### DatapointIDMode.INDEX not supported for CategoricalHeatmap.");
+			log("### ERROR ### DatapointIDMode.INDEX not supported for CategoricalHeatmap.");
+		}
+	}
+	
+	@Override
+	public void removeHoverHighlighting()
+	{
+		isDisplayingExternalHoverEvent = false;
+		
+		// Reset variables storing hovered over/selected LDA matches.
+		if (highlightedLDAConfigIDs != null) {
+			highlightedLDAConfigIDs.clear();
+		}
+		
+		// Redraw.
+		if (data != null)
+			draw((HeatmapDataset) data, false, true);
 	}
 }
