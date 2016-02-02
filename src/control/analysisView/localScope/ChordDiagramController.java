@@ -90,15 +90,6 @@ public class ChordDiagramController extends LocalScopeVisualizationController
 		localScope.refreshPTC(ldaID1, ldaID2, topicID1, topicID2);
 	}
 	
-	/**
-	 * Propagates information about hover over a LDA config.
-	 * @param ldaID
-	 */
-	public void propagateLDAHoverInformation(final int ldaID)
-	{
-		localScope.propagateLDAHoverInformation(ldaID);
-	}
-	
     /**
      * Process information that no group is hovered anymore.
      */

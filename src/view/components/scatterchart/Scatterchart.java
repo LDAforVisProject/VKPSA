@@ -394,12 +394,6 @@ public abstract class Scatterchart extends VisualizationComponent
 	@Override
 	public void processSelectionManipulationRequest(double minX, double minY, double maxX, double maxY)
 	{
-		// Check if settings icon was used. Workaround due to problems with selection's mouse event handling. 
-		if (minX == maxX && minY == maxY) {
-			Pair<Integer, Integer> offsets = provideOffsets();
-			analysisController.checkIfSettingsIconWasClicked(minX + offsets.getKey(), minY + offsets.getValue(), "settings_paramDist_icon");
-		}
-		
 		// Set of data points to add to selection. 
 		Set<XYChart.Data<Number, Number>> pointsToAddToSelection		= new HashSet<XYChart.Data<Number,Number>>();
 		// Set of data points to remove from selection.

@@ -73,7 +73,7 @@ public class NumericalHeatmap extends HeatMap
     {
     	HeatmapOptionset hOptions = (HeatmapOptionset)options;
     	
-    	GraphicsContext gc		= canvas.getGraphicsContext2D();
+    	GraphicsContext gc			= canvas.getGraphicsContext2D();
     	double binMatrix[][]		= data.getBinMatrix();
     	double minOccurenceCount	= data.getMinOccurenceCount();
     	double maxOccurenceCount	= data.getMaxOccurenceCount();
@@ -130,6 +130,18 @@ public class NumericalHeatmap extends HeatMap
 			}	
 		}
     }
+	
+	@Override
+	public void resizeContent(double width, double height)
+	{
+		if (width > 0)
+			canvas.setWidth(width);
+		if (height > 0)
+			canvas.setHeight(height);
+		
+		// Refresh heatmap.
+		refresh();
+	}
 	
 	@Override
 	public void initHoverEventListeners()

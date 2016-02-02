@@ -306,15 +306,6 @@ public class LocalScopeInstance extends VisualizationComponent_Legacy
 														 		true);
 	}
 	
-	/**
-	 * Propagates information about hover over a LDA config.
-	 * @param ldaID
-	 */
-	public void propagateLDAHoverInformation(final int ldaID)
-	{
-		analysisController.induceCrossChartHighlighting(ldaID);
-	}
-	
 	public void propagateLDAHoverExitedInformation()
 	{
 		analysisController.removeCrossChartHighlighting();

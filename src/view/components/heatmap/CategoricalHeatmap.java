@@ -613,6 +613,18 @@ public class CategoricalHeatmap extends HeatMap
 	}
 	
 	@Override
+	public void resizeContent(double width, double height)
+	{
+		if (width > 0)
+			canvas.setWidth(width - 79);
+		if (height > 0)
+			canvas.setHeight(height - 68);
+		
+		// Refresh heatmap.
+		refresh();
+	}
+	
+	@Override
 	public void removeHoverHighlighting()
 	{
 		isDisplayingExternalHoverEvent = false;

@@ -524,12 +524,6 @@ public class HeatMap extends VisualizationComponent_Legacy implements ISelectabl
 		final Color highlightColor 	= isCtrlDown ? new Color(0.0, 0.0, 1.0, 0.5) : new Color(1.0, 0.0, 0.0, 0.5); 
 		final Color minColor 		= dataBinding == HeatmapDataBinding.FILTERED ? Color.LIGHTBLUE 	: Color.RED;
 		final Color maxColor 		= dataBinding == HeatmapDataBinding.FILTERED ? Color.DARKBLUE	: Color.DARKRED;
-    	
-		// Check if settings icon was used. Workaround due to problems with selection's mouse event handling. 
-		if (minX == maxX && minY == maxY) {
-			final Pair<Integer, Integer> offsets = provideOffsets();
-			analysisController.checkIfSettingsIconWasClicked(minX + offsets.getKey(), minY + offsets.getValue(), "settings_paramDist_icon");
-		}
 		
 		// Check which cells are in selected area, highlight them.
 		for (Map.Entry<Pair<Integer, Integer>, double[]> cellCoordinateEntry : cellsToCoordinates.entrySet()) {

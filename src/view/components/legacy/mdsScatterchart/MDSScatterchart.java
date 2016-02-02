@@ -930,12 +930,6 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	@Override
 	public void processSelectionManipulationRequest(double minX, double minY, double maxX, double maxY)
 	{
-		// Check if settings icon was used. Workaround due to problems with selection's mouse event handling. 
-		if (minX == maxX && minY == maxY) {
-			Pair<Integer, Integer> offsets = provideOffsets();
-			analysisController.checkIfSettingsIconWasClicked(minX + offsets.getKey(), minY + offsets.getValue(), "settings_mds_icon");
-		}
-		
 		// Set of data points to add to selection. 
 		Set<XYChart.Data<Number, Number>> pointsToAddToSelection		= new HashSet<XYChart.Data<Number,Number>>();
 		// Set of data points to remove from selection.
@@ -1206,7 +1200,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 		heatmap_canvas.setLayoutX(offsetX);
 		heatmap_canvas.setWidth( (scatterchart.getWidth() - 10 - offsetX) * (1 - xBorderFactor));
 		
-		// Set y positiona and new height.
+		// Set y positions and new height.
 		final double offsetY = scatterchart.getHeight() * yBorderFactor;
 		heatmap_canvas.setTranslateY(offsetY);
 		heatmap_canvas.setHeight((scatterchart.getHeight() - 95 - offsetY) * (1 - yBorderFactor));

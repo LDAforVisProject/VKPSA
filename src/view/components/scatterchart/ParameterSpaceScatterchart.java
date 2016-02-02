@@ -8,6 +8,10 @@ import java.util.ResourceBundle;
 import model.LDAConfiguration;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
+import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Data;
+import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.ComboBox;
 import javafx.scene.paint.Color;
 import javafx.util.Pair;
@@ -253,19 +257,24 @@ public class ParameterSpaceScatterchart extends Scatterchart
 	@Override
 	protected void updateHeatmapPosition()
 	{
-		final double xBorderFactor = 0.0675;
-		final double yBorderFactor = 0.05;
+		final double xBorderFactor = 0.07;
+		final double yBorderFactor = 0.06;
 		
-		final double offsetX = 26 + scatterchart.getWidth() * xBorderFactor;
-		final double offsetY = -30 - scatterchart.getHeight() * yBorderFactor;
+		// Initialize sequence: minX, minY, maxX, maxY.
+		double extrema[] = new double[4];
+		extrema[0] = Double.MAX_VALUE;
+		extrema[1] = Double.MAX_VALUE;
+			
+		final double offsetX = 31 + scatterchart.getWidth() * xBorderFactor;
+		final double offsetY = -31 - scatterchart.getHeight() * yBorderFactor;
 		
 		// Set x position and new width.
 		densityHeatmap.getRoot().setTranslateX(offsetX);
-		final double newWidth = (scatterchart.getWidth() - 14 ) * (1 - xBorderFactor * 1.5);
+		final double newWidth = (scatterchart.getWidth() - offsetX - scatterchart.getWidth() * xBorderFactor - 30);
 		
 		// Set y positiona and new height.
 		densityHeatmap.getRoot().setTranslateY(offsetY);
-		final double newHeight = (scatterchart.getHeight() - 14) * (1 - yBorderFactor * 2.0);
+		final double newHeight = (scatterchart.getHeight() + offsetY - scatterchart.getHeight() * yBorderFactor - 50);
 		
 		densityHeatmap.resizeContent(newWidth, newHeight);
 	}

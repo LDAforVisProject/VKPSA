@@ -24,25 +24,20 @@
                     <items>
                       <AnchorPane fx:id="settings_anchorPane" minHeight="0.0" minWidth="0.0" prefHeight="528.0" prefWidth="322.0" style="-fx-background-color: #ffffff;">
                            <children>
-                              <Accordion fx:id="accordion_options" layoutX="34.0" layoutY="13.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="45.0">
-                                <panes>
-                                  <TitledPane fx:id="filter_titledPane" animated="false" onMouseClicked="#selectSettingsPane" style="-fx-background-color: #ffffff;" text="Filter">
-                                    <content>
-                                      <AnchorPane fx:id="settings_filter_anchorPane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: #ffffff;" />
-                                    </content>
-                                  </TitledPane>
-                                </panes>
-                              </Accordion>
-                              <Label layoutX="45.0" layoutY="12.0" text="Filter" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="12.0">
-                                 <font>
-                                    <Font name="System Bold" size="12.0" />
-                                 </font>
-                              </Label>
-                              <ImageView fitHeight="35.0" fitWidth="40.0" layoutX="10.0" layoutY="9.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="3.0">
-                                 <image>
-                                    <Image url="@icons/filter_slider.gif" />
-                                 </image>
-                              </ImageView>
+                              <TabPane fx:id="options_tabpane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <tabs>
+                                    <Tab fx:id="filter_tab" closable="false" text="Filter">
+                                       <content>
+                                      <AnchorPane fx:id="filter_anchorpane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: #ffffff;" />
+                                       </content>
+                                    </Tab>
+                                    <Tab fx:id="settings_tab" closable="false" text="Settings">
+                                      <content>
+                                        <AnchorPane fx:id="settings_anchorpane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                                      </content>
+                                    </Tab>
+                                 </tabs>
+                              </TabPane>
                            </children>
                         </AnchorPane>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">

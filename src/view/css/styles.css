@@ -26,6 +26,24 @@
 	-fx-background-insets: 2;	
 }
 
+/* 
+ * Here: Customizations for scroll-panes.
+ */
+
+.scroll-bar:horizontal .track,
+.scroll-bar:vertical .track {
+ -fx-background-color: transparent;
+ -fx-border-color:transparent;
+ -fx-background-radius: 2em;
+}
+
+.scroll-bar:vertical .track-background,
+.scroll-bar:horizontal .track-background {
+ -fx-background-color: transparent;
+ -fx-background-insets: 0;
+ -fx-background-radius: 2em;
+}
+
 /*
  * From here: CSS for numeric spinner. 
  */

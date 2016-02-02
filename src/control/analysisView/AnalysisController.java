@@ -43,6 +43,9 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
+import javafx.scene.control.SingleSelectionModel;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
@@ -65,12 +68,21 @@ public class AnalysisController extends Controller
 	private Scene scene;
 	
 	/*
-	 * Accordion and other elements for options section.
+	 * Tab pane and other elements for options section.
 	 */
 	
-	private @FXML Accordion accordion_options;
-	// Panes in accordion.
-	private @FXML TitledPane filter_titledPane;
+	/**
+	 * TabPane for filters and settings.
+	 */
+	private @FXML TabPane options_tabpane;
+	/**
+	 * Tab for settings. 
+	 */
+	private @FXML Tab settings_tab;
+	/**
+	 * Tab for filters. 
+	 */
+	private @FXML Tab filter_tab;
 	
 	/*
 	 * Anchorpanes hosting visualizations. 
@@ -84,14 +96,14 @@ public class AnalysisController extends Controller
 	/**
 	 * For settings.
 	 */
-	private @FXML AnchorPane settings_anchorPane;
+	private @FXML AnchorPane settings_anchorpane;
 	/**
 	 * For filter settings.
 	 */
-	private @FXML AnchorPane settings_filter_anchorPane;
+	private @FXML AnchorPane filter_anchorpane;
 	
 	
-	// For MDS scatterchart.
+	// For global scatterchart.
 	// --------------------
 	/**
 	 * AnchorPane holding scroll pane (important for zoom). 
@@ -127,7 +139,7 @@ public class AnalysisController extends Controller
 	private @FXML AnchorPane localscope_tmc_anchorPane;
 	
 	/*
-	 * MDS Scatterchart.
+	 * Global Scatterchart.
 	 */
 	
 	/**
@@ -207,10 +219,6 @@ public class AnalysisController extends Controller
 	 * Settings panel. 
 	 */
 	private SettingsPanel settingsPanel;
-	/**
-	 * Popover for settings panel.
-	 */
-	private PopOver settingsPopOver;
 	
 	// -----------------------------------------------
 	// 				Data.
@@ -252,10 +260,6 @@ public class AnalysisController extends Controller
 		// Init GUI elements.
 		initUIElements();
 		addResizeListeners();
-		
-		// Expand filter pane.
-		accordion_options.setExpandedPane(filter_titledPane);
-		//filter_titledPane.lookup(".title").setStyle("-fx-font-weight:bold");
 	}
 	
 	private void addResizeListeners()
@@ -267,8 +271,8 @@ public class AnalysisController extends Controller
 		anchorPanesToResize.add(mds_anchorPane);
 		anchorPanesToResize.add(localscope_tmc_anchorPane);
 		anchorPanesToResize.add(localScope_ptc_anchorPane);
-		anchorPanesToResize.add(settings_anchorPane);
-		anchorPanesToResize.add(settings_filter_anchorPane);
+		anchorPanesToResize.add(settings_anchorpane);
+		anchorPanesToResize.add(filter_anchorpane);
 		
 		// Add width and height resize listeners to all panes.
 		for (Pane ap : anchorPanesToResize) {
@@ -313,11 +317,9 @@ public class AnalysisController extends Controller
 	
 	private void initSettingsPanel()
 	{
-		settingsPanel 	= (SettingsPanel)VisualizationComponent.generateInstance(VisualizationComponentType.SETTINGS_PANEL, this, null, null, null);
-		settingsPopOver = new PopOver(settingsPanel.getRoot());
-		
+		settingsPanel 	= (SettingsPanel)VisualizationComponent.generateInstance(VisualizationComponentType.SETTINGS_PANEL, this, null, null, null);		
 		settingsPanel.init();
-		settingsPopOver.detach();
+		settingsPanel.embedIn(settings_anchorpane);
 	}
 	
 	private void initComparisonHeatmaps()
@@ -341,8 +343,9 @@ public class AnalysisController extends Controller
 		filters						= new ArrayList<ScentedFilter>();
 		
 		// Init container for filters.
-		filters_vbox = new VBox();
+		filters_vbox 				= new VBox();
 		filters_vbox.resize(100, filters_vbox.getHeight());
+		
 		// Iterate over supported parameters.
 		for (String param : LDAConfiguration.SUPPORTED_PARAMETERS) {
 			// Create new filter.
@@ -375,10 +378,10 @@ public class AnalysisController extends Controller
 		distanceFilter.embedIn(filters_vbox);
 		
 		// Add containing VBox to pane.
-		settings_filter_anchorPane.getChildren().add(filters_vbox);
-		settings_filter_anchorPane.applyCss();
-		settings_filter_anchorPane.layout();
-		settings_filter_anchorPane.requestLayout();
+		filter_anchorpane.getChildren().add(filters_vbox);
+		filter_anchorpane.applyCss();
+		filter_anchorpane.layout();
+		filter_anchorpane.requestLayout();
 		filters_vbox.resize(100, filters_vbox.getHeight());
 	}
 
@@ -726,7 +729,7 @@ public class AnalysisController extends Controller
 				localScopeInstance.resize(width, height, LocalScopeVisualizationType.PARALLEL_TAG_CLOUDS);
 			break;
 			
-			case "settings_anchorPane":
+			case "settings_anchorpane":
 				filters_vbox.setPrefWidth(width - 20);
 				for (ScentedFilter filter : filters) {
 					filter.resizeContent(width - 20, 0);
@@ -871,53 +874,11 @@ public class AnalysisController extends Controller
 	@FXML
 	public void switchToSettingsPane(MouseEvent e)
 	{
-		settingsPopOver.show(analysisRoot_anchorPane);
-		settingsPopOver.setX(e.getSceneX());
-		settingsPopOver.setY(e.getSceneY());
-		settingsPopOver.detach();
+		// Switch to settings pane.
+		options_tabpane.getSelectionModel().select(settings_tab);
 		
+		// Open pane.
 		settingsPanel.openSettingsPane(((Node)e.getSource()).getId());
-	}
-	
-	/**
-	 * Workaround for selection-using panels: Check if clicked coordinates fit a settings icon.
-	 * @param x
-	 * @param y
-	 */
-	public void checkIfSettingsIconWasClicked(double x, double y, String iconID)
-	{		
-		if(	(iconID == "settings_mds_icon" 				&& settings_mds_icon.getBoundsInParent().contains(x, y))			||
-			(iconID == "settings_paramDist_icon" 		&& settings_paramDist_icon.getBoundsInParent().contains(x, y))		||
-			(iconID == "settings_localScope_icon" 		&& settings_localScope_icon.getBoundsInParent().contains(x, y))
-		) {
-			settingsPopOver.show(analysisRoot_anchorPane);
-			settingsPopOver.setX(0);
-			settingsPopOver.setY(0);
-			settingsPopOver.detach();
-		}
-	}
-	
-	/**
-	 * Reset font styles in setting panel's titles.
-	 */
-	private void resetSettingsPanelsFontStyles()
-	{
-		// Change all font weights back to normal.
-		filter_titledPane.lookup(".title").setStyle("-fx-font-weight:normal");
-	}
-	
-	/**
-	 * Called when user opens a settings pane directly.
-	 * @param e
-	 */
-	@FXML
-	public void selectSettingsPane(MouseEvent e) 
-	{
-		// Reset title styles.
-		resetSettingsPanelsFontStyles();
-		
-		// Set new font style.
-		((TitledPane) e.getSource()).lookup(".title").setStyle("-fx-font-weight:bold");
 	}
 
 	/**
@@ -954,7 +915,7 @@ public class AnalysisController extends Controller
 				settings_mds_icon.setVisible(false);
 			break;
 			
-			case "paramSpace_distribution_anchorPane":
+			case "paramSpace_anchorPane":
 				settings_paramDist_icon.setVisible(false);
 			break;
 			
@@ -970,24 +931,6 @@ public class AnalysisController extends Controller
 		return null;
 	}
 	
-	/**
-	 * Induces cross-visualization highlighting of one particular LDA configuration.
-	 * @param ldaConfigurationID
-	 */
-	public void induceCrossChartHighlighting(final int ldaConfigurationID)
-	{
-		// Find index of this LDA configuration (remark: data structure not appropriate for this task).
-		int index = -1;
-		for (int i : dataspace.getActiveIndices()) {
-			LDAConfiguration ldaConfig = dataspace.getLDAConfigurations().get(i);
-			
-			if (ldaConfig.getConfigurationID() == ldaConfigurationID)
-				index = i;
-		}
-		
-		globalScatterplot.highlightLDAConfiguration(index);
-	}
-
 	/**
 	 * Removes all highlighting from charts (used e.g. after user doesn't hover over group/LDA info in CD anymore). 
 	 */

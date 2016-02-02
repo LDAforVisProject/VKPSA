@@ -197,12 +197,6 @@ public abstract class HeatMap extends VisualizationComponent
 			// Set highlight color (red for additional selection, blue for subtractive).
 			final Color highlightColor 	= isCtrlDown ? hOptions.getSubtractiveSelectionColor() : hOptions.getAdditiveSelectionColor(); 
 			
-			// Check if settings icon was used. Workaround due to problems with selection's mouse event handling. 
-			if (minX == maxX && minY == maxY) {
-				final Pair<Integer, Integer> offsets = provideOffsets();
-				analysisController.checkIfSettingsIconWasClicked(minX + offsets.getKey(), minY + offsets.getValue(), "settings_paramDist_icon");
-			}
-			
 			// Check which cells are in selected area, highlight them.
 			for (Map.Entry<Pair<Integer, Integer>, double[]> cellCoordinateEntry : cellsToCoordinates.entrySet()) {
 				double cellMinX = cellCoordinateEntry.getValue()[0];
@@ -282,18 +276,6 @@ public abstract class HeatMap extends VisualizationComponent
 	public void processKeyReleasedEvent(KeyEvent ke)
 	{
 		isCtrlDown = ke.isControlDown();
-	}
-
-	@Override
-	public void resizeContent(double width, double height)
-	{
-		if (width > 0)
-			canvas.setWidth(width - 79);
-		if (height > 0)
-			canvas.setHeight(height - 68);
-		
-		// Refresh heatmap.
-		refresh();
 	}
 
 	@Override
