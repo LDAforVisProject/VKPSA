@@ -98,7 +98,7 @@ public abstract class HeatMap extends VisualizationComponent
 	{
 		// Initialize color legend.
 		colorLegend = new ColorLegend();
-		System.out.println("ap = " + rootNode + ", cl = " + colorLegend);
+
 		// Add to anchor pane.
 		colorLegend.addTo((AnchorPane)rootNode);
 	}
