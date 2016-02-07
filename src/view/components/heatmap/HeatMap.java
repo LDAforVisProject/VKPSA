@@ -1,15 +1,14 @@
 package view.components.heatmap;
 
 import java.net.URL;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import model.LDAConfiguration;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyEvent;
@@ -17,9 +16,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.util.Pair;
-import view.components.ColorScale;
-import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
+import view.components.controls.ColorLegend.ColorLegend;
+import view.components.controls.ColorLegend.ColorScale;
 import view.components.rubberbandselection.RubberBandSelection;
 
 public abstract class HeatMap extends VisualizationComponent
@@ -31,6 +30,11 @@ public abstract class HeatMap extends VisualizationComponent
 	@FXML protected AnchorPane parent_anchorpane;
 	
 	@FXML protected Canvas canvas;
+	
+	/**
+	 * Color legend.
+	 */
+	protected ColorLegend colorLegend;
 	
 	/*
 	 * Metadata.
@@ -68,14 +72,35 @@ public abstract class HeatMap extends VisualizationComponent
 		cellsToCoordinates					= new LinkedHashMap<Pair<Integer, Integer>, double[]>();
 		selectedCellsCoordinates			= new HashSet<Pair<Integer,Integer>>();
 		
-		// Init axis settings.
+		// Initialize axis settings.
 		initAxes();
 		
-		// Init selection tools.
+		// Initialize selection tools.
 		initSelection();
 		
 		// Prepare workaround for hover highlighting.
 		isDisplayingExternalHoverEvent = false;
+	}
+	
+	@Override
+	public void setRoot(Node rootNode)
+	{
+		super.setRoot(rootNode);
+		
+		// Initialize color legend.
+		initColorLegend();
+	}
+	
+	/**
+	 * Initialize color legend.
+	 */
+	protected void initColorLegend()
+	{
+		// Initialize color legend.
+		colorLegend = new ColorLegend();
+		System.out.println("ap = " + rootNode + ", cl = " + colorLegend);
+		// Add to anchor pane.
+		colorLegend.addTo((AnchorPane)rootNode);
 	}
 	
 	/**

@@ -1,4 +1,4 @@
-package view.components;
+package view.components.controls.ColorLegend;
 
 import javafx.geometry.Orientation;
 import javafx.scene.image.ImageView;
@@ -17,15 +17,16 @@ public class ColorScale extends ImageView
 
 	/**
      * Create ImageView of a colorscale.
-     * Used in HeatMap and the filter pane of the analysis view.
      * @param min
      * @param max
+     * @param minColor
+     * @param maxColor
      * @param width
      * @param height
      * @param orientation
      * @return
      */
-    public static ImageView createColorScaleImageView(double min, double max, int width, int height, Orientation orientation) 
+    public static ImageView createColorScaleImageView(double min, double max, Color minColor, Color maxColor, int width, int height, Orientation orientation) 
     {
     	// Image colorScale = createColorScaleImage(600, 120, Orientation.HORIZONTAL);
         WritableImage image		= new WritableImage(width, height);
@@ -34,7 +35,7 @@ public class ColorScale extends ImageView
         if (orientation == Orientation.HORIZONTAL) {
             for (int x = 0; x < width; x++) {
                 double value 	= min + (max - min) * x / width;
-                Color color		= getColorForValue(value, min, max);
+                Color color		= getColorForValue(value, min, max, minColor, maxColor);
                 
                 for (int y = 0; y < height; y++) {
                     pixelWriter.setColor(x, y, color);
@@ -45,7 +46,7 @@ public class ColorScale extends ImageView
         else {
             for (int y = 0; y < height; y++) {
                 double value 	= max - (max - min) * y / height;
-                Color color		= getColorForValue(value, min, max);
+                Color color		= getColorForValue(value, min, max, minColor, maxColor);
                 for (int x = 0; x < width; x++) {
                     pixelWriter.setColor(x, y, color);
                 }

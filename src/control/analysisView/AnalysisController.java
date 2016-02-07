@@ -104,7 +104,7 @@ public class AnalysisController extends Controller
 	
 	
 	// For global scatterchart.
-	// --------------------
+
 	/**
 	 * AnchorPane holding scroll pane (important for zoom). 
 	 */
@@ -117,12 +117,6 @@ public class AnalysisController extends Controller
 	 * AnchorPane holding actual scatterchart. 
 	 */
 	private @FXML AnchorPane mds_content_anchorPane;
-	// --------------------
-	
-	/**
-	 * For distance evaluation barchart.
-	 */
-	private @FXML AnchorPane distEval_anchorPane;
 	
 	/**
 	 * For the parameter space distribution heatmap (using selected data).

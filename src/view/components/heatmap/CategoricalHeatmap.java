@@ -12,13 +12,16 @@ import java.util.Set;
 
 import mdsj.Data;
 import model.LDAConfiguration;
+import model.workspace.Workspace;
 import model.workspace.WorkspaceAction;
 import model.workspace.tasks.Task_LoadTopicDistancesForSelection;
 import model.workspace.tasks.Task_LoadTopicDistancesForSelection_CD;
-import view.components.ColorScale;
 import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
 import view.components.VisualizationComponentType;
+import view.components.controls.ColorLegend.ColorLegend;
+import view.components.controls.ColorLegend.ColorLegendDataset;
+import view.components.controls.ColorLegend.ColorScale;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -28,6 +31,8 @@ import javafx.scene.Cursor;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TextArea;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -449,6 +454,8 @@ public class CategoricalHeatmap extends HeatMap
 		// Update labels.
     	updateLabels(data, cellsToCoordinates);
 		
+    	// Redraw color legend.
+    	colorLegend.refresh( new ColorLegendDataset(minOccurenceCount, maxOccurenceCount, hOptions.getMinColor(), hOptions.getMaxColor()) );
 	}
 	
 	@Override
@@ -637,5 +644,13 @@ public class CategoricalHeatmap extends HeatMap
 		// Redraw.
 		if (data != null)
 			draw((HeatmapDataset) data, false, true);
+	}
+	
+	@Override
+	public void setReferences(Workspace workspace, ProgressIndicator logPI, TextArea logTA)
+	{
+		super.setReferences(workspace, logPI, logTA);
+		// Set references for color legend.
+		colorLegend.setReferences(workspace, logPI, logTA);
 	}
 }

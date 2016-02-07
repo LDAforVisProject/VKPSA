@@ -126,6 +126,16 @@ public abstract class VisualizationComponent extends Controller implements ISele
 	}
 	
 	/**
+	 * Embeds this component in parent AnchorPane.
+	 * @param parent
+	 */
+	public void addTo(AnchorPane parent)
+	{
+		// Add root node to parent.
+		parent.getChildren().add(this.rootNode);
+	}	
+	
+	/**
 	 * Embeds this component in parent VBox.
 	 * @param parent
 	 */

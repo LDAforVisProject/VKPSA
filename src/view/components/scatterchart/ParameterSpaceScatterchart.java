@@ -276,6 +276,7 @@ public class ParameterSpaceScatterchart extends Scatterchart
 		densityHeatmap.getRoot().setTranslateY(offsetY);
 		final double newHeight = (scatterchart.getHeight() + offsetY - scatterchart.getHeight() * yBorderFactor - 50);
 		
+		// Resize.
 		densityHeatmap.resizeContent(newWidth, newHeight);
 	}
 }
