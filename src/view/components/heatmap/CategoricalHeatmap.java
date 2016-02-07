@@ -629,6 +629,9 @@ public class CategoricalHeatmap extends HeatMap
 		
 		// Refresh heatmap.
 		refresh();
+		
+		// Refresh color legend.
+		colorLegend.resizeContent(width, height);
 	}
 	
 	@Override
