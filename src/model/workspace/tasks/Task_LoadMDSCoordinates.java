@@ -9,14 +9,14 @@ import java.util.List;
 import java.util.Map;
 
 import model.workspace.Workspace;
-import model.workspace.WorkspaceAction;
+import model.workspace.TaskType;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 
 public class Task_LoadMDSCoordinates extends WorkspaceTask
 {
-	public Task_LoadMDSCoordinates(Workspace workspace, WorkspaceAction workspaceAction, final Map<String, Integer> additionalOptionSet)
+	public Task_LoadMDSCoordinates(Workspace workspace, TaskType workspaceAction, final Map<String, Integer> additionalOptionSet)
 	{
 		super(workspace, workspaceAction, additionalOptionSet);
 	}

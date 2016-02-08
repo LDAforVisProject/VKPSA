@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import model.workspace.TaskType;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
@@ -87,7 +88,7 @@ public abstract class HeatMap extends VisualizationComponent
 	{
 		super.setRoot(rootNode);
 		
-		// Initialize color legend.
+		// Initialize color legend after root is available.
 		initColorLegend();
 	}
 	
@@ -97,7 +98,7 @@ public abstract class HeatMap extends VisualizationComponent
 	protected void initColorLegend()
 	{
 		// Initialize color legend.
-		colorLegend = new ColorLegend();
+		colorLegend = new ColorLegend(this);
 
 		// Add to anchor pane.
 		colorLegend.addTo((AnchorPane)rootNode);
@@ -313,5 +314,17 @@ public abstract class HeatMap extends VisualizationComponent
 	protected Map<String, Integer> prepareOptionSet()
 	{
 		return null;
+	}
+	
+	@Override
+	public void notifyOfTaskCompleted(final TaskType taskType)
+	{
+		// Call parent's implementation.
+		super.notifyOfTaskCompleted(taskType);
+		
+		// If of type COLOR_LEGEND_MODIFIED: Adapt color spectrum.
+		if (taskType == TaskType.COLOR_LEGEND_MODIFIED) {
+			System.out.println("modified");
+		}
 	}
 }

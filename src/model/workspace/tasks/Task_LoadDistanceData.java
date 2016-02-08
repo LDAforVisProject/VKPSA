@@ -4,11 +4,11 @@ import java.util.Map;
 
 import database.DBManagement;
 import model.workspace.Workspace;
-import model.workspace.WorkspaceAction;
+import model.workspace.TaskType;
 
 public class Task_LoadDistanceData extends WorkspaceTask
 {
-	public Task_LoadDistanceData(Workspace workspace, WorkspaceAction workspaceAction, final Map<String, Integer> additionalOptionSet)
+	public Task_LoadDistanceData(Workspace workspace, TaskType workspaceAction, final Map<String, Integer> additionalOptionSet)
 	{
 		super(workspace, workspaceAction, additionalOptionSet);
 	}

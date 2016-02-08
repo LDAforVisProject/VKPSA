@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import model.workspace.Workspace;
-import model.workspace.WorkspaceAction;
+import model.workspace.TaskType;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -99,13 +99,13 @@ public class LoadController extends DataSubViewController
 			// Load data from new directory.
 			if (currentPath != workspace.getDirectory()) {
 				// 	Reset workspace.
-				workspace.executeWorkspaceAction(WorkspaceAction.SWITCH, null, this, null);
+				workspace.executeWorkspaceAction(TaskType.SWITCH, null, this, null);
 				
 				// Set new path.
 				workspace.setDirectory(currentPath);
 				
 				// Collect file metadata. Execute other actions once file metadata reading is complete.
-				workspace.executeWorkspaceAction(WorkspaceAction.COLLECT_METADATA, progressIndicator_load.progressProperty(), this, null);
+				workspace.executeWorkspaceAction(TaskType.COLLECT_METADATA, progressIndicator_load.progressProperty(), this, null);
 			}
 			
 			// Specified is current directory.
@@ -126,7 +126,7 @@ public class LoadController extends DataSubViewController
 	 * @param workspaceAction
 	 */
 	@Override
-	public void notifyOfTaskCompleted(final WorkspaceAction workspaceAction)
+	public void notifyOfTaskCompleted(final TaskType workspaceAction)
 	{
 		switch (workspaceAction) {
 			case COLLECT_METADATA:
@@ -135,13 +135,13 @@ public class LoadController extends DataSubViewController
 				// If .dis exists: Load it.
 				if (workspace.getNumberOfDatasetsInDISTable() > 0) {
 					// Load distance data.
-					workspace.executeWorkspaceAction(WorkspaceAction.LOAD_DISTANCES, progressIndicator_load.progressProperty(), this, null);
+					workspace.executeWorkspaceAction(TaskType.LOAD_DISTANCES, progressIndicator_load.progressProperty(), this, null);
 				}
 				
 				// Otherwise: Execute and display integrity check, set summary as tooltip.
 				else {
 					// Load MDS coordinates.
-					workspace.executeWorkspaceAction(WorkspaceAction.LOAD_MDS_COORDINATES, progressIndicator_load.progressProperty(), this, null);
+					workspace.executeWorkspaceAction(TaskType.LOAD_MDS_COORDINATES, progressIndicator_load.progressProperty(), this, null);
 				}
 			break;
 			
@@ -151,7 +151,7 @@ public class LoadController extends DataSubViewController
 				// Once distance data is loaded: Check if .mds file exists. If so: load it.
 				if (workspace.containsMDSFile()) {
 					// Load MDS coordinates.
-					workspace.executeWorkspaceAction(WorkspaceAction.LOAD_MDS_COORDINATES, progressIndicator_load.progressProperty(), this, null);					
+					workspace.executeWorkspaceAction(TaskType.LOAD_MDS_COORDINATES, progressIndicator_load.progressProperty(), this, null);					
 				}
 				
 				// Otherwise: Execute and display integrity check, set summary as tooltip.

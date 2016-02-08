@@ -20,7 +20,7 @@ import javafx.fxml.FXML;
 import javafx.scene.web.WebView;
 import javafx.util.Pair;
 import model.LDAConfiguration;
-import model.workspace.WorkspaceAction;
+import model.workspace.TaskType;
 import model.workspace.tasks.Task_LoadTopicDistancesForSelection_CD;
 
 /**
@@ -129,7 +129,7 @@ public class ChordDiagramController extends LocalScopeVisualizationController
 	}
 	
 	@Override
-	public void notifyOfTaskCompleted(final WorkspaceAction workspaceAction)
+	public void notifyOfTaskCompleted(final TaskType workspaceAction)
 	{
 		content_webview.getEngine().loadContent(adaptHTMLTemplate(templateHTMLCode));
 	}

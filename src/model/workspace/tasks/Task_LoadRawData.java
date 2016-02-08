@@ -6,7 +6,7 @@ import database.DBManagement;
 import model.LDAConfiguration;
 import model.workspace.Dataset;
 import model.workspace.Workspace;
-import model.workspace.WorkspaceAction;
+import model.workspace.TaskType;
 
 /**
  * Loads datasets from specified directory.
@@ -14,7 +14,7 @@ import model.workspace.WorkspaceAction;
 public class Task_LoadRawData extends WorkspaceTask
 {
 
-	public Task_LoadRawData(Workspace workspace, WorkspaceAction workspaceAction, final Map<String, Integer> additionalOptionSet)
+	public Task_LoadRawData(Workspace workspace, TaskType workspaceAction, final Map<String, Integer> additionalOptionSet)
 	{
 		super(workspace, workspaceAction, additionalOptionSet);
 	}

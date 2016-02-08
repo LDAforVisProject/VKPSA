@@ -10,7 +10,7 @@ import database.DBManagement;
 import mdsj.Data;
 import model.LDAConfiguration;
 import model.workspace.Workspace;
-import model.workspace.WorkspaceAction;
+import model.workspace.TaskType;
 
 public class Task_LoadTopicDistancesForSelection_CD extends WorkspaceTask
 {
@@ -59,7 +59,7 @@ public class Task_LoadTopicDistancesForSelection_CD extends WorkspaceTask
 	 * --------------------------------------------------------------
 	 */
 	
-	public Task_LoadTopicDistancesForSelection_CD(	Workspace workspace, WorkspaceAction workspaceAction, final Map<String, Integer> additionalOptionSet,
+	public Task_LoadTopicDistancesForSelection_CD(	Workspace workspace, TaskType workspaceAction, final Map<String, Integer> additionalOptionSet,
 												ArrayList<LDAConfiguration> ldaConfigurationsToLoad, Map<String, Pair<Double, Double>> parameterFilterThresholds)
 	{
 		super(workspace, workspaceAction, additionalOptionSet);

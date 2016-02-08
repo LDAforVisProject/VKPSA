@@ -4,7 +4,7 @@ import java.util.Map;
 
 import control.analysisView.AnalysisController;
 import model.workspace.Workspace;
-import model.workspace.WorkspaceAction;
+import model.workspace.TaskType;
 import model.workspace.tasks.ITaskListener;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
@@ -70,7 +70,7 @@ public abstract class Controller implements Initializable, ITaskListener
 	}
 	
 	@Override
-	public void notifyOfTaskCompleted(final WorkspaceAction workspaceAction)
+	public void notifyOfTaskCompleted(final TaskType workspaceAction)
 	{
 	}
 	

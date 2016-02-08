@@ -2,7 +2,6 @@ package view.components.heatmap;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,20 +9,17 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import mdsj.Data;
 import model.LDAConfiguration;
 import model.workspace.Workspace;
-import model.workspace.WorkspaceAction;
+import model.workspace.TaskType;
+import model.workspace.tasks.ITaskListener;
 import model.workspace.tasks.Task_LoadTopicDistancesForSelection;
-import model.workspace.tasks.Task_LoadTopicDistancesForSelection_CD;
 import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
 import view.components.VisualizationComponentType;
 import view.components.controls.ColorLegend.ColorLegend;
 import view.components.controls.ColorLegend.ColorLegendDataset;
 import view.components.controls.ColorLegend.ColorScale;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
@@ -34,6 +30,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.util.Pair;
@@ -423,20 +420,33 @@ public class CategoricalHeatmap extends HeatMap
 				cellCoordinates[2] 			= cellCoordinates[0] + cellWidth;
 				cellCoordinates[3] 			= cellCoordinates[1] + cellHeight;
 				
-				// Set color for this cell.
-				Color cellColor = ColorScale.getColorForValue(binMatrix[i][j] == -1 ? 0 : binMatrix[i][j], minOccurenceCount, maxOccurenceCount, hOptions.getMinColor(), hOptions.getMaxColor());
+				// Set color for this cell. Consider selected color extrema in color legend for this.
+				Pair<Double, Double> selectedValueExtrema 	= colorLegend.getSelectedExtrema();
+				Color cellColor 							= ColorScale.getColorForValue(	binMatrix[i][j] == -1 ? 0 : binMatrix[i][j], 
+																							selectedValueExtrema.getKey(), selectedValueExtrema.getValue(), 
+																							hOptions.getMinColor(), hOptions.getMaxColor());
+				
 				// Adapt cell opacity to current hover events (i.e.: Lower opacity, if other LDA config. is hovered over). Ignore transparent cells.
-				if ( (	hoveredOverLDAMatchID != null || 
-						highlightedLDAConfigIDs != null && isDisplayingExternalHoverEvent ) && 
-						cellColor != Color.TRANSPARENT) {
-					cellColor = Color.hsb(	cellColor.getHue(), cellColor.getSaturation(), cellColor.getBrightness(), 
-											ldaMatchID.equals(hoveredOverLDAMatchID) || highlightedLDAConfigIDs.contains(ldaMatchID) ? 1 : VisualizationComponent.HOVER_OPACITY_FACTOR);
+				cellColor = adjustCellOpacity(cellColor, ldaMatchID);
+				
+				// If cell color not black (i.e. values in viable range): Fill cell.
+				if (cellColor != Color.BLACK) {
+					// Set fill color.
+					gc.setFill(cellColor);
+					// Draw cell.
+					gc.fillRect(cellCoordinates[0], cellCoordinates[1], cellWidth, cellHeight);
+				}
+				// Otherwise (if cell content is not in valid range): Mark cell as invalid.
+				else {
+					// Draw rectangle.
+					//gc.strokeRect(cellCoordinates[0], cellCoordinates[1], cellWidth - 1, cellHeight - 1);
+					// Mark rectangle as invalid.
+					gc.strokeLine(	cellCoordinates[0], cellCoordinates[1], 
+									cellCoordinates[0] + cellWidth, cellCoordinates[1] + cellHeight);
+					gc.strokeLine(	cellCoordinates[0] + cellWidth, cellCoordinates[1], 
+									cellCoordinates[0], cellCoordinates[1] + cellHeight);
 				}
 				
-				// Set fill color.
-				gc.setFill(cellColor);
-				// Draw cell.
-				gc.fillRect(cellCoordinates[0], cellCoordinates[1], cellWidth, cellHeight);
 				
 				// Draw borders, if this is desired and cell has content.
 				if (useBorders && cellColor != Color.TRANSPARENT)
@@ -456,6 +466,28 @@ public class CategoricalHeatmap extends HeatMap
 		
     	// Redraw color legend.
     	colorLegend.refresh( new ColorLegendDataset(minOccurenceCount, maxOccurenceCount, hOptions.getMinColor(), hOptions.getMaxColor()) );
+	}
+	
+	/**
+	 * Lowers/adjusts opacity for given cell. Used e.g. for highlighting of hovered over/selected cells.
+	 * @param cellColor
+	 * @param ldaMatchID
+	 * @return
+	 */
+	private Color adjustCellOpacity(final Color cellColor, final Pair<Integer, Integer> ldaMatchID)
+	{
+		// Adapt cell opacity to current hover events (i.e.: Lower opacity, if other LDA config. is hovered over). Ignore transparent cells.
+		if ( 	(hoveredOverLDAMatchID != null || highlightedLDAConfigIDs != null && isDisplayingExternalHoverEvent ) && 
+				cellColor != Color.TRANSPARENT) {
+			Color newCellColor = Color.hsb(	cellColor.getHue(), cellColor.getSaturation(), cellColor.getBrightness(), 
+											ldaMatchID.equals(hoveredOverLDAMatchID) || highlightedLDAConfigIDs.contains(ldaMatchID) ? 1 : VisualizationComponent.HOVER_OPACITY_FACTOR);
+			
+			// Return new cell color.
+			return newCellColor;
+		}
+		
+		// If conditions not met: Return old cell color (e.g. because the current cell/LDA match was highlighted).
+		return cellColor;
 	}
 	
 	@Override
@@ -534,7 +566,7 @@ public class CategoricalHeatmap extends HeatMap
 			}
 			
 			// Load topic distance data for selection.
-			topicDistanceLoadingTask = new Task_LoadTopicDistancesForSelection(workspace, WorkspaceAction.LOAD_SPECIFIC_TOPIC_DISTANCES, null, ldaConfigurations);
+			topicDistanceLoadingTask = new Task_LoadTopicDistancesForSelection(workspace, TaskType.LOAD_SPECIFIC_TOPIC_DISTANCES, null, ldaConfigurations);
 			topicDistanceLoadingTask.addListener(this);
 			
 			// Start thread.
@@ -543,9 +575,9 @@ public class CategoricalHeatmap extends HeatMap
 	}
 	
 	@Override
-	public void notifyOfTaskCompleted(final WorkspaceAction workspaceAction)
+	public void notifyOfTaskCompleted(final TaskType taskType)
 	{
-		if (workspaceAction == WorkspaceAction.LOAD_SPECIFIC_TOPIC_DISTANCES) {
+		if (taskType == TaskType.LOAD_SPECIFIC_TOPIC_DISTANCES) {
 			log("Loaded topic distance data.");
 			
 			// Create dataset.
@@ -553,6 +585,14 @@ public class CategoricalHeatmap extends HeatMap
 		
 			this.data = new HeatmapDataset(	topicDistanceLoadingTask.getLDAConfigurationsToLoad(), topicDistanceLoadingTask.getSpatialIDsForLDATopicConfiguration(), 
 											topicDistanceLoadingTask.getTopicDistances(), topicDistanceLoadingTask.getTopicDistanceExtrema(), (HeatmapOptionset)options);
+			
+			// Refresh heatmap.
+			this.refresh();
+		}
+		
+		else if (taskType == TaskType.COLOR_LEGEND_MODIFIED) {
+			System.out.println("Refreshing after color legend modification.");
+			log("Refreshing after color legend modification.");
 			
 			// Refresh heatmap.
 			this.refresh();

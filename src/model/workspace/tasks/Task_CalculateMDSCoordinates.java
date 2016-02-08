@@ -11,7 +11,7 @@ import mdsj.MDSJ;
 import model.LDAConfiguration;
 import model.workspace.Dataset;
 import model.workspace.Workspace;
-import model.workspace.WorkspaceAction;
+import model.workspace.TaskType;
 
 /**
  * Calculates MDS coordinates (requires loaded distance data).
@@ -22,7 +22,7 @@ import model.workspace.WorkspaceAction;
 public class Task_CalculateMDSCoordinates extends WorkspaceTask
 {
 
-	public Task_CalculateMDSCoordinates(Workspace workspace, WorkspaceAction workspaceAction, final Map<String, Integer> additionalOptionSet)
+	public Task_CalculateMDSCoordinates(Workspace workspace, TaskType workspaceAction, final Map<String, Integer> additionalOptionSet)
 	{
 		super(workspace, workspaceAction, additionalOptionSet);
 	}

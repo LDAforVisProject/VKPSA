@@ -211,7 +211,7 @@ public class Workspace implements ITaskListener
 	 * @param optionSet Provides additional options, if needed. Is optional, may be null.
 	 * @return Task processing the request.
 	 */
-	public WorkspaceTask executeWorkspaceAction(WorkspaceAction workspaceAction, DoubleProperty progressProperty, 
+	public WorkspaceTask executeWorkspaceAction(TaskType workspaceAction, DoubleProperty progressProperty, 
 												ITaskListener listener, final Map<String, Integer> optionSet)
 	{
 		WorkspaceTask task	= null;
@@ -228,30 +228,30 @@ public class Workspace implements ITaskListener
 				isMDSDataLoaded			= false;
 				
 				// Collect metadata from raw topic files.
-				task					= new Task_CollectMetadata(this, WorkspaceAction.COLLECT_METADATA, optionSet);
+				task					= new Task_CollectMetadata(this, TaskType.COLLECT_METADATA, optionSet);
 			break;
 			
 			case LOAD_RAW_DATA:
 				// Load datasets.
 				isRawDataLoaded 		= false;
-				task					= new Task_LoadRawData(this, WorkspaceAction.LOAD_RAW_DATA, optionSet);
+				task					= new Task_LoadRawData(this, TaskType.LOAD_RAW_DATA, optionSet);
 			break;
 			
 			case LOAD_DISTANCES:
 				isDistanceDataLoaded	= false;
-				task					= new Task_LoadDistanceData(this, WorkspaceAction.LOAD_DISTANCES, optionSet);
+				task					= new Task_LoadDistanceData(this, TaskType.LOAD_DISTANCES, optionSet);
 			break;
 			
 			case LOAD_MDS_COORDINATES:
 				// Load MDS coordinates from file.
 				isMDSDataLoaded 		= false;
-				task					= new Task_LoadMDSCoordinates(this, WorkspaceAction.LOAD_MDS_COORDINATES, optionSet);
+				task					= new Task_LoadMDSCoordinates(this, TaskType.LOAD_MDS_COORDINATES, optionSet);
 			break;
 			
 			case LOAD_SPECIFIC_DATASETS:
 				// Plan: Queue instruction in frontend to backend.
 				// Execute data reading task in workspace.
-				task					= new Task_LoadSpecificDatasets(this, WorkspaceAction.LOAD_SPECIFIC_DATASETS, optionSet);
+				task					= new Task_LoadSpecificDatasets(this, TaskType.LOAD_SPECIFIC_DATASETS, optionSet);
 			break;
 			
 			// -----------------------------------------------
@@ -259,19 +259,19 @@ public class Workspace implements ITaskListener
 			// -----------------------------------------------
 			
 			case CALCULATE_DISTANCES:
-				task = new Task_CalculateDistances(this, WorkspaceAction.CALCULATE_DISTANCES, optionSet);
+				task = new Task_CalculateDistances(this, TaskType.CALCULATE_DISTANCES, optionSet);
 			break;
 			
 			case CALCULATE_MDS_COORDINATES:
-				task = new Task_CalculateMDSCoordinates(this, WorkspaceAction.CALCULATE_MDS_COORDINATES, optionSet);
+				task = new Task_CalculateMDSCoordinates(this, TaskType.CALCULATE_MDS_COORDINATES, optionSet);
 			break;
 			
 			case GENERATE_PARAMETER_LIST:
-				task = new Task_GenerateParameterList(this, WorkspaceAction.GENERATE_PARAMETER_LIST, optionSet);
+				task = new Task_GenerateParameterList(this, TaskType.GENERATE_PARAMETER_LIST, optionSet);
 			break;
 			
 			case GENERATE_DATA:
-				task = new Task_GenerateData(this, WorkspaceAction.GENERATE_DATA, optionSet);
+				task = new Task_GenerateData(this, TaskType.GENERATE_DATA, optionSet);
 			break;
 			
 			// -----------------------------------------------
@@ -314,7 +314,7 @@ public class Workspace implements ITaskListener
 	}
 	
 	@Override
-	public void notifyOfTaskCompleted(WorkspaceAction workspaceAction)
+	public void notifyOfTaskCompleted(TaskType workspaceAction)
 	{
 		switch (workspaceAction) 
 		{

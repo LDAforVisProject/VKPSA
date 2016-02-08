@@ -22,9 +22,24 @@
     -fx-padding: 4px;
 }
 
+/* 
+ * Range Slider
+ */
+
 .range-slider .range-bar {
 	-fx-background-insets: 2;	
 }
+
+.range-slider:vertical .range-bar {
+	-fx-background-color: transparent;
+	-fx-border-color: transparent;
+	-fx-opacity: 0;
+}
+
+.range-slider:vertical .track {
+	-fx-opacity:0;
+}
+
 
 /* 
  * Here: Customizations for scroll-panes.

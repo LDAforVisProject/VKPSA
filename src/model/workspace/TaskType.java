@@ -1,6 +1,6 @@
 package model.workspace;
 
-public enum WorkspaceAction
+public enum TaskType
 {
 	/*
 	 * Singular/independent actions (involving exactly one - this - WorkspaceAction/task).
@@ -20,5 +20,9 @@ public enum WorkspaceAction
 	/*
 	 * Other actions.
 	 */
-	NONE
+	NONE,
+	/*
+	 * None-workspace actions.
+	 */
+	COLOR_LEGEND_MODIFIED
 }

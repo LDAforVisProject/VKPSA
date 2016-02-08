@@ -1,12 +1,12 @@
 package model.workspace.tasks;
 
-import model.workspace.WorkspaceAction;
+import model.workspace.TaskType;
 
 public interface ITaskListener
 {
 	/**
 	 * Is called once the specified task has been completed.
-	 * @param workspaceAction
+	 * @param taskType
 	 */
-	void notifyOfTaskCompleted(final WorkspaceAction workspaceAction);
+	void notifyOfTaskCompleted(final TaskType taskType);
 }

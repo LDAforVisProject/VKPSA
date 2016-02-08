@@ -7,11 +7,11 @@ import java.util.Map;
 
 import model.LDAConfiguration;
 import model.workspace.Workspace;
-import model.workspace.WorkspaceAction;
+import model.workspace.TaskType;
 
 public class Task_GenerateParameterList extends WorkspaceTask
 {
-	public Task_GenerateParameterList(Workspace workspace, WorkspaceAction workspaceAction, final Map<String, Integer> additionalOptionSet)
+	public Task_GenerateParameterList(Workspace workspace, TaskType workspaceAction, final Map<String, Integer> additionalOptionSet)
 	{
 		super(workspace, workspaceAction, additionalOptionSet);
 	}
