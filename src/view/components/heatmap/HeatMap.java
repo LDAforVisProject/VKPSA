@@ -17,6 +17,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.util.Pair;
+import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
 import view.components.controls.ColorLegend.ColorLegend;
 import view.components.controls.ColorLegend.ColorScale;
@@ -288,7 +289,7 @@ public abstract class HeatMap extends VisualizationComponent
 		}
 		
 		// Pass references to selected data onward to AnalysisController.
-		analysisController.integrateSelection(selectedLDAConfigIDs, !isCtrlDown);
+		analysisController.integrateSelectionOfDataPoints(selectedLDAConfigIDs, !isCtrlDown, DatapointIDMode.CONFIG_ID, false);
 	}
 
 	@Override

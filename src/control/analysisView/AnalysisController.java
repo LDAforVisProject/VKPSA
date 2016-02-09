@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -472,41 +473,6 @@ public class AnalysisController extends Controller
 	}
 	
 	/**
-	 * Refreshes visualization after data in global MDS scatterchart was selected. 
-	 * @param selectedIndices
-	 */
-	public void integrateMDSSelection(Set<Integer> selectedIndices, boolean includeLocalScope)
-	{
-		boolean changeDetected = !( selectedIndices.containsAll(dataspace.getActiveIndices()) && dataspace.getActiveIndices().containsAll(selectedIndices) );
-
-		// Update set of filtered and selected indices.
-		if (changeDetected) {
-			// Update dataspace.
-			dataspace.updateAfterSelection(selectedIndices);
-			
-			// Refresh other (than MDSScatterchart) visualizations.
-			
-			//	Paramer space scatterchart:
-			paramSpaceScatterchart.refresh(new ScatterchartDataset(	dataspace.getLDAConfigurations(), dataspace.getDiscardedLDAConfigurations(),
-																	dataspace.getInactiveLDAConfigurations(), dataspace.getActiveLDAConfigurations()));
-			
-			// 	Local scope:
-			if (includeLocalScope)
-				localScopeInstance.refresh(dataspace.getActiveLDAConfigurations());
-			
-			// 	Parameter histograms:
-			refreshScentedFilters();
-		}
-		
-		// Even if no change on global scope detected: Update local scope, if requested. 
-		else if (includeLocalScope) {
-			//localScopeInstance.refresh(dataspace.getActiveLDAConfigurations());
-			// Refresh topic model comparison heatmap.
-			refreshTMCHeatmap(dataspace.getActiveLDAConfigurations());
-		}
-	}
-	
-	/**
 	 * Integrates data/heatmap cells selected in TMC heatmap into dataspace and displays the
 	 * selection in local scope.
 	 * @param selectedTopicConfigIDs
@@ -515,64 +481,21 @@ public class AnalysisController extends Controller
 	{
 		localScopeInstance.refreshPTC(selectedTopicConfigIDs);
 	}
-	
-	/**
-	 * Integrates heatmap selection into dataspace, then fires update for all relevant visualizations.
-	 * @param newlySelectedLDAConfigIDs
-	 * @param isAddition
-	 */
-	public void integrateSelection(Set<Integer> newlySelectedLDAConfigIDs, final boolean isAddition)
-	{
-		// Check if there is any change in the set of selected datasets.
-		boolean changeDetected = dataspace.integrateSelection(newlySelectedLDAConfigIDs, isAddition);
 
-		// If so: Refresh visualizations.
-		if (changeDetected)
-			refreshVisualizationsAfterLocalSelection(isAddition);
-	}
-	
 	/**
-	 * Integrates barchart selection into MDS selection, then fires update for all relevant visualizations.
+	 * Integrates index selection into MDS selection, then fires update for all relevant visualizations.
 	 * @param newlySelectedLocalIndices
 	 * @param isAddition true for addition of selected data to global selection; false for their removal.
+	 * @param idMode
+	 * @param forceRefresh
 	 */
-	public void integrateBarchartSelection(ArrayList<Integer> newlySelectedLocalIndices, final boolean isAddition)
+	public void integrateSelectionOfDataPoints(Set<Integer> newlySelectedLocalIndices, final boolean isAddition, final DatapointIDMode idMode, final boolean forceRefresh)
 	{
 		// Check if there is any change in the set of selected datasets.
-		boolean changeDetected				= false;
-		
-		// 1. 	Check which elements are to be added/removed from current selection by comparing 
-		// 		with set of filtered and selected datasets.
-		
-		// Selection should be added:
-		if (isAddition) {
-			// Translate local indices to global indices.
-			for (int i = 0; i < newlySelectedLocalIndices.size(); i++) {
-				if (!dataspace.getActiveIndices().contains( newlySelectedLocalIndices.get(i)) ) {
-					// Add to collection of selected indices.
-					dataspace.getActiveIndices().add( newlySelectedLocalIndices.get(i) );
-					
-					// Change detected.
-					changeDetected = true;
-				}
-			}
-		}
-		
-		else {
-			// Translate local indices to global indices.
-			for (int i = 0; i < newlySelectedLocalIndices.size(); i++) {
-				// Add to set of selected, translated indices. 
-				if (dataspace.getActiveIndices().contains( newlySelectedLocalIndices.get(i)) ) {
-					dataspace.getActiveIndices().remove( newlySelectedLocalIndices.get(i) );
-					
-					// Change detected.
-					changeDetected = true;
-				}
-			}
-		}
-		
+		boolean changeDetected = dataspace.integrateSelection(newlySelectedLocalIndices, isAddition, idMode);
+		System.out.println("change det. = " + changeDetected);
 		// 2. 	Update related (i.e. dependent on the set of selected entities) datasets and visualization, if there were any changes made.
-		if (changeDetected)
+		if (changeDetected || forceRefresh)
 			refreshVisualizationsAfterLocalSelection(isAddition);
 	}
 	
@@ -1037,33 +960,8 @@ public class AnalysisController extends Controller
 		 * 1. Translate configuration IDs to indices.
 		 */
 		
-		Set<Integer> dataPointConfigIDs = null;
-		Set<Integer> dataPointIndices	= null;
-
-		if (idMode == DatapointIDMode.CONFIG_ID) {
-			dataPointConfigIDs 	= dataPointIDs;
-			dataPointIndices	= new HashSet<Integer>();
-			
-			// If element with index i has configuration ID contained in dataPointIDs:
-			// Add to collection of indices to highlight.
-			for (int i = 0; i < dataspace.getLDAConfigurations().size(); i++) {
-				int configID = dataspace.getLDAConfigurations().get(i).getConfigurationID();
-				if (dataPointIDs.contains(configID))
-					dataPointIndices.add(i);
-			}
-		}
-		
-		else if (idMode == DatapointIDMode.INDEX) {
-			dataPointConfigIDs 	= new HashSet<Integer>();
-			dataPointIndices 	= dataPointIDs;
-			
-			// Grab configuration ID of element at index i, add to collection of indices
-			// to highlight.
-			for (int i : dataPointIDs) {
-				int configID = dataspace.getLDAConfigurations().get(i).getConfigurationID();
-				dataPointConfigIDs.add(configID);
-			}
-		}
+		Set<Integer> dataPointConfigIDs = idMode == DatapointIDMode.CONFIG_ID 	? dataPointIDs : dataspace.translateBetweenIDModes(dataPointIDs, DatapointIDMode.INDEX);
+		Set<Integer> dataPointIndices	= idMode == DatapointIDMode.INDEX		? dataPointIDs : dataspace.translateBetweenIDModes(dataPointIDs, DatapointIDMode.CONFIG_ID);
 		
 		/*
 		 * 2. Propagate information about hover event.

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -383,7 +384,7 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 	public void processSelectionManipulationRequest(double minX, double minY, double maxX, double maxY)
 	{
 		// If control is not down: Ignore selected points, add all non-selected in chosen area.
-		if (!isCtrlDown) {
+//		if (isCtrlDown) {
 			// Process filtered, non-selected data.
 			for (int i = 0; i < inactiveDataSeries.getData().size(); i++) {
 				Data<String, Number> barData 	= inactiveDataSeries.getData().get(i);
@@ -411,49 +412,48 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 					selectedBars.remove(i);
 				}
 			}
-		}
+//		}
 		
-		else {
-			// Process filtered, non-selected data.
-			for (int i = 0; i < activeDataSeries.getData().size(); i++) {
-			//for (Data<String, Integer> data : activeDataSeries.getData()) {
-				Data<String, Number> barData 	= activeDataSeries.getData().get(i);
-				Node dataNode 					= barData.getNode();
-				String barKey					= "active_" + i;
-				
-				if (	data.getBarToDataAssociations().containsKey(barKey) && 
-						data.getBarToDataAssociations().get(barKey).size() > 0 &&
-						dataNode.getLayoutX() >= minX && dataNode.getLayoutX() + dataNode.getBoundsInLocal().getWidth() <= maxX &&
-						dataNode.getLayoutY() >= minY && dataNode.getLayoutY() + dataNode.getBoundsInLocal().getHeight() <= maxY ) {
-					// Highlight bar.
-					setBarHighlighting(dataNode, true, Color.GREY);
-					
-					// Add to collection.
-					if (!selectedBars.contains(barData.getXValue())) {
-						selectedBars.add(String.valueOf(i));
-					}
-				}
-				
-				else {
-					// Remove bar highlighting.
-					setBarHighlighting(dataNode, false, null);
-					
-					// Remove from collection.
-					selectedBars.remove(i);
-				}
-			}
-		}
+//		else {
+//			// Process filtered, non-selected data.
+//			for (int i = 0; i < activeDataSeries.getData().size(); i++) {
+//			//for (Data<String, Integer> data : activeDataSeries.getData()) {
+//				Data<String, Number> barData 	= activeDataSeries.getData().get(i);
+//				Node dataNode 					= barData.getNode();
+//				String barKey					= "active_" + i;
+//				
+//				if (	data.getBarToDataAssociations().containsKey(barKey) && 
+//						data.getBarToDataAssociations().get(barKey).size() > 0 &&
+//						dataNode.getLayoutX() >= minX && dataNode.getLayoutX() + dataNode.getBoundsInLocal().getWidth() <= maxX &&
+//						dataNode.getLayoutY() >= minY && dataNode.getLayoutY() + dataNode.getBoundsInLocal().getHeight() <= maxY ) {
+//					// Highlight bar.
+//					setBarHighlighting(dataNode, true, Color.GREY);
+//					
+//					// Add to collection.
+//					if (!selectedBars.contains(barData.getXValue())) {
+//						selectedBars.add(String.valueOf(i));
+//					}
+//				}
+//				
+//				else {
+//					// Remove bar highlighting.
+//					setBarHighlighting(dataNode, false, null);
+//					
+//					// Remove from collection.
+//					selectedBars.remove(i);
+//				}
+//			}
+//		}
 	}
 
 	@Override
 	public void processEndOfSelectionManipulation()
 	{
-		ArrayList<Integer> selectedLocalIndices = new ArrayList<Integer>();
+		Set<Integer> selectedLocalIndices = new HashSet<Integer>();
 		
 		for (String description : selectedBars) {
 			// Add to collection.
-			final String seriesPraefix = !isCtrlDown ? "inactive_" : "active_"; 
-			selectedLocalIndices.addAll(data.getBarToDataAssociations().get(seriesPraefix + description));
+			selectedLocalIndices.addAll(data.getBarToDataAssociations().get("inactive_" + description));
 			
 			// Remove glow from all bars.
 			for (Data<String, Number> data : inactiveDataSeries.getData()) {
@@ -468,7 +468,7 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 		selectedBars.clear();
 		
 		// Pass selection data on to controller.
-		analysisController.integrateBarchartSelection(selectedLocalIndices, !isCtrlDown);
+		analysisController.integrateSelectionOfDataPoints(selectedLocalIndices, isCtrlDown, DatapointIDMode.INDEX, false);
 	}
 
 	@Override

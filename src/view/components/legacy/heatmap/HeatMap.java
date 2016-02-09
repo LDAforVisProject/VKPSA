@@ -586,7 +586,7 @@ public class HeatMap extends VisualizationComponent_Legacy implements ISelectabl
 		}
 		
 		// Pass references to selected data onward to AnalysisController.
-		analysisController.integrateSelection(selectedLDAConfigIDs, !isCtrlDown);
+		analysisController.integrateSelectionOfDataPoints(selectedLDAConfigIDs, !isCtrlDown, DatapointIDMode.CONFIG_ID, false);
 	}
 	
 	@Override

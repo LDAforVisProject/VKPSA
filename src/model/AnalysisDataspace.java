@@ -1,12 +1,14 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import view.components.DatapointIDMode;
 import javafx.scene.chart.XYChart;
 import javafx.util.Pair;
 import control.analysisView.AnalysisController;
@@ -661,76 +663,68 @@ public class AnalysisDataspace
 	
 	/**
 	 * Integrates selection (of LDA configuration IDs) into dataspace.
-	 * @param newlySelectedLDAConfigIDs
-	 * @param isAddition
+	 * @param newlySelectedIDs
+	 * @param isAddition Signifies usage of CTRL. If CTRL was pressed, delivered data is added to set of selected values. Otherwise, only delivered data is used for selection.
+	 * @param idMode
 	 */
-	public boolean integrateSelection(Set<Integer> newlySelectedLDAConfigIDs, final boolean isAddition)
+	public boolean integrateSelection(Collection<Integer> newlySelectedIDs, final boolean isAddition, DatapointIDMode idMode)
 	{
 		// Check if there is any change in the set of selected datasets.
 		boolean changeDetected = false;
 		
-		// 1. 	Check which elements are to be added/removed from current selection by comparing 
-		// 		with set of filtered and selected datasets.
+		// 0. Translate to indices, if data not already delivered in that form.
+		newlySelectedIDs = idMode == DatapointIDMode.INDEX ? newlySelectedIDs : translateBetweenIDModes(newlySelectedIDs, DatapointIDMode.CONFIG_ID);
 		
-		// 1.a.	Selection should be added:
-		if (isAddition) {
-			// Check if any of the newly selected IDs are not contained in global selection yet.
-			// If so: Add them.
-			for (LDAConfiguration selectedLDAConfiguration : this.activeLDAConfigurations) {
-				final int alreadySelectedLDAConfigID = selectedLDAConfiguration.getConfigurationID(); 
-				
-				// If newly selected set already contained in existing selection: Remove from addition set.
-				if (newlySelectedLDAConfigIDs.contains(alreadySelectedLDAConfigID)) {
-					newlySelectedLDAConfigIDs.remove(alreadySelectedLDAConfigID);
-				}
-			}
-			
-			// If set of newly selected indices still contains elements: Change detected.
-			if (newlySelectedLDAConfigIDs.size() > 0) {
-				// Update flag.
-				changeDetected = true;
-				
-				// Add missing LDA configurations to collection.
-				for (final int ldaConfigIndex : getInactiveIndices()) {
-					// Get LDA configuration for this index.
-					final LDAConfiguration ldaConfiguration = this.ldaConfigurations.get(ldaConfigIndex);
-					
-					// Check if this LDA configuration is part of the set of newly selected LDA configurations. 
-					if ( newlySelectedLDAConfigIDs.contains(ldaConfiguration.getConfigurationID()) )
-						this.activeIndices.add(ldaConfigIndex);
-				}
-			}
+		// 1. Check if there is any difference between current  and new set of active indices.
+		changeDetected 	= !( this.activeIndices.containsAll(newlySelectedIDs) && newlySelectedIDs.containsAll(this.activeIndices) );
+
+		// 2.	Selection should be stand-alone:
+		if (!isAddition) {
+			// If change detected: Clear current set.
+			this.activeIndices.clear();
 		}
 		
-		// 1.b.	Selection should be removed:
-		else {
-			System.out.println("no addition");
-			// Set of dataset indices (instead of configuration IDs) to delete.
-			Set<Integer> indicesToDeleteFromSelection = new HashSet<Integer>();
-			
-			// Check if any of the newly selected IDs are contained in global selection.
-			// If so: Remove them.
-			for (final int ldaConfigIndex : this.activeIndices) {
-				// Get LDA configuration for this index.
-				final LDAConfiguration ldaConfiguration = this.ldaConfigurations.get(ldaConfigIndex); 
-				
-				// If currently examine LDAConfiguration is in set of newly selected indices:
-				// Remove LDAConfiguration from set of selected indices.
-				if (newlySelectedLDAConfigIDs.contains(ldaConfiguration.getConfigurationID())) {
-					// Update flag.
-					changeDetected = true;
-					
-					// Add dataset index to collection of indices to remove from selection.
-					indicesToDeleteFromSelection.add(ldaConfigIndex);
-				}
-			}
-			System.out.println("indices to remove: " + indicesToDeleteFromSelection);
-			// Remove set of indices to delete from set of selected indices.
-			this.activeIndices.removeAll(indicesToDeleteFromSelection);
-		}
+		// 3. Add to current selection.
+		this.activeIndices.addAll(newlySelectedIDs);
 		
 		// 2. Return dirty bit.
 		return changeDetected;
+	}
+	
+	/**
+	 * Translates between ID modes (index vs. global configuration ID) of set of data points.
+	 * @param idValues
+	 * @param originalIDMode ID mode of delivered argument.
+	 * @return IDs of delivered data points in ID mode opposed to original ID mode. 
+	 */
+	public Set<Integer> translateBetweenIDModes(final Collection<Integer> dataPointIDs, final DatapointIDMode originalIDMode)
+	{
+		Set<Integer> translatedDataPointIDs = null;
+
+		if (originalIDMode == DatapointIDMode.CONFIG_ID) {
+			translatedDataPointIDs = new HashSet<Integer>();
+			
+			// If element with index i has configuration ID contained in dataPointIDs:
+			// Add to collection of indices to highlight.
+			for (int i = 0; i < getLDAConfigurations().size(); i++) {
+				int configID = getLDAConfigurations().get(i).getConfigurationID();
+				if (dataPointIDs.contains(configID))
+					translatedDataPointIDs.add(i);
+			}
+		}
+		
+		else if (originalIDMode == DatapointIDMode.INDEX) {
+			translatedDataPointIDs = new HashSet<Integer>();
+			
+			// Grab configuration ID of element at index i, add to collection of indices
+			// to highlight.
+			for (int i : dataPointIDs) {
+				int configID = getLDAConfigurations().get(i).getConfigurationID();
+				translatedDataPointIDs.add(configID);
+			}
+		}
+		
+		return translatedDataPointIDs;
 	}
 	
 	/**

@@ -2,28 +2,17 @@ package view.components.legacy.mdsScatterchart;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-
-
-
-
-
-
 
 import com.sun.javafx.charts.Legend;
 
 import javafx.event.EventHandler;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -47,6 +36,7 @@ import view.components.legacy.heatmap.HeatmapDataType;
 import view.components.rubberbandselection.ISelectableComponent;
 import view.components.rubberbandselection.RubberBandSelection;
 
+@SuppressWarnings("restriction")
 enum SelectionMode
 {
 	SINGULAR, GROUP
@@ -859,7 +849,18 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 								changeDataPointSelectionStatus(dataPoint, true);
 					    		
 								// Refresh other charts.
-					    		analysisController.integrateMDSSelection(activeMDSPoints.keySet(), false);
+								Set<Integer> selectedIndices = new HashSet<Integer>();
+								if (isCtrlDown) {
+									selectedIndices.addAll(activeMDSPoints.keySet());
+									selectedIndices.addAll(inactiveIndices);
+								}
+								// Otherwise: Consider only datapoints selected in the current step.
+								else {
+									selectedIndices.addAll(pointsManipulatedInCurrSelectionStep);
+								}
+								
+								// Integration selection.
+								analysisController.integrateSelectionOfDataPoints(selectedIndices, isCtrlDown, DatapointIDMode.INDEX, true);
 					    	}
 				    	}
 				    	else
@@ -884,10 +885,25 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 							changeDataPointSelectionStatus(dataPoint, false);
 							
 							// Refresh other charts.
-				    		analysisController.integrateMDSSelection(activeMDSPoints.keySet(), false);
+							Set<Integer> selectedIndices = new HashSet<Integer>();
+							if (isCtrlDown) {
+								selectedIndices.addAll(activeMDSPoints.keySet());
+								selectedIndices.addAll(inactiveIndices);
+							}
+							// Otherwise: Consider only datapoints selected in the current step.
+							else {
+								selectedIndices.addAll(pointsManipulatedInCurrSelectionStep);
+							}
+							
+							// Integration selection.
+							analysisController.integrateSelectionOfDataPoints(selectedIndices, isCtrlDown, DatapointIDMode.INDEX, true);
     			    	}
     			    }
     			});
+			break;
+			
+			// Selection of discarded data points not supported.
+			case DISCARDED:
 			break;
 		}
 	}
@@ -935,93 +951,48 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 		// Set of data points to remove from selection.
 		Set<XYChart.Data<Number, Number>> pointsToRemoveFromSelection	= new HashSet<XYChart.Data<Number,Number>>();
 		
-		// If control is not down: Ignore selected points, add all non-selected in chosen area.
-		if (!isCtrlDown) {
-			// Iterate over all filtered points.
-			for (XYChart.Data<Number, Number> datapoint : inactiveDataSeries.getData()) {
-				// Point was selected - add to sets of selected indices and selected points.
-				if (	isNodeWithinBounds(datapoint.getNode(), minX, minY, maxX, maxY) &&
-						!activeMDSPoints.containsKey((int)datapoint.getExtraValue())
-					) {
-					// Set dirty flags.
-					changeInSelectionDetected				= true;
-					changeInSelectionDetected_localScope	= true;
-					
-					// Update collection of selected points.
-					activeMDSPoints.put((int)datapoint.getExtraValue(), datapoint);
-					
-					// Update set of values added to selection in this action.
-					pointsToAddToSelection.add(datapoint);
-					
-					// Mark data point as manipulated in this step.
-					pointsManipulatedInCurrSelectionStep.add((int) datapoint.getExtraValue());
-				}
-			}
-
-			// Iterate over all selected points.
-			for (XYChart.Data<Number, Number> datapoint : activeDataSeries.getData()) {
-				if (	!isNodeWithinBounds(datapoint.getNode(), minX, minY, maxX, maxY) 	&&
-						activeMDSPoints.containsKey((int)datapoint.getExtraValue())		&&
-						pointsManipulatedInCurrSelectionStep.contains((int) datapoint.getExtraValue())
-					) {
-					// Set dirty flags.
-					changeInSelectionDetected				= true;
-					changeInSelectionDetected_localScope	= true;
-					
-					// Update collection of selected points.
-					activeMDSPoints.remove((int)datapoint.getExtraValue());
-					
-					// Update set of values removed from selection in this action.
-					pointsToRemoveFromSelection.add(datapoint);
-				}
+		// Iterate over all filtered points.
+		for (XYChart.Data<Number, Number> datapoint : inactiveDataSeries.getData()) {
+			// Point was selected - add to sets of selected indices and selected points.
+			if (	isNodeWithinBounds(datapoint.getNode(), minX, minY, maxX, maxY) &&
+					!activeMDSPoints.containsKey((int)datapoint.getExtraValue())
+				) {
+				// Set dirty flags.
+				changeInSelectionDetected				= true;
+				changeInSelectionDetected_localScope	= true;
+				
+				// Update collection of selected points.
+				activeMDSPoints.put((int)datapoint.getExtraValue(), datapoint);
+				
+				// Update set of values added to selection in this action.
+				pointsToAddToSelection.add(datapoint);
+				
+				// Mark data point as manipulated in this step.
+				pointsManipulatedInCurrSelectionStep.add((int) datapoint.getExtraValue());
 			}
 		}
-		
-		// Else if control is down: Remove selected points in chose area from selection (in data series 0).
-		else {
-			// Iterate over selected points.
-			for (XYChart.Data<Number, Number> datapoint : activeDataSeries.getData()) {
-				// Point was deselected - remove from of selected points and selected indices.
-				if (isNodeWithinBounds(datapoint.getNode(), minX, minY, maxX, maxY) &&
-					activeMDSPoints.containsKey((int)datapoint.getExtraValue())
-				) {
-					// Set dirty flags.
-					changeInSelectionDetected				= true;
-					changeInSelectionDetected_localScope	= true;
-					
-					// Update collection of selected points.
-					activeMDSPoints.remove((int)datapoint.getExtraValue());
-					
-					// Update set of values removed from selection in this action.
-					pointsToRemoveFromSelection.add(datapoint);			
-					
-					// Mark data point as manipulated in this step.
-					pointsManipulatedInCurrSelectionStep.add((int) datapoint.getExtraValue());
-				}
-			}
-			
-			// Iterate over all filtered points.
-			for (XYChart.Data<Number, Number> datapoint : inactiveDataSeries.getData()) {
-				// Point was deselected - remove from of selected points and selected indices.
-				if (!isNodeWithinBounds(datapoint.getNode(), minX, minY, maxX, maxY)	&&
-					!activeMDSPoints.containsKey((int)datapoint.getExtraValue())		&&
+
+		// Iterate over all selected points; remove, if not in selected area anymore.
+		for (XYChart.Data<Number, Number> datapoint : activeDataSeries.getData()) {
+			if (	!isNodeWithinBounds(datapoint.getNode(), minX, minY, maxX, maxY) 	&&
+					activeMDSPoints.containsKey((int)datapoint.getExtraValue())			&&
 					pointsManipulatedInCurrSelectionStep.contains((int) datapoint.getExtraValue())
 				) {
-					// Set dirty flags.
-					changeInSelectionDetected				= true;
-					changeInSelectionDetected_localScope	= true;
-					
-					// Update collection of selected points.
-					activeMDSPoints.remove((int)datapoint.getExtraValue());
-					
-					// Update set of values removed from selection in this action.
-					pointsToAddToSelection.add(datapoint);						
-				}
+				// Set dirty flags.
+				changeInSelectionDetected				= true;
+				changeInSelectionDetected_localScope	= true;
+				
+				// Update collection of selected points.
+				activeMDSPoints.remove((int)datapoint.getExtraValue());
+				
+				// Update set of values removed from selection in this action.
+				pointsToRemoveFromSelection.add(datapoint);
 			}
 		}
-		
+			
 		// Incorporate identified selection changes into data point's series associations.
 		if (changeInSelectionDetected) {
+			System.out.println("change det. - " + pointsToAddToSelection.size() + ", " + activeMDSPoints.size());
 			// Add newly selected data points to selection.
 			for (XYChart.Data<Number, Number> newlySelectedDataPoint : pointsToAddToSelection) {
 				// Change selection status.
@@ -1036,9 +1007,6 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 				// Change selection status.
 				changeDataPointSelectionStatus(newlyDeselectedDataPoint, false);
 			}
-			
-    		// Refresh other charts.
-    		analysisController.integrateMDSSelection(activeMDSPoints.keySet(), false);
     		
     		// Reset flag.
     		changeInSelectionDetected = false;
@@ -1047,7 +1015,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
     		updateLegendLabels();
     		
     		// Highlight reference TM.
-    		markReferenceTM();
+//    		markReferenceTM();
 		}
 	}
 	
@@ -1091,23 +1059,51 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	
 	@Override
 	public void processEndOfSelectionManipulation()
-	{
+	{	
+		// Reset dirty flag.
+		changeInSelectionDetected_localScope = false;
+		
+		/* 
+		 * Refresh local scope visualization.
+		 */
+		
+		// Integrate into dataspace.
+		integrateIntoDataspace(isCtrlDown);		
+		
+		// Add event listeners to active and inactive data series (may contain new members).
+		initHoverEventListeners(activeDataSeries);
+		initHoverEventListeners(inactiveDataSeries);
+		
 		// Clear selection-step-dependent data collections.
 		pointsManipulatedInCurrSelectionStep.clear();
-		
-		// Update local scope.
-		if (changeInSelectionDetected_localScope) {
-			// Reset dirty flag.
-			changeInSelectionDetected_localScope = false;
-			
-			// Refresh local scope visualization.
-			analysisController.integrateMDSSelection(activeMDSPoints.keySet(), true);
-			
-			// Add event listeners to active and inactive data series (may contain new members).
-			initHoverEventListeners(activeDataSeries);
-			initHoverEventListeners(inactiveDataSeries);
-		}
 	}
+	
+	/**
+	 * Integrates selected data into global dataspace.
+	 * @param inclusiveMode Determines whether new data should be added (included) or be added exclusively. 
+	 */
+	private void integrateIntoDataspace(boolean inclusiveMode)
+	{
+		// Collected selected indices.
+		Set<Integer> selectedIndices = new HashSet<Integer>();
+		System.out.println("incl. = " + inclusiveMode);
+		// If CTRL is down: Consider all currently selected datapoints.
+		if (inclusiveMode) {
+			selectedIndices.addAll(activeMDSPoints.keySet());
+		}
+		// Otherwise: Consider only datapoints selected in the current step.
+		else {
+			selectedIndices.addAll(pointsManipulatedInCurrSelectionStep);
+			selectedIndices.retainAll(activeMDSPoints.keySet());
+		}
+		
+		System.out.println("sel. = " + selectedIndices.size() + ", aMDSp.size = " + activeMDSPoints.keySet().size());
+		
+		
+		// Integration selection.
+		analysisController.integrateSelectionOfDataPoints(selectedIndices, inclusiveMode, DatapointIDMode.INDEX, true);
+	}
+	
 	
 	@Override
 	public Pair<Integer, Integer> provideOffsets()

@@ -438,13 +438,13 @@ public class CategoricalHeatmap extends HeatMap
 				}
 				// Otherwise (if cell content is not in valid range): Mark cell as invalid.
 				else {
-					// Draw rectangle.
-					//gc.strokeRect(cellCoordinates[0], cellCoordinates[1], cellWidth - 1, cellHeight - 1);
+					gc.setStroke(Color.GREY);
 					// Mark rectangle as invalid.
 					gc.strokeLine(	cellCoordinates[0], cellCoordinates[1], 
 									cellCoordinates[0] + cellWidth, cellCoordinates[1] + cellHeight);
 					gc.strokeLine(	cellCoordinates[0] + cellWidth, cellCoordinates[1], 
 									cellCoordinates[0], cellCoordinates[1] + cellHeight);
+					gc.setStroke(Color.BLACK);
 				}
 				
 				
@@ -591,9 +591,6 @@ public class CategoricalHeatmap extends HeatMap
 		}
 		
 		else if (taskType == TaskType.COLOR_LEGEND_MODIFIED) {
-			System.out.println("Refreshing after color legend modification.");
-			log("Refreshing after color legend modification.");
-			
 			// Refresh heatmap.
 			this.refresh();
 		}
