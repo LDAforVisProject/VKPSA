@@ -992,7 +992,6 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 			
 		// Incorporate identified selection changes into data point's series associations.
 		if (changeInSelectionDetected) {
-			System.out.println("change det. - " + pointsToAddToSelection.size() + ", " + activeMDSPoints.size());
 			// Add newly selected data points to selection.
 			for (XYChart.Data<Number, Number> newlySelectedDataPoint : pointsToAddToSelection) {
 				// Change selection status.
@@ -1015,7 +1014,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
     		updateLegendLabels();
     		
     		// Highlight reference TM.
-//    		markReferenceTM();
+    		markReferenceTM();
 		}
 	}
 	
@@ -1086,7 +1085,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	{
 		// Collected selected indices.
 		Set<Integer> selectedIndices = new HashSet<Integer>();
-		System.out.println("incl. = " + inclusiveMode);
+		
 		// If CTRL is down: Consider all currently selected datapoints.
 		if (inclusiveMode) {
 			selectedIndices.addAll(activeMDSPoints.keySet());
@@ -1096,9 +1095,6 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 			selectedIndices.addAll(pointsManipulatedInCurrSelectionStep);
 			selectedIndices.retainAll(activeMDSPoints.keySet());
 		}
-		
-		System.out.println("sel. = " + selectedIndices.size() + ", aMDSp.size = " + activeMDSPoints.keySet().size());
-		
 		
 		// Integration selection.
 		analysisController.integrateSelectionOfDataPoints(selectedIndices, inclusiveMode, DatapointIDMode.INDEX, true);

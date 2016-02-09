@@ -429,13 +429,15 @@ public class CategoricalHeatmap extends HeatMap
 				// Adapt cell opacity to current hover events (i.e.: Lower opacity, if other LDA config. is hovered over). Ignore transparent cells.
 				cellColor = adjustCellOpacity(cellColor, ldaMatchID);
 				
-				// If cell color not black (i.e. values in viable range): Fill cell.
-				if (cellColor != Color.BLACK) {
+				// If cell value in viable range: Fill cell.
+				//if (cellColor != Color.BLACK) {
+				if (binMatrix[i][j] >= selectedValueExtrema.getKey() && binMatrix[i][j] <= selectedValueExtrema.getValue()) {
 					// Set fill color.
 					gc.setFill(cellColor);
 					// Draw cell.
 					gc.fillRect(cellCoordinates[0], cellCoordinates[1], cellWidth, cellHeight);
 				}
+				
 				// Otherwise (if cell content is not in valid range): Mark cell as invalid.
 				else {
 					gc.setStroke(Color.GREY);

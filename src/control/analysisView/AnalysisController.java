@@ -493,7 +493,7 @@ public class AnalysisController extends Controller
 	{
 		// Check if there is any change in the set of selected datasets.
 		boolean changeDetected = dataspace.integrateSelection(newlySelectedLocalIndices, isAddition, idMode);
-		System.out.println("change det. = " + changeDetected);
+		
 		// 2. 	Update related (i.e. dependent on the set of selected entities) datasets and visualization, if there were any changes made.
 		if (changeDetected || forceRefresh)
 			refreshVisualizationsAfterLocalSelection(isAddition);
