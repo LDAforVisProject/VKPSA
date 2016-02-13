@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import view.components.controls.ColorLegend.ColorScale;
+import view.components.controls.colorLegend.ColorScale;
 import model.LDAConfiguration;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;

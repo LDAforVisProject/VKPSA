@@ -1,4 +1,4 @@
-package view.components.spinner;
+package view.components.controls.spinner;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;

@@ -19,8 +19,8 @@ import javafx.scene.paint.Color;
 import javafx.util.Pair;
 import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
-import view.components.controls.ColorLegend.ColorLegend;
-import view.components.controls.ColorLegend.ColorScale;
+import view.components.controls.colorLegend.ColorLegend;
+import view.components.controls.colorLegend.ColorScale;
 import view.components.rubberbandselection.RubberBandSelection;
 
 public abstract class HeatMap extends VisualizationComponent

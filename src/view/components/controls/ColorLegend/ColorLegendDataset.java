@@ -1,4 +1,4 @@
-package view.components.controls.ColorLegend;
+package view.components.controls.colorLegend;
 
 import model.LDAConfiguration;
 import javafx.scene.paint.Color;

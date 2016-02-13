@@ -8,7 +8,7 @@ import java.util.Set;
 
 import control.analysisView.AnalysisController;
 import view.components.DatapointIDMode;
-import view.components.controls.ColorLegend.ColorScale;
+import view.components.controls.colorLegend.ColorScale;
 import view.components.legacy.BinnedOccurenceEntity;
 import view.components.legacy.VisualizationComponent_Legacy;
 import view.components.rubberbandselection.ISelectableComponent;

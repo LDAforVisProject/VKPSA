@@ -4,8 +4,8 @@ package view.components.heatmap;
 import java.util.Set;
 
 import view.components.DatapointIDMode;
-import view.components.controls.ColorLegend.ColorLegend;
-import view.components.controls.ColorLegend.ColorScale;
+import view.components.controls.colorLegend.ColorLegend;
+import view.components.controls.colorLegend.ColorScale;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.chart.NumberAxis;

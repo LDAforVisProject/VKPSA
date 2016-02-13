@@ -1,4 +1,4 @@
-package view.components.controls.ColorLegend;
+package view.components.controls.colorLegend;
 
 import java.net.URL;
 import java.util.Map;

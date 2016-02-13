@@ -1,4 +1,4 @@
-package view.components.controls.ColorLegend;
+package view.components.controls.colorLegend;
 
 import javafx.geometry.Orientation;
 import javafx.scene.image.ImageView;

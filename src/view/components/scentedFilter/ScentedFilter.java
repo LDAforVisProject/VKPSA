@@ -33,9 +33,9 @@ import javafx.util.Pair;
 import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
 import view.components.VisualizationComponentType;
+import view.components.controls.spinner.ISpinnerListener;
+import view.components.controls.spinner.NumericSpinner;
 import view.components.rubberbandselection.RubberBandSelection;
-import view.components.spinner.ISpinnerListener;
-import view.components.spinner.NumericSpinner;
 
 public class ScentedFilter extends VisualizationComponent implements ISpinnerListener
 {
