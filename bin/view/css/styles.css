@@ -1,27 +1,97 @@
-#alpha_barchart {
-	
-}
-
 /* Defines color for discarded data series in scatterchart. */
 .default-color0.chart-symbol { /* hollow circle */
-    -fx-background-color: #CACACA, white;
+    -fx-background-color: lightgrey, white;
     -fx-background-insets: 0, 2;
-    -fx-background-radius: 5px;
-    -fx-padding: 5px;
+    -fx-background-radius: 4px;
+    -fx-padding: 4px;
 }
 
-/* Defines color for filtered data series in scatterchart. */
+/* Defines color for active data series in scatterchart. */
 .default-color1.chart-symbol {
-    -fx-background-color: blue;
+    -fx-background-color: darkgrey;
     -fx-background-insets: 0, 2;
-    -fx-background-radius: 5px;
-    -fx-padding: 5px;
+    -fx-background-radius: 4px;
+    -fx-padding: 4px;
 }
 
 /* Defines color for selected data series in scatterchart. */
 .default-color2.chart-symbol {
-    -fx-background-color: red;
+    -fx-background-color: blue;
     -fx-background-insets: 0, 2;
-    -fx-background-radius: 5px;
-    -fx-padding: 5px;
+    -fx-background-radius: 4px;
+    -fx-padding: 4px;
+}
+
+/* 
+ * Range Slider
+ */
+
+.range-slider .range-bar {
+	-fx-background-insets: 2;	
+}
+
+.range-slider:vertical .range-bar {
+	-fx-background-color: transparent;
+	-fx-border-color: transparent;
+	-fx-opacity: 0;
+}
+
+.range-slider:vertical .track {
+	-fx-opacity:0;
+}
+
+
+/* 
+ * Here: Customizations for scroll-panes.
+ */
+
+.scroll-bar:horizontal .track,
+.scroll-bar:vertical .track {
+ -fx-background-color: transparent;
+ -fx-border-color:transparent;
+ -fx-background-radius: 2em;
+}
+
+.scroll-bar:vertical .track-background,
+.scroll-bar:horizontal .track-background {
+ -fx-background-color: transparent;
+ -fx-background-insets: 0;
+ -fx-background-radius: 2em;
+}
+
+/*
+ * From here: CSS for numeric spinner. 
+ */
+
+#NumberField {
+    -fx-border-width: 1;
+    -fx-border-color: lightgray;
+    -fx-background-insets:1;
+    -fx-border-radius:3 0 0 3;
+    /*    -fx-border-radius:0 0 0 0;*/
+}
+
+#NumberSpinnerArrow {
+    -fx-fill: gray;
+    -fx-stroke: gray;
+    /*        -fx-effect: innershadow( gaussian , black , 2 , 0.6 , 1 , 1 )*/
+}
+
+#ButtonsBox {
+    -fx-border-color:lightgray;
+    -fx-border-width: 1 1 1 0;
+    -fx-border-radius: 0 3 3 0;
+    /*    -fx-border-radius: 0 0 0 0;*/
+}
+
+#SpinnerButtonUp {
+    -fx-background-insets: 0;
+    -fx-background-radius:0 3 0 0;
+    /*    -fx-background-radius:0;*/
+}
+
+#SpinnerButtonDown {
+    -fx-background-insets: 0;
+    -fx-background-radius:0 0 3 0;
+    /*    -fx-background-radius:0;*/
 }

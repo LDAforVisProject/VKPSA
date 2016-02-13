@@ -6,9 +6,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import netscape.javascript.JSObject;
 import javafx.beans.value.ChangeListener;
@@ -16,14 +18,15 @@ import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker.State;
 import javafx.fxml.FXML;
 import javafx.scene.web.WebView;
+import javafx.util.Pair;
 import model.LDAConfiguration;
-import model.workspace.WorkspaceAction;
-import model.workspace.tasks.Task_LoadTopicDistancesForSelection;
+import model.workspace.TaskType;
+import model.workspace.tasks.Task_LoadTopicDistancesForSelection_CD;
 
 /**
  * Controller for chord diagram in local scope instance.
  * @author RM
- *
+ * @deprecated
  */
 public class ChordDiagramController extends LocalScopeVisualizationController 
 {
@@ -35,7 +38,7 @@ public class ChordDiagramController extends LocalScopeVisualizationController
 	/**
 	 * Path to HTML template for chord diagram visualization.
 	 */
-	private final Path templatePath				= Paths.get("src/js/chordDiagram.html");
+	private final Path templatePath			= Paths.get("src/js/chordDiagram.html");
 	
 	/**
 	 * Holds original, unchanged HTML code.
@@ -45,7 +48,7 @@ public class ChordDiagramController extends LocalScopeVisualizationController
 	/**
 	 * Task executing the loading of the current topic data (and holding the results).
 	 */
-	private Task_LoadTopicDistancesForSelection topicLoadingTask;
+	private Task_LoadTopicDistancesForSelection_CD topicLoadingTask;
 	
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1)
@@ -87,15 +90,6 @@ public class ChordDiagramController extends LocalScopeVisualizationController
 		localScope.refreshPTC(ldaID1, ldaID2, topicID1, topicID2);
 	}
 	
-	/**
-	 * Propagates information about hover over a LDA config.
-	 * @param ldaID
-	 */
-	public void propagateLDAHoverInformation(final int ldaID)
-	{
-		localScope.propagateLDAHoverInformation(ldaID);
-	}
-	
     /**
      * Process information that no group is hovered anymore.
      */
@@ -111,23 +105,31 @@ public class ChordDiagramController extends LocalScopeVisualizationController
 	}
 
 	@Override
-	public void refresh(ArrayList<LDAConfiguration> selectedLDAConfigurations,
-						int maxNumberOfTopics, int numberOfTopics,
+	public void refresh(ArrayList<Pair<Integer, Integer>> selectedTopicConfigurations,
 						int maxNumberOfKeywords, int numberOfKeywords,
 						boolean updateData)
 	{
-		if (selectedLDAConfigurations.size() > 0) {
-			// Load topic distance data for selection.
-			topicLoadingTask = new Task_LoadTopicDistancesForSelection(workspace, WorkspaceAction.LOAD_SPECIFIC_TOPIC_DISTANCES, null, selectedLDAConfigurations, localScope.getFilterThresholds());
-			topicLoadingTask.addListener(this);
-			
-			// Write list to file.
-			(new Thread(topicLoadingTask)).start();
+		if (selectedTopicConfigurations.size() > 0) {
+			System.out.println("### WARNING ### ChordDiagram is deprecated and no longer supported.");
+			// Extract LDA configuration ID from set. Workaround (topic IDs should be considered too)..
+//			Set<Integer> ldaConfigIDSet			= new HashSet<Integer>();
+//			ArrayList<Integer> ldaConfigIDList	= new ArrayList<Integer>();
+//			for (Pair<Integer, Integer> topicConfig : selectedTopicConfigurations) {
+//				ldaConfigIDSet.add(topicConfig.getKey());
+//			}
+//			ldaConfigIDList.addAll(ldaConfigIDSet);
+//			
+//			// Load topic distance data for selection.
+//			topicLoadingTask = new Task_LoadTopicDistancesForSelection_CD(workspace, WorkspaceAction.LOAD_SPECIFIC_TOPIC_DISTANCES, null, ldaConfigIDList, localScope.getFilterThresholds());
+//			topicLoadingTask.addListener(this);
+//			
+//			// Write list to file.
+//			(new Thread(topicLoadingTask)).start();
 		}
 	}
 	
 	@Override
-	public void notifyOfTaskCompleted(final WorkspaceAction workspaceAction)
+	public void notifyOfTaskCompleted(final TaskType workspaceAction)
 	{
 		content_webview.getEngine().loadContent(adaptHTMLTemplate(templateHTMLCode));
 	}
@@ -233,4 +235,8 @@ public class ChordDiagramController extends LocalScopeVisualizationController
 		return null;
 	}
 
+	@Override
+	public void refresh()
+	{
+	}
 }

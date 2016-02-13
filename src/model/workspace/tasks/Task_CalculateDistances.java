@@ -12,7 +12,7 @@ import model.LDAConfiguration;
 import model.workspace.Dataset;
 import model.workspace.DatasetDistance;
 import model.workspace.Workspace;
-import model.workspace.WorkspaceAction;
+import model.workspace.TaskType;
 
 /**
  * Calculates distances (requires loaded raw topic data).
@@ -23,7 +23,7 @@ import model.workspace.WorkspaceAction;
 public class Task_CalculateDistances extends WorkspaceTask
 {
 
-	public Task_CalculateDistances(Workspace workspace, WorkspaceAction workspaceAction, final Map<String, Integer> additionalOptionSet)
+	public Task_CalculateDistances(Workspace workspace, TaskType workspaceAction, final Map<String, Integer> additionalOptionSet)
 	{
 		super(workspace, workspaceAction, additionalOptionSet);
 	}
@@ -61,9 +61,11 @@ public class Task_CalculateDistances extends WorkspaceTask
 		boolean calculateAllDistances = additionalOptionSet == null	|| 
 										additionalOptionSet != null && (additionalOptionSet.get("forceDistanceRecalculation") == 1);
 		
-	
-//		for (int i : listOfLDAConfigsWithoutDistances)
-//			System.out.println("\tblub - " + i);
+		System.out.println("ldaConfigCount = " + ldaConfigurations.size());
+		System.out.println("without distances = " + listOfLDAConfigsWithoutDistances.size());
+		System.out.println("datasetMap.size = " + datasetMap.size());
+		System.out.println("calculateAllDistances = " + calculateAllDistances);
+		
 		
 		/*
 		 * Compare all datasets with each other, calculate distances.

@@ -141,7 +141,7 @@ public class CoreController extends Controller
 				
 				// Is controller already initiated? If so, node was already created.
 				if (!viewNodeMap.containsKey("analyze")) {
-					initView("analyze", "/view/SII/SII_Content_Analysis.fxml");
+					initView("analyze", "/view/fxml/content/Analysis.fxml");
 					
 					// Set scene and draw visualizations.
 					((AnalysisController)controllerMap.get("analyze")).setScene(scene);
@@ -200,10 +200,8 @@ public class CoreController extends Controller
 			// Add to content pane.
 			pane_content.getChildren().add(contentNode);
 			
-			// Set current workspace in analysis controller.
-			controller.setWorkspace(workspace);
-			// Set protocol elements.
-			controller.setProtocolElements(protocol_progressindicator, protocol_textarea);
+			// Set current workspace and protocol elements in analysis controller.
+			controller.setReferences(workspace, protocol_progressindicator, protocol_textarea);
 			
 			// Ensure resizability of content.
 			AnchorPane.setTopAnchor(contentNode, 0.0);
@@ -226,7 +224,7 @@ public class CoreController extends Controller
 		 * Init actual data view.
 		 */
 		
-		initView("dataview", "/view/SII/SII_Content_Data.fxml");
+		initView("dataview", "/view/fxml/content/Data.fxml");
 		DataViewController dvController	= (DataViewController)controllerMap.get("dataview");
 		// Set reference to CoreController.
 		dvController.setCoreController(this);
@@ -236,7 +234,7 @@ public class CoreController extends Controller
 		 */
 		
         String[] viewIDs				= {"load", "preprocess", "generate"};
-        String[] fxmlFilePaths			= {"/view/SII/SII_Content_Load.fxml", "/view/SII/SII_Content_Postprocess.fxml", "/view/SII/SII_Content_Generate.fxml"};
+        String[] fxmlFilePaths			= {"/view/fxml/content/Load.fxml", "/view/fxml/content/Postprocess.fxml", "/view/fxml/content/Generate.fxml"};
         
         try {
         	// Add all relevant sub-views to DataView.
@@ -254,10 +252,8 @@ public class CoreController extends Controller
 	        	// Get and store controller.
 	        	controllerMap.put(viewID, (Controller)fxmlLoader.getController());
 				
-	        	// Set current workspace in analysis controller.	        	
-				controllerMap.get(viewID).setWorkspace(workspace);
-				// Set protocol elements.
-				controllerMap.get(viewID).setProtocolElements(protocol_progressindicator, protocol_textarea);
+	        	// Set current workspace in analysis controller.
+	        	controllerMap.get(viewID).setReferences(workspace, protocol_progressindicator, protocol_textarea);				
 				
 				// Set dataViewController in respective sub-controller.
 				((DataSubViewController)controllerMap.get(viewID)).setDataViewController(dvController);

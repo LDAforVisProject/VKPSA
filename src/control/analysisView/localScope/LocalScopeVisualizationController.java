@@ -4,11 +4,14 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
-import view.components.LocalScopeInstance;
+import view.components.legacy.LocalScopeInstance;
 import model.LDAConfiguration;
 import model.workspace.Workspace;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
+import javafx.util.Pair;
 import control.Controller;
 
 public abstract class LocalScopeVisualizationController extends Controller
@@ -71,10 +74,13 @@ public abstract class LocalScopeVisualizationController extends Controller
 
 	/**
 	 * Redraw visualization.
-	 * @param maxNumberOfKeywords 
-	 * @param maxNumberOfTopics 
+	 * @param selectedTopicConfigurations
+	 * @param maxNumberOfKeywords
+	 * @param numberOfKeywords
+	 * @param updateData
 	 */
-	public abstract void refresh(ArrayList<LDAConfiguration> selectedFilteredLDAConfigurations, int maxNumberOfTopics, int numberOfTopics, int maxNumberOfKeywords, int numberOfKeywords, boolean updateData);
+	public abstract void refresh(	ArrayList<Pair<Integer, Integer>> selectedTopicConfigurations, 
+									int maxNumberOfKeywords, int numberOfKeywords, boolean updateData);
 
 	/**
 	 * Resize visualization.
@@ -93,11 +99,6 @@ public abstract class LocalScopeVisualizationController extends Controller
 		this.localScope = localScope;
 	}
 	
-	public void setWorkspace(Workspace workspace)
-	{
-		this.workspace = workspace;
-	}
-	
 	protected abstract void updateData();
 	
 	/**
@@ -114,4 +115,18 @@ public abstract class LocalScopeVisualizationController extends Controller
 	 * Clears visualization.
 	 */
 	public abstract void clear();
+	
+	@Override
+	public void setReferences(Workspace workspace, ProgressIndicator logPI, TextArea logTA)
+	{
+		this.workspace						= workspace;
+		
+		this.log_protocol_progressindicator = logPI;
+		this.log_protocol_textarea			= logTA;
+	}
+
+	/**
+	 * Refreshes visualization, using the existing data.
+	 */
+	public abstract void refresh();
 }

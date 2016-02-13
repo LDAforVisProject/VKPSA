@@ -4,56 +4,60 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.controlsfx.control.PopOver;
+
 import model.AnalysisDataspace;
 import model.LDAConfiguration;
 import model.workspace.Workspace;
-
-import org.controlsfx.control.RangeSlider;
-
 import control.Controller;
 import control.analysisView.localScope.LocalScopeVisualizationType;
-import view.components.DistanceDifferenceCorrelationLinechart;
-import view.components.DistancesBarchart;
-import view.components.LocalScopeInstance;
-import view.components.heatmap.HeatMap;
-import view.components.heatmap.HeatmapDataBinding;
-import view.components.heatmap.HeatmapDataType;
-import view.components.mdsScatterchart.MDSScatterchart;
+import view.components.DatapointIDMode;
+import view.components.VisualizationComponent;
+import view.components.VisualizationComponentType;
+import view.components.heatmap.CategoricalHeatmap;
+import view.components.heatmap.HeatmapOptionset;
+import view.components.legacy.LocalScopeInstance;
+import view.components.legacy.mdsScatterchart.MDSScatterchart;
+import view.components.scatterchart.ScatterchartDataset;
+import view.components.scatterchart.ScatterchartOptionset;
+import view.components.scatterchart.ParameterSpaceScatterchart;
+import view.components.scentedFilter.ScentedFilter;
+import view.components.scentedFilter.ScentedFilterDataset;
+import view.components.scentedFilter.ScentedFilterOptionset;
+import view.components.settingsPopup.SettingsPanel;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.chart.BarChart;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
-import javafx.scene.chart.StackedBarChart;
-import javafx.scene.chart.ValueAxis;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.Accordion;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TextField;
+import javafx.scene.control.Separator;
+import javafx.scene.control.SingleSelectionModel;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.util.Pair;
 
 public class AnalysisController extends Controller
@@ -65,37 +69,56 @@ public class AnalysisController extends Controller
 	private Scene scene;
 	
 	/*
-	 * Accordion and other elements for options section.
+	 * Tab pane and other elements for options section.
 	 */
 	
-	private @FXML Accordion accordion_options;
-	// Panes in accordion.
-	private @FXML TitledPane filter_titledPane;
-	private @FXML TitledPane mdsDistEval_titledPane;
-	private @FXML TitledPane localScope_titledPane;
-	private @FXML TitledPane paramSpace_titledPane;
+	/**
+	 * TabPane for filters and settings.
+	 */
+	private @FXML TabPane options_tabpane;
+	/**
+	 * Tab for settings. 
+	 */
+	private @FXML Tab settings_tab;
+	/**
+	 * Tab for filters. 
+	 */
+	private @FXML Tab filter_tab;
 	
 	/*
 	 * Anchorpanes hosting visualizations. 
 	 */
 	
 	/**
-	 * For MDS scatterchart.
+	 * Root pane.
+	 */
+	private @FXML AnchorPane analysisRoot_anchorPane;
+	
+	/**
+	 * For settings.
+	 */
+	private @FXML AnchorPane settings_anchorpane;
+	/**
+	 * For filter settings.
+	 */
+	private @FXML AnchorPane filter_anchorpane;
+	
+	
+	// For global scatterchart.
+
+	/**
+	 * AnchorPane holding scroll pane (important for zoom). 
 	 */
 	private @FXML AnchorPane mds_anchorPane;
 	/**
-	 * For distance evaluation barchart.
+	 * ScrollPane holding component.
 	 */
-	private @FXML AnchorPane distEval_anchorPane;
+	private @FXML ScrollPane mds_content_scrollPane;
+	/**
+	 * AnchorPane holding actual scatterchart. 
+	 */
+	private @FXML AnchorPane mds_content_anchorPane;
 	
-	/**
-	 * For both parameter space distribution heatmaps.
-	 */
-	private @FXML AnchorPane paramSpace_distribution_anchorPane;
-	/**
-	 * For the parameter space distribution heatmap (using filtered data).
-	 */
-	private @FXML AnchorPane paramSpace_distribution_anchorPane_filtered;
 	/**
 	 * For the parameter space distribution heatmap (using selected data).
 	 */
@@ -106,23 +129,18 @@ public class AnalysisController extends Controller
 	 */
 	private @FXML AnchorPane localScope_ptc_anchorPane;
 	/**
-	 * For local scope visualization(s): Chord diagram.
+	 * For local scope visualization(s): Comparison of topic models.
 	 */
-	private @FXML AnchorPane localscope_cd_anchorPane;
-	
-	/**
-	 * For distance correlation linechart.
-	 */
-	private @FXML AnchorPane paramSpace_correlation_anchorPane;
+	private @FXML AnchorPane localscope_tmc_anchorPane;
 	
 	/*
-	 * MDS Scatterchart.
+	 * Global Scatterchart.
 	 */
 	
 	/**
 	 * MDSScatterchart component.
 	 */
-	private MDSScatterchart mdsScatterchart;
+	private MDSScatterchart globalScatterplot;
 	/**
 	 * Actual scatterchart.
 	 */
@@ -132,31 +150,6 @@ public class AnalysisController extends Controller
 	 */
 	private @FXML Canvas mdsHeatmap_canvas;
 	
-	// Following: Controls for MDS heatmap.
-	/**
-	 * Checkbox for heatmap.
-	 */
-	private @FXML CheckBox checkbox_mdsHeatmap_distribution_dynAdjustment;
-	/**
-	 * Slider specifying MDS heatmap granularity.
-	 */
-	private @FXML Slider slider_mds_distribution_granularity;
-	/**
-	 * Specifies whether or not the MDS heatmap is to be shown.
-	 */
-	private @FXML CheckBox showMSDHeatmap_checkbox;
-	
-	/*
-	 * Distances barchart. 
-	 */
-	
-	/**
-	 * DistancesBarchart componenet.
-	 */
-	private DistancesBarchart distancesBarchart;
-	
-	private @FXML BarChart<String, Number> barchart_distances;
-	private @FXML NumberAxis numberaxis_distanceEvaluation_yaxis;
 	private @FXML CheckBox checkbox_logarithmicDistanceBarchart;
 	
 	/*
@@ -170,83 +163,57 @@ public class AnalysisController extends Controller
 	 * Parameter Space - Distribution.
 	 */
 	
-	// Components for heatmap showing filtered data:
-	
-	private HeatMap parameterspace_heatmap_filtered;
-	
-	private @FXML Canvas paramSpaceHeatmap_canvas_filtered;
-	private @FXML NumberAxis numberaxis_parameterSpace_xaxis_filtered;
-	private @FXML NumberAxis numberaxis_parameterSpace_yaxis_filtered;
-	private @FXML ToggleButton button_relativeView_paramDist_filtered;
-	
-	// Components for heatmap showing selected data:
-	
-	private HeatMap parameterspace_heatmap_selected;
-	
-	private @FXML Canvas paramSpaceHeatmap_canvas_selected;
-	private @FXML NumberAxis numberaxis_parameterSpace_xaxis_selected;
-	private @FXML NumberAxis numberaxis_parameterSpace_yaxis_selected;
-	private @FXML ToggleButton button_relativeView_paramDist_selected;
+	/**
+	 * ParameterSpaceScatterchart for display of parameter values.
+	 */
+	private ParameterSpaceScatterchart paramSpaceScatterchart;
 	
 	// Heatmap setting controls (and metadata).
-	
-	private @FXML ComboBox<String> combobox_parameterSpace_distribution_xAxis;
-	private @FXML ComboBox<String> combobox_parameterSpace_distribution_yAxis;
-	private @FXML Slider slider_parameterSpace_distribution_granularity;
-	private @FXML CheckBox checkbox_parameterSpace_distribution_dynAdjustment;
-	private @FXML ComboBox<String> paramDistributionHeatmap_datasetBinding_combobox;
+	private @FXML ToggleButton button_relativeView_paramDist;
 	
 	/*
 	 * Local scope.
 	 */
 	
 	/**
-	 * Parallel tag bloud in local scope.
+	 * Heatmap for comparison of topic models.
+	 */	
+	CategoricalHeatmap tmcHeatmap;
+	
+	/**
+	 * Parallel tag cloud in local scope.
 	 */
 	private LocalScopeInstance localScopeInstance;
-	
-	// Local scope options.
-	 
-	private @FXML Slider slider_localScope_numTopicsToUse;
-	private @FXML TextField textfield_localScope_numTopicsToUse;
-	private @FXML Slider slider_localScope_numKeywordsToUse;
-	private @FXML TextField textfield_localScope_numKeywordsToUse;
-	
+
 	/*
 	 * Filter controls.
 	 */
 	
-	private @FXML ScrollPane scrollpane_filter;
-	private @FXML GridPane gridpane_parameterConfiguration;
-	
-	private Map<String, StackedBarChart<String, Integer>> barchartsForFilterControls;
-	private @FXML StackedBarChart<String, Integer> barchart_alpha;
-	private @FXML StackedBarChart<String, Integer> barchart_eta;
-	private @FXML StackedBarChart<String, Integer> barchart_kappa;
-	
-	private Map<String, RangeSlider> rangeSliders;
-	private @FXML VBox vbox_alpha;
-	private @FXML VBox vbox_eta;
-	private @FXML VBox vbox_kappa;
-	
-	private Map<String, Pair<TextField, TextField>> textfieldsForFilterControls;
-	private @FXML TextField alpha_min_textfield;
-	private @FXML TextField alpha_max_textfield;
-	private @FXML TextField eta_min_textfield;
-	private @FXML TextField eta_max_textfield;
-	private @FXML TextField kappa_min_textfield;
-	private @FXML TextField kappa_max_textfield;
+	/**
+	 * Container for scented filters.
+	 */
+	private VBox filters_vbox;
+	/**
+	 * Scented filters for parameters.
+	 */
+	private ArrayList<ScentedFilter> filters;
 	
 	/*
 	 * Setting shortcuts icons.
 	 */
 	
 	private @FXML ImageView settings_mds_icon;
-	private @FXML ImageView settings_distEval_icon;
 	private @FXML ImageView settings_paramDist_icon;
-	private @FXML ImageView settings_paramDistCorr_icon;
 	private @FXML ImageView settings_localScope_icon;
 	
+	/*
+	 * Settings panel and related elements.
+	 */
+	
+	/**
+	 * Settings panel. 
+	 */
+	private SettingsPanel settingsPanel;
 	
 	// -----------------------------------------------
 	// 				Data.
@@ -288,107 +255,40 @@ public class AnalysisController extends Controller
 		// Init GUI elements.
 		initUIElements();
 		addResizeListeners();
-		
-		// Expand filter pane.
-		accordion_options.setExpandedPane(filter_titledPane);
-		//filter_titledPane.lookup(".title").setStyle("-fx-font-weight:bold");
 	}
 	
 	private void addResizeListeners()
 	{
-		/*
-		 * Add resize listeners for parameter space anchor pane.
-		 */
+		// Define list of anchor panes / other elements to add resize listeners to.
+		ArrayList<Pane> anchorPanesToResize = new ArrayList<Pane>();
+
+		anchorPanesToResize.add(paramSpace_distribution_anchorPane_selected);
+		anchorPanesToResize.add(mds_anchorPane);
+		anchorPanesToResize.add(localscope_tmc_anchorPane);
+		anchorPanesToResize.add(localScope_ptc_anchorPane);
+		anchorPanesToResize.add(settings_anchorpane);
+		anchorPanesToResize.add(filter_anchorpane);
 		
-		paramSpace_distribution_anchorPane_filtered.widthProperty().addListener(new ChangeListener<Number>() {
-		    @Override 
-		    public void changed(ObservableValue<? extends Number> observableValue, Number oldWidth, Number newWidth)
-		    {
-		        resizeElement(paramSpace_distribution_anchorPane_filtered, newWidth.doubleValue(), 0);
-		    }
-		});
-		
-		paramSpace_distribution_anchorPane_filtered.heightProperty().addListener(new ChangeListener<Number>() {
-		    @Override 
-		    public void changed(ObservableValue<? extends Number> observableValue, Number oldHeight, Number newHeight) 
-		    {
-		    	resizeElement(paramSpace_distribution_anchorPane_filtered, 0, newHeight.doubleValue());
-		    }
-		});
-		
-		paramSpace_distribution_anchorPane_selected.widthProperty().addListener(new ChangeListener<Number>() {
-		    @Override 
-		    public void changed(ObservableValue<? extends Number> observableValue, Number oldWidth, Number newWidth)
-		    {
-		        resizeElement(paramSpace_distribution_anchorPane_selected, newWidth.doubleValue(), 0);
-		    }
-		});
-		
-		paramSpace_distribution_anchorPane_selected.heightProperty().addListener(new ChangeListener<Number>() {
-		    @Override 
-		    public void changed(ObservableValue<? extends Number> observableValue, Number oldHeight, Number newHeight) 
-		    {
-		    	resizeElement(paramSpace_distribution_anchorPane_selected, 0, newHeight.doubleValue());
-		    }
-		});
-		
-		/*
-		 *  Add resize listeners for MDS anchor pane (needed for correct resizing of heatmap's anchor pane).
-		 */
-		
-		mds_anchorPane.widthProperty().addListener(new ChangeListener<Number>() {
-		    @Override 
-		    public void changed(ObservableValue<? extends Number> observableValue, Number oldWidth, Number newWidth)
-		    {
-		        resizeElement(mds_anchorPane, newWidth.doubleValue(), 0);
-		    }
-		});
-		
-		mds_anchorPane.heightProperty().addListener(new ChangeListener<Number>() {
-		    @Override 
-		    public void changed(ObservableValue<? extends Number> observableValue, Number oldHeight, Number newHeight) 
-		    {
-		    	resizeElement(mds_anchorPane, 0, newHeight.doubleValue());
-		    }
-		});
-		
-		/*
-		 * Add resize listeners for local scope / chord diagram anchor pane.
-		 */
-		localscope_cd_anchorPane.widthProperty().addListener(new ChangeListener<Number>() {
-		    @Override 
-		    public void changed(ObservableValue<? extends Number> observableValue, Number oldWidth, Number newWidth)
-		    {
-		        resizeElement(localscope_cd_anchorPane, newWidth.doubleValue(), 0);
-		    }
-		});
-		
-		localscope_cd_anchorPane.heightProperty().addListener(new ChangeListener<Number>() {
-		    @Override 
-		    public void changed(ObservableValue<? extends Number> observableValue, Number oldHeight, Number newHeight) 
-		    {
-		    	resizeElement(localscope_cd_anchorPane, 0, newHeight.doubleValue());
-		    }
-		});
-		
-		/*
-		 * Add resize listeners for local scope / parallel tag clouds anchor pane.
-		 */
-		localScope_ptc_anchorPane.widthProperty().addListener(new ChangeListener<Number>() {
-		    @Override 
-		    public void changed(ObservableValue<? extends Number> observableValue, Number oldWidth, Number newWidth)
-		    {
-		        resizeElement(localScope_ptc_anchorPane, newWidth.doubleValue(), 0);
-		    }
-		});
-		
-		localScope_ptc_anchorPane.heightProperty().addListener(new ChangeListener<Number>() {
-		    @Override 
-		    public void changed(ObservableValue<? extends Number> observableValue, Number oldHeight, Number newHeight) 
-		    {
-		    	resizeElement(localScope_ptc_anchorPane, 0, newHeight.doubleValue());
-		    }
-		});
+		// Add width and height resize listeners to all panes.
+		for (Pane ap : anchorPanesToResize) {
+			// Add listener to width property.
+			ap.widthProperty().addListener(new ChangeListener<Number>() {
+			    @Override 
+			    public void changed(ObservableValue<? extends Number> observableValue, Number oldWidth, Number newWidth)
+			    {
+			        resizeElement(ap, newWidth.doubleValue(), 0);
+			    }
+			});
+			
+			// Add listener to height property.
+			ap.heightProperty().addListener(new ChangeListener<Number>() {
+			    @Override 
+			    public void changed(ObservableValue<? extends Number> observableValue, Number oldHeight, Number newHeight) 
+			    {
+			    	resizeElement(ap, 0, newHeight.doubleValue());
+			    }
+			});
+		}
 	}
 	
 	/**
@@ -397,161 +297,107 @@ public class AnalysisController extends Controller
 	 */
 	private void initUIElements() 
 	{
+		initSettingsPanel();
 		initFilterControls();
 		initMDSScatterchart();
-		initDistanceBarchart();
-		initParameterSpaceHeatmaps();
+		initParameterSpaceScatterchart();
 		initLocalScopeView();
+		initComparisonHeatmaps();
+		
+		// Bring setting icons to front.
+		settings_mds_icon.toFront();
+		settings_paramDist_icon.toFront();
+		settings_localScope_icon.toFront();
+	}
+	
+	private void initSettingsPanel()
+	{
+		settingsPanel 	= (SettingsPanel)VisualizationComponent.generateInstance(VisualizationComponentType.SETTINGS_PANEL, this, null, null, null);		
+		settingsPanel.init();
+		settingsPanel.embedIn(settings_anchorpane);
+	}
+	
+	private void initComparisonHeatmaps()
+	{
+		tmcHeatmap = (CategoricalHeatmap)VisualizationComponent.generateInstance(VisualizationComponentType.CATEGORICAL_HEATMAP, this, null, null, null);
+		tmcHeatmap.embedIn(localscope_tmc_anchorPane);
 	}
 
 	private void initLocalScopeView()
 	{
 		// Create new instance of local scope.
-		localScopeInstance = new LocalScopeInstance(this, 	localScope_ptc_anchorPane, localscope_cd_anchorPane,
-															slider_localScope_numTopicsToUse, textfield_localScope_numTopicsToUse,
-															slider_localScope_numKeywordsToUse, textfield_localScope_numKeywordsToUse);
+		localScopeInstance = new LocalScopeInstance(this, 	localScope_ptc_anchorPane, localscope_tmc_anchorPane,
+															settingsPanel.getLocalScopeTopicNumberSlider(), settingsPanel.getLocalScopeTopicNumberTextField(),
+															settingsPanel.getLocalScopeKeywordNumberSlider(), settingsPanel.getLocalScopeTopicNumberTextField());
 		localScopeInstance.load();
 	}
 
 	private void initFilterControls()
 	{
-		scrollpane_filter.setContent(gridpane_parameterConfiguration);
-		
 		// Init collections.
-		rangeSliders				= new HashMap<String, RangeSlider>();
-		textfieldsForFilterControls	= new HashMap<String, Pair<TextField, TextField>>();
-		barchartsForFilterControls	= new HashMap<String, StackedBarChart<String, Integer>>();
+		filters						= new ArrayList<ScentedFilter>();
 		
-		// Add range sliders to collection.
-		rangeSliders.put("alpha", new RangeSlider());
-		rangeSliders.put("eta", new RangeSlider());
-		rangeSliders.put("kappa", new RangeSlider());
+		// Init container for filters.
+		filters_vbox 				= new VBox();
+		filters_vbox.resize(100, filters_vbox.getHeight());
 		
-		// Add textfields to collection.
-		textfieldsForFilterControls.put("alpha", new Pair<TextField, TextField>(alpha_min_textfield, alpha_max_textfield));
-		textfieldsForFilterControls.put("eta", new Pair<TextField, TextField>(eta_min_textfield, eta_max_textfield));
-		textfieldsForFilterControls.put("kappa", new Pair<TextField, TextField>(kappa_min_textfield, kappa_max_textfield));
-		
-		// Add barcharts to collections.
-		barchartsForFilterControls.put("alpha", barchart_alpha);
-		barchartsForFilterControls.put("eta", barchart_eta);
-		barchartsForFilterControls.put("kappa", barchart_kappa);
-		
-		// Init range slider.
-		for (Map.Entry<String, RangeSlider> entry : rangeSliders.entrySet()) {
-			RangeSlider rs = entry.getValue();
+		// Iterate over supported parameters.
+		for (String param : LDAConfiguration.SUPPORTED_PARAMETERS) {
+			// Create new filter.
+			ScentedFilter filter = (ScentedFilter) VisualizationComponent.generateInstance(VisualizationComponentType.SCENTED_FILTER, this, this.workspace, this.log_protocol_progressindicator, this.log_protocol_textarea);
+
+			// Init filter.
+			if (param != "kappa")
+				filter.applyOptions(new ScentedFilterOptionset(param, true, 0, 15, 50, 0.05, true, true, false));
+			else
+				filter.applyOptions(new ScentedFilterOptionset(param, true, 2, 25, 50, 1, true, true, false));
 			
-			rs.setMaxWidth(230);
-			rs.setMax(25);
-			rs.setMax(100);
-			rs.setMajorTickUnit(5);
-			rs.setMinorTickCount(4);
-			rs.setSnapToTicks(false);
-			rs.setShowTickLabels(true);
-			rs.setShowTickMarks(true);
-			rs.setLowValue(0);
-			rs.setHighValue(25);
-			rs.setHighValue(100);
-			
-			// Set width. 
-			rs.setMaxWidth(220);
-			rs.setMinWidth(220);
-			rs.setPrefWidth(220);
-			
-			// Get some distance between range sliders and bar charts.
-			rs.setTranslateX(-6);
-			rs.setPadding(new Insets(5, 0, 0, 0));
-			
-			// Add event handler - trigger update of visualizations (and the
-			// data preconditioning necessary for that) if filter settings
-			// are changed.
-			addEventHandlerToRangeSlider(rs, entry.getKey());
+			// Add to collection of filters.
+			filters.add(filter);
+			// Embed in containing VBox.
+			filter.embedIn(filters_vbox);
 		}
 		
-		// Set variable-specific minima and maxima.
-		rangeSliders.get("kappa").setMin(1);
-		rangeSliders.get("kappa").setMax(50);
-		rangeSliders.get("kappa").setHighValue(50);
+		// Add seperating line.
+		Separator separator = new Separator();
+		separator.setTranslateX(15);
+		separator.setTranslateY(15);
+		filters_vbox.getChildren().add(separator);
 		
-		// Adapt textfield values.
-		for (Map.Entry<String, Pair<TextField, TextField>> entry : textfieldsForFilterControls.entrySet()) {
-			entry.getValue().getKey().setText( String.valueOf(rangeSliders.get(entry.getKey()).getMin()) );
-			entry.getValue().getValue().setText( String.valueOf(rangeSliders.get(entry.getKey()).getMax()) );
-		}
+		// Add distance filter - note: Is derived data.
+		ScentedFilter distanceFilter = (ScentedFilter) VisualizationComponent.generateInstance(VisualizationComponentType.SCENTED_FILTER, this, this.workspace, this.log_protocol_progressindicator, this.log_protocol_textarea);
+		distanceFilter.applyOptions(new ScentedFilterOptionset("distance", true, 0, 15, 50, 0.01, true, true, false));
+		// Add to collection of filters.
+		filters.add(distanceFilter);
+		// Embed in containing VBox.
+		distanceFilter.embedIn(filters_vbox);
 		
-		// Add range slider to GUI.
-		vbox_alpha.getChildren().add(rangeSliders.get("alpha"));
-		vbox_eta.getChildren().add(rangeSliders.get("eta"));
-		vbox_kappa.getChildren().add(rangeSliders.get("kappa"));
-		
-		// Set gridpane's height (based on the number of supported parameters).
-		final int prefRowHeight = 100;
-		gridpane_parameterConfiguration.setPrefHeight(LDAConfiguration.SUPPORTED_PARAMETERS.length * prefRowHeight);
-		gridpane_parameterConfiguration.setMinHeight(LDAConfiguration.SUPPORTED_PARAMETERS.length * prefRowHeight);
+		// Add containing VBox to pane.
+		filter_anchorpane.getChildren().add(filters_vbox);
+		filter_anchorpane.applyCss();
+		filter_anchorpane.layout();
+		filter_anchorpane.requestLayout();
+		filters_vbox.resize(100, filters_vbox.getHeight());
 	}
 
 	private void initMDSScatterchart()
 	{
-		mdsScatterchart = new MDSScatterchart(	this, mds_scatterchart, mdsHeatmap_canvas,
-												checkbox_mdsHeatmap_distribution_dynAdjustment, slider_mds_distribution_granularity);
+		// Init scatterchart. checkbox_mdsHeatmap_distribution_dynAdjustment
+		mds_content_scrollPane.toBack();
+		globalScatterplot = new MDSScatterchart(	this, mds_scatterchart, mdsHeatmap_canvas, mds_content_scrollPane,
+													settingsPanel.getGlobalScatterchartDHMGranularityCheckbox(), settingsPanel.getGlobalScatterchartDHMGranularitySlider(),
+													settingsPanel.getGlobalScatterchartDHMMinColor(), settingsPanel.getGlobalScatterchartDHMMaxColor());
 	}
 	
-	private void initDistanceBarchart()
+	private void initParameterSpaceScatterchart()
 	{
-		distancesBarchart = new DistancesBarchart(	this, barchart_distances, numberaxis_distanceEvaluation_yaxis, 
-													button_relativeView_distEval, checkbox_logarithmicDistanceBarchart);
-	}
-	
-	private void initParameterSpaceHeatmaps()
-	{
-		combobox_parameterSpace_distribution_xAxis.getItems().clear();
-		combobox_parameterSpace_distribution_yAxis.getItems().clear();
-		paramDistributionHeatmap_datasetBinding_combobox.getItems().clear();
-		
-		// Add databinding options.
-		paramDistributionHeatmap_datasetBinding_combobox.getItems().add("Filtered data");
-		paramDistributionHeatmap_datasetBinding_combobox.getItems().add("Selected data");
-		paramDistributionHeatmap_datasetBinding_combobox.requestLayout();
-		paramDistributionHeatmap_datasetBinding_combobox.applyCss();
-		// Set default databinding option.
-		paramDistributionHeatmap_datasetBinding_combobox.getSelectionModel().selectFirst();
-		
-		// Add supported parameters to axis comboboxes. 
-		for (String param : LDAConfiguration.SUPPORTED_PARAMETERS) {
-			combobox_parameterSpace_distribution_xAxis.getItems().add(param);
-			combobox_parameterSpace_distribution_yAxis.getItems().add(param);
-		}
-		
-		// Set default axes.
-		combobox_parameterSpace_distribution_xAxis.setValue("alpha");
-		combobox_parameterSpace_distribution_yAxis.setValue("eta");
-		
-		// Init heatmaps.
-		parameterspace_heatmap_filtered = new HeatMap(this, paramSpaceHeatmap_canvas_filtered, numberaxis_parameterSpace_xaxis_filtered, numberaxis_parameterSpace_yaxis_filtered, HeatmapDataType.LDAConfiguration);
-		parameterspace_heatmap_selected	= new HeatMap(this, paramSpaceHeatmap_canvas_selected, numberaxis_parameterSpace_xaxis_selected, numberaxis_parameterSpace_yaxis_selected, HeatmapDataType.LDAConfiguration);
-
-		/*
-		 * Init option controls.
-		 */
-		
-		// Add listener to determine position during after release.
-		slider_parameterSpace_distribution_granularity.addEventHandler(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
-            public void handle(MouseEvent event) 
-            {
-            	parameterspace_heatmap_filtered.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
-            	parameterspace_heatmap_selected.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
-            	
-            }
-        });
-		
-		// Add listener to determine position during mouse drag.
-		slider_parameterSpace_distribution_granularity.addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
-            public void handle(MouseEvent event) 
-            {
-            	parameterspace_heatmap_filtered.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
-            	parameterspace_heatmap_selected.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
-            };
-        });
+		// Init parameter space scatterchart.
+		paramSpaceScatterchart = (ParameterSpaceScatterchart) VisualizationComponent.generateInstance(VisualizationComponentType.PARAMSPACE_SCATTERCHART, this, null, null, null);
+		paramSpaceScatterchart.applyOptions(new ScatterchartOptionset(	true, true, false,
+																		settingsPanel.isParamSpaceDHMVisible(), settingsPanel.isParamSpaceDHMGranularityDynamic(), settingsPanel.getParamSpaceDHMGranularityValue(),
+																		settingsPanel.calculatePSScatterchartCategoriesValue(),
+																		settingsPanel.getParamSpaceDHMMinColor(), settingsPanel.getParamSpaceDHMMaxColor()));
+		paramSpaceScatterchart.embedIn(paramSpace_distribution_anchorPane_selected);
 	}
 	
 	/**
@@ -565,37 +411,36 @@ public class AnalysisController extends Controller
 		// Set references to data collections.
 		dataspace.setDataReferences(workspace.getLDAConfigurations(),  workspace.getMDSCoordinates(), workspace.getDistances());
 		
-		// Call initialization procedure.
-		init();
-		
 		// Draw entire data set. Used as initialization call, executed by Workspace instance.
 		if (filterData) {
 			// Filter data.
 			applyFilter();
 		}
+
+		// Call initialization procedure.
+		init();
 		
-		
-		// Refresh visualizations.
+		/*
+		 * Refresh visualizations.
+		 */
 		
 		// 	Parameter filtering controls:
-		refreshParameterHistograms(50);
-
+		refreshScentedFilters();
+		
 		// 	MDS scatterchart:
-		mdsScatterchart.refresh(	dataspace.getCoordinates(),
-									dataspace.getFilteredCoordinates(), dataspace.getFilteredIndices(), 
-									dataspace.getSelectedCoordinates(), dataspace.getSelectedIndices(), 
+		globalScatterplot.refresh(	dataspace.getCoordinates(), dataspace.getReferenceTMIndex(),
+									dataspace.getAvailableCoordinates(), dataspace.getInactiveIndices(), 
+									dataspace.getActiveCoordinates(), dataspace.getActiveIndices(), 
 									dataspace.getDiscardedCoordinates(), dataspace.getDiscardedIndices());
 
-		//	Distance evaluation barchart:
-		distancesBarchart.refresh(	dataspace.getDiscardedIndices(), dataspace.getFilteredIndices(), dataspace.getSelectedIndices(),
-									dataspace.getDiscardedDistances(), dataspace.getFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
-									true);
-
-		// 	Heatmaps:
-		refreshParameterspaceHeatmaps();
+		// 	Parameter space scatterchart:
+		paramSpaceScatterchart.refresh(new ScatterchartDataset(	dataspace.getLDAConfigurations(), dataspace.getDiscardedLDAConfigurations(),
+																dataspace.getInactiveLDAConfigurations(), dataspace.getActiveLDAConfigurations()));
 		
 		//	Local scope:
-		localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
+		localScopeInstance.refresh(dataspace.getActiveLDAConfigurations());
+		// TM comparison heatmap:
+		refreshTMCHeatmap(dataspace.getActiveLDAConfigurations());
 	}
 
 	/**
@@ -606,177 +451,51 @@ public class AnalysisController extends Controller
 		// If not done already: Discover global extrema, adapt components.
 		if (!globalExtremaIdentified) {
 			// Identify global extrema.
-			distancesBarchart.identifyGlobalExtrema(dataspace.getDistances());
-			mdsScatterchart.identifyGlobalExtrema(dataspace.getCoordinates());
-
+			globalScatterplot.identifyGlobalExtrema(dataspace.getCoordinates());
+			paramSpaceScatterchart.identifyGlobalExtrema(dataspace.getLDAConfigurations());
+			
 			// Add keyboard listener in order to enable selection.
 			addKeyListener();
 			
 			// Mark global extrema as found.
 			globalExtremaIdentified = true;
-			
-			// Adapt controls to new data.
-			adjustControlExtrema();
-		}
-	}
-	
-	/**
-	 * Refreshes visualization after data in global MDS scatterchart was selected. 
-	 * @param selectedIndices
-	 */
-	public void integrateMDSSelection(Set<Integer> selectedIndices, boolean includeLocalScope)
-	{
-		boolean changeDetected = !( selectedIndices.containsAll(dataspace.getSelectedIndices()) && dataspace.getSelectedIndices().containsAll(selectedIndices) );
 
-		// Update set of filtered and selected indices.
-		if (changeDetected) {
-			dataspace.updateSelectedIndexSet(selectedIndices);
-			
-			// Find selected and filtered values.
-			dataspace.updateSelectedDistanceMatrix();
-			dataspace.updateSelectedLDAConfigurations();
-			dataspace.updateSelectedCoordinateMatrix();
-			dataspace.updateReductiveFilteredDistanceMatrix();
-			
-			// Refresh other (than MDSScatterchart) visualizations.
-			
-			//	Distances barchart:
-			distancesBarchart.refresh(	dataspace.getDiscardedIndices(), dataspace.getFilteredIndices(), dataspace.getSelectedIndices(),
-										dataspace.getDiscardedDistances(), dataspace.getFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
-										true);
-			
-			//	Paramer space heatmaps:
-			refreshParameterspaceHeatmaps();
-			
-			// 	Local scope:
-			if (includeLocalScope)
-				localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
-			
-			// 	Parameter histograms:
-			refreshParameterHistograms(50);
+			// Adjust controls for filters for primitive attribute.
+			for (ScentedFilter filter : filters.subList(0, 3)) {
+				// Adjust global extrema for controls.
+				filter.adjustControlExtrema(dataspace.getLDAConfigurations());
+				// Set initial width.
+				filter.resizeContent(300, 0);
+			}
+			// Adjust controls for filters with derived attributes.
+			filters.get(3).adjustDerivedControlExtrema(dataspace.getAverageDistances());
 		}
-		
-		// Even if no change on global scope detected: Update local scope, if requested. 
-		else if (includeLocalScope)
-			localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
 	}
 	
 	/**
-	 * Integrates heatmap selection into MDS selection, then fires update for all relevant visualizations.
-	 * @param newlySelectedLDAConfigIDs
-	 * @param isAddition
+	 * Integrates data/heatmap cells selected in TMC heatmap into dataspace and displays the
+	 * selection in local scope.
+	 * @param selectedTopicConfigIDs
 	 */
-	public void integrateHeatmapSelection(Set<Integer> newlySelectedLDAConfigIDs, final boolean isAddition)
+	public void integrateTMCHeatmapSelection(Set<Pair<Integer, Integer>> selectedTopicConfigIDs)
 	{
-		// Check if there is any change in the set of selected datasets.
-		boolean changeDetected = false;
-		
-		// 1. 	Check which elements are to be added/removed from current selection by comparing 
-		// 		with set of filtered and selected datasets.
-		
-		// 1.a.	Selection should be added:
-		if (isAddition) {
-			// Check if any of the newly selected IDs are not contained in global selection yet.
-			// If so: Add them.
-			for (LDAConfiguration selectedLDAConfiguration : dataspace.getSelectedLDAConfigurations()) {
-				final int alreadySelectedLDAConfigID = selectedLDAConfiguration.getConfigurationID(); 
-				
-				// If newly selected set already contained in existing selection: Remove from addition set.
-				if (newlySelectedLDAConfigIDs.contains(alreadySelectedLDAConfigID)) {
-					newlySelectedLDAConfigIDs.remove(alreadySelectedLDAConfigID);
-				}
-			}
-			
-			// If set of newly selected indices still contains elements: Change detected.
-			if (newlySelectedLDAConfigIDs.size() > 0) {
-				// Update flag.
-				changeDetected = true;
-				
-				// Add missing LDA configurations to collection.
-				for (final int ldaConfigIndex : dataspace.getFilteredIndices()) {
-					// Get LDA configuration for this index.
-					final LDAConfiguration ldaConfiguration = dataspace.getLDAConfigurations().get(ldaConfigIndex);
-					
-					// Check if this LDA configuration is part of the set of newly selected LDA configurations. 
-					if ( newlySelectedLDAConfigIDs.contains(ldaConfiguration.getConfigurationID()) )
-						dataspace.getSelectedIndices().add(ldaConfigIndex);
-				}
-			}
-		}
-		
-		// 1.b.	Selection should be removed:
-		else {
-			// Set of dataset indices (instead of configuration IDs) to delete.
-			Set<Integer> indicesToDeleteFromSelection = new HashSet<Integer>();
-			
-			// Check if any of the newly selected IDs are contained in global selection.
-			// If so: Remove them.
-			for (final int ldaConfigIndex : dataspace.getSelectedIndices()) {
-				// Get LDA configuration for this index.
-				final LDAConfiguration ldaConfiguration = this.dataspace.getLDAConfigurations().get(ldaConfigIndex); 
-				
-				// If currently examine LDAConfiguration is in set of newly selected indices:
-				// Remove LDAConfiguration from set of selected indices.
-				if (newlySelectedLDAConfigIDs.contains(ldaConfiguration.getConfigurationID())) {
-					// Update flag.
-					changeDetected = true;
-					
-					// Add dataset index to collection of indices to remove from selection.
-					indicesToDeleteFromSelection.add(ldaConfigIndex);
-				}
-			}
-			
-			// Remove set of indices to delete from set of selected indices.
-			dataspace.getSelectedIndices().removeAll(indicesToDeleteFromSelection);
-		}
-		
-		// 2. 	Update related (i.e. dependent on the set of selected entities) datasets and visualization, if there were any changes made.
-		if (changeDetected)
-			refreshVisualizationsAfterLocalSelection(isAddition);
+		localScopeInstance.refreshPTC(selectedTopicConfigIDs);
 	}
-	
+
 	/**
-	 * Integrates barchart selection into MDS selection, then fires update for all relevant visualizations.
+	 * Integrates index selection into MDS selection, then fires update for all relevant visualizations.
 	 * @param newlySelectedLocalIndices
 	 * @param isAddition true for addition of selected data to global selection; false for their removal.
+	 * @param idMode
+	 * @param forceRefresh
 	 */
-	public void integrateBarchartSelection(ArrayList<Integer> newlySelectedLocalIndices, final boolean isAddition)
+	public void integrateSelectionOfDataPoints(Set<Integer> newlySelectedLocalIndices, final boolean isAddition, final DatapointIDMode idMode, final boolean forceRefresh)
 	{
 		// Check if there is any change in the set of selected datasets.
-		boolean changeDetected				= false;
-		
-		// 1. 	Check which elements are to be added/removed from current selection by comparing 
-		// 		with set of filtered and selected datasets.
-		
-		// Selection should be added:
-		if (isAddition) {
-			// Translate local indices to global indices.
-			for (int i = 0; i < newlySelectedLocalIndices.size(); i++) {
-				if (!dataspace.getSelectedIndices().contains( newlySelectedLocalIndices.get(i)) ) {
-					// Add to collection of selected indices.
-					dataspace.getSelectedIndices().add( newlySelectedLocalIndices.get(i) );
-					
-					// Change detected.
-					changeDetected = true;
-				}
-			}
-		}
-		
-		else {
-			// Translate local indices to global indices.
-			for (int i = 0; i < newlySelectedLocalIndices.size(); i++) {
-				// Add to set of selected, translated indices. 
-				if (dataspace.getSelectedIndices().contains( newlySelectedLocalIndices.get(i)) ) {
-					dataspace.getSelectedIndices().remove( newlySelectedLocalIndices.get(i) );
-					
-					// Change detected.
-					changeDetected = true;
-				}
-			}
-		}
+		boolean changeDetected = dataspace.integrateSelection(newlySelectedLocalIndices, isAddition, idMode);
 		
 		// 2. 	Update related (i.e. dependent on the set of selected entities) datasets and visualization, if there were any changes made.
-		if (changeDetected)
+		if (changeDetected || forceRefresh)
 			refreshVisualizationsAfterLocalSelection(isAddition);
 	}
 	
@@ -788,75 +507,75 @@ public class AnalysisController extends Controller
 	 */
 	private void refreshVisualizationsAfterLocalSelection(boolean isAddition)
 	{
-		// Find selected and filtered values.
-		dataspace.updateSelectedDistanceMatrix();
-		dataspace.updateSelectedLDAConfigurations();
-		dataspace.updateSelectedCoordinateMatrix();
-		dataspace.updateReductiveFilteredDistanceMatrix();
+		// Update dataspace.
+		dataspace.updateAfterSelection(null);
 
 		// 4.	Refresh visualizations.
-		// 	Distances barchart:
-		distancesBarchart.refresh(		dataspace.getDiscardedIndices(), dataspace.getFilteredIndices(), dataspace.getSelectedIndices(),
-										dataspace.getDiscardedDistances(), dataspace.getFilteredDistances(), dataspace.getSelectedFilteredDistances(), 
-										true);
 		// 	MDS scatterchart:
-		mdsScatterchart.refresh(		dataspace.getCoordinates(),
-										dataspace.getFilteredCoordinates(), dataspace.getFilteredIndices(), 
-										dataspace.getSelectedCoordinates(), dataspace.getSelectedIndices(), 
+		globalScatterplot.refresh(		dataspace.getCoordinates(), dataspace.getReferenceTMIndex(),
+										dataspace.getAvailableCoordinates(), dataspace.getInactiveIndices(), 
+										dataspace.getActiveCoordinates(), dataspace.getActiveIndices(), 
 										dataspace.getDiscardedCoordinates(), dataspace.getDiscardedIndices());
 		// 	Parameter space heatmap:
-		refreshParameterspaceHeatmaps();
-
+		paramSpaceScatterchart.refresh(new ScatterchartDataset(	dataspace.getLDAConfigurations(), dataspace.getDiscardedLDAConfigurations(),
+																dataspace.getInactiveLDAConfigurations(), dataspace.getActiveLDAConfigurations()));
+		
 		//	Local scope:
-		localScopeInstance.refresh(dataspace.getSelectedLDAConfigurations());
+		localScopeInstance.refresh(dataspace.getActiveLDAConfigurations());
+		refreshTMCHeatmap(dataspace.getActiveLDAConfigurations());
 		
 		// 	Parameter histograms:
-		refreshParameterHistograms(50);
+		refreshScentedFilters();
 	}
 	
 	/**
-	 * Refreshes both heatmaps in parameter space using the current default values.
+	 * Refresh heatmap for topic model comparison. Loads new data from DB. 
+	 * @param selectedLDAConfigurations
 	 */
-	private void refreshParameterspaceHeatmaps()
+	private void refreshTMCHeatmap(ArrayList<LDAConfiguration> selectedLDAConfigurations)
 	{
-		// Refresh heatmap using filtered data:
-		parameterspace_heatmap_filtered.refresh(dataspace.getLDAConfigurations(), dataspace.getFilteredLDAConfigurations(), 
-												combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), 
-												button_relativeView_paramDist_filtered.isSelected(), HeatmapDataBinding.FILTERED);
-
-		// Refresh heatmap using selected data:
-		parameterspace_heatmap_selected.refresh(dataspace.getLDAConfigurations(), dataspace.getSelectedLDAConfigurations(), 
-												combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), 
-												button_relativeView_paramDist_selected.isSelected(), HeatmapDataBinding.SELECTED);
-	}
-	
-	/**
-	 * Adds event handler processing slide and other events to a specified range slider.
-	 * @param rs
-	 * @param parameter
-	 */
-	private void addEventHandlerToRangeSlider(RangeSlider rs, String parameter)
-	{
-		// Add listener to determine position during after release.
-		rs.addEventHandler(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
-            public void handle(MouseEvent event) 
-            {
-            	// Update control values after slider values where changed.
-            	updateControlValues(rs, parameter);
-
-            	// Filter by values; refresh visualizations.
-            	refreshVisualizations(true);
-            }
-        });
+		// If data sets were selected:
+		if (selectedLDAConfigurations.size() > 0) {
+			HeatmapOptionset tmcOptions = new HeatmapOptionset(	true, -1, 
+																settingsPanel.getTMCMinColor(), settingsPanel.getTMCMaxColor(), new Color(0.0, 0.0, 1.0, 0.5), new Color(1.0, 0.0, 0.0, 0.5),
+																"", "",
+																true, false, true);
+			// Instruct heatmap to fetch topic distance data asynchronously.
+			tmcHeatmap.fetchTopicDistanceData(selectedLDAConfigurations, tmcOptions);
+		}
 		
-		// Add listener to determine position during mouse drag.
-		rs.addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
-            public void handle(MouseEvent event) 
-            {
-            	// Update control values after slider values where changed.
-            	updateControlValues(rs, parameter);
-            };
-        });
+		else
+			tmcHeatmap.clear();
+	}
+	
+	/**
+	 * Refreshes heatmap for topic model comparison. Uses available data. 
+	 */
+	private void refreshTMCHeatmap()
+	{
+		// Update colors by refreshing the TMC heatmap.
+		HeatmapOptionset tmcOptions = new HeatmapOptionset(	true, -1, 
+															settingsPanel.getTMCMinColor(), settingsPanel.getTMCMaxColor(), new Color(0.0, 0.0, 1.0, 0.5), new Color(1.0, 0.0, 0.0, 0.5),
+															"", "",
+															true, false, true);
+		tmcHeatmap.applyOptions(tmcOptions);
+		tmcHeatmap.refresh();
+	}
+	
+	/**
+	 * Refreshes heatmap for topic model comparison. Uses available data. 
+	 * @param minColor
+	 * @param maxColor
+	 */
+	private void refreshTMCHeatmap(Color minColor, Color maxColor)
+	{
+		// Update colors by refreshing the TMC heatmap.
+		HeatmapOptionset tmcOptions = new HeatmapOptionset(	true, -1, 
+															minColor, maxColor, new Color(0.0, 0.0, 1.0, 0.5), new Color(1.0, 0.0, 0.0, 0.5),
+															"", "",
+															true, false, true);
+		tmcHeatmap.applyOptions(tmcOptions);
+		tmcHeatmap.refresh();
 	}
 	
 	private void applyFilter()
@@ -879,201 +598,15 @@ public class AnalysisController extends Controller
 		// Get parameter boundaries.
 		Map<String, Pair<Double, Double>> parameterBoundaries = new HashMap<String, Pair<Double, Double>>();
 		
-		for (String param : rangeSliders.keySet()) {
-			parameterBoundaries.put(param, new Pair<Double, Double>(rangeSliders.get(param).getLowValue(), rangeSliders.get(param).getHighValue()));
+		// Here: Consider only filter for primitive attributes.
+		for (ScentedFilter filter : filters) {
+			filter.addThresholdsToMap(parameterBoundaries);
 		}
 		
 		// Filter indices.
 		dataspace.filterIndices(parameterBoundaries);
 	}
-
-
-	/**
-	 * Updates control values after slide event ended.
-	 * @param rs
-	 * @param parameter
-	 */
-	private void updateControlValues(RangeSlider rs, String parameter)
-	{
-		Map<String, Double> parameterValues_low		= new HashMap<String, Double>();
-		Map<String, Double> parameterValues_high	= new HashMap<String, Double>();
-		
-		// Determine minima and maxima for all parameters.
-		for (String param : rangeSliders.keySet()) {
-			parameterValues_low.put(param, rs.getLowValue() >= rangeSliders.get(param).getMin() ? rs.getLowValue() : rangeSliders.get(param).getMin());
-			parameterValues_high.put(param, rs.getHighValue() <= rangeSliders.get(param).getMax() ? rs.getHighValue() : rangeSliders.get(param).getMax());
-		}
-		
-		// Update textfield values.
-    	switch (parameter) 
-    	{
-    		case "alpha":
-    			alpha_min_textfield.setText(String.valueOf(parameterValues_low.get("alpha")));
-            	alpha_max_textfield.setText(String.valueOf(parameterValues_high.get("alpha")));
-    		break;
-    		
-    		case "eta":
-    	       	eta_min_textfield.setText(String.valueOf(parameterValues_low.get("eta")));
-            	eta_max_textfield.setText(String.valueOf(parameterValues_high.get("eta")));
-        	break;
-        		
-    		case "kappa":
-    			kappa_min_textfield.setText(String.valueOf(parameterValues_low.get("kappa")));
-            	kappa_max_textfield.setText(String.valueOf(parameterValues_high.get("kappa")));
-        	break;	
-    	}            		
-	}
-
-	/**
-	 * Refresh parameter filter control histograms.
-	 * @param numberOfBins
-	 */
-	private void refreshParameterHistograms(final int numberOfBins)
-	{
-		// Map storing one bin list for each parameter, counting only filtered datasets.
-		Map<String, int[]> parameterBinLists_filtered	= new HashMap<String, int[]>();
-		// Map storing one bin list for each parameter, counting only selected datasets.
-		Map<String, int[]> parameterBinLists_selected	= new HashMap<String, int[]>();
-		// Map storing one bin list for each parameter, counting only discarded datasets.
-		Map<String, int[]> parameterBinLists_discarded	= new HashMap<String, int[]>();
-		
-		// Add parameters to map of bin lists. 
-		for (String supportedParameter : LDAConfiguration.SUPPORTED_PARAMETERS) {
-			parameterBinLists_filtered.put(supportedParameter, new int[numberOfBins]);
-			parameterBinLists_selected.put(supportedParameter, new int[numberOfBins]);
-			parameterBinLists_discarded.put(supportedParameter, new int[numberOfBins]);
-		}
-		
-		// Bin data.
-		for (int i = 0; i < dataspace.getLDAConfigurations().size(); i++) {
-			// Check if dataset is filtered (as opposed to discarded).
-			boolean isFilteredDataset = dataspace.getFilteredIndices().contains(i);
-			boolean isSelectedDataset = dataspace.getSelectedIndices().contains(i);
-			
-			// Evaluate bin counts for this dataset for each parameter.
-			for (String param : rangeSliders.keySet()) {
-				double binInterval	= (rangeSliders.get(param).getMax() - rangeSliders.get(param).getMin()) / numberOfBins;
-				// Calculate index of bin in which to store the current value.
-				int index_key		= (int) ( (dataspace.getLDAConfigurations().get(i).getParameter(param) - rangeSliders.get(param).getMin()) / binInterval);
-				// Check if element is highest allowed entry.
-				index_key			= index_key < numberOfBins ? index_key : numberOfBins - 1;
-				
-				// Check if this dataset fits all boundaries / is filtered, selected or discarded - then increment content of corresponding bin.
-				if (isFilteredDataset) {
-					// Filtered dataset:
-					if (!isSelectedDataset)
-						parameterBinLists_filtered.get(param)[index_key]++;
-					// Selected dataset:
-					else 
-						parameterBinLists_selected.get(param)[index_key]++;
-				}
-				else
-					parameterBinLists_discarded.get(param)[index_key]++;
-			}
-		}
-
-		/*
-		 * Transfer data to scented widgets.
-		 */
-		
-		for (Map.Entry<String, StackedBarChart<String, Integer>> parameterBarchartEntry : barchartsForFilterControls.entrySet()) {
-			// Clear old data.
-			parameterBarchartEntry.getValue().getData().clear();
-
-			generateParameterHistogramDataSeries(parameterBarchartEntry, parameterBinLists_filtered, numberOfBins, 0);
-			
-			// Add discarded data series to barcharts.
-			parameterBarchartEntry.getValue().getData().add(
-					generateParameterHistogramDataSeries(parameterBarchartEntry.getKey(), parameterBinLists_discarded, numberOfBins)
-			);
-			// Color discarded data.
-			colorParameterHistogramBarchart(parameterBarchartEntry.getValue(), 1);
-			
-			// Add selected data series to barcharts.
-			parameterBarchartEntry.getValue().getData().add(
-					generateParameterHistogramDataSeries(parameterBarchartEntry.getKey(), parameterBinLists_selected, numberOfBins)
-			);
-			// Color selected data.
-			colorParameterHistogramBarchart(parameterBarchartEntry.getValue(), 2);
-		}
-	}
 	
-	/**
-	 * Generates parameter histogram in/for specified barcharts.
-	 * @param parameterBarchartEntry
-	 * @param paramterBinLists
-	 * @param numberOfBins
-	 * @param seriesIndex
-	 */
-	private void generateParameterHistogramDataSeries(	Map.Entry<String, StackedBarChart<String, Integer>> parameterBarchartEntry, 
-														Map<String, int[]> paramterBinLists,
-														final int numberOfBins, final int seriesIndex)
-	{
-		// Add data series to barcharts.
-		parameterBarchartEntry.getValue().getData().add(
-				generateParameterHistogramDataSeries(parameterBarchartEntry.getKey(), paramterBinLists, numberOfBins)
-		);
-		// Color data.
-		colorParameterHistogramBarchart(parameterBarchartEntry.getValue(), seriesIndex);
-	}
-	
-	/**
-	 * Colours a parameter histogram barchart in the desired colors (one for filtered, one for discarded).
-	 * @param barchart
-	 * @param seriesIndex Index of series to be colored. 0 for discarded, 1 for filtered data points.
-	 */
-	private void colorParameterHistogramBarchart(StackedBarChart<String, Integer> barchart, int seriesIndex)
-	{
-		// Color bars (todo: color according to defined options).
-		for (Node node : barchart.lookupAll(".chart-bar")) {
-			switch (seriesIndex)
-			{
-				// Selectede data.
-				case 2:
-					if (node.getUserData() == null || node.getUserData().toString() == "selected") {
-						node.setUserData("selected");
-						node.setStyle("-fx-bar-fill: red;");
-					}
-				break;
-				
-				// Discarded data.
-				case 1:
-					if (node.getUserData() == null || node.getUserData().toString() == "discarded") {
-						node.setUserData("discarded");
-						node.setStyle("-fx-bar-fill: grey;");
-					}
-				break;
-				
-				// Filtered data.
-				case 0:
-					if (node.getUserData() == null || node.getUserData().toString() == "filtered") {
-						node.setUserData("filtered");
-						node.setStyle("-fx-bar-fill: blue;");
-					}
-				break;
-			}
-		}
-	}
-
-	/**
-	 * Generates data series for histograms in scented widgets controlling the selected parameter boundaries.
-	 * @param key
-	 * @param parameterBinLists
-	 * @param numberOfBins
-	 * @return
-	 */
-	private XYChart.Series<String, Integer> generateParameterHistogramDataSeries(String key, Map<String, int[]> parameterBinLists, final int numberOfBins)
-	{
-		final XYChart.Series<String, Integer> data_series = new XYChart.Series<String, Integer>();
-		
-		for (int i = 0; i < numberOfBins; i++) {
-			final int binContent = parameterBinLists.get(key)[i];
-			data_series.getData().add( new XYChart.Data<String, Integer>(String.valueOf(i), binContent ));
-		}
-		
-		return data_series;
-	}
-
 	@Override
 	public void resizeContent(double width, double height)
 	{
@@ -1084,53 +617,40 @@ public class AnalysisController extends Controller
 	{
 		switch (node.getId()) {
 			case "paramSpace_distribution_anchorPane_filtered":
-				// Adapt width.
-				if (width > 0) {	
-					// Update width of parameter distribution heatmap.
-					paramSpaceHeatmap_canvas_filtered.setWidth(width - 59 - 57);
-					parameterspace_heatmap_filtered.refresh(false);
-				}
-				
-				// Adapt height.
-				if (height > 0) {
-					// Update width of parameter distribution heatmap.
-					paramSpaceHeatmap_canvas_filtered.setHeight(height - 45 - 45);
-					parameterspace_heatmap_filtered.refresh(false);
-				}
 			break;
 			
 			case "paramSpace_distribution_anchorPane_selected":
-				// Adapt width.
-				if (width > 0) {	
-					// Update width of parameter distribution heatmap.
-					paramSpaceHeatmap_canvas_selected.setWidth(width - 59 - 57);
-					parameterspace_heatmap_selected.refresh(false);
-				}
-				
-				// Adapt height.
-				if (height > 0) {
-					// Update width of parameter distribution heatmap.
-					paramSpaceHeatmap_canvas_selected.setHeight(height - 45 - 45);
-					parameterspace_heatmap_selected.refresh(false);
-				}
+				// Adapt size.
+				paramSpaceScatterchart.resizeContent(width, height);
 			break;
 			
 			// Resize scatter plot.
 			case "mds_anchorPane":
+				// Update content anchor pane. Deduct 5 pixels for scroll bars.
+				mds_content_anchorPane.setPrefWidth(mds_content_scrollPane.getWidth() - 5);
+				mds_content_anchorPane.setPrefHeight(mds_content_scrollPane.getHeight() - 5);
+				
 	        	// Update MDS heatmap position/indentation.
-				mdsScatterchart.updateHeatmapPosition();
+				globalScatterplot.updateHeatmapPosition();
 				// Redraw heatmap.
-				mdsScatterchart.refreshHeatmapAfterResize();
+				globalScatterplot.refreshHeatmapAfterResize();
 			break;
 			
 			// Resize local scope element: Chord diagram.
-			case "localscope_cd_anchorPane":
-				localScopeInstance.resize(width, height, LocalScopeVisualizationType.CHORD_DIAGRAM);
+			case "localscope_tmc_anchorPane":
+				tmcHeatmap.resizeContent(width, height);
 			break;
 			
 			// Resize local scope element: Parallel tag clouds.
 			case "localScope_ptc_anchorPane":
 				localScopeInstance.resize(width, height, LocalScopeVisualizationType.PARALLEL_TAG_CLOUDS);
+			break;
+			
+			case "settings_anchorpane":
+				filters_vbox.setPrefWidth(width - 20);
+				for (ScentedFilter filter : filters) {
+					filter.resizeContent(width - 20, 0);
+				}
 			break;
 		}
 	}
@@ -1138,15 +658,15 @@ public class AnalysisController extends Controller
 	@FXML
 	public void ddcButtonStateChanged(ActionEvent e)
 	{
-		double filteredDistances[][]							= new double[dataspace.getFilteredIndices().size()][dataspace.getFilteredIndices().size()];
-		ArrayList<LDAConfiguration> filteredLDAConfigurations	= new ArrayList<LDAConfiguration>(dataspace.getFilteredIndices().size());
+		double filteredDistances[][]							= new double[dataspace.getInactiveIndices().size()][dataspace.getInactiveIndices().size()];
+		ArrayList<LDAConfiguration> filteredLDAConfigurations	= new ArrayList<LDAConfiguration>(dataspace.getInactiveIndices().size());
 		
 		// Copy data corresponding to chosen LDA configurations in new arrays.
 		int count = 0;
-		for (int selectedIndex : dataspace.getFilteredIndices()) {
+		for (int selectedIndex : dataspace.getInactiveIndices()) {
 			// Copy distances.
 			int innerCount = 0;
-			for (int selectedInnerIndex : dataspace.getFilteredIndices()) {
+			for (int selectedInnerIndex : dataspace.getInactiveIndices()) {
 				filteredDistances[count][innerCount] = dataspace.getDistances()[selectedIndex][selectedInnerIndex];
 				innerCount++;
 			}
@@ -1159,129 +679,33 @@ public class AnalysisController extends Controller
 	}
 	
 	@FXML
-	public void updateHeatmap(ActionEvent e)
-	{
-		ArrayList<LDAConfiguration> filteredLDAConfigurations = new ArrayList<LDAConfiguration>(dataspace.getFilteredIndices().size());
-		
-		// Copy data corresponding to chosen LDA configurations in new arrays.
-		for (int selectedIndex : dataspace.getFilteredIndices()) {
-			// Copy LDA configurations.
-			filteredLDAConfigurations.add(dataspace.getLDAConfigurations().get(selectedIndex));
-		}
-		
-		if (	parameterspace_heatmap_filtered != null 			&&
-				parameterspace_heatmap_selected != null 			&&
-				combobox_parameterSpace_distribution_xAxis != null 	&& 
-				combobox_parameterSpace_distribution_yAxis != null) {
-			// Refresh heatmaps.
-			refreshParameterspaceHeatmaps();
-		}
-	}
-	
-	@FXML
 	public void changeVisualizationViewMode(ActionEvent e)
 	{
 		Node source = (Node) e.getSource();
 		
 		switch (source.getId()) {
-			case "button_relativeView_distEval":
-				distancesBarchart.changeViewMode();
-			break;
-
-			case "button_relativeView_paramDist_filtered":
-			case "button_relativeView_paramDist_selected":
-				updateHeatmap(e);
+			case "button_relativeView_paramDist":
 			break;
 		}
 	}
 	
-	@FXML
-	public void changeScalingType(ActionEvent e)
-	{
-		distancesBarchart.changeScalingType();
-	}
-	
 	/**
-	 * Processes new information about granularity of parameter space distribution heatmap.
-	 * @param e
+	 * Processes new information about granularity of density heatmap in global scatterchart.
+	 * @param isGranularityDynamic
+	 * @param granularity
 	 */
-	@FXML
-	public void changeParameterDistributionGranularityMode(ActionEvent e)
+	public void changeGlobalScatterplotDHMGranularity(boolean isGranularityDynamic, int granularity)
 	{
-		slider_parameterSpace_distribution_granularity.setDisable(checkbox_parameterSpace_distribution_dynAdjustment.isSelected());
-
-		// Propagate information to heatmaps.
-		parameterspace_heatmap_filtered.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
-		parameterspace_heatmap_selected.setGranularityInformation(checkbox_parameterSpace_distribution_dynAdjustment.isSelected(), (int) slider_parameterSpace_distribution_granularity.getValue(), true);
-	}
-	
-	/**
-	 * Processes new information about granularity of MDS heatmap.
-	 * @param e
-	 */
-	@FXML
-	public void changeHeatmapGranularityMode(ActionEvent e)
-	{
-		slider_mds_distribution_granularity.setDisable(checkbox_mdsHeatmap_distribution_dynAdjustment.isSelected());
-		mdsScatterchart.setHeatmapGranularityInformation(checkbox_mdsHeatmap_distribution_dynAdjustment.isSelected(), (int) slider_mds_distribution_granularity.getValue(), true);
+		globalScatterplot.setHeatmapGranularityInformation(isGranularityDynamic, granularity, true);
 	}
 
 	/**
-	 * Toggles MDS heatmap visibility.
-	 * @param e
+	 * Toggles global scatterplot's density heatmap visiblity.
+	 * @param isVisible
 	 */
-	@FXML
-	public void changeMDSHeatmapVisibility(ActionEvent e)
+	public void changeGlobalScatterplotDHMVisibility(boolean isVisible)
 	{
-		mdsScatterchart.setHeatmapVisiblity(showMSDHeatmap_checkbox.isSelected());
-	}
-	
-	/**
-	 * Changes which dataset the parameter distribution heatmap is bound to (filtered or selected datasets). 
-	 * @param e
-	 * @deprecated
-	 */
-	@FXML
-	public void changeParamDistributionHeatmapDataBinding(ActionEvent e)
-	{
-//		// Translate control value into valid HeatmapDataBinding entitiy.
-//		final String selectedDataBindingString	= paramDistributionHeatmap_datasetBinding_combobox.getSelectionModel().getSelectedItem();
-//		this.paramSpaceHeatmap_dataBinding		= HeatMap.translateItemstringToDataBindingType(selectedDataBindingString);
-//
-//		// Refresh heatmap.
-//		if (dataspace.getLDAConfigurations() != null) {
-//			parameterspace_heatmap_filtered.refresh(	dataspace.getLDAConfigurations(),
-//											paramSpaceHeatmap_dataBinding == HeatmapDataBinding.FILTERED ? dataspace.getFilteredLDAConfigurations() : dataspace.getSelectedLDAConfigurations(), 
-//											combobox_parameterSpace_distribution_xAxis.getValue(), combobox_parameterSpace_distribution_yAxis.getValue(), 
-//											button_relativeView_paramDist_filtered.isSelected(), paramSpaceHeatmap_dataBinding);
-//		}
-	}
-	
-	/**
-	 * Adjusts minimal and maximal control values so that they fit the loaded data set.
-	 */
-	private void adjustControlExtrema()
-	{
-		Map<String, Pair<Double, Double>> ldaParameterExtrema = dataspace.identifyLDAParameterExtrema(dataspace.getLDAConfigurations());
-		
-		// Update values of range slider. 
-		for (Map.Entry<String, RangeSlider> rs : rangeSliders.entrySet()) {
-			String param	= rs.getKey();
-			double min		= ldaParameterExtrema.get(param).getKey();
-			double max		= ldaParameterExtrema.get(param).getValue();
-			
-			// Set range slider values.
-			rs.getValue().setMin(min);
-			rs.getValue().setMax(max);
-			
-			// Set range slider's textfield values.
-			textfieldsForFilterControls.get(param).getKey().setText(String.valueOf(min));
-			textfieldsForFilterControls.get(param).getValue().setText(String.valueOf(max));
-			
-			// Adapt barchart axis.
-			ValueAxis<Integer> yAxis = (ValueAxis<Integer>) barchartsForFilterControls.get(param).getYAxis();
-			yAxis.setMinorTickVisible(false);
-		}
+		globalScatterplot.setHeatmapVisiblity(isVisible);
 	}
 	
 	/**
@@ -1290,25 +714,59 @@ public class AnalysisController extends Controller
 	 */
 	public void addKeyListener()
 	{
-		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+		/*
+		 * Consume space bar key event in scroll pane, manually propagate event to
+		 * AnalysisController's key event processing. 
+		 */
+		EventHandler<KeyEvent> scrollPaneKEHandler = (new EventHandler<KeyEvent>() {
             public void handle(KeyEvent ke) 
             {
-            	mdsScatterchart.processKeyPressedEvent(ke);
-            	distancesBarchart.processKeyPressedEvent(ke);
-            	parameterspace_heatmap_filtered.processKeyPressedEvent(ke);
-            	parameterspace_heatmap_selected.processKeyPressedEvent(ke);
+            	if (ke.getCode() == KeyCode.SPACE || ke.getCharacter().equals(" ")) {
+	            	notifyKeyEventSubscribers(ke);
+	            	ke.consume();
+            	}
             }
 		});
 		
-		scene.setOnKeyReleased(new EventHandler<KeyEvent>() {
+		globalScatterplot.setSpaceKeyHandler(scrollPaneKEHandler);
+		paramSpaceScatterchart.setSpaceKeyHandler(scrollPaneKEHandler);
+		
+		/**
+		 * Process key events.
+		 */
+		
+		EventHandler<KeyEvent> defaultKEHandler = (new EventHandler<KeyEvent>() {
             public void handle(KeyEvent ke) 
             {
-            	mdsScatterchart.processKeyReleasedEvent(ke);
-            	distancesBarchart.processKeyReleasedEvent(ke);
-            	parameterspace_heatmap_filtered.processKeyReleasedEvent(ke);
-            	parameterspace_heatmap_selected.processKeyReleasedEvent(ke);
+            	notifyKeyEventSubscribers(ke);
             }
 		});
+		
+		scene.setOnKeyPressed(defaultKEHandler);
+		scene.setOnKeyTyped(defaultKEHandler);
+		scene.setOnKeyReleased(defaultKEHandler);
+	}
+	
+	/**
+	 * Notifies all subscribers about key events.
+	 * @param ke
+	 */
+	private void notifyKeyEventSubscribers(KeyEvent ke)
+	{
+		if (ke.getEventType() == KeyEvent.KEY_PRESSED || ke.getEventType() == KeyEvent.KEY_RELEASED) {
+	    	globalScatterplot.processKeyReleasedEvent(ke);
+	    	tmcHeatmap.processKeyReleasedEvent(ke);
+	    	for (ScentedFilter filter : filters)
+	    		filter.processKeyReleasedEvent(ke);
+	    	paramSpaceScatterchart.processKeyReleasedEvent(ke);
+		}
+		
+		else if (ke.getEventType() == KeyEvent.KEY_TYPED) {
+			globalScatterplot.processKeyPressedEvent(ke);
+			paramSpaceScatterchart.processKeyPressedEvent(ke);
+		}
+		
+    	ke.consume();
 	}
 	
 	public ArrayList<LDAConfiguration> getLDAConfigurations()
@@ -1326,15 +784,6 @@ public class AnalysisController extends Controller
 		this.scene = scene;
 	}
 
-	@Override
-	public void setWorkspace(Workspace workspace)
-	{
-		super.setWorkspace(workspace);
-		
-		// Pass reference on to instance of local scope component.
-		localScopeInstance.setWorkspace(workspace);
-	}
-	
 	/**
 	 * Switches to settings panel after corresponding icon has been clicked.
 	 * @param e
@@ -1342,90 +791,11 @@ public class AnalysisController extends Controller
 	@FXML
 	public void switchToSettingsPane(MouseEvent e)
 	{
-		openSettingsPane( ((Node)e.getSource()).getId() );
-	}
-	
-	/**
-	 * Workaround for selection-using panels: Check if clicked coordinates fit a settings icon.
-	 * @param x
-	 * @param y
-	 */
-	public void checkIfSettingsIconWasClicked(double x, double y, String iconID)
-	{
-		if(	(iconID == "settings_mds_icon" 				&& settings_mds_icon.getBoundsInParent().contains(x, y))			||
-			(iconID == "settings_distEval_icon" 		&& settings_distEval_icon.getBoundsInParent().contains(x, y))		||
-			(iconID == "settings_paramDist_icon" 		&& settings_paramDist_icon.getBoundsInParent().contains(x, y))		||
-			(iconID == "settings_paramDistCorr_icon" 	&& settings_paramDistCorr_icon.getBoundsInParent().contains(x, y))	||
-			(iconID == "settings_localScope_icon" 		&& settings_localScope_icon.getBoundsInParent().contains(x, y))
-		) {
-			// Open corresponding settings panel.
-			openSettingsPane(iconID);
-		}
-	}
-	
-	/**
-	 * Opens pane in settings panel.
-	 * @param paneID
-	 */
-	private void openSettingsPane(String paneID)
-	{	
-		// Reset title styles.
-		resetSettingsPanelsFontStyles();
+		// Switch to settings pane.
+		options_tabpane.getSelectionModel().select(settings_tab);
 		
-		// Select new pane.
-		switch (paneID) {
-			case "settings_mds_icon":
-				accordion_options.setExpandedPane(mdsDistEval_titledPane);
-				mdsDistEval_titledPane.lookup(".title").setStyle("-fx-font-weight:bold");
-			break;
-			
-			case "settings_distEval_icon":
-				accordion_options.setExpandedPane(mdsDistEval_titledPane);
-				mdsDistEval_titledPane.lookup(".title").setStyle("-fx-font-weight:bold");
-			break;
-				
-			case "settings_paramDist_icon":
-				accordion_options.setExpandedPane(paramSpace_titledPane);
-				paramSpace_titledPane.lookup(".title").setStyle("-fx-font-weight:bold");
-			break;
-				
-			case "settings_paramDistCorr_icon":
-				accordion_options.setExpandedPane(paramSpace_titledPane);
-				paramSpace_titledPane.lookup(".title").setStyle("-fx-font-weight:bold");
-			break;
-				
-			case "settings_localScope_icon":
-				accordion_options.setExpandedPane(localScope_titledPane);
-				localScope_titledPane.lookup(".title").setStyle("-fx-font-weight:bold");
-			break;
-		}
-	}
-	
-	/**
-	 * Reset font styles in setting panel's titles.
-	 */
-	private void resetSettingsPanelsFontStyles()
-	{
-		// Change all font weights back to normal.
-		filter_titledPane.lookup(".title").setStyle("-fx-font-weight:normal");
-		mdsDistEval_titledPane.lookup(".title").setStyle("-fx-font-weight:normal");
-		paramSpace_titledPane.lookup(".title").setStyle("-fx-font-weight:normal");
-		paramSpace_titledPane.lookup(".title").setStyle("-fx-font-weight:normal");
-		localScope_titledPane.lookup(".title").setStyle("-fx-font-weight:normal");
-	}
-	
-	/**
-	 * Called when user opens a settings pane directly.
-	 * @param e
-	 */
-	@FXML
-	public void selectSettingsPane(MouseEvent e) 
-	{
-		// Reset title styles.
-		resetSettingsPanelsFontStyles();
-		
-		// Set new font style.
-		((TitledPane) e.getSource()).lookup(".title").setStyle("-fx-font-weight:bold");
+		// Open pane.
+		settingsPanel.openSettingsPane(((Node)e.getSource()).getId());
 	}
 
 	/**
@@ -1440,20 +810,12 @@ public class AnalysisController extends Controller
 				settings_mds_icon.setVisible(true);
 			break;
 			
-			case "distEval_anchorPane":
-				settings_distEval_icon.setVisible(true);
-			break;
-			
-			case "paramSpace_distribution_anchorPane":
+			case "paramSpace_anchorPane":
 				settings_paramDist_icon.setVisible(true);
 			break;
 			
 			case "localScope_containingAnchorPane":
 				settings_localScope_icon.setVisible(true);
-			break;
-			
-			case "paramSpace_correlation_anchorPane":
-				settings_paramDistCorr_icon.setVisible(true);
 			break;			
 		}
 	}
@@ -1470,21 +832,13 @@ public class AnalysisController extends Controller
 				settings_mds_icon.setVisible(false);
 			break;
 			
-			case "distEval_anchorPane":
-				settings_distEval_icon.setVisible(false);
-			break;
-			
-			case "paramSpace_distribution_anchorPane":
+			case "paramSpace_anchorPane":
 				settings_paramDist_icon.setVisible(false);
 			break;
 			
 			case "localScope_containingAnchorPane":
 				settings_localScope_icon.setVisible(false);
 			break;
-			
-			case "paramSpace_correlation_anchorPane":
-				settings_paramDistCorr_icon.setVisible(false);
-			break;			
 		}		
 	}
 
@@ -1495,43 +849,159 @@ public class AnalysisController extends Controller
 	}
 	
 	/**
-	 * Returns extrema for all currently supported parameters.
-	 * @return
-	 */
-	public Map<String, Pair<Double, Double>> getParamExtrema()
-	{
-		Map<String, Pair<Double, Double>> parameterFilterThresholds = new HashMap<String, Pair<Double, Double>>();
-		
-		for (Map.Entry<String, RangeSlider> entry : rangeSliders.entrySet()) {
-			parameterFilterThresholds.put(entry.getKey(), new Pair<Double, Double>(entry.getValue().getMin(), entry.getValue().getMax()));
-		}
-		
-		return parameterFilterThresholds;
-	}
-	
-	/**
-	 * Induces cross-visualization highlighting of one particular LDA configuration.
-	 * @param ldaConfigurationID
-	 */
-	public void induceCrossChartHighlighting(final int ldaConfigurationID)
-	{
-		// Find index of this LDA configuration (remark: data structure not appropriate for this task).
-		int index = -1;
-		for (int i : dataspace.getSelectedIndices()) {
-			LDAConfiguration ldaConfig = dataspace.getLDAConfigurations().get(i);
-			
-			if (ldaConfig.getConfigurationID() == ldaConfigurationID)
-				index = i;
-		}
-		
-		mdsScatterchart.highlightLDAConfiguration(index);
-	}
-
-	/**
 	 * Removes all highlighting from charts (used e.g. after user doesn't hover over group/LDA info in CD anymore). 
 	 */
 	public void removeCrossChartHighlighting()
 	{
-		mdsScatterchart.highlightLDAConfiguration(-1);
+		globalScatterplot.highlightLDAConfiguration(-1);
+	}
+	
+	/**
+	 * Refreshes all scented filters.
+	 */
+	private void refreshScentedFilters()
+	{
+		// Refresh filters for primitive parameters.
+		for (ScentedFilter filter : filters.subList(0, 3)) {
+			filter.refresh(new ScentedFilterDataset(dataspace.getLDAConfigurations(), dataspace.getInactiveIndices(), dataspace.getActiveIndices()));
+		}
+		// Refresh filters for derived parameters.
+		//	Distance filter:
+		filters.get(3).refresh(new ScentedFilterDataset(dataspace.getLDAConfigurations(), dataspace.getInactiveIndices(), dataspace.getActiveIndices(),
+														dataspace.getAverageDistances()));
+	}
+	
+	@Override
+	public void setReferences(Workspace workspace, ProgressIndicator logPI, TextArea logTA)
+	{
+		super.setReferences(workspace, logPI, logTA);
+		
+		// Set references for child elements.
+		//	...for TMC heatmap.
+		tmcHeatmap.setReferences(workspace, logPI, logTA);
+		// ...for parameter space visualizations. 
+		paramSpaceScatterchart.setReferences(workspace, logPI, logTA);
+		//	...for local scope instance.
+		localScopeInstance.setReferences(workspace, logPI, logTA);
+		//	... for scented filter.
+		for (ScentedFilter filter : filters) {
+			filter.setReferences(workspace, logPI, logTA);
+		}
+		// ... for settings panel.
+		settingsPanel.setReferences(workspace, logPI, logTA);
+	}
+	
+	/**
+	 * Changes visibility of heatmap in parameter space scatterchart.
+	 * @param e
+	 */
+	@FXML
+	public void changePSHeatmapVisibility(ActionEvent e)
+	{
+		refreshParameterSpaceScatterchart();
+	}
+	
+	/**
+	 * Refreshs parameter space scatterchart using existing data.
+	 */
+	public void refreshParameterSpaceScatterchart()
+	{
+		paramSpaceScatterchart.applyOptions(new ScatterchartOptionset(	true, true, false,
+											settingsPanel.isParamSpaceDHMVisible(), settingsPanel.isParamSpaceDHMGranularityDynamic(), settingsPanel.getParamSpaceDHMGranularityValue(),
+											settingsPanel.calculatePSScatterchartCategoriesValue(),
+											settingsPanel.getParamSpaceDHMMinColor(), settingsPanel.getParamSpaceDHMMaxColor()));
+		paramSpaceScatterchart.refresh();
+	}
+	
+	/**
+	 * Update color in global scatterchart density heatmap.
+	 * @param minColor
+	 * @param maxColor
+	 */
+	public void updateTMCHeatmapColorSpectrum(Color minColor, Color maxColor)
+	{
+		refreshTMCHeatmap(minColor, maxColor);
+	}
+	
+	/**
+	 * Update color in global scatterchart density heatmap.
+	 * @param minColor
+	 * @param maxColor
+	 */
+	public void updateGlobalScatterchartDHMColorSpectrum(Color minColor, Color maxColor)
+	{
+		globalScatterplot.updateDHMColorSpectrum(minColor, maxColor);
+	}
+	
+	/**
+	 * Wrapper method for AnalysisController::highlightDataPoints(...).
+	 * @param dataPointID
+	 * @param idMode
+	 * @param visType
+	 */
+	public void highlightDataPoints(int dataPointID, DatapointIDMode idMode, VisualizationComponentType visType)
+	{
+		Set<Integer> dataPointIDs = new HashSet<Integer>();
+		dataPointIDs.add(dataPointID);
+		
+		// Call actual method.
+		highlightDataPoints(dataPointIDs, idMode, visType);
+	}
+	
+	/**
+	 * Instructs visualization components to highlight delivered data points.
+	 * @param dataPointIDs
+	 * @param idMode
+	 * @param sourceVisType
+	 */
+	public void highlightDataPoints(Set<Integer> dataPointIDs, DatapointIDMode idMode, VisualizationComponentType sourceVisType)
+	{
+		/*
+		 * 1. Translate configuration IDs to indices.
+		 */
+		
+		Set<Integer> dataPointConfigIDs = idMode == DatapointIDMode.CONFIG_ID 	? dataPointIDs : dataspace.translateBetweenIDModes(dataPointIDs, DatapointIDMode.INDEX);
+		Set<Integer> dataPointIndices	= idMode == DatapointIDMode.INDEX		? dataPointIDs : dataspace.translateBetweenIDModes(dataPointIDs, DatapointIDMode.CONFIG_ID);
+		
+		/*
+		 * 2. Propagate information about hover event.
+		 */
+		
+		if (sourceVisType != VisualizationComponentType.GLOBAL_SCATTERCHART)
+			globalScatterplot.highlightHoveredOverDataPoints(dataPointIndices, DatapointIDMode.INDEX);
+		
+		if (sourceVisType != VisualizationComponentType.PARAMSPACE_SCATTERCHART)
+			paramSpaceScatterchart.highlightHoveredOverDataPoints(dataPointConfigIDs, DatapointIDMode.CONFIG_ID);
+		
+		// Workaround due to convenience: Apply on filters regardless - since only one of them was 
+		// being manipulated, we want the others to be updated too.
+		for (ScentedFilter filter : filters) {
+			filter.highlightHoveredOverDataPoints(dataPointIndices, DatapointIDMode.INDEX);
+		}
+		
+		if (sourceVisType != VisualizationComponentType.CATEGORICAL_HEATMAP)
+			tmcHeatmap.highlightHoveredOverDataPoints(dataPointConfigIDs, DatapointIDMode.CONFIG_ID);
+	}
+	
+	/**
+	 * Instructs visualization components to remove highlighting from points.
+	 * @param sourceVisType
+	 */
+	public void removeHighlighting(VisualizationComponentType sourceVisType)
+	{
+		if (sourceVisType != VisualizationComponentType.GLOBAL_SCATTERCHART)
+			globalScatterplot.removeHoverHighlighting();
+		
+		if (sourceVisType != VisualizationComponentType.PARAMSPACE_SCATTERCHART)
+			paramSpaceScatterchart.removeHoverHighlighting();
+		
+		// Workaround due to convenience: Apply on filters regardless - since only one of them was 
+		// being manipulated, we want the others to be updated too.
+		for (ScentedFilter filter : filters) {
+			filter.removeHoverHighlighting();
+		}
+		
+		if (sourceVisType != VisualizationComponentType.CATEGORICAL_HEATMAP)
+			tmcHeatmap.removeHoverHighlighting();
 	}
 }

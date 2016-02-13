@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import model.workspace.WorkspaceAction;
+import model.workspace.TaskType;
 import model.workspace.tasks.Task_LoadRawData;
 import model.workspace.tasks.WorkspaceTask;
 import javafx.event.ActionEvent;
@@ -94,7 +94,7 @@ public class PostprocessingController extends DataSubViewController
 					System.out.println("Loading raw data.");
 					log("Loading raw data.");
 					
-					workspace.executeWorkspaceAction(WorkspaceAction.LOAD_RAW_DATA, progressIndicator_distanceCalculation.progressProperty(), this, optionSet);
+					workspace.executeWorkspaceAction(TaskType.LOAD_RAW_DATA, progressIndicator_distanceCalculation.progressProperty(), this, optionSet);
 				}
 				
 				// Raw data has already been loaded: Calculate distances.
@@ -102,7 +102,7 @@ public class PostprocessingController extends DataSubViewController
 					System.out.println("Calculating distances.");
 					log("Calculating distances.");
 					
-					workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_DISTANCES, progressIndicator_distanceCalculation.progressProperty(), this, optionSet);
+					workspace.executeWorkspaceAction(TaskType.CALCULATE_DISTANCES, progressIndicator_distanceCalculation.progressProperty(), this, optionSet);
 				}
 				
 			break;
@@ -113,7 +113,7 @@ public class PostprocessingController extends DataSubViewController
 					System.out.println("Calculating MDS coordinates.");
 					log("Calculating MDS coordinates.");
 					
-					workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_MDS_COORDINATES, progressIndicator_calculateMDSCoordinates.progressProperty(), this, null);
+					workspace.executeWorkspaceAction(TaskType.CALCULATE_MDS_COORDINATES, progressIndicator_calculateMDSCoordinates.progressProperty(), this, null);
 				}
 				
 				// Otherwise: Load distance data, then calculate MDS coordinates.
@@ -124,7 +124,7 @@ public class PostprocessingController extends DataSubViewController
 						System.out.println("Loading distance data.");
 						log("Loading distance data.");
 						
-						workspace.executeWorkspaceAction(WorkspaceAction.LOAD_DISTANCES, progressIndicator_calculateMDSCoordinates.progressProperty(), this, null);
+						workspace.executeWorkspaceAction(TaskType.LOAD_DISTANCES, progressIndicator_calculateMDSCoordinates.progressProperty(), this, null);
 					}
 					
 					// Otherwise: Prompt user to calculate distance data first.
@@ -143,21 +143,21 @@ public class PostprocessingController extends DataSubViewController
 	}
 	
 	@Override
-	public void notifyOfTaskCompleted(final WorkspaceAction workspaceAction)
+	public void notifyOfTaskCompleted(final TaskType workspaceAction)
 	{
 		switch (workspaceAction) {
 			case LOAD_RAW_DATA:
 				System.out.println("Finished loading raw data. Calculating distances.");
 				log("Finished loading raw data. Calculating distances.");
 				
-				workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_DISTANCES, progressIndicator_distanceCalculation.progressProperty(), this, optionSet);
+				workspace.executeWorkspaceAction(TaskType.CALCULATE_DISTANCES, progressIndicator_distanceCalculation.progressProperty(), this, optionSet);
 			break;
 			
 			case LOAD_DISTANCES:
 				System.out.println("Finished loading distance data. Calculating MDS coordinates.");
 				log("Finished loading distance data. Calculating MDS coordinates.");
 				
-				workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_MDS_COORDINATES, progressIndicator_distanceCalculation.progressProperty(), this, null);
+				workspace.executeWorkspaceAction(TaskType.CALCULATE_MDS_COORDINATES, progressIndicator_distanceCalculation.progressProperty(), this, null);
 			break;
 			
 			case CALCULATE_DISTANCES:

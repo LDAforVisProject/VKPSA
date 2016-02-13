@@ -47,7 +47,7 @@ public class JSCallbackMonitor
     {
     	final String[] values	= ((String) groupName).split("#");
     	
-    	controller.propagateLDAHoverInformation(Integer.parseInt(values[0]));
+//    	controller.propagateLDAHoverInformation(Integer.parseInt(values[0]));
     }
     
     /**

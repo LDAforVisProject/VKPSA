@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import model.workspace.Workspace;
-import model.workspace.WorkspaceAction;
+import model.workspace.TaskType;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
@@ -12,7 +12,7 @@ import javafx.event.EventHandler;
 public abstract class WorkspaceTask extends Task<Integer>
 {
 	protected Workspace workspace;
-	protected WorkspaceAction workspaceAction;
+	protected TaskType workspaceAction;
 	protected ArrayList<ITaskListener> listeners;
 	protected Map<String, Integer> additionalOptionSet;
 	
@@ -22,7 +22,7 @@ public abstract class WorkspaceTask extends Task<Integer>
 	 * @param workspaceAction
 	 * @param additionalOptionSet
 	 */
-	public WorkspaceTask(Workspace workspace, WorkspaceAction workspaceAction, final Map<String, Integer> additionalOptionSet)
+	public WorkspaceTask(Workspace workspace, TaskType workspaceAction, final Map<String, Integer> additionalOptionSet)
 	{
 		this.workspace				= workspace;
 		this.workspaceAction		= workspaceAction;

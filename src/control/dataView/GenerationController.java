@@ -8,7 +8,7 @@ import java.util.Random;
 import java.util.ResourceBundle;
 
 import model.LDAConfiguration;
-import model.workspace.WorkspaceAction;
+import model.workspace.TaskType;
 
 import org.controlsfx.control.RangeSlider;
 
@@ -223,6 +223,9 @@ public class GenerationController extends DataSubViewController
 			// Set initial values.
 			numberOfDatasetsToGenerate	= Integer.parseInt(numberOfDatasets_textfield.getText());
 			numberOfDivisions			= Integer.parseInt(numberOfDivisions_textfield.getText());
+			
+			// Disable number of divisions by default (since random sampling is enabled by default).
+			numberOfDivisions_textfield.setDisable(true);
 		}
 		
 		catch (NumberFormatException e) {
@@ -313,7 +316,7 @@ public class GenerationController extends DataSubViewController
 			parameterValues_low.put(param, rs.getLowValue() >= rangeSliders.get(param).getMin() ? rs.getLowValue() : rangeSliders.get(param).getMin());
 			parameterValues_high.put(param, rs.getHighValue() <= rangeSliders.get(param).getMax() ? rs.getHighValue() : rangeSliders.get(param).getMax());
 		}
-		
+			
     	switch (parameter) 
     	{
     		case "alpha":
@@ -343,10 +346,18 @@ public class GenerationController extends DataSubViewController
 			{
 				// If sampling mode == random: Number of datasets to generate equals number of divisions for each parameter.
 				case "Random":
+					// Disable divisions textfield.
+					numberOfDivisions_textfield.setDisable(true);
+					
+					// Update number of divisions.
 					numberOfDivisions = numberOfDatasetsToGenerate;
 				break;
 				
 				case "Cartesian":
+					// Enable divisions textfield.
+					numberOfDivisions_textfield.setDisable(false);
+					
+					// Update number of divisions.
 					numberOfDivisions			= (int) Math.pow(numberOfDatasetsToGenerate,  1.0 / LDAConfiguration.SUPPORTED_PARAMETERS.length);
 					
 					// Round down number of datasets to nearest possible value.
@@ -517,11 +528,11 @@ public class GenerationController extends DataSubViewController
 		workspace.setConfigurationsToGenerate(LDAConfiguration.generateLDAConfigurations( numberOfDivisions, numberOfDatasetsToGenerate, sampling_combobox.getValue(), parameterValues ));
 		
 		// Write list to file.
-		workspace.executeWorkspaceAction(WorkspaceAction.GENERATE_PARAMETER_LIST, generate_progressIndicator.progressProperty(), this, null);
+		workspace.executeWorkspaceAction(TaskType.GENERATE_PARAMETER_LIST, generate_progressIndicator.progressProperty(), this, null);
 	}
 	
 	@Override
-	public void notifyOfTaskCompleted(final WorkspaceAction workspaceAction)
+	public void notifyOfTaskCompleted(final TaskType workspaceAction)
 	{
 		switch (workspaceAction) 
 		{
@@ -530,7 +541,7 @@ public class GenerationController extends DataSubViewController
 
 				// Call Python script and execute data.
 				generate_progressIndicator.progressProperty().unbind();
-				workspace.executeWorkspaceAction(WorkspaceAction.GENERATE_DATA, generate_progressIndicator.progressProperty(), this, null);
+				workspace.executeWorkspaceAction(TaskType.GENERATE_DATA, generate_progressIndicator.progressProperty(), this, null);
 			break;
 			
 			case GENERATE_DATA:
@@ -541,10 +552,10 @@ public class GenerationController extends DataSubViewController
 				generate_progressIndicator.progressProperty().set(1);
 
 				// Reset workspace data.
-				workspace.executeWorkspaceAction(WorkspaceAction.RESET, null, this, null);
+				workspace.executeWorkspaceAction(TaskType.RESET, null, this, null);
 				
 				// Collect metadata from raw topic files.
-				workspace.executeWorkspaceAction(WorkspaceAction.COLLECT_METADATA, generate_progressIndicator.progressProperty(), this, null);
+				workspace.executeWorkspaceAction(TaskType.COLLECT_METADATA, generate_progressIndicator.progressProperty(), this, null);
 			break;
 			
 			// After workspace variables are resetted and file metadata was parsed anew: Preprocess data if desired.
@@ -555,7 +566,7 @@ public class GenerationController extends DataSubViewController
 				if (includePostprocessing_checkbox.isSelected()) {
 					// Load raw data.
 					generate_progressIndicator.progressProperty().unbind();
-					workspace.executeWorkspaceAction(WorkspaceAction.LOAD_RAW_DATA, generate_progressIndicator.progressProperty(), this, null);
+					workspace.executeWorkspaceAction(TaskType.LOAD_RAW_DATA, generate_progressIndicator.progressProperty(), this, null);
 				}
 				
 				// Else: Display warning (workspace is inconsistent). Refresh not necessary, since - apart from the already collected
@@ -573,7 +584,7 @@ public class GenerationController extends DataSubViewController
 				log("[Post-generation] Loaded raw topic data.");
 				
 				// Calculate distances.
-				workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_DISTANCES, dataViewController.getProgressIndicator_distanceCalculation().progressProperty(), this, null);
+				workspace.executeWorkspaceAction(TaskType.CALCULATE_DISTANCES, dataViewController.getProgressIndicator_distanceCalculation().progressProperty(), this, null);
 			break;
 			
 			case CALCULATE_DISTANCES:
@@ -584,7 +595,7 @@ public class GenerationController extends DataSubViewController
 				additionalOptionSet.put("forceDistanceRecalculation", 0);
 				
 				// Calculate distances.
-				workspace.executeWorkspaceAction(WorkspaceAction.CALCULATE_MDS_COORDINATES, dataViewController.getProgressIndicator_calculateMDSCoordinates().progressProperty(), this, additionalOptionSet);
+				workspace.executeWorkspaceAction(TaskType.CALCULATE_MDS_COORDINATES, dataViewController.getProgressIndicator_calculateMDSCoordinates().progressProperty(), this, additionalOptionSet);
 			break;
 			
 			case CALCULATE_MDS_COORDINATES:

@@ -1,5 +1,8 @@
 package database;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -10,6 +13,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -37,6 +41,7 @@ public class DBManagement
 	{
 		this.dbPath = dbPath;
 		
+		// Init DB connection.
 		initConnection();
 	}
 	
@@ -105,6 +110,470 @@ public class DBManagement
 		}
 	}
 
+	/**
+	 * Imports reference topic model data from .csv file.
+	 * Keyword probabilities are assigned uniformly.
+	 * @param filepath
+	 */
+	public void importReferenceTopicModel(String filepath)
+	{
+		// Map of all keywords in DB.
+		Map<String, Double> keywordProbabilities	= readKeywordsAsMap();
+		// Allocate collection for reference topic model. 
+		ArrayList<Map<String, Double>> topicModel	= new ArrayList<Map<String,Double>>();
+		
+		// Remember original size of keyword probability map.
+		final int originalKPMapSize					= keywordProbabilities.size();
+		
+		try {
+			// Load reference topic model data.
+			List<String> lines = Files.readAllLines(new File(filepath).toPath());
+			
+			/*
+			 * 1. Adjust keyword probabilities. 
+			 */
+			
+			// One line <-> one manually defined topic.
+			for (String line : lines) {
+				// Allocate memory for this topic.
+				Map<String, Double> topic = new HashMap<String, Double>(keywordProbabilities);
+				
+				// Replace whitespace with _.
+				line = line.replace(" ", "_");
+				
+				// Extract keywords.
+				final String[] keywords 	= line.split(",");
+				// Calculate probability assigned to each keyword.
+				final double probPerKeyword	= 1.0 / keywords.length;
+				double adjustedProb			= 0;
+				
+				for (String kw : keywords) {
+					// Keyword not found: Assign manually.
+					if(!keywordProbabilities.containsKey(kw)) {
+						// Manual assignemnts:
+						switch (kw) 
+						{
+							case "isosurfaces":
+								adjustedProb = probPerKeyword / 2;
+								
+								topic.put("isosurface", adjustedProb);
+								topic.put("isosurfacing", adjustedProb);
+							break;
+							
+							case "time-varying_data":
+								adjustedProb = probPerKeyword / 3;
+								
+								topic.put("time-varying", adjustedProb);
+								topic.put("time-varying_dataset", adjustedProb);
+								topic.put("time-varying_datum", adjustedProb);
+							break;
+							
+							case "focus+context_techniques":
+								adjustedProb = probPerKeyword / 5;
+								
+								topic.put("focus_and_context", adjustedProb);
+								topic.put("focus-and-context", adjustedProb);
+								topic.put("focus+context_visualization", adjustedProb);
+								topic.put("focus+context_visualization_technique", adjustedProb);
+								topic.put("focus+context", adjustedProb);
+							break;
+							
+							case "visualization_systems":
+								adjustedProb = probPerKeyword / 1;
+								
+								topic.put("visualization_system", adjustedProb);
+							break;
+							
+							case "unstructured_grids":
+								adjustedProb = probPerKeyword / 1;
+								
+								topic.put("unstructured_grid", adjustedProb);
+							break;
+							
+							case "coordinated_&_multiple_views":
+								adjustedProb = probPerKeyword / 2;
+								
+								topic.put("multiple_coordinated_view", adjustedProb);
+								topic.put("multiple-coordinated_view", adjustedProb);
+							break;							
+							
+							case "interactive_visual_analysis":
+								adjustedProb = probPerKeyword / 2;
+								
+								topic.put("interactive_visual_analysi", adjustedProb);
+								topic.put("interactive_visual_exploration_and_analysi", adjustedProb);
+							break;
+							
+							case "multiple_views":
+								adjustedProb = probPerKeyword / 8;
+								
+								topic.put("multiple-view", adjustedProb);
+								topic.put("multi-linked_view", topic.get("multi-linked_view") + adjustedProb);
+								topic.put("multiple_view", adjustedProb);
+								topic.put("multiple-view_technique", adjustedProb);
+								topic.put("multiview", adjustedProb);
+								topic.put("multi-view", adjustedProb);
+								topic.put("multiple_coordinated_view", adjustedProb);
+								topic.put("multiple-coordinated_view", adjustedProb);
+							break;
+							
+							case "time_series_data":
+								adjustedProb = probPerKeyword / 7;
+								
+								topic.put("timeseries", adjustedProb);
+								topic.put("time_series_datum", adjustedProb);
+								topic.put("time_series_dataset", adjustedProb);
+								topic.put("time_series", adjustedProb);
+								topic.put("time-series_datum", adjustedProb);
+								topic.put("time-series_dataset", adjustedProb);
+								topic.put("time-series", adjustedProb);
+							break;
+							
+							case "social_networks":
+								adjustedProb = probPerKeyword / 4;
+								
+								topic.put("social_network_analysi", adjustedProb);
+								topic.put("social_networks_visualization", adjustedProb);
+								topic.put("social_network", adjustedProb);
+								topic.put("social-network", adjustedProb);
+							break;
+							
+							case "geovisualization":
+								adjustedProb = probPerKeyword / 4;
+								
+								topic.put("geographic_visualization", adjustedProb);
+								topic.put("geo-temporal_visualization", adjustedProb);
+								topic.put("geographic/geospatial_visualization", adjustedProb);
+								topic.put("geospatial-temporal_visualization", adjustedProb);
+							break;
+							
+							case "spatio-temporal_data":
+								adjustedProb = probPerKeyword / 5;
+								
+								topic.put("spatiotemporal_datum", adjustedProb);
+								topic.put("geospatial-temporal_datum", adjustedProb);
+								topic.put("spatiotemporal_dataset", adjustedProb);
+								topic.put("spatio-temporal_dataset", adjustedProb);
+								topic.put("spatio-temporal_datum", adjustedProb);
+							break;
+							
+							case "node-link_diagrams":
+								adjustedProb = probPerKeyword / 2;
+								
+								topic.put("node-link", adjustedProb);
+								topic.put("node-link_diagram", adjustedProb);
+							break;
+							
+							case "treemaps":
+								adjustedProb = probPerKeyword / 5;
+								
+								topic.put("tree-map", adjustedProb);
+								topic.put("treemap", adjustedProb);
+								topic.put("treemap-like", adjustedProb);
+								topic.put("zoomable_treemap", adjustedProb);
+								topic.put("voronoi_treemap", adjustedProb);
+							break;
+							
+							case "parallel_coordinates":
+								adjustedProb = probPerKeyword / 1;
+								
+								topic.put("parallel_coordinate", adjustedProb);
+							break;
+							
+							case "hierarchies":
+								adjustedProb = probPerKeyword / 1;
+								
+								topic.put("hierarchy", adjustedProb);
+							break;
+							
+							case "multi-variate_data":
+								adjustedProb = probPerKeyword / 6;
+								
+								topic.put("multi-variate", adjustedProb);
+								topic.put("multi-variate_datum", adjustedProb);
+								topic.put("multi-variate_visualization", adjustedProb);
+								topic.put("multi-variate_visualization_technique", adjustedProb);
+								topic.put("multivariate", adjustedProb);
+								topic.put("statistics—multivariate", adjustedProb);
+							break;
+							
+							case "user_interfaces":
+								adjustedProb = probPerKeyword / 7;
+								
+								topic.put("user_interfaces—gui", adjustedProb);
+								topic.put("user_interfaces,", adjustedProb);
+								topic.put("user_interfaces—graphical", adjustedProb);
+								topic.put("user_interfaces-graphical", adjustedProb);
+								topic.put("techniques-user_interface", adjustedProb);
+								topic.put("user-interaction", adjustedProb);
+								topic.put("user-interface", adjustedProb);
+							break;
+							
+							case "high-dimensional_data":
+								adjustedProb = probPerKeyword / 5;
+								
+								topic.put("high-dimensional_data_visualization", adjustedProb);
+								topic.put("high-dimensional_dataset", adjustedProb);
+								topic.put("high-dimensional_data_analysi", adjustedProb);
+								topic.put("high-dimensional_datum", adjustedProb);
+								topic.put("high-dimensional_data-focusing", adjustedProb);
+							break;
+							
+							case "scatterplots":
+								adjustedProb = probPerKeyword / 3;
+								
+								topic.put("scatterplot_matrix", adjustedProb);
+								topic.put("scatter-plot", adjustedProb);
+								topic.put("scatterplot", adjustedProb);
+							break;
+							
+							case "visual_analysis":
+								adjustedProb = probPerKeyword / 10;
+								
+								topic.put("visual_data_analysi", adjustedProb);
+								topic.put("visual_exploratory_data_analysi", adjustedProb);
+								topic.put("visual_analysi", adjustedProb);
+								topic.put("visual_analytics_query", adjustedProb);
+								topic.put("visual_analytics-enabled", adjustedProb);
+								topic.put("visualization/analysi", adjustedProb);
+								topic.put("interactive_visual_analysi", adjustedProb);
+								topic.put("linked_view_visual_analytic", adjustedProb);
+								topic.put("interactive_visual_exploration_and_analysi", adjustedProb);
+								topic.put("visual_analytic", adjustedProb);
+							break;
+							
+							case "principal_component_analysis":
+								adjustedProb = probPerKeyword / 1;
+								
+								topic.put("principal_component_analysi", adjustedProb);
+							break;							
+							
+							case "medical_visualization":
+								adjustedProb = probPerKeyword / 2;
+								
+								topic.put("visualization_in_medicine", adjustedProb);
+								topic.put("biomedical_visualization", adjustedProb);
+							break;
+							
+							case "linked_views":
+								adjustedProb = probPerKeyword / 6;
+								
+								topic.put("linked_related_view", adjustedProb);
+								topic.put("coordinated_linked_view", adjustedProb);
+								topic.put("multi-linked_view", topic.get("multi-linked_view") + adjustedProb);
+								topic.put("linked_view_visual_analytic", adjustedProb);
+								topic.put("linked_view", adjustedProb);
+								topic.put("linked-view", adjustedProb);
+							break;
+							
+							case "tiled_displays":
+								adjustedProb = probPerKeyword / 2;
+								
+								topic.put("tiled-display", adjustedProb);
+								topic.put("tiled_display", adjustedProb);
+							break;
+							
+							case "social_data_analysis":
+								adjustedProb = probPerKeyword / 1;
+								
+								topic.put("social_data_analysi", adjustedProb);
+							break;
+							
+							case "bioinformatics":
+								adjustedProb = probPerKeyword / 2;
+								
+								topic.put("bioinformatics_visualization", adjustedProb);
+								topic.put("bioinformatic", adjustedProb);
+							break;
+							
+							case "applications_of_visualizations":
+								adjustedProb = probPerKeyword / 10;
+								
+								topic.put("applications_of_visualization_technique", adjustedProb);
+								topic.put("remote_visualization_application", adjustedProb);
+								topic.put("interactive_visualization_application", adjustedProb);
+								topic.put("applications_of_visualization", adjustedProb);
+								topic.put("large_dataset_visualization_applications_of_infovi", adjustedProb);
+								topic.put("scientific_visualization_application", adjustedProb);
+								topic.put("information_visualization_application", adjustedProb);
+								topic.put("applications¿visual_analytic", adjustedProb);
+								topic.put("visualization_applications-topic", adjustedProb);
+								topic.put("visualization_application", adjustedProb);
+							break;
+							
+							case "glyphs":
+								adjustedProb = probPerKeyword / 14;
+								
+								topic.put("glyph_rendering", adjustedProb);
+								topic.put("tensor_glyph", adjustedProb);
+								topic.put("glyph", adjustedProb);
+								topic.put("glyphbased", adjustedProb);
+								topic.put("glyph-based_technique", adjustedProb);
+								topic.put("“glyphs”", adjustedProb);
+								topic.put("glyph_design", adjustedProb);
+								topic.put("glyph-based", adjustedProb);
+								topic.put("vesselglyph", adjustedProb);
+								topic.put("3d_glyph", adjustedProb);
+								topic.put("star_glyph", adjustedProb);
+								topic.put("glyph-based_visualization", adjustedProb);
+								topic.put("glyph_packing", adjustedProb);
+								topic.put("glyph_generation", adjustedProb);
+							break;
+							
+							case "intelligence_analysis":
+								adjustedProb = probPerKeyword / 1;
+								
+								topic.put("intelligence_analysi", adjustedProb);
+							break;							
+							
+							case "geographic_visualiziation":
+								adjustedProb = probPerKeyword / 5;
+								
+								topic.put("geographic_visualization", adjustedProb);
+								topic.put("geo-temporal_visualization", adjustedProb);
+								topic.put("geovistum", adjustedProb);
+								topic.put("geographic/geospatial_visualization", adjustedProb);
+								topic.put("geospatial-temporal_visualization", adjustedProb);
+							break;				
+							
+							case "quality_evaluation":
+								adjustedProb = probPerKeyword / 1;
+								
+								topic.put("qualitative_evaluation", adjustedProb);
+							break;							
+							
+							case "vector_fields":
+								adjustedProb = probPerKeyword / 7;
+								
+								topic.put("multivector_field", adjustedProb);
+								topic.put("vector_field_datum", adjustedProb);
+								topic.put("unsteady_vector_field", adjustedProb);
+								topic.put("vector_field_visualization", adjustedProb);
+								topic.put("time-dependent_vector_field", adjustedProb);
+								topic.put("vector_field_topology", adjustedProb);
+								topic.put("vector_field", adjustedProb);
+							break;
+							
+							case "streamlines":
+								adjustedProb = probPerKeyword / 11;
+								
+								topic.put("streamline_datum", adjustedProb);
+								topic.put("streamline-like", adjustedProb);
+								topic.put("streamline_generation", adjustedProb);
+								topic.put("closed_streamline", adjustedProb);
+								topic.put("adaptive_streamline", adjustedProb);
+								topic.put("streamline_visualization", adjustedProb);
+								topic.put("hyperstreamline_placement", adjustedProb);
+								topic.put("streamline", adjustedProb);
+								topic.put("hyperstreamline", adjustedProb);
+								topic.put("streamline_placement", adjustedProb);
+								topic.put("streamlines/streamtubes/tuboid", adjustedProb);
+							break;		
+							
+							case "3d_vector_field_visualization":
+								adjustedProb = probPerKeyword / 5;
+								
+								topic.put("vector_field_visualization", topic.get("vector_field_visualization") + adjustedProb);
+								topic.put("vector_field", topic.get("vector_field") + adjustedProb);
+								topic.put("vector_field_topology", topic.get("vector_field_topology") + adjustedProb);
+								topic.put("vector_field_datum", topic.get("vector_field_datum") + adjustedProb);
+								topic.put("multivector_field", topic.get("multivector_field") + adjustedProb);
+							break;								
+						}
+										
+					}
+					
+					// Keyword found: Assign probability, store in map.
+					else {
+						topic.put(kw, probPerKeyword);
+					}
+				}
+				
+				if (originalKPMapSize != topic.size()) {
+					System.out.println("### ERROR ### Non-existent keyword used in manual replacement.");
+				}
+				
+				// Add to topic collection.
+				topicModel.add(topic);
+			}
+			
+			/*
+			 * 2. Insert new LDA configuration and topics.
+			 */
+			
+			System.out.println("Inserting new LDA configuration and respective topics.");
+			
+			// Define ID for reference LDA configuration.
+			final int referenceModelConfigID 	= 2222;
+			// Number of topics in reference model.
+			final int numberOfTopics			= 16; 
+			
+			// Prepare statements for data insertion.
+			PreparedStatement ldaConfigInsertStatement 	= connection.prepareStatement(	"insert into ldaConfigurations (ldaConfigurationID, alpha, kappa, eta) " + 
+																						"values (" + referenceModelConfigID + ", 0, " + numberOfTopics +", 0);");
+			PreparedStatement topicInsertStatement 		= connection.prepareStatement(	"insert into topics (topicID, ldaConfigurationID) values (?, ?);");
+			
+			// Set auto-commit to false.
+			connection.setAutoCommit(false);
+			
+			// Insert LDA configuration.
+			ldaConfigInsertStatement.execute();
+			
+			// Add topic insert statements.
+			for (int i = 0; i < numberOfTopics; i++) {
+				topicInsertStatement.setInt(1, i);
+				topicInsertStatement.setInt(2, referenceModelConfigID);
+				topicInsertStatement.addBatch();
+			}
+			// Insert new topics.
+			topicInsertStatement.executeBatch();
+			
+			/*
+			 * 3. Map keywords to keyword IDs, insert KIT data. 
+			 */
+			
+			System.out.println("Inserting new keyword/probability data.");
+			
+			PreparedStatement kitInsertStatement 	= connection.prepareStatement(	"insert into keywordInTopic (topicID, keywordID, probability, ldaConfigurationID) " + 
+																					"values (?, ?, ?, " + referenceModelConfigID + ");");
+			// Fetch keywords and their corresponding IDs.
+			Map<String, Integer> kitData			= readKeywordsAsIndexedMap();
+			
+			// Iterate over topics.
+			int currTopicID = 0;
+			for (Map<String, Double> topicData : topicModel) {
+				// Iterate over keywords in topic.
+				for (Map.Entry<String, Double> keywordProbability : topicData.entrySet()) {
+					// Add insert statetement (with keyword resolved to keyword ID).
+					kitInsertStatement.setInt(1, currTopicID);
+					kitInsertStatement.setInt(2, kitData.get(keywordProbability.getKey()));
+					kitInsertStatement.setDouble(3, keywordProbability.getValue());
+					// Add to batch.
+					kitInsertStatement.addBatch();
+				}
+				
+				currTopicID++;
+			}
+			// Execute KIT data batch.
+			kitInsertStatement.executeBatch();
+			
+			// Commit transaction.
+			connection.commit();
+			
+			// Re-enable auto-commit.
+			connection.setAutoCommit(true);	
+		}
+		
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		System.out.println("Import finished.");
+	}
+	
+	/**
+	 * Reopen database.
+	 */
 	public void reopen()
 	{
 		try {
@@ -214,6 +683,8 @@ public class DBManagement
 			// Prepare statement for selection of raw data and fetch results.
 			PreparedStatement stmt	= connection.prepareStatement(query);
 			rs						= stmt.executeQuery();
+			// Set cursor.
+			rs.next();
 			
 			/*
 			 * Create collection of datasets over collection of topics over collection of keyword/probability pairs.
@@ -227,7 +698,7 @@ public class DBManagement
 			ldaConfigTopics.put(new LDAConfiguration(currLDAConfig), new ArrayList<Topic>());
 			
 			// As long as row is not the last one: Process it.
-			while (rs.next()) {
+			do {
 				final LDAConfiguration ldaConfig 	= new LDAConfiguration(rs.getInt("ldaConfigurationID"), rs.getInt("kappa"), rs.getDouble("alpha"), rs.getDouble("eta"));
 				int topicID 						= rs.getInt("topicID");
 				boolean isNewLDAConfig				= !ldaConfig.equals(currLDAConfig); 
@@ -264,7 +735,7 @@ public class DBManagement
 
 				// Update task progress.
 				task.updateTaskProgress(count++, numberOfResults);
-			}
+			} while (rs.next());
 			
 			System.out.println("4");
 			// For last dataset: Flush data, create last dataset.
@@ -361,8 +832,7 @@ public class DBManagement
 				// Simplified request:
 				String stmtString					= 	"select count(*) as actualKWCount from keywordInTopic kit " +
 														"join ldaConfigurations lda on lda.ldaConfigurationID = kit.ldaConfigurationID " +
-														"group by lda.ldaConfigurationID, topicID " +
-														"order by lda.ldaConfigurationID, topicID";
+														"group by lda.ldaConfigurationID, topicID";
 				
 				PreparedStatement numKeywordsStmt	= connection.prepareStatement(stmtString);
 				ResultSet rs						= numKeywordsStmt.executeQuery();
@@ -438,6 +908,70 @@ public class DBManagement
 		}
 		
 		return data;
+	}
+	
+	/**
+	 * Reads and returns map of keywords (and a respective probability of 0) in dedicated keyword table.
+	 * @return
+	 */
+	private Map<String, Double> readKeywordsAsMap()
+	{
+		// Read number of keywords.
+		if (numberOfKeywordsPerTopic <= 0) {
+			readNumberOfKeywords(true);
+		}
+		
+		// Allocate memory.
+		Map<String, Double> keywords = new HashMap<String, Double>(numberOfKeywordsPerTopic);
+		
+		// Get keywords.
+		try {
+			PreparedStatement pstmt = connection.prepareStatement("select keyword from keywords");
+			ResultSet rs			= pstmt.executeQuery();
+			
+			// Loop through result set.
+			while (rs.next()) {
+				keywords.put(rs.getString("keyword"), 0.0);
+			}
+		}
+		
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return keywords;
+	}
+	
+	/**
+	 * Reads and returns map of keywords (and the respective keywordID) in dedicated keyword table.
+	 * @return
+	 */
+	private Map<String, Integer> readKeywordsAsIndexedMap()
+	{
+		// Read number of keywords.
+		if (numberOfKeywordsPerTopic <= 0) {
+			readNumberOfKeywords(true);
+		}
+		
+		// Allocate memory.
+		Map<String, Integer> keywords = new HashMap<String, Integer>(numberOfKeywordsPerTopic);
+		
+		// Get keywords.
+		try {
+			PreparedStatement pstmt = connection.prepareStatement("select keyword, keywordID from keywords");
+			ResultSet rs			= pstmt.executeQuery();
+			
+			// Loop through result set.
+			while (rs.next()) {
+				keywords.put(rs.getString("keyword"), rs.getInt("keywordID"));
+			}
+		}
+		
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return keywords;
 	}
 	
 	/**
@@ -557,8 +1091,7 @@ public class DBManagement
 						listOfLDAConfigsWithoutDistances.contains(ldaConfigurations.get(i).getConfigurationID()) || 
 						listOfLDAConfigsWithoutDistances.contains(ldaConfigurations.get(j).getConfigurationID()) ) {
 						
-						// Set values for row.
-						System.out.println("storing " + ldaConfigurations.get(i).getConfigurationID() + " to " + ldaConfigurations.get(j).getConfigurationID()); 
+						// Set values for row. 
 						statement.setInt(1, ldaConfigurations.get(i).getConfigurationID());
 						statement.setInt(2, ldaConfigurations.get(j).getConfigurationID());
 						statement.setDouble(3, distances[i][j]);
@@ -628,20 +1161,25 @@ public class DBManagement
 				// Iterate through topic distances for this pair of LDA configurations.
 				for (int i = 0; i < topicDistanceMatrix.length; i++) {
 					for (int j = 0; j < topicDistanceMatrix[i].length; j++) {
+						statement.setInt(1, ldaConfigID_1);
+						statement.setInt(2, ldaConfigID_2);
+						statement.setInt(3, i);
+						statement.setInt(4, j);
+						
 						// Set values for row, if distance is not between the same topic.
 						if ( !( (ldaConfigID_1 == ldaConfigID_2) && (i == j) ) ) {
-							statement.setInt(1, ldaConfigID_1);
-							statement.setInt(2, ldaConfigID_2);
-							statement.setInt(3, i);
-							statement.setInt(4, j);
 							statement.setDouble(5, topicDistanceMatrix[i][j]);
-
-							// Add row to batch.
-							statement.addBatch();
-							
-							// Keep track of how many statements are in this batch.
-							statementsInBatch++;
 						}
+						// Else: Use 0 as distance of a topic to itself.
+						else {
+							statement.setDouble(5, 0);
+						}
+
+						// Add row to batch.
+						statement.addBatch();
+						
+						// Keep track of how many statements are in this batch.
+						statementsInBatch++;
 					}	
 				}
 				
@@ -837,6 +1375,38 @@ public class DBManagement
 		}
 	
 		return ldaConfigIDsWithoutDistances;
+	}
+	
+	/**
+	 * Loads topic distance maximum and minimum.
+	 * @return Pair of extrema. Ordering: Minimum, maximum.
+	 */
+	public Pair<Double, Double> loadTopicDistanceExtrema()
+	{
+		double max = -1;
+		double min = -1;
+		
+		try {
+			// Avoid infinity values introduced by reference topic model(s) when looking for maximum.
+			PreparedStatement statement	= connection.prepareStatement(	"select max(distance) maxDist from topicDistances " + 
+																		"where cast(distance as string) not like '%Inf%';");
+			// Execute statement.
+			ResultSet rs				= statement.executeQuery();
+			// Process value.
+			max							= rs.getDouble("maxDist");
+			
+			statement					= connection.prepareStatement("select min(distance) minDist from topicDistances;");
+			// Execute statement.
+			rs							= statement.executeQuery();
+			// Process value.
+			min							= rs.getDouble("minDist");
+		}
+		
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return new Pair<Double, Double>(min, max);
 	}
 	
 	/**

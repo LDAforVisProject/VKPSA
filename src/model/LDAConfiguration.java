@@ -32,6 +32,11 @@ public class LDAConfiguration
 	        tempParameterMap.put("alpha", -1);
 	        PARAMETER_MAP 							= Collections.unmodifiableMap(tempParameterMap);
 	}
+	
+	/**
+	 * Workaround for the time being: Hardcode ID of LDA configuration representing reference topic model. 
+	 */
+	public static final int REFERENCE_TOPICMODEL_CONFIGID = 2222;
 	   
 	
 	// -----------------------------------------------	
@@ -115,6 +120,13 @@ public class LDAConfiguration
 		return true;
 	}
 	
+	/**
+	 * Generates LDA configuration from configuration string.
+	 * @param ldaConfigString
+	 * @return
+	 * @throws Exception
+	 * @deprecated
+	 */
 	public static LDAConfiguration generateLDAConfiguration(String ldaConfigString) throws Exception
 	{
 		Map<String, Integer> paramMapCopy	= new HashMap<String, Integer>(LDAConfiguration.PARAMETER_MAP);
@@ -177,6 +189,21 @@ public class LDAConfiguration
 		}
 		
 		return configList;
+	}
+	
+	/**
+	 * Tells whether a parameter is supported or not.
+	 * @param param
+	 * @return
+	 */
+	public static boolean supports(String param)
+	{
+		for (String supParam : SUPPORTED_PARAMETERS) {
+			if (supParam.equals(param))
+				return true;
+		}
+		
+		return false;
 	}
 	
 	// -----------------------------------------------
@@ -260,6 +287,10 @@ public class LDAConfiguration
 			
 			case "kappa":
 				symbol = "κ";
+			break;
+			
+			case "distance":
+				symbol = "δ";
 			break;
 			
 			default:
