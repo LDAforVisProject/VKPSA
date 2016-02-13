@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane fx:id="root_anchorPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.components.scentedFilter.ScentedFilter">
+   <children>
+      <Label fx:id="param_label" layoutX="14.0" layoutY="42.0" text="SC" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="33.0">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+      </Label>
+      <VBox fx:id="container_vbox" layoutX="88.0" layoutY="6.0" maxHeight="81.0" prefHeight="81.0" prefWidth="476.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="88.0" AnchorPane.rightAnchor="46.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <StackedBarChart fx:id="barchart" alternativeRowFillVisible="false" animated="false" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="75.0" minHeight="75.0" prefHeight="75.0" prefWidth="10.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
+               <xAxis>
+                  <CategoryAxis endMargin="0.0" gapStartAndEnd="false" side="BOTTOM" startMargin="10.0" tickLabelsVisible="false" tickMarkVisible="false" />
+               </xAxis>
+               <yAxis>
+                  <NumberAxis side="LEFT" tickLabelGap="1.0" tickLength="1.0" upperBound="200.0" />
+               </yAxis>
+               <VBox.margin>
+                  <Insets left="-20.0" />
+               </VBox.margin>
+            </StackedBarChart>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>

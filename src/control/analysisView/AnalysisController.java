@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import org.controlsfx.control.PopOver;
 
 import model.AnalysisDataspace;
 import model.LDAConfiguration;
