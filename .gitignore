@@ -18,4 +18,4 @@ hs_err_pid*
 *.db
 
 # No classpath files. #
-*.classpath
+# *.classpath
