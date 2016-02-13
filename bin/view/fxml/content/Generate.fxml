@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.canvas.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="695.0" prefWidth="695.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.dataView.GenerationController">
+   <children>
+    <AnchorPane>
+         <children>
+            <ScrollPane fx:id="parameter_scrollPane" hbarPolicy="NEVER" layoutX="80.0" layoutY="81.0" prefHeight="250.0" prefViewportHeight="90.0" prefViewportWidth="400.0" prefWidth="548.0" vbarPolicy="ALWAYS">
+               <content>
+                  <GridPane fx:id="parameterConfiguration_gridPane" hgap="10.0" layoutX="217.0" layoutY="117.0" prefHeight="247.0" prefWidth="526.0" vgap="5.0">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="123.0" minWidth="10.0" prefWidth="39.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="290.0" minWidth="10.0" prefWidth="63.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="366.0" minWidth="10.0" prefWidth="335.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="95.0" minWidth="10.0" prefWidth="72.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Label text="α">
+                           <GridPane.margin>
+                              <Insets left="10.0" />
+                           </GridPane.margin>
+                           <font>
+                              <Font name="System Bold" size="18.0" />
+                           </font>
+                        </Label>
+                        <Label text="η " GridPane.rowIndex="1">
+                           <GridPane.margin>
+                              <Insets left="10.0" />
+                           </GridPane.margin>
+                           <font>
+                              <Font name="System Bold" size="18.0" />
+                           </font>
+                        </Label>
+                        <Label text="κ" GridPane.rowIndex="2">
+                           <GridPane.margin>
+                              <Insets left="10.0" />
+                           </GridPane.margin>
+                           <font>
+                              <Font name="System Bold" size="18.0" />
+                           </font>
+                        </Label>
+                        <TextField fx:id="alpha_max_textfield" maxWidth="50.0" GridPane.columnIndex="3">
+                           <GridPane.margin>
+                              <Insets />
+                           </GridPane.margin>
+                        </TextField>
+                        <TextField fx:id="eta_min_textfield" maxWidth="50.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                           <GridPane.margin>
+                              <Insets />
+                           </GridPane.margin>
+                        </TextField>
+                        <TextField fx:id="eta_max_textfield" maxWidth="50.0" GridPane.columnIndex="3" GridPane.rowIndex="1">
+                           <GridPane.margin>
+                              <Insets />
+                           </GridPane.margin>
+                        </TextField>
+                        <TextField fx:id="kappa_min_textfield" maxWidth="50.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                           <GridPane.margin>
+                              <Insets />
+                           </GridPane.margin>
+                        </TextField>
+                        <TextField fx:id="kappa_max_textfield" maxWidth="50.0" GridPane.columnIndex="3" GridPane.rowIndex="2">
+                           <GridPane.margin>
+                              <Insets />
+                           </GridPane.margin>
+                        </TextField>
+                        <TextField fx:id="alpha_min_textfield" maxWidth="50.0" prefWidth="10.0" GridPane.columnIndex="1">
+                           <GridPane.margin>
+                              <Insets />
+                           </GridPane.margin>
+                        </TextField>
+                        <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2">
+                           <children>
+                              <BarChart fx:id="alpha_barchart" alternativeRowFillVisible="false" animated="false" barGap="0.0" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="40.0" maxWidth="360.0" minHeight="40.0" minWidth="360.0" prefHeight="40.0" prefWidth="360.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
+                                 <padding>
+                                    <Insets bottom="-20.0" top="-10.0" />
+                                 </padding>
+                                 <xAxis>
+                                    <CategoryAxis endMargin="0.0" gapStartAndEnd="false" side="BOTTOM" startMargin="10.0" tickLabelsVisible="false" tickMarkVisible="false" />
+                                 </xAxis>
+                                 <yAxis>
+                                    <NumberAxis minorTickVisible="false" side="LEFT" tickLabelGap="1.0" tickLength="1.0" upperBound="200.0" />
+                                 </yAxis>
+                                 <VBox.margin>
+                                    <Insets left="-24.0" top="15.0" />
+                                 </VBox.margin>
+                              </BarChart>
+                              <Slider maxWidth="37.0" showTickLabels="true" showTickMarks="true">
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                              </Slider>
+                           </children>
+                        </VBox>
+                        <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                           <children>
+                              <BarChart fx:id="eta_barchart" alternativeRowFillVisible="false" animated="false" barGap="0.0" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="40.0" maxWidth="360.0" minHeight="40.0" minWidth="360.0" prefHeight="40.0" prefWidth="360.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
+                                 <padding>
+                                    <Insets bottom="-20.0" top="-10.0" />
+                                 </padding>
+                                 <xAxis>
+                                    <CategoryAxis endMargin="0.0" gapStartAndEnd="false" side="BOTTOM" startMargin="10.0" tickLabelsVisible="false" tickMarkVisible="false" />
+                                 </xAxis>
+                                 <yAxis>
+                                    <NumberAxis minorTickVisible="false" side="LEFT" tickLabelGap="1.0" tickLength="1.0" upperBound="200.0" />
+                                 </yAxis>
+                                 <VBox.margin>
+                                    <Insets left="-24.0" top="15.0" />
+                                 </VBox.margin>
+                              </BarChart>
+                              <Slider maxWidth="37.0" showTickLabels="true" showTickMarks="true">
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                              </Slider>
+                           </children>
+                        </VBox>
+                        <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                           <children>
+                              <BarChart fx:id="kappa_barchart" alternativeRowFillVisible="false" animated="false" barGap="0.0" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="40.0" maxWidth="360.0" minHeight="40.0" minWidth="360.0" prefHeight="40.0" prefWidth="360.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
+                                 <padding>
+                                    <Insets bottom="-20.0" top="-10.0" />
+                                 </padding>
+                                 <xAxis>
+                                    <CategoryAxis endMargin="0.0" gapStartAndEnd="false" side="BOTTOM" startMargin="10.0" tickLabelsVisible="false" tickMarkVisible="false" />
+                                 </xAxis>
+                                 <yAxis>
+                                    <NumberAxis minorTickVisible="false" side="LEFT" tickLabelGap="1.0" tickLength="1.0" upperBound="200.0" />
+                                 </yAxis>
+                                 <VBox.margin>
+                                    <Insets left="-24.0" top="15.0" />
+                                 </VBox.margin>
+                              </BarChart>
+                              <Slider maxWidth="37.0" showTickLabels="true" showTickMarks="true">
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                              </Slider>
+                           </children>
+                        </VBox>
+                     </children>
+                     <padding>
+                        <Insets bottom="20.0" />
+                     </padding>
+                  </GridPane>
+               </content>
+            </ScrollPane>
+            <GridPane layoutX="90.0" layoutY="432.0" prefHeight="120.0" prefWidth="415.0" vgap="20.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="277.0" minWidth="10.0" prefWidth="277.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="202.0" minWidth="10.0" prefWidth="138.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints maxHeight="28.0" minHeight="10.0" prefHeight="26.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="35.0" minHeight="10.0" prefHeight="33.0" vgrow="SOMETIMES" />
+                  <RowConstraints maxHeight="27.0" minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
+                  <RowConstraints maxHeight="27.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Label text="Generate only non-available data" />
+                  <Label text="Number of divisions  for each parameter" GridPane.rowIndex="1" />
+                  <CheckBox disable="true" mnemonicParsing="false" GridPane.columnIndex="1" />
+                  <Label text="Sampling method" GridPane.rowIndex="3" />
+                  <ComboBox fx:id="sampling_combobox" onAction="#changeSamplingMethod" prefWidth="150.0" promptText="Random" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <TextField fx:id="numberOfDivisions_textfield" maxWidth="50.0" minWidth="40.0" onAction="#updateNumberOfDivisions" prefHeight="25.0" prefWidth="50.0" text="1000" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Label text="Number of datasets" GridPane.rowIndex="2" />
+                  <TextField fx:id="numberOfDatasets_textfield" maxWidth="50.0" onAction="#updateNumberOfDatasets" prefHeight="25.0" text="1000" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+               </children>
+            </GridPane>
+            <Button fx:id="generate_button" layoutX="280.0" layoutY="624.0" mnemonicParsing="false" onAction="#generateData" text="Generate topic models">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Button>
+            <ProgressIndicator fx:id="generate_progressIndicator" layoutX="457.0" layoutY="620.0" prefHeight="45.0" prefWidth="39.0" progress="0.0" />
+            <Label layoutX="244.0" layoutY="21.0" text="Data Generation Configuration">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+            <Separator layoutX="39.0" layoutY="56.0" prefHeight="3.0" prefWidth="614.0" />
+            <Separator layoutX="39.0" layoutY="404.0" prefHeight="3.0" prefWidth="614.0" />
+            <Separator layoutX="39.0" layoutY="596.0" prefHeight="3.0" prefWidth="614.0" />
+            <CheckBox fx:id="includePostprocessing_checkbox" layoutX="76.0" layoutY="630.0" mnemonicParsing="false" selected="true" text="Include postprocessing" />
+         </children>
+      </AnchorPane>
+   </children>
+</AnchorPane>

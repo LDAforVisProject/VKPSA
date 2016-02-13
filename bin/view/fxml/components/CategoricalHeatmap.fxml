@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.canvas.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane fx:id="parent_anchorpane" prefHeight="220.0" prefWidth="230.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.components.heatmap.CategoricalHeatmap">
+   <children>
+      <Canvas fx:id="canvas" height="100.0" layoutX="35.0" layoutY="22.0" width="100.0" AnchorPane.bottomAnchor="46.0" AnchorPane.leftAnchor="58.0" />
+      <CategoryAxis animated="false" autoRanging="false" layoutX="35.0" layoutY="152.0" prefHeight="40.0" prefWidth="150.0" side="BOTTOM" tickLength="5.0" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="58.0" AnchorPane.rightAnchor="22.0" fx:id="xAxis" />
+      <CategoryAxis fx:id="yAxis" animated="false" autoRanging="false" layoutX="5.0" layoutY="21.0" prefHeight="150.0" prefWidth="50.0" side="LEFT" tickLength="5.0" AnchorPane.bottomAnchor="48.0" AnchorPane.leftAnchor="9.0" AnchorPane.topAnchor="22.0" />
+   </children>
+</AnchorPane>
