@@ -39,10 +39,6 @@ public class LocalScopeInstance extends VisualizationComponent_Legacy
 	 * AnchorPane holding parallel tag clouds visualization.
 	 */
 	private AnchorPane ptc_anchorpane;
-	/**
-	 * AnchorPane holding chord diagram visualization.
-	 */
-	private AnchorPane cd_anchorpane;
 	
 	/**
 	 * Protocol pane's ProgressIndicator.
@@ -63,10 +59,7 @@ public class LocalScopeInstance extends VisualizationComponent_Legacy
 	 * Path to .fxml for parallel tag clouds.
 	 */
 	private final String ptcPath 	= "/view/fxml/localScope/ParallelTagCloud.fxml";
-	/**
-	 * Path to .fxml for chord diagram.
-	 */
-	private final String cdPath		= "/view/fxml/localScope/ChordDiagram.fxml";
+
 	
 	/*
 	 * Other data.
@@ -105,7 +98,6 @@ public class LocalScopeInstance extends VisualizationComponent_Legacy
 		super(analysisController);
 		
 		this.ptc_anchorpane							= ptc_anchorpane;
-		this.cd_anchorpane							= cd_anchorpane;
 		this.slider_localScope_numTopicsToUse		= slider_localScope_numTopicsToUse;
 		this.textfield_localScope_numTopicsToUse	= textfield_localScope_numTopicsToUse;
 		this.slider_localScope_numKeywordsToUse		= slider_localScope_numKeywordsToUse;

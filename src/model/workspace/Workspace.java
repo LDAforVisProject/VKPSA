@@ -448,6 +448,7 @@ public class Workspace implements ITaskListener
 	/**
 	 * Compares LDA configuration string in first line of given line (LDA configurations 
 	 * are separated by spaces) to the current workspace.ldaConfigurations.
+	 * @deprecated
 	 * @param path
 	 * @param delimiter
 	 * @return

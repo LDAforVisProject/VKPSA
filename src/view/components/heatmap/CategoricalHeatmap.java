@@ -12,12 +12,10 @@ import java.util.Set;
 import model.LDAConfiguration;
 import model.workspace.Workspace;
 import model.workspace.TaskType;
-import model.workspace.tasks.ITaskListener;
 import model.workspace.tasks.Task_LoadTopicDistancesForSelection;
 import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
 import view.components.VisualizationComponentType;
-import view.components.controls.colorLegend.ColorLegend;
 import view.components.controls.colorLegend.ColorLegendDataset;
 import view.components.controls.colorLegend.ColorScale;
 import javafx.event.EventHandler;
@@ -583,8 +581,6 @@ public class CategoricalHeatmap extends HeatMap
 			log("Loaded topic distance data.");
 			
 			// Create dataset.
-			System.out.println(topicDistanceLoadingTask);
-		
 			this.data = new HeatmapDataset(	topicDistanceLoadingTask.getLDAConfigurationsToLoad(), topicDistanceLoadingTask.getSpatialIDsForLDATopicConfiguration(), 
 											topicDistanceLoadingTask.getTopicDistances(), topicDistanceLoadingTask.getTopicDistanceExtrema(), (HeatmapOptionset)options);
 			

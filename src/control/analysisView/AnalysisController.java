@@ -10,6 +10,9 @@ import java.util.ResourceBundle;
 import java.util.Set;
 
 
+
+
+
 import model.AnalysisDataspace;
 import model.LDAConfiguration;
 import model.workspace.Workspace;
@@ -22,6 +25,9 @@ import view.components.heatmap.CategoricalHeatmap;
 import view.components.heatmap.HeatmapOptionset;
 import view.components.legacy.LocalScopeInstance;
 import view.components.legacy.mdsScatterchart.MDSScatterchart;
+import view.components.parallelTagCloud.ParallelTagCloud;
+import view.components.parallelTagCloud.ParallelTagCloudDataset;
+import view.components.parallelTagCloud.ParallelTagCloudOptionset;
 import view.components.scatterchart.ScatterchartDataset;
 import view.components.scatterchart.ScatterchartOptionset;
 import view.components.scatterchart.ParameterSpaceScatterchart;
@@ -170,19 +176,22 @@ public class AnalysisController extends Controller
 	// Heatmap setting controls (and metadata).
 	private @FXML ToggleButton button_relativeView_paramDist;
 	
-	/*
-	 * Local scope.
-	 */
 	
 	/**
 	 * Heatmap for comparison of topic models.
 	 */	
-	CategoricalHeatmap tmcHeatmap;
+	private CategoricalHeatmap tmcHeatmap;
+
+	
+	/**
+	 * Parallel tag cloud component.
+	 */
+	private ParallelTagCloud parallelTagCloud;
 	
 	/**
 	 * Parallel tag cloud in local scope.
 	 */
-	private LocalScopeInstance localScopeInstance;
+	//private LocalScopeInstance localScopeInstance;
 
 	/*
 	 * Filter controls.
@@ -300,6 +309,7 @@ public class AnalysisController extends Controller
 		initFilterControls();
 		initMDSScatterchart();
 		initParameterSpaceScatterchart();
+		initParallelTagCloud();
 		initLocalScopeView();
 		initComparisonHeatmaps();
 		
@@ -325,12 +335,18 @@ public class AnalysisController extends Controller
 	private void initLocalScopeView()
 	{
 		// Create new instance of local scope.
-		localScopeInstance = new LocalScopeInstance(this, 	localScope_ptc_anchorPane, localscope_tmc_anchorPane,
-															settingsPanel.getLocalScopeTopicNumberSlider(), settingsPanel.getLocalScopeTopicNumberTextField(),
-															settingsPanel.getLocalScopeKeywordNumberSlider(), settingsPanel.getLocalScopeTopicNumberTextField());
-		localScopeInstance.load();
+//		localScopeInstance = new LocalScopeInstance(this, 	localScope_ptc_anchorPane, localscope_tmc_anchorPane,
+//															settingsPanel.getLocalScopeTopicNumberSlider(), settingsPanel.getLocalScopeTopicNumberTextField(),
+//															settingsPanel.getLocalScopeKeywordNumberSlider(), settingsPanel.getLocalScopeTopicNumberTextField());
+//		localScopeInstance.load();
 	}
 
+	private void initParallelTagCloud()
+	{
+		parallelTagCloud = (ParallelTagCloud)VisualizationComponent.generateInstance(VisualizationComponentType.PARALLEL_TAG_CLOUD, this, null, null, null);
+		parallelTagCloud.embedIn(localScope_ptc_anchorPane);
+	}
+	
 	private void initFilterControls()
 	{
 		// Init collections.
@@ -437,7 +453,7 @@ public class AnalysisController extends Controller
 																dataspace.getInactiveLDAConfigurations(), dataspace.getActiveLDAConfigurations()));
 		
 		//	Local scope:
-		localScopeInstance.refresh(dataspace.getActiveLDAConfigurations());
+//		localScopeInstance.refresh(dataspace.getActiveLDAConfigurations());
 		// TM comparison heatmap:
 		refreshTMCHeatmap(dataspace.getActiveLDAConfigurations());
 	}
@@ -478,7 +494,11 @@ public class AnalysisController extends Controller
 	 */
 	public void integrateTMCHeatmapSelection(Set<Pair<Integer, Integer>> selectedTopicConfigIDs)
 	{
-		localScopeInstance.refreshPTC(selectedTopicConfigIDs);
+//		localScopeInstance.refreshPTC(selectedTopicConfigIDs);
+		ParallelTagCloudDataset ptcData 		= new ParallelTagCloudDataset(selectedTopicConfigIDs);
+		ParallelTagCloudOptionset ptcOptions 	= new ParallelTagCloudOptionset(true, true, false, (int) settingsPanel.getLocalScopeKeywordNumberSlider().getValue());
+		// Refresh parallel tag cloud.
+		parallelTagCloud.refresh(ptcOptions, ptcData);
 	}
 
 	/**
@@ -520,7 +540,7 @@ public class AnalysisController extends Controller
 																dataspace.getInactiveLDAConfigurations(), dataspace.getActiveLDAConfigurations()));
 		
 		//	Local scope:
-		localScopeInstance.refresh(dataspace.getActiveLDAConfigurations());
+//		localScopeInstance.refresh(dataspace.getActiveLDAConfigurations());
 		refreshTMCHeatmap(dataspace.getActiveLDAConfigurations());
 		
 		// 	Parameter histograms:
@@ -642,7 +662,8 @@ public class AnalysisController extends Controller
 			
 			// Resize local scope element: Parallel tag clouds.
 			case "localScope_ptc_anchorPane":
-				localScopeInstance.resize(width, height, LocalScopeVisualizationType.PARALLEL_TAG_CLOUDS);
+//				localScopeInstance.resize(width, height, LocalScopeVisualizationType.PARALLEL_TAG_CLOUDS);
+				parallelTagCloud.resizeContent(width, height);
 			break;
 			
 			case "settings_anchorpane":
@@ -727,6 +748,7 @@ public class AnalysisController extends Controller
             }
 		});
 		
+		// Set customized keyhandler for zoomable (i.e. contained in scroll pane) components.
 		globalScatterplot.setSpaceKeyHandler(scrollPaneKEHandler);
 		paramSpaceScatterchart.setSpaceKeyHandler(scrollPaneKEHandler);
 		
@@ -752,12 +774,22 @@ public class AnalysisController extends Controller
 	 */
 	private void notifyKeyEventSubscribers(KeyEvent ke)
 	{
-		if (ke.getEventType() == KeyEvent.KEY_PRESSED || ke.getEventType() == KeyEvent.KEY_RELEASED) {
+		if (ke.getEventType() == KeyEvent.KEY_PRESSED) {
+			globalScatterplot.processKeyPressedEvent(ke);
+	    	tmcHeatmap.processKeyPressedEvent(ke);
+	    	for (ScentedFilter filter : filters)
+	    		filter.processKeyPressedEvent(ke);
+	    	paramSpaceScatterchart.processKeyPressedEvent(ke);
+	    	parallelTagCloud.processKeyPressedEvent(ke);
+		}
+			
+		else if (ke.getEventType() == KeyEvent.KEY_RELEASED) {
 	    	globalScatterplot.processKeyReleasedEvent(ke);
 	    	tmcHeatmap.processKeyReleasedEvent(ke);
 	    	for (ScentedFilter filter : filters)
 	    		filter.processKeyReleasedEvent(ke);
 	    	paramSpaceScatterchart.processKeyReleasedEvent(ke);
+	    	parallelTagCloud.processKeyReleasedEvent(ke);
 		}
 		
 		else if (ke.getEventType() == KeyEvent.KEY_TYPED) {
@@ -881,11 +913,13 @@ public class AnalysisController extends Controller
 		// ...for parameter space visualizations. 
 		paramSpaceScatterchart.setReferences(workspace, logPI, logTA);
 		//	...for local scope instance.
-		localScopeInstance.setReferences(workspace, logPI, logTA);
+//		localScopeInstance.setReferences(workspace, logPI, logTA);
 		//	... for scented filter.
 		for (ScentedFilter filter : filters) {
 			filter.setReferences(workspace, logPI, logTA);
 		}
+		// ...for parallel tag cloud.
+		parallelTagCloud.setReferences(workspace, logPI, logTA);
 		// ... for settings panel.
 		settingsPanel.setReferences(workspace, logPI, logTA);
 	}
@@ -980,6 +1014,10 @@ public class AnalysisController extends Controller
 		
 		if (sourceVisType != VisualizationComponentType.CATEGORICAL_HEATMAP)
 			tmcHeatmap.highlightHoveredOverDataPoints(dataPointConfigIDs, DatapointIDMode.CONFIG_ID);
+		
+		// Remove highlighting from parallel tag cloud.
+		if (sourceVisType != VisualizationComponentType.PARALLEL_TAG_CLOUD)
+			parallelTagCloud.highlightHoveredOverDataPoints(dataPointConfigIDs, DatapointIDMode.CONFIG_ID);
 	}
 	
 	/**
@@ -988,9 +1026,11 @@ public class AnalysisController extends Controller
 	 */
 	public void removeHighlighting(VisualizationComponentType sourceVisType)
 	{
+		// Remove highlighting from global scatterchart.
 		if (sourceVisType != VisualizationComponentType.GLOBAL_SCATTERCHART)
 			globalScatterplot.removeHoverHighlighting();
-		
+
+		// Remove highlighting from parameter space scatterchart.		
 		if (sourceVisType != VisualizationComponentType.PARAMSPACE_SCATTERCHART)
 			paramSpaceScatterchart.removeHoverHighlighting();
 		
@@ -1000,7 +1040,12 @@ public class AnalysisController extends Controller
 			filter.removeHoverHighlighting();
 		}
 		
+		// Remove highlighting from TMC.
 		if (sourceVisType != VisualizationComponentType.CATEGORICAL_HEATMAP)
 			tmcHeatmap.removeHoverHighlighting();
+		
+		// Remove highlighting from parallel tag cloud.
+		if (sourceVisType != VisualizationComponentType.PARALLEL_TAG_CLOUD)
+			parallelTagCloud.removeHoverHighlighting();		
 	}
 }
