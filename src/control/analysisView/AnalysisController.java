@@ -568,6 +568,16 @@ public class AnalysisController extends Controller
 	}
 	
 	/**
+	 * Refreshes parallel tag cloud after settings change. Uses available data. 
+	 */
+	public void refreshPTC()
+	{
+		ParallelTagCloudOptionset ptcOptions 	= new ParallelTagCloudOptionset(true, true, false, (int) settingsPanel.getLocalScopeKeywordNumberSlider().getValue());
+		// Refresh parallel tag cloud.
+		parallelTagCloud.refresh(ptcOptions);
+	}
+	
+	/**
 	 * Refreshes heatmap for topic model comparison. Uses available data. 
 	 */
 	private void refreshTMCHeatmap()

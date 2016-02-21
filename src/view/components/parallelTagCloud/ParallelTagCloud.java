@@ -52,11 +52,6 @@ public class ParallelTagCloud extends VisualizationComponent
 	 */
     private CategoryAxis probDistBarchart_yAxis;
 	
-	final static String austria = "Austria";
-    final static String brazil = "Brazil";
-    final static String france = "France";
-    final static String italy = "Italy";
-    final static String usa = "USA";
     
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1)
@@ -101,33 +96,9 @@ public class ParallelTagCloud extends VisualizationComponent
         probabilityDistribution_barchart.setAnimated(false);
         probDistBarchart_xAxis.setLabel("Probability");  
         probDistBarchart_xAxis.setTickLabelRotation(90);
-        probDistBarchart_yAxis.setLabel("Keyword");        
+        probDistBarchart_yAxis.setLabel("n-th most relevant keyword for each topic");        
  
-        XYChart.Series series1 = new XYChart.Series();
-        series1.setName("2003");       
-        series1.getData().add(new XYChart.Data(25601.34, austria));
-        series1.getData().add(new XYChart.Data(20148.82, brazil));
-        series1.getData().add(new XYChart.Data(10000, france));
-        series1.getData().add(new XYChart.Data(35407.15, italy));
-        series1.getData().add(new XYChart.Data(12000, usa));      
-        
-        XYChart.Series series2 = new XYChart.Series();
-        series2.setName("2004");
-        series2.getData().add(new XYChart.Data(57401.85, austria));
-        series2.getData().add(new XYChart.Data(41941.19, brazil));
-        series2.getData().add(new XYChart.Data(45263.37, france));
-        series2.getData().add(new XYChart.Data(117320.16, italy));
-        series2.getData().add(new XYChart.Data(14845.27, usa));  
-        
-        XYChart.Series series3 = new XYChart.Series();
-        series3.setName("2005");
-        series3.getData().add(new XYChart.Data(45000.65, austria));
-        series3.getData().add(new XYChart.Data(44835.76, brazil));
-        series3.getData().add(new XYChart.Data(18722.18, france));
-        series3.getData().add(new XYChart.Data(17557.31, italy));
-        series3.getData().add(new XYChart.Data(92633.68, usa));  
-        
-        probabilityDistribution_barchart.getData().addAll(series1, series2, series3);
+        // Add to pane.
         barchart_anchorpane.getChildren().add(probabilityDistribution_barchart);
         
 		// Ensure resizability of barchart.
@@ -152,7 +123,19 @@ public class ParallelTagCloud extends VisualizationComponent
 	}
 	
 	/**
-	 * Refresh visualization, given a generic, preprocessed dataset.
+	 * Refresh visualization using existing data and a new option set.
+	 * @param options
+	 */
+	public void refresh(ParallelTagCloudOptionset options)
+	{
+		this.options = options;
+		
+		// Refresh visualizations.
+		refresh();
+	}
+	
+	/**
+	 * Refresh visualization, given a generic, preprocessed dataset and a set of options.
 	 * @param options
 	 * @param data
 	 */
@@ -161,9 +144,8 @@ public class ParallelTagCloud extends VisualizationComponent
 		this.options 		= options;
 		this.data			= data;
     	
-		System.out.println("loading data");
 		// Fetch keyword/probability data from database.
-		data.fetchTopicProbabilityData(this, workspace);
+		((ParallelTagCloudDataset)this.data).fetchTopicProbabilityData(this, workspace);
 	}
 	
 	/**
@@ -172,11 +154,61 @@ public class ParallelTagCloud extends VisualizationComponent
 	@Override
 	public void refresh()
 	{
+		ParallelTagCloudDataset ptcData 		= (ParallelTagCloudDataset)this.data;
+		ParallelTagCloudOptionset ptcOptions	= (ParallelTagCloudOptionset)this.options;
+		
 		System.out.println("refreshing after data was loaded");
 		
 		if (this.options != null && this.data != null) {
+		
 			
+			// Refresh probability distribution barchart.
+			refreshBarchart(ptcData, ptcOptions);
 		}
+	}
+	
+	/**
+	 * Refreshes barchart. Adds all available data to it. 
+	 * @param data
+	 * @param options
+	 */
+	private void refreshBarchart(ParallelTagCloudDataset data, ParallelTagCloudOptionset options)
+	{
+		// Clear data.
+		probabilityDistribution_barchart.getData().clear();
+		
+		// Add new data to chart.
+		for (Pair<Integer, Integer> topicConfig : data.getKeywordProbabilities().keySet()) {
+			// Allocate series object, set name.
+			XYChart.Series<Number, String> series = new XYChart.Series<Number, String>();
+			series.setName(String.valueOf(topicConfig.getKey()) + "#" + String.valueOf(topicConfig.getValue()));
+			
+			System.out.println(topicConfig);
+			
+			// Loop through all n requested keyword/probability pairs.
+			
+			// Add all keyword/probability pairs to data series.
+			// Sort by priority for each topic (as opposed to alphabetically).
+			// Important: One bar most probably represents different keywords for different topics.
+			// Get data.
+			ArrayList<Pair<String, Double>> keywordProbabilityData = data.getKeywordProbabilities().get(topicConfig);
+			// Calculate start index.
+			final int startIndex = options.getNumberOfKeywordsToDisplay() <= keywordProbabilityData.size() ? options.getNumberOfKeywordsToDisplay() - 1 : keywordProbabilityData.size() - 1; 
+			System.out.println("si = " + startIndex);
+			// Iterate over keyword/probablity pairs.
+			for (int i = startIndex; i >= 0; i--) {
+				Pair<String, Double> keywordProbPair = keywordProbabilityData.get(i);
+				
+				series.getData().add(new XYChart.Data<Number, String>(	keywordProbPair.getValue(), 
+																		"#" + String.valueOf( i + 1 ))
+				);
+				System.out.println("\t" + (keywordProbabilityData.size() - i) + " -> " + keywordProbPair.getValue());
+			}
+			
+			// Add data series to barchart.
+			probabilityDistribution_barchart.getData().add(series);
+		}
+		
 	}
 	
 	@Override

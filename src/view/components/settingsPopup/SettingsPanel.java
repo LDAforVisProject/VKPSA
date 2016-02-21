@@ -168,6 +168,10 @@ public class SettingsPanel extends VisualizationComponent
 		mdsHeatmap_dhmColor_min_colChooser.setValue(Color.RED);
 		mdsHeatmap_dhmColor_max_colChooser.setValue(Color.DARKRED);
 		
+		// Set properties for slider.
+		slider_localScope_numKeywordsToUse.setSnapToTicks(true);
+		slider_localScope_numKeywordsToUse.setMin(1);
+		
 		// Init event listener (e.g. for updates after slider changes).
 		initEventListener();
 	}
@@ -210,6 +214,20 @@ public class SettingsPanel extends VisualizationComponent
             public void handle(MouseEvent event) 
             {
             	analysisController.refreshParameterSpaceScatterchart();
+            };
+        });
+		
+		/*
+		 * Event listener for change in number of keywords to consider in PTC component.
+		 */
+		
+		slider_localScope_numKeywordsToUse.addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent event) 
+            {
+            	// Update textfield content.
+            	textfield_localScope_numKeywordsToUse.setText(String.valueOf((int)slider_localScope_numKeywordsToUse.getValue()));
+            	// Refresh parallel tag clouds.
+            	analysisController.refreshPTC();
             };
         });
 	}
