@@ -154,4 +154,21 @@ public class ParallelTagCloudDataset extends VisualizationComponentDataset
 	{
 		return keywordDataLoadingTask;
 	}
+	
+	/**
+	 * Returns n-th entry in keyword probability map.
+	 * Inefficient, but preferred due to it being less effort.
+	 * @param n
+	 * @return
+	 */
+	public Map.Entry<Pair<Integer, Integer>, ArrayList<Pair<String, Double>>> getNthKeywordProbabilityArray(int n)
+	{
+		int i = 0;
+		for (Map.Entry<Pair<Integer, Integer>, ArrayList<Pair<String, Double>>> entry : keywordProbabilities.entrySet()) {
+			if (i++ == n)
+				return entry;
+		}
+		
+		return null;
+	}
 }
