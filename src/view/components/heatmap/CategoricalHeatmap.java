@@ -389,6 +389,9 @@ public class CategoricalHeatmap extends HeatMap
     	double minOccurenceCount	= data.getGlobalExtrema() == null ? data.getMinOccurenceCount() : data.getGlobalExtrema().getKey();
     	double maxOccurenceCount	= data.getGlobalExtrema() == null ? data.getMaxOccurenceCount() : data.getGlobalExtrema().getValue();
     	
+    	// Redraw color legend.
+    	colorLegend.refresh( new ColorLegendDataset(minOccurenceCount, maxOccurenceCount, hOptions.getMinColor(), hOptions.getMaxColor()) );
+    	
     	// Set stroke color.
     	gc.setStroke(Color.BLACK);
     	
@@ -463,9 +466,6 @@ public class CategoricalHeatmap extends HeatMap
 		
 		// Update labels.
     	updateLabels(data, cellsToCoordinates);
-		
-    	// Redraw color legend.
-    	colorLegend.refresh( new ColorLegendDataset(minOccurenceCount, maxOccurenceCount, hOptions.getMinColor(), hOptions.getMaxColor()) );
 	}
 	
 	/**

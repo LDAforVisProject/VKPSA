@@ -216,21 +216,12 @@ public class ColorLegend extends VisualizationComponent
 	{
 		this.data = data;
 		
-		// Update legend.
-		updateLegend();
+		// Reset slider to initial values.
+		slider.setHighValue(slider.getMax());
+		slider.setLowValue(slider.getMin());
 		
-		// Update labels.
-		updateLabels();
-		
-		// Update legend border.
-		updateLegendBorder();
-		
-		// Update slider.
-		updateSlider();
-		
-//			@todo: Continue with
-//						- Integration into all (other) components
-//						- Interactivity
+		// Refresh color legend.
+		this.refresh();
 	}
 	
 	/**
@@ -298,8 +289,19 @@ public class ColorLegend extends VisualizationComponent
 	@Override
 	public void refresh()
 	{
-		if (this.data != null)
-			refresh(this.data);
+		if (this.data != null) {
+			// Update legend.
+			updateLegend();
+			
+			// Update labels.
+			updateLabels();
+			
+			// Update legend border.
+			updateLegendBorder();
+			
+			// Update slider.
+			updateSlider();
+		}
 	}
 
 	@Override
