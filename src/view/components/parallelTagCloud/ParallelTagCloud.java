@@ -499,19 +499,18 @@ public class ParallelTagCloud extends VisualizationComponent
 	    	// Get current tag cloud.
 	    	VBox vbox = tagCloudContainer.get(i);
 	    	
-	    	CONTINUE HERE: Adust placement of tag clouds.
 	    	// Get width of tag cloud.
 	    	double tagCloudWidth			= vbox.getBoundsInParent().getWidth();
 	    	// Calculate segment of total width this tag cloud needs.
-	    	double percentageOfWidth		= tagCloudWidth / canvas.getWidth(); //(tagCloudWidthSum + tagCloudContainer.size() * gap);
+	    	double percentageOfWidth		= tagCloudWidth / (tagCloudWidthSum);
 	    	// Alloted width in canvas.
-			double adjustedTagCloudWidth	= canvas.getWidth() * percentageOfWidth;
+			double adjustedTagCloudWidth	= (canvas.getWidth()) * percentageOfWidth;
 			
-			vbox.setLayoutX(currXPos + gap);
+			vbox.setLayoutX(currXPos + (adjustedTagCloudWidth - tagCloudWidth) / 2);
 			vbox.setLayoutY(canvas.getLayoutY() + 15);
 			
 			// Place label.
-			topicIDLabels.get(i).setLayoutX(currXPos + gap + adjustedTagCloudWidth / 3);
+			topicIDLabels.get(i).setLayoutX(currXPos + (adjustedTagCloudWidth - tagCloudWidth) / 2);
 			topicIDLabels.get(i).setLayoutY(5);
 			
 			// Keep track of current position on x-axis.
@@ -575,7 +574,8 @@ public class ParallelTagCloud extends VisualizationComponent
 		    }
 		    
 		    // Calculate ratio from current to maximum width.
-		    final double widthRatio 	= canvas.getWidth() / cloudWidthSum;
+		    final double gap			= 5;
+		    final double widthRatio 	= (canvas.getWidth() - tagCloudContainer.size() * gap) / cloudWidthSum;
 		    final double heightRatio	= (canvas.getHeight() - 35) / maxCloudHeight;
 		    final double ratio			= widthRatio < heightRatio ? widthRatio : heightRatio;
 		    
