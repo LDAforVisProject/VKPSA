@@ -9,12 +9,17 @@ import org.controlsfx.control.RangeSlider;
 
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Pair;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Background;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
@@ -61,6 +66,19 @@ public class ColorLegend extends VisualizationComponent
 	 */
 	private Rectangle legendBorder;
 	
+	/**
+	 * Histogram displaying distribution over value range.
+	 */
+	private BarChart<Number, String> histogram;
+	/**
+	 * X-axis for prob. dist. barchart. 
+	 */
+	private NumberAxis histogram_xAxis;
+	/**
+	 * Y-Axis for prob. dist. barchart..
+	 */
+    private CategoryAxis histogram_yAxis;
+    
 	/*
 	 * Data.
 	 */
@@ -83,6 +101,7 @@ public class ColorLegend extends VisualizationComponent
 	private int legendHeight;
 	private int legendOffsetX;
 	
+	
 	public ColorLegend(ITaskListener listener)
 	{
 		System.out.println("Creating ColorLegend.");
@@ -102,9 +121,40 @@ public class ColorLegend extends VisualizationComponent
 		// Initialize legend border shape.
 		initLegendBorder();
 		
+		// Initialize histogram.
+		initHistogram();
+		
 		// Set preferable width for legend.
 		legendWidth		= 7;
 		legendOffsetX 	= 3;
+	}
+	
+	private void initHistogram()
+	{
+        histogram_xAxis = new NumberAxis();
+        histogram_yAxis = new CategoryAxis();
+        histogram	 	= new BarChart<Number, String>(histogram_xAxis, histogram_yAxis);
+        
+        histogram.setAnimated(false);
+        histogram.setLegendVisible(false);  
+        histogram.setBackground(Background.EMPTY);
+        
+        histogram_xAxis.setTickMarkVisible(false);
+        histogram_yAxis.setTickMarkVisible(false);
+        histogram_xAxis.setMinorTickVisible(false);
+        
+ 
+        // Add to pane.
+        ((AnchorPane) rootNode).getChildren().add(histogram);
+		
+        // Set width.
+        histogram.setPrefWidth(20);
+        
+		// Ensure resizability of barchart.
+		AnchorPane.setTopAnchor(histogram, 0.0);
+		AnchorPane.setBottomAnchor(histogram, 0.0);
+		AnchorPane.setLeftAnchor(histogram, 0.0);
+		AnchorPane.setRightAnchor(histogram, 0.0);
 	}
 	
 	private void initLegendBorder()
@@ -301,7 +351,26 @@ public class ColorLegend extends VisualizationComponent
 			
 			// Update slider.
 			updateSlider();
+			
+			// Update histogram.
+			updateHistogram();
 		}
+	}
+	
+	/**
+	 * Update histogram with new data.
+	 */
+	private void updateHistogram()
+	{
+		// Set new height.
+		histogram.setPrefHeight(legendHeight);
+		
+		// Add data.
+		XYChart.Series<Number, String> series = new XYChart.Series<Number, String>();
+		series.getData().add(new XYChart.Data<Number, String>(5, "1"));
+		series.getData().add(new XYChart.Data<Number, String>(10, "2"));
+		histogram.getData().clear();
+		histogram.getData().add(series);
 	}
 
 	@Override
