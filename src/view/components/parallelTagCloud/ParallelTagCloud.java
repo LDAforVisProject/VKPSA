@@ -114,7 +114,12 @@ public class ParallelTagCloud extends VisualizationComponent
 	/**
 	 * Minimum of all keyword probability sum over all topics.
 	 */
-	private double keywordProbabilitySumOverTopicsMin;	
+	private double keywordProbabilitySumOverTopicsMin;
+	
+	/**
+	 * Auxiliary variable serving as storage for collection of data point IDs to highlight.
+	 */
+	private Set<Integer> dataPointConfigIDsToHighlight;
 	
 	
 	@Override
@@ -403,9 +408,16 @@ public class ParallelTagCloud extends VisualizationComponent
         });
 		
 	    // Iterate over all topics; create cloud for each one.
-		for (ArrayList<Pair<String, Double>> topicKeywordProbabilityPairs : data.getKeywordProbabilities().values()) {
-			//ArrayList<Pair<String, Double>> topicKeywordProbabilityPairs = data.get(i);
+	    for (Map.Entry<Pair<Integer, Integer>, ArrayList<Pair<String, Double>>> keywordProbabilitySet : data.getKeywordProbabilities().entrySet()) {
+		//for (ArrayList<Pair<String, Double>> topicKeywordProbabilityPairs : data.getKeywordProbabilities().values()) {
+			// Get keyword probability data.
+	    	ArrayList<Pair<String, Double>> topicKeywordProbabilityPairs = keywordProbabilitySet.getValue();
 			
+			// If highlighting is active and current topic is not to be highlighted: Reduce opacity.
+//			Color fontColor = (dataPointConfigIDsToHighlight.size() > 0 && !dataPointConfigIDsToHighlight.contains(keywordProbabilitySet.getKey().getKey()) ?
+//								new Color(0, 0, 0, 0.1) 
+//					font
+					
 			VBox vbox = new VBox();
 			tagCloudContainer.add(vbox);
 			
@@ -440,6 +452,8 @@ public class ParallelTagCloud extends VisualizationComponent
 		            {
 		            }
 		        });
+				
+
 				
 				//label.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 				label.setText(keyword);
@@ -504,7 +518,7 @@ public class ParallelTagCloud extends VisualizationComponent
 	    	// Calculate segment of total width this tag cloud needs.
 	    	double percentageOfWidth		= tagCloudWidth / (tagCloudWidthSum);
 	    	// Alloted width in canvas.
-			double adjustedTagCloudWidth	= (canvas.getWidth()) * percentageOfWidth;
+			double adjustedTagCloudWidth	= (canvas.getWidth() - tagCloudContainer.size() * gap) * percentageOfWidth;
 			
 			vbox.setLayoutX(currXPos + (adjustedTagCloudWidth - tagCloudWidth) / 2);
 			vbox.setLayoutY(canvas.getLayoutY() + 15);
@@ -579,7 +593,7 @@ public class ParallelTagCloud extends VisualizationComponent
 		    final double heightRatio	= (canvas.getHeight() - 35) / maxCloudHeight;
 		    final double ratio			= widthRatio < heightRatio ? widthRatio : heightRatio;
 		    
-		    System.out.println("height = " + maxCloudHeight);
+		    System.out.println("w.r = " + widthRatio + ", h.r = " + heightRatio);
 		    // Scale all clouds with determined ratio.
 		    for (VBox vbox : tagCloudContainer) {
 		    	// Adjust font sizes.
@@ -615,7 +629,7 @@ public class ParallelTagCloud extends VisualizationComponent
 		tagcloud_anchorpane.layout();
 		
 		// Define default line width in pixel.
-		double defaultLineWidth = canvas.getHeight() * (3.0 / 219);
+		double defaultLineWidth = canvas.getHeight() * (2.0 / 219);
 		
 		// Get GraphicsContext for canvas, draw background.
 		GraphicsContext gc = canvas.getGraphicsContext2D();
@@ -669,22 +683,11 @@ public class ParallelTagCloud extends VisualizationComponent
 						if (nextKeyword.equals(keyword)) {
 							wasFound			= true;
 							
-							// Calculate proportion from current to next probability.
-							double proportion	= probability > nextProbability ? nextProbability / probability : probability / nextProbability; 
-							
 							// Line width is proportional to the difference in probability between these two topics.
-							gc.setLineWidth(defaultLineWidth); // * Math.pow(proportion, 2));
-							
-							// Line color is dependent on the overall importance of this keyword.
-							final int colorExponent					= 3;
-							double adjustedKeywordProbabilityValue 	= Math.pow(keywordProbabilitySumsOverTopics.get(keyword), colorExponent);
-							Color color								= ColorScale.getColorForValue(	adjustedKeywordProbabilityValue, 
-																									Math.pow(keywordProbabilitySumOverTopicsMin, colorExponent), 
-																									Math.pow(keywordProbabilitySumOverTopicsMax, colorExponent), 
-																									Color.RED, Color.DARKRED);
+							gc.setLineWidth(defaultLineWidth);
 							
 							// Set color.
-							gc.setStroke(color); 
+							gc.setStroke(Color.RED); 
 							
 							// Draw line.
 							gc.strokeLine(currBridgeX, currBridgeY, nextBridgeX, nextBridgeY);
@@ -741,7 +744,10 @@ public class ParallelTagCloud extends VisualizationComponent
 	public void highlightHoveredOverDataPoints(Set<Integer> dataPointIDs, DatapointIDMode idMode)
 	{
 		// @todo Implement ParallelTagCloud::highlightHoveredOverDataPoints(...).
-		
+		if (idMode == DatapointIDMode.CONFIG_ID) {
+			
+		}
+		System.out.println("in highlighting");
 	}
 
 	@Override
