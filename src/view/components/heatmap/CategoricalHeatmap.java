@@ -322,7 +322,7 @@ public class CategoricalHeatmap extends HeatMap
     		// For y-axis.
     		Label yLabel = new Label();
     		yLabel.setText( String.valueOf(ldaConfig.getConfigurationID()) );
-    		yLabel.setLayoutX(yAxis.getLayoutX() + 15);
+    		yLabel.setLayoutX(yAxis.getLayoutX() + 25);
     		yLabel.setLayoutY(yAxis.getLayoutY() + currYPos + yDiff / 2);
     		yLabel.setAlignment(Pos.CENTER_RIGHT);
     		yLabel.setFont(new Font(9));
@@ -390,7 +390,9 @@ public class CategoricalHeatmap extends HeatMap
     	double maxOccurenceCount	= data.getGlobalExtrema() == null ? data.getMaxOccurenceCount() : data.getGlobalExtrema().getValue();
     	
     	// Redraw color legend.
-    	colorLegend.refresh( new ColorLegendDataset(minOccurenceCount, maxOccurenceCount, hOptions.getMinColor(), hOptions.getMaxColor()) );
+    	colorLegend.refresh( new ColorLegendDataset(minOccurenceCount, maxOccurenceCount, 
+    												hOptions.getMinColor(), hOptions.getMaxColor(),
+    												binMatrix) );
     	
     	// Set stroke color.
     	gc.setStroke(Color.BLACK);
@@ -430,26 +432,15 @@ public class CategoricalHeatmap extends HeatMap
 				// Adapt cell opacity to current hover events (i.e.: Lower opacity, if other LDA config. is hovered over). Ignore transparent cells.
 				cellColor = adjustCellOpacity(cellColor, ldaMatchID);
 				
-				// If cell value in viable range: Fill cell.
-				//if (cellColor != Color.BLACK) {
-				if (binMatrix[i][j] >= selectedValueExtrema.getKey() && binMatrix[i][j] <= selectedValueExtrema.getValue()) {
-					// Set fill color.
-					gc.setFill(cellColor);
-					// Draw cell.
-					gc.fillRect(cellCoordinates[0], cellCoordinates[1], cellWidth, cellHeight);
-				}
-				
-				// Otherwise (if cell content is not in valid range): Mark cell as invalid.
-				else {
-					gc.setStroke(Color.GREY);
-					// Mark rectangle as invalid.
-					gc.strokeLine(	cellCoordinates[0], cellCoordinates[1], 
-									cellCoordinates[0] + cellWidth, cellCoordinates[1] + cellHeight);
-					gc.strokeLine(	cellCoordinates[0] + cellWidth, cellCoordinates[1], 
-									cellCoordinates[0], cellCoordinates[1] + cellHeight);
-					gc.setStroke(Color.BLACK);
-				}
-				
+				// If cell value not in viable range: Set grey as fill color.
+				if (binMatrix[i][j] != -1)
+					cellColor	= 	binMatrix[i][j] >= selectedValueExtrema.getKey() && binMatrix[i][j] <= selectedValueExtrema.getValue() ?
+									cellColor : Color.LIGHTGRAY;
+				// Set fill color.
+				gc.setFill(cellColor);
+				// Draw cell.
+				gc.fillRect(cellCoordinates[0], cellCoordinates[1], cellWidth, cellHeight);
+
 				
 				// Draw borders, if this is desired and cell has content.
 				if (useBorders && cellColor != Color.TRANSPARENT)

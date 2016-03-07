@@ -9,9 +9,11 @@ import org.controlsfx.control.RangeSlider;
 
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
+import javafx.scene.Node;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.StackedBarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
@@ -20,6 +22,7 @@ import javafx.util.Pair;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
+import javafx.scene.layout.Border;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
@@ -134,6 +137,7 @@ public class ColorLegend extends VisualizationComponent
         histogram_xAxis = new NumberAxis();
         histogram_yAxis = new CategoryAxis();
         histogram	 	= new BarChart<Number, String>(histogram_xAxis, histogram_yAxis);
+        histogram.setId("colorLegend_histogram");
         
         histogram.setAnimated(false);
         histogram.setLegendVisible(false);  
@@ -142,13 +146,38 @@ public class ColorLegend extends VisualizationComponent
         histogram_xAxis.setTickMarkVisible(false);
         histogram_yAxis.setTickMarkVisible(false);
         histogram_xAxis.setMinorTickVisible(false);
-        
- 
-        // Add to pane.
-        ((AnchorPane) rootNode).getChildren().add(histogram);
 		
+        // Hide ticks.
+        histogram_xAxis.setMinorTickVisible(false);
+        histogram_xAxis.setTickLabelsVisible(false);
+        histogram_yAxis.setTickLabelsVisible(false);
+        
         // Set width.
-        histogram.setPrefWidth(20);
+        histogram.setPrefWidth(60);
+        histogram.setMaxWidth(60);
+        histogram.setMinWidth(60);
+        
+        // Hide background.
+        histogram.setBackground(Background.EMPTY);
+        histogram.setBorder(Border.EMPTY);
+        histogram.setStyle("-fx-background-color: #ffffff;");
+        histogram_xAxis.setStyle("-fx-background-color: #ffffff;");
+        histogram_yAxis.setStyle("-fx-background-color: #ffffff;");
+        
+        // Adjust gaps.
+        histogram.setBarGap(0);
+        histogram.setCategoryGap(0);
+        histogram_yAxis.setGapStartAndEnd(false);
+        
+        // Hide lines.
+        histogram.setHorizontalGridLinesVisible(false);
+        histogram.setVerticalGridLinesVisible(false);
+        histogram.setHorizontalZeroLineVisible(true);
+        histogram.setVerticalZeroLineVisible(false);
+        
+        // Set offset.
+        histogram.setTranslateX(-10);
+        histogram.setTranslateY(-15);
         
 		// Ensure resizability of barchart.
 		AnchorPane.setTopAnchor(histogram, 0.0);
@@ -219,8 +248,8 @@ public class ColorLegend extends VisualizationComponent
 		((AnchorPane) rootNode).getChildren().add(maxLabel);
 		
 		// Set position.
-		minLabel.setLayoutX(20);
-		maxLabel.setLayoutX(20);
+		minLabel.setLayoutX(25);
+		maxLabel.setLayoutX(25);
 		
 		// Set style.
 		minLabel.setFont(Font.font("Verdana", FontPosture.ITALIC, 9));
@@ -264,12 +293,16 @@ public class ColorLegend extends VisualizationComponent
 	 */
 	public void refresh(ColorLegendDataset data)
 	{
+		// Reset slider, if data set is new.
+		if (this.data == null || !this.data.equals(data)) {
+			// Reset slider to initial values.
+			slider.setHighValue(slider.getMax());
+			slider.setLowValue(slider.getMin());
+		}
+
+		// Update data set.
 		this.data = data;
-		
-		// Reset slider to initial values.
-		slider.setHighValue(slider.getMax());
-		slider.setLowValue(slider.getMin());
-		
+
 		// Refresh color legend.
 		this.refresh();
 	}
@@ -285,6 +318,12 @@ public class ColorLegend extends VisualizationComponent
 		if (legend != null && parent.getChildren().contains(legend)) {
 			// Remove legend.
 			parent.getChildren().remove(legend);
+		}
+		
+		// Add histogram, if not yet added.
+		if (histogram != null && !parent.getChildren().contains(histogram)) {
+			parent.getChildren().add(histogram);
+			histogram.toBack();
 		}
 		
 		// Calculate percentage of legend selected with slider.
@@ -363,14 +402,30 @@ public class ColorLegend extends VisualizationComponent
 	private void updateHistogram()
 	{
 		// Set new height.
-		histogram.setPrefHeight(legendHeight);
+		histogram.setMinHeight(legendHeight + 40);
+		histogram.setPrefHeight(legendHeight + 40);
+		histogram.setMaxHeight(legendHeight + 40);
 		
-		// Add data.
+		/*
+		 * Insert data.
+		 */
+		
+		// Allocate data series.
 		XYChart.Series<Number, String> series = new XYChart.Series<Number, String>();
-		series.getData().add(new XYChart.Data<Number, String>(5, "1"));
-		series.getData().add(new XYChart.Data<Number, String>(10, "2"));
+		
+		// Bin data.
+		int counter = 0;
+		for (double binValue : data.getBinList()) {
+			XYChart.Data<Number, String> binData = new XYChart.Data<Number, String>(binValue, String.valueOf(counter));
+			binData.setExtraValue((double)counter++ / data.getBinList().length);
+			series.getData().add(binData);
+		}
+		
+		// Re-add data series.
 		histogram.getData().clear();
 		histogram.getData().add(series);
+		
+		colorHistogramBarchart(histogram);
 	}
 
 	@Override
@@ -391,14 +446,21 @@ public class ColorLegend extends VisualizationComponent
 	@Override
 	public void resizeContent(double width, double height)
 	{
-		// Resize root node/container.
-		((AnchorPane)this.rootNode).setPrefSize(width, height);
-		
-		// Remember new height.
-		legendHeight = height > 0 ? (int) height : legendHeight;
-		
-		// Redraw legend.
-		refresh();
+		if (height > 0) {
+			// Resize root node/container.
+			((AnchorPane)this.rootNode).setPrefSize(width, height);
+			
+			// Remember new height.
+			legendHeight = height > 0 ? (int) height : legendHeight;
+			
+			// Set new histogram width.
+			histogram.setPrefWidth(60);
+	        histogram.setMaxWidth(60);
+	        histogram.setMinWidth(60);
+			
+			// Redraw legend.
+			refresh();
+		}
 	}
 
 	private void updateLegendBorder()
@@ -428,5 +490,33 @@ public class ColorLegend extends VisualizationComponent
 	{
 		return new Pair<Double, Double>(slider.getLowValue(), slider.getHighValue());
 	}
-  
+
+	/**
+	 * Colours a histogram barchart in the desired colors.
+	 * Draws information from node.getUserData() to determine colour of bar.
+	 * @param barchart Bar chart to color.
+	 */
+	private void colorHistogramBarchart(BarChart<Number, String> barchart)
+	{
+		for (XYChart.Series<Number, String> series : histogram.getData()) {
+			for (XYChart.Data<Number, String> dataPoint : series.getData()) {
+				// Get corresponding color.
+				Color color = Color.LIGHTGREY;
+				// Use grey color, if bin is outside of selected range.
+				double lowSlider_relativePosition 	= slider.getLowValue() / slider.getMax();
+				double highSlider_relativePosition	= slider.getHighValue() / slider.getMax();
+				
+				if (	(double)dataPoint.getExtraValue() <= highSlider_relativePosition && 
+						(double)dataPoint.getExtraValue() >= lowSlider_relativePosition) {
+					color = ColorScale.getColorForValue(	(double)dataPoint.getExtraValue(),
+															lowSlider_relativePosition, highSlider_relativePosition, 
+															data.getMinColor(), data.getMaxColor());
+				}
+				
+				String hex = String.format("#%02x%02x%02x", (int)(color.getRed() * 255), (int)(color.getGreen() * 255), (int)(color.getBlue() * 255));
+				// Set color.
+				dataPoint.getNode().setStyle("-fx-bar-fill: " + hex + ";");
+			}	
+		}
+	}
 }
