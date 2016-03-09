@@ -507,11 +507,21 @@ public class ColorLegend extends VisualizationComponent
 				double lowSlider_relativePosition 	= slider.getLowValue() / slider.getMax();
 				double highSlider_relativePosition	= slider.getHighValue() / slider.getMax();
 				
+				// Otherwise: Calculate color.
 				if (	(double)dataPoint.getExtraValue() <= highSlider_relativePosition && 
 						(double)dataPoint.getExtraValue() >= lowSlider_relativePosition) {
-					color = ColorScale.getColorForValue(	(double)dataPoint.getExtraValue(),
+					
+					// If not first bin: Color value according to calculation.
+					if ((double)dataPoint.getExtraValue() > 0) {
+						color = ColorScale.getColorForValue((double)dataPoint.getExtraValue(),
 															lowSlider_relativePosition, highSlider_relativePosition, 
 															data.getMinColor(), data.getMaxColor());
+					}
+					
+					// Workaround: Since we don't want transparent bins, color it with lower saturation than the second bin.
+					else {
+						color = Color.hsb(data.getMinColor().getHue(), 0.1, 1.0);
+					}
 				}
 				
 				String hex = String.format("#%02x%02x%02x", (int)(color.getRed() * 255), (int)(color.getGreen() * 255), (int)(color.getBlue() * 255));

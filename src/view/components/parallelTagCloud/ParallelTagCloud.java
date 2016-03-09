@@ -22,6 +22,7 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -47,10 +48,17 @@ public class ParallelTagCloud extends VisualizationComponent
 	 * GUI elements.
 	 * 
 	 */
+	
+	/**
+	 * ScrollPane containing AnchorPane containing actual tag cloud.
+	 */
+	private @FXML ScrollPane tagcloud_scrollpane;
+	
 	/**
 	 * AnchorPane containing actual tag cloud.
 	 */
 	private @FXML AnchorPane tagcloud_anchorpane;
+	
 	/**
 	 * AnchorPane containing probability distribution barchart..
 	 */
@@ -362,7 +370,7 @@ public class ParallelTagCloud extends VisualizationComponent
 	 */
 	private void createTopicIDLabels(ArrayList<Pair<Integer, Integer>> selectedTopicConfigurations)
 	{
-	    AnchorPane node = (AnchorPane) canvas.getParent();
+	    AnchorPane node = tagcloud_anchorpane;//(AnchorPane) canvas.getParent().getParent();
 	    
 	    // Remove old labels.
 	    for (Label label : topicIDLabels) {
@@ -524,7 +532,7 @@ public class ParallelTagCloud extends VisualizationComponent
 			vbox.setLayoutY(canvas.getLayoutY() + 15);
 			
 			// Place label.
-			topicIDLabels.get(i).setLayoutX(currXPos + (adjustedTagCloudWidth - tagCloudWidth) / 2);
+			topicIDLabels.get(i).setLayoutX(currXPos + (adjustedTagCloudWidth - tagCloudWidth));
 			topicIDLabels.get(i).setLayoutY(5);
 			
 			// Keep track of current position on x-axis.
@@ -587,13 +595,21 @@ public class ParallelTagCloud extends VisualizationComponent
 		    	maxCloudHeight = maxCloudHeight >= vbox.getHeight() ? maxCloudHeight : vbox.getHeight();
 		    }
 		    
-		    // Calculate ratio from current to maximum width.
-		    final double gap			= 5;
-		    final double widthRatio 	= (canvas.getWidth() - tagCloudContainer.size() * gap) / cloudWidthSum;
-		    final double heightRatio	= (canvas.getHeight() - 35) / maxCloudHeight;
-		    final double ratio			= widthRatio < heightRatio ? widthRatio : heightRatio;
+		    // Calculate ratio to multiply current font size with.
+		    final double gap					= 5;
+		    final double widthRatio 			= (canvas.getWidth() - tagCloudContainer.size() * gap) / cloudWidthSum;
+		    final double heightRatio			= (canvas.getHeight() - 35) / maxCloudHeight;
+		    final double ratio					= widthRatio < heightRatio ? widthRatio : heightRatio;
 		    
-		    System.out.println("w.r = " + widthRatio + ", h.r = " + heightRatio);
+		    // Determine new width of PTC container.
+		    final double newPTCWidth			= (cloudWidthSum + tagCloudContainer.size() * gap) * heightRatio;
+		    final double newPTCContainerWidth	= newPTCWidth > tagcloud_scrollpane.getWidth() ? newPTCWidth : tagcloud_scrollpane.getWidth();
+		    // Set new container width in dependence of PTC width.
+		    tagcloud_anchorpane.setMinWidth(newPTCContainerWidth);
+		    tagcloud_anchorpane.setPrefWidth(newPTCContainerWidth);
+		    tagcloud_anchorpane.setMaxWidth(newPTCContainerWidth);
+		    
+		    
 		    // Scale all clouds with determined ratio.
 		    for (VBox vbox : tagCloudContainer) {
 		    	// Adjust font sizes.
@@ -618,7 +634,6 @@ public class ParallelTagCloud extends VisualizationComponent
 	 * @param data
 	 * @param options
 	 */
-	//private void drawBridges(ArrayList<ArrayList<Pair<String, Double>>> data, final int numberOfTopics, final int numberOfKeywords)
 	private void drawBridges(final ParallelTagCloudDataset data, final ParallelTagCloudOptionset options)
 	{
 		final int numberOfTopics	= data.getTopicConfigurations().size(); 
@@ -629,7 +644,7 @@ public class ParallelTagCloud extends VisualizationComponent
 		tagcloud_anchorpane.layout();
 		
 		// Define default line width in pixel.
-		double defaultLineWidth = canvas.getHeight() * (2.0 / 219);
+		double defaultLineWidth = canvas.getHeight() * (1.0 / 219);
 		
 		// Get GraphicsContext for canvas, draw background.
 		GraphicsContext gc = canvas.getGraphicsContext2D();
@@ -765,6 +780,16 @@ public class ParallelTagCloud extends VisualizationComponent
 		probabilityDistribution_barchart.setPrefHeight(barchart_anchorpane.getHeight());
 		
 		System.out.println("resizing: " + tagcloud_anchorpane.getWidth() + "/" + tagcloud_anchorpane.getHeight());
+		
+		// Adjust width of containing AnchorPane.
+		tagcloud_anchorpane.setMinWidth(tagcloud_scrollpane.getWidth());
+		tagcloud_anchorpane.setPrefWidth(tagcloud_scrollpane.getWidth());
+		tagcloud_anchorpane.setMaxWidth(tagcloud_scrollpane.getWidth());
+		// Adjust height of containing AnchorPane.
+		tagcloud_anchorpane.setMinHeight(tagcloud_scrollpane.getHeight() - 13);
+		tagcloud_anchorpane.setPrefHeight(tagcloud_scrollpane.getHeight() - 13);
+		tagcloud_anchorpane.setMaxHeight(tagcloud_scrollpane.getHeight() - 13);
+		
 		// Resize canvas.
 		canvas.setWidth(tagcloud_anchorpane.getWidth());
 		canvas.setHeight(tagcloud_anchorpane.getHeight());
