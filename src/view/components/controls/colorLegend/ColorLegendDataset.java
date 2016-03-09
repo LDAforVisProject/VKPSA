@@ -57,16 +57,19 @@ public class ColorLegendDataset
 		// Calculate bin content.
 		for (int i = 0; i < valueMatrix.length; i++) {
 			for (int j = 0; j < valueMatrix[i].length; j++) {
-				// Calculate index of bin in which to store the current value.
-				int index_key		= (int) ( (valueMatrix[i][j] - this.min) / binInterval);
-
-				// Check if element is highest allowed entry.
-				index_key			= index_key < ColorLegendDataset.NUMBER_OF_BINS ? index_key : ColorLegendDataset.NUMBER_OF_BINS - 1;
-				// Check if element is lowest allowed entry.
-				index_key			= index_key >= 0 ? index_key : 0;
-				
-				// Increment counter in corresponding bin.
-				binList[index_key]++;
+				// Exclude elements in diagonale.
+				if (i != j) {
+					// Calculate index of bin in which to store the current value.
+					int index_key		= (int) ( (valueMatrix[i][j] - this.min) / binInterval);
+	
+					// Check if element is highest allowed entry.
+					index_key			= index_key < ColorLegendDataset.NUMBER_OF_BINS ? index_key : ColorLegendDataset.NUMBER_OF_BINS - 1;
+					// Check if element is lowest allowed entry.
+					index_key			= index_key >= 0 ? index_key : 0;
+					
+					// Increment counter in corresponding bin.
+					binList[index_key]++;
+				}
 			}
 		}
 	}

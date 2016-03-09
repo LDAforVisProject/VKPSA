@@ -604,6 +604,9 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 		
 		// Add hover event listeners.
 		initHoverEventListeners();
+		
+		// Lower opacity for all data points.
+		removeHoverHighlighting();
 	}
 	
 	/**
@@ -797,8 +800,6 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 					for (XYChart.Data<String, Number> bar : dataSeries.getData()) {
 						if (barsToHighlight.contains(bar.getXValue()))
 							bar.getNode().setOpacity(1);
-						else
-							bar.getNode().setOpacity(VisualizationComponent.HOVER_OPACITY_FACTOR);
 					}
 				}
 			}
@@ -835,7 +836,7 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 		if (barchart != null) {
 			for (XYChart.Series<String, Number> dataSeries : barchart.getData()) {
 				for (XYChart.Data<String, Number> bar : dataSeries.getData()) {
-					bar.getNode().setOpacity(1);
+					bar.getNode().setOpacity(VisualizationComponent.DEFAULT_OPACITY_FACTOR);
 				}
 			}
 		}

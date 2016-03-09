@@ -25,6 +25,39 @@
       </Label>
       <Accordion fx:id="accordion_options" layoutY="52.0" prefHeight="281.0" prefWidth="344.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="45.0">
          <panes>
+            <TitledPane animated="false" text="General">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <Label text="Highlighting">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets bottom="8.0" />
+                                 </VBox.margin>
+                              </Label>
+                              <GridPane prefHeight="22.0" prefWidth="323.0">
+                                 <children>
+                                    <Label text="Default opacity" />
+                                    <Slider fx:id="defaultOpacity_slider" blockIncrement="0.1" majorTickUnit="0.2" max="1.0" minorTickCount="0" showTickLabels="true" showTickMarks="true" value="0.1" GridPane.columnIndex="1" />
+                                 </children>
+                                 <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                 </columnConstraints>
+                                 <rowConstraints>
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                 </rowConstraints>
+                              </GridPane>
+                           </children>
+                        </VBox>
+                     </children>
+                  </AnchorPane>
+              </content>
+            </TitledPane>
             <TitledPane fx:id="mdsDistEval_titledPane" animated="false" onMouseClicked="#selectSettingsPane" style="-fx-background-color: #ffffff;" text="Result Space | Topic Models &amp; Distance Evaluation">
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: #ffffff;">
@@ -259,13 +292,6 @@
                               </Label>
                               <GridPane hgap="5.0">
                                  <children>
-                                    <Label text="Max. number of topics" GridPane.rowIndex="1" />
-                                    <Slider fx:id="slider_localScope_numTopicsToUse" disable="true" maxWidth="120.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="50.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                                       <GridPane.margin>
-                                          <Insets top="10.0" />
-                                       </GridPane.margin>
-                                    </Slider>
-                                    <TextField fx:id="textfield_localScope_numTopicsToUse" disable="true" maxWidth="40.0" text="50" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                                     <Label text="Number of keywords" />
                                     <Slider fx:id="slider_localScope_numKeywordsToUse" maxWidth="120.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="10.0" GridPane.columnIndex="1" />
                                     <TextField fx:id="textfield_localScope_numKeywordsToUse" maxWidth="40.0" text="10" GridPane.columnIndex="2" />
@@ -276,7 +302,6 @@
                                     <ColumnConstraints hgrow="SOMETIMES" maxWidth="117.0" minWidth="10.0" prefWidth="68.0" />
                                  </columnConstraints>
                                  <rowConstraints>
-                                    <RowConstraints maxHeight="34.0" minHeight="10.0" prefHeight="34.0" vgrow="SOMETIMES" />
                                     <RowConstraints maxHeight="34.0" minHeight="10.0" prefHeight="34.0" vgrow="SOMETIMES" />
                                  </rowConstraints>
                               </GridPane>

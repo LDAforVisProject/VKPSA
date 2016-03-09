@@ -162,6 +162,9 @@ public class ParameterSpaceScatterchart extends Scatterchart
         
         // Init hover event listeners.
         initHoverEventListeners();
+        
+        // Lower opacity for all data points.
+        removeHoverHighlighting();
 	}
 	
 	

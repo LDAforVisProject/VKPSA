@@ -842,8 +842,8 @@ public abstract class Scatterchart extends VisualizationComponent
 		if (idMode == DatapointIDMode.CONFIG_ID) {
 			for (XYChart.Series<Number, Number> dataSeries : scatterchart.getData()) {
 				for (XYChart.Data<Number, Number> dataPoint : dataSeries.getData()) {
-					if ( !dataPointIDs.contains((int)dataPoint.getExtraValue()) )
-						dataPoint.getNode().setOpacity(VisualizationComponent.HOVER_OPACITY_FACTOR);
+					if ( dataPointIDs.contains((int)dataPoint.getExtraValue()) )
+						dataPoint.getNode().setOpacity(1);
 				}
 			}
 		}
@@ -859,7 +859,7 @@ public abstract class Scatterchart extends VisualizationComponent
 	{
 		for (XYChart.Series<Number, Number> dataSeries : scatterchart.getData()) {
 			for (XYChart.Data<Number, Number> dataPoint : dataSeries.getData()) {
-				dataPoint.getNode().setOpacity(1);
+				dataPoint.getNode().setOpacity(VisualizationComponent.DEFAULT_OPACITY_FACTOR);
 			}
 		}
 	}

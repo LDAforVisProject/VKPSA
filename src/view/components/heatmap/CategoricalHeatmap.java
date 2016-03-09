@@ -425,23 +425,35 @@ public class CategoricalHeatmap extends HeatMap
 				
 				// Set color for this cell. Consider selected color extrema in color legend for this.
 				Pair<Double, Double> selectedValueExtrema 	= colorLegend.getSelectedExtrema();
-				Color cellColor 							= ColorScale.getColorForValue(	binMatrix[i][j] == -1 ? 0 : binMatrix[i][j], 
-																							selectedValueExtrema.getKey(), selectedValueExtrema.getValue(), 
-																							hOptions.getMinColor(), hOptions.getMaxColor());
 				
-				// Adapt cell opacity to current hover events (i.e.: Lower opacity, if other LDA config. is hovered over). Ignore transparent cells.
-				cellColor = adjustCellOpacity(cellColor, ldaMatchID);
+				/*
+				 *  Determine color of cell.
+				 */
 				
-				// If cell value not in viable range: Set grey as fill color.
-				if (binMatrix[i][j] != -1)
-					cellColor	= 	binMatrix[i][j] >= selectedValueExtrema.getKey() && binMatrix[i][j] <= selectedValueExtrema.getValue() ?
-									cellColor : Color.LIGHTGRAY;
+				Color cellColor = null;
+				
+				// If cell in diagonale (i.e. reflects distance 0): Use white.
+				if (i == j) {
+					cellColor = Color.WHITE;
+				}
+				
+				// Otherwise: Calculate color, then adjust opacity (dependent from whether cell is currently
+				// (cross.-vis.-)hovered over).
+				else {
+					cellColor = ColorScale.getColorForValue(binMatrix[i][j] == -1 ? 0 : binMatrix[i][j], 
+															selectedValueExtrema.getKey(), selectedValueExtrema.getValue(), 
+															hOptions.getMinColor(), hOptions.getMaxColor());
+					
+					// Adapt cell opacity to current hover events (i.e.: Lower opacity, if other LDA config. is hovered over). Ignore transparent cells.
+					cellColor = adjustCellOpacity(cellColor, ldaMatchID);
+				}
+				
+	
 				// Set fill color.
 				gc.setFill(cellColor);
 				// Draw cell.
 				gc.fillRect(cellCoordinates[0], cellCoordinates[1], cellWidth, cellHeight);
 
-				
 				// Draw borders, if this is desired and cell has content.
 				if (useBorders && cellColor != Color.TRANSPARENT)
 					gc.strokeRect(cellCoordinates[0], cellCoordinates[1] + 1, cellWidth - 1, cellHeight - 1);
@@ -467,18 +479,20 @@ public class CategoricalHeatmap extends HeatMap
 	 */
 	private Color adjustCellOpacity(final Color cellColor, final Pair<Integer, Integer> ldaMatchID)
 	{
-		// Adapt cell opacity to current hover events (i.e.: Lower opacity, if other LDA config. is hovered over). Ignore transparent cells.
+		double opacity = VisualizationComponent.DEFAULT_OPACITY_FACTOR;
+		
+		// Adapt cell opacity to current hover events (i.e.: Higher opacity if other LDA config. is hovered over). Ignore transparent cells.
+		// If hover event is active: Set opacity to 1 if current cell is in set of hovered over datasets. 
 		if ( 	(hoveredOverLDAMatchID != null || highlightedLDAConfigIDs != null && isDisplayingExternalHoverEvent ) && 
 				cellColor != Color.TRANSPARENT) {
-			Color newCellColor = Color.hsb(	cellColor.getHue(), cellColor.getSaturation(), cellColor.getBrightness(), 
-											ldaMatchID.equals(hoveredOverLDAMatchID) || highlightedLDAConfigIDs.contains(ldaMatchID) ? 1 : VisualizationComponent.HOVER_OPACITY_FACTOR);
-			
-			// Return new cell color.
-			return newCellColor;
+			// Is data set in set of hovered over datasets? In this case: Use full opacity.
+			if (ldaMatchID.equals(hoveredOverLDAMatchID) || highlightedLDAConfigIDs.contains(ldaMatchID)) {
+				opacity = 1;
+			}
 		}
-		
-		// If conditions not met: Return old cell color (e.g. because the current cell/LDA match was highlighted).
-		return cellColor;
+
+		// Return cell with adjusted opacity.
+		return Color.hsb(cellColor.getHue(), cellColor.getSaturation(), cellColor.getBrightness(), opacity);
 	}
 	
 	@Override

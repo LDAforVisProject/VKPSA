@@ -756,6 +756,9 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
         
         // Add hover event listener to all relevant nodes.
         initHoverEventListeners();
+        
+        // Lower opacity for all data points.
+        removeHoverHighlighting();
 	}
 	
 	/**
@@ -1229,8 +1232,8 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 		if (idMode == DatapointIDMode.INDEX) {
 			for (XYChart.Series<Number, Number> dataSeries : scatterchart.getData()) {
 				for (XYChart.Data<Number, Number> dataPoint : dataSeries.getData()) {
-					if ( !dataPointIDs.contains((int)dataPoint.getExtraValue()) ) {
-						dataPoint.getNode().setOpacity(VisualizationComponent.HOVER_OPACITY_FACTOR);
+					if ( dataPointIDs.contains((int)dataPoint.getExtraValue()) ) {
+						dataPoint.getNode().setOpacity(1);
 					}
 				}
 			}
@@ -1246,7 +1249,7 @@ public class MDSScatterchart extends VisualizationComponent_Legacy implements IS
 	{
 		for (XYChart.Series<Number, Number> dataSeries : scatterchart.getData()) {
 			for (XYChart.Data<Number, Number> dataPoint : dataSeries.getData()) {
-				dataPoint.getNode().setOpacity(1);
+				dataPoint.getNode().setOpacity(VisualizationComponent.DEFAULT_OPACITY_FACTOR);
 			}
 		}
 	}

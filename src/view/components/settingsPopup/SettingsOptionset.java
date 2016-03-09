@@ -8,7 +8,6 @@ public class SettingsOptionset extends VisualizationComponentOptionset
 	public SettingsOptionset()
 	{
 		super(false, false, false);
-		// @todo Auto-generated constructor stub
 	}
 
 }

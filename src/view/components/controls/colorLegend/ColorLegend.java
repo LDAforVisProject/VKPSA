@@ -176,8 +176,8 @@ public class ColorLegend extends VisualizationComponent
         histogram.setVerticalZeroLineVisible(false);
         
         // Set offset.
-        histogram.setTranslateX(-10);
-        histogram.setTranslateY(-15);
+        histogram.setTranslateX(-8);
+        histogram.setTranslateY(-12);
         
 		// Ensure resizability of barchart.
 		AnchorPane.setTopAnchor(histogram, 0.0);
@@ -402,9 +402,9 @@ public class ColorLegend extends VisualizationComponent
 	private void updateHistogram()
 	{
 		// Set new height.
-		histogram.setMinHeight(legendHeight + 40);
-		histogram.setPrefHeight(legendHeight + 40);
-		histogram.setMaxHeight(legendHeight + 40);
+		histogram.setMinHeight(legendHeight + 30);
+		histogram.setPrefHeight(legendHeight + 30);
+		histogram.setMaxHeight(legendHeight + 30);
 		
 		/*
 		 * Insert data.
@@ -425,6 +425,7 @@ public class ColorLegend extends VisualizationComponent
 		histogram.getData().clear();
 		histogram.getData().add(series);
 		
+		// Color histogram according to represented value.
 		colorHistogramBarchart(histogram);
 	}
 

@@ -452,10 +452,10 @@ public class AnalysisController extends Controller
 		paramSpaceScatterchart.refresh(new ScatterchartDataset(	dataspace.getLDAConfigurations(), dataspace.getDiscardedLDAConfigurations(),
 																dataspace.getInactiveLDAConfigurations(), dataspace.getActiveLDAConfigurations()));
 		
-		//	Local scope:
-//		localScopeInstance.refresh(dataspace.getActiveLDAConfigurations());
 		// TM comparison heatmap:
 		refreshTMCHeatmap(dataspace.getActiveLDAConfigurations());
+		
+		// @todo Refresh parallel tag cloud.
 	}
 
 	/**

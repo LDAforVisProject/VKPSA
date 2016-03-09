@@ -252,7 +252,7 @@ public class ParallelTagCloud extends VisualizationComponent
 		ParallelTagCloudDataset ptcData 		= (ParallelTagCloudDataset)this.data;
 		ParallelTagCloudOptionset ptcOptions	= (ParallelTagCloudOptionset)this.options;
 		
-		System.out.println("refreshing after data was loaded");
+		System.out.println("PTC: refreshing after data was loaded");
 		
 		if (this.options != null && this.data != null) {
 			// Refresh probability distribution barchart.
@@ -747,7 +747,7 @@ public class ParallelTagCloud extends VisualizationComponent
 		if (idMode == DatapointIDMode.CONFIG_ID) {
 			
 		}
-		System.out.println("in highlighting");
+		System.out.println("in PTC.highlighting");
 	}
 
 	@Override

@@ -352,19 +352,16 @@ public class LocalScopeInstance extends VisualizationComponent_Legacy
 
 	@Override
 	public void initHoverEventListeners()
-	{
-		// @todo Implement LocalScopeInstance.initHoverEventListener.	
+	{	
 	}
 
 	@Override
 	public void highlightHoveredOverDataPoints(Set<Integer> dataPointIDs, DatapointIDMode idMode)
 	{
-		// @todo Implement LocalScopeInstance.highlightHoveredOverDataPoints.		
 	}
 
 	@Override
 	public void removeHoverHighlighting()
 	{
-		// @todo Implement LocalScopeInstance.removeHoverHighlighting.
 	}
 }

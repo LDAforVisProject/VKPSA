@@ -148,18 +148,15 @@ public class NumericalHeatmap extends HeatMap
 	@Override
 	public void initHoverEventListeners()
 	{
-		// @todo Implement NumericalHeatmap.initHoverEventListener.
 	}
 	
 	@Override
 	public void highlightHoveredOverDataPoints(Set<Integer> dataPointIDs, DatapointIDMode idMode)
-	{
-		// @todo Implement NumericalHeatmap.highlightHoveredOverDataPoints.		
+	{		
 	}
 	
 	@Override
 	public void removeHoverHighlighting()
 	{
-		// @todo Implement NumericalHeatmap.removeHoverHighlighting.
 	}	
 }

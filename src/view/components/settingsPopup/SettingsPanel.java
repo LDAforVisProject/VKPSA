@@ -128,16 +128,6 @@ public class SettingsPanel extends VisualizationComponent
 	 */
 	
 	/**
-	 * Denotes number of topics to show in visualization - in slider.
-	 * @deprecated
-	 */
-	private @FXML Slider slider_localScope_numTopicsToUse;
-	/**
-	 * Denotes number of topics to show in visualization - in textfield.
-	 * @deprecated
-	 */
-	private @FXML TextField textfield_localScope_numTopicsToUse;
-	/**
 	 * Denotes number of keywords to show in visualization - in slider.
 	 */
 	private @FXML Slider slider_localScope_numKeywordsToUse;
@@ -146,6 +136,10 @@ public class SettingsPanel extends VisualizationComponent
 	 */
 	private @FXML TextField textfield_localScope_numKeywordsToUse;
 	
+	/*
+	 * Options for highlighting. 
+	 */
+	private @FXML Slider defaultOpacity_slider;
 	
 	
 	// -----------------------------------------------------------
@@ -228,6 +222,27 @@ public class SettingsPanel extends VisualizationComponent
             	textfield_localScope_numKeywordsToUse.setText(String.valueOf((int)slider_localScope_numKeywordsToUse.getValue()));
             	// Refresh parallel tag clouds.
             	analysisController.refreshPTC();
+            };
+        });
+		
+		/*
+		 * Event listener for default opacity slider (relevant for highlighting).
+		 */
+		
+		defaultOpacity_slider.addEventHandler(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent event) 
+            {
+            	VisualizationComponent.DEFAULT_OPACITY_FACTOR = defaultOpacity_slider.getValue();
+            	// Refresh visualizations.
+            	analysisController.refreshVisualizations(false);            	
+            }
+        });
+		
+		// Add listener to determine position during mouse drag.
+		defaultOpacity_slider.addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent event) 
+            {
+            	VisualizationComponent.DEFAULT_OPACITY_FACTOR = defaultOpacity_slider.getValue();
             };
         });
 	}
@@ -487,19 +502,9 @@ public class SettingsPanel extends VisualizationComponent
 		return paramSpace_dhmColor_max_colChooser.getValue();
 	}
 	
-	public Slider getLocalScopeTopicNumberSlider()
-	{
-		return slider_localScope_numTopicsToUse;
-	}
-	
 	public Slider getLocalScopeKeywordNumberSlider()
 	{
 		return slider_localScope_numKeywordsToUse;
-	}
-	
-	public TextField getLocalScopeTopicNumberTextField()
-	{
-		return textfield_localScope_numTopicsToUse;
 	}
 	
 	public TextField getLocalScopeKeywordNumberTextField()
