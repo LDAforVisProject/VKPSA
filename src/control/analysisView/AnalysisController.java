@@ -13,6 +13,7 @@ import java.util.Set;
 
 
 
+
 import model.AnalysisDataspace;
 import model.LDAConfiguration;
 import model.workspace.Workspace;
@@ -50,6 +51,7 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
 import javafx.scene.control.SingleSelectionModel;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
@@ -72,6 +74,23 @@ public class AnalysisController extends Controller
 	// -----------------------------------------------
 	
 	private Scene scene;
+	
+	/*
+	 * Split panes dividing UI into resizable sections. 
+	 */
+	
+	/**
+	 * SplitPane dividing history and content panel.
+	 */
+	private @FXML SplitPane content_history_splitpane;
+	/**
+	 * SplitPane dividing filter and visualization panels.
+	 */
+	private @FXML SplitPane filter_vis_splitpane;
+	/**
+	 * SplitPane dividing overview and detail vis. components.
+	 */
+	private @FXML SplitPane overview_detail_splitpane;
 	
 	/*
 	 * Tab pane and other elements for options section.
@@ -209,10 +228,17 @@ public class AnalysisController extends Controller
 	/*
 	 * Setting shortcuts icons.
 	 */
-	
+
 	private @FXML ImageView settings_mds_icon;
 	private @FXML ImageView settings_paramDist_icon;
-	private @FXML ImageView settings_localScope_icon;
+	private @FXML ImageView settings_tmc_icon;
+	private @FXML ImageView settings_ptc_icon;
+	
+	/*
+	 * Maximization icons. 
+	 */
+	
+	private @FXML ImageView maximize_ptc_icon;
 	
 	/*
 	 * Settings panel and related elements.
@@ -313,10 +339,13 @@ public class AnalysisController extends Controller
 		initLocalScopeView();
 		initComparisonHeatmaps();
 		
-		// Bring setting icons to front.
+		// Bring settings icons to front.
 		settings_mds_icon.toFront();
 		settings_paramDist_icon.toFront();
-		settings_localScope_icon.toFront();
+		settings_tmc_icon.toFront();
+		settings_ptc_icon.toFront();
+		// Bring maximization icons to front.
+		maximize_ptc_icon.toFront();
 	}
 	
 	private void initSettingsPanel()
@@ -838,6 +867,19 @@ public class AnalysisController extends Controller
 		// Open pane.
 		settingsPanel.openSettingsPane(((Node)e.getSource()).getId());
 	}
+	
+	/**
+	 * Maximizes panel.
+	 * @param e
+	 */
+	@FXML
+	public void maximizePanel(MouseEvent e)
+	{
+		overview_detail_splitpane.setDividerPosition(0, 0.02);
+		content_history_splitpane.setDividerPosition(0, 0.98);
+		filter_vis_splitpane.setDividerPosition(0, 0.02);
+	}
+	
 
 	/**
 	 * Shows respective settings icon.
@@ -856,7 +898,12 @@ public class AnalysisController extends Controller
 			break;
 			
 			case "localScope_containingAnchorPane":
-				settings_localScope_icon.setVisible(true);
+				settings_tmc_icon.setVisible(true);
+			break;
+			
+			case "detailView_anchorpane":
+				settings_ptc_icon.setVisible(true);
+				maximize_ptc_icon.setVisible(true);
 			break;			
 		}
 	}
@@ -878,8 +925,13 @@ public class AnalysisController extends Controller
 			break;
 			
 			case "localScope_containingAnchorPane":
-				settings_localScope_icon.setVisible(false);
+				settings_tmc_icon.setVisible(false);
 			break;
+			
+			case "detailView_anchorpane":
+				settings_ptc_icon.setVisible(false);
+				maximize_ptc_icon.setVisible(false);
+			break;						
 		}		
 	}
 
@@ -1026,8 +1078,9 @@ public class AnalysisController extends Controller
 			tmcHeatmap.highlightHoveredOverDataPoints(dataPointConfigIDs, DatapointIDMode.CONFIG_ID);
 		
 		// Remove highlighting from parallel tag cloud.
-		if (sourceVisType != VisualizationComponentType.PARALLEL_TAG_CLOUD)
+		if (sourceVisType != VisualizationComponentType.PARALLEL_TAG_CLOUD && parallelTagCloud != null)  {
 			parallelTagCloud.highlightHoveredOverDataPoints(dataPointConfigIDs, DatapointIDMode.CONFIG_ID);
+		}
 	}
 	
 	/**

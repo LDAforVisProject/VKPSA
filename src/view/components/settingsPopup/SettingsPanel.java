@@ -434,7 +434,12 @@ public class SettingsPanel extends VisualizationComponent
 				paramSpace_titledPane.lookup(".title").setStyle("-fx-font-weight:bold");
 			break;
 				
-			case "settings_localScope_icon":
+			case "settings_tmc_icon":
+				accordion_options.setExpandedPane(localScope_titledPane);
+				localScope_titledPane.lookup(".title").setStyle("-fx-font-weight:bold");
+			break;
+			
+			case "settings_ptc_icon":
 				accordion_options.setExpandedPane(localScope_titledPane);
 				localScope_titledPane.lookup(".title").setStyle("-fx-font-weight:bold");
 			break;
