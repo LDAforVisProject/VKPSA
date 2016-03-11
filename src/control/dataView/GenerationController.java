@@ -3,9 +3,11 @@ package control.dataView;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import model.LDAConfiguration;
 import model.workspace.TaskType;
@@ -185,7 +187,7 @@ public class GenerationController extends DataSubViewController
 		sampling_combobox.getItems().clear();
 		sampling_combobox.getItems().add("Random");
 		sampling_combobox.getItems().add("Cartesian");
-//		sampling_combobox.getItems().add("Latin Hypercube");
+		sampling_combobox.getItems().add("Latin Hypercube");
 
 		// Set default value.
 		sampling_combobox.setValue("Random");
@@ -340,6 +342,7 @@ public class GenerationController extends DataSubViewController
 	private void updateNumberOfDatasets(ActionEvent e)
 	{
 		try {
+			System.out.println("updating number of datasets");
 			numberOfDatasetsToGenerate = Integer.parseInt(numberOfDatasets_textfield.getText());
 			
 			switch(sampling_combobox.getValue())
@@ -366,6 +369,30 @@ public class GenerationController extends DataSubViewController
 				break;
 				
 				case "Latin Hypercube":
+					// Enable divisions textfield.
+					numberOfDivisions_textfield.setDisable(false);
+					
+					// Get curr. number of divisions.
+					numberOfDivisions 			= Integer.parseInt(numberOfDivisions_textfield.getText());
+					
+					// Calculate max. number of combinations.
+					int maxNumberOfCombinations = 1;
+					//	1. n_divisions!
+					for (int m = numberOfDivisions; m >= 1; m--)
+						maxNumberOfCombinations *= m;
+					// 2. (n_divisions!) ^ (n_variables - 1)
+					maxNumberOfCombinations = (int) Math.pow(maxNumberOfCombinations, LDAConfiguration.SUPPORTED_PARAMETERS.length - 1);
+
+					// If current value in textfield for number of datasets to generate <= max. possible number of combinations:
+					// Keep value, otherwise lower it.
+					if (numberOfDatasetsToGenerate > maxNumberOfCombinations) {
+						// Update value.
+						numberOfDatasetsToGenerate = maxNumberOfCombinations;
+						// Update field with number of datasets.
+						numberOfDatasets_textfield.setText(String.valueOf(maxNumberOfCombinations));
+					}
+					
+					
 				break;
 			}
 			
@@ -385,6 +412,8 @@ public class GenerationController extends DataSubViewController
 	private void updateNumberOfDivisions(ActionEvent e)
 	{
 		try {
+			System.out.println("updating number of divisions");
+			
 			numberOfDivisions = Integer.parseInt(numberOfDivisions_textfield.getText());
 			
 			switch(sampling_combobox.getValue())
@@ -402,7 +431,26 @@ public class GenerationController extends DataSubViewController
 //					numberOfDatasets_textfield.setText(String.valueOf(numberOfDatasetsToGenerate));
 				break;
 				
-				case "Hypercube":
+				case "Latin Hypercube":
+					// Get curr. number of datasets to generate.
+					numberOfDatasetsToGenerate = Integer.parseInt(numberOfDatasets_textfield.getText());
+					
+					// Calculate max. number of combinations.
+					int maxNumberOfCombinations = 1;
+					//	1. n_divisions!
+					for (int m = numberOfDivisions; m >= 1; m--)
+						maxNumberOfCombinations *= m;
+					// 2. (n_divisions!) ^ (n_variables - 1)
+					maxNumberOfCombinations = (int) Math.pow(maxNumberOfCombinations, LDAConfiguration.SUPPORTED_PARAMETERS.length - 1);
+					
+					// If current value in textfield for number of datasets to generate <= max. possible number of combinations:
+					// Keep value, otherwise lower it.
+					if (numberOfDatasetsToGenerate > maxNumberOfCombinations) {
+						// Update value.
+						numberOfDatasetsToGenerate = maxNumberOfCombinations;
+						// Update field with number of datasets.
+						numberOfDatasets_textfield.setText(String.valueOf(maxNumberOfCombinations));
+					}
 				break;
 			}
 
@@ -469,6 +517,19 @@ public class GenerationController extends DataSubViewController
 					for (int i = 0; i < numberOfDivisions; i++) {
 						parameterValues.get(param).add(rangeSliders.get(param).getLowValue() + interval * i);
 					}
+				}
+			break;
+			
+			case "Latin Hypercube":
+				for (String param : LDAConfiguration.SUPPORTED_PARAMETERS) {
+					final double interval 	= (rangeSliders.get(param).getHighValue() - rangeSliders.get(param).getLowValue()) / (numberOfDivisions - 1);
+					Set<Integer> usedBins	= new HashSet<Integer>();
+					
+					to do:
+						- optional: adapt code for data generation; store configuration using generated parameter values directly
+						- mandatory: write parameter -> configuration assocation in LDAConfiguration.generateLDAConfigurations.
+						- test: check generate.txt.
+						- after that: START WRITING PAPER (SATURDAY!).
 				}
 			break;
 		}

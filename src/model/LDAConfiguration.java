@@ -184,6 +184,12 @@ public class LDAConfiguration
 				}
 			break;
 			
+			case "Cartesian":
+			break;
+			
+			case "Latin Hypercube":
+			break;
+			
 			default:
 				System.out.println("Sampling mode '" + samplingMode + "' currently not supported.");
 		}
