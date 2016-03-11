@@ -268,7 +268,7 @@ public class HeatMap extends VisualizationComponent_Legacy implements ISelectabl
 		binnedData = examineMDSCoordinateData();
 		
 		// Draw heatmap.
-		draw(binnedData, true);
+		draw(binnedData, false);
 	}
     
 	/**
@@ -292,8 +292,8 @@ public class HeatMap extends VisualizationComponent_Legacy implements ISelectabl
     	
     	else {
 	    	// Draw data.
-	    	boolean useBorders = dataType == HeatmapDataType.LDAConfiguration ? false : true;
-	    	draw(binnedData, useBorders);
+	    	//boolean useBorders = dataType == HeatmapDataType.LDAConfiguration ? false : true;
+	    	draw(binnedData, false);
     	}
     }
     

@@ -57,29 +57,6 @@ public class ColorScale extends ImageView
     }
     
     /**
-     * Calculate value on a blue to red hue scale, dependent on the given minimum and maximum values.
-     * @deprecated
-     * @param value
-     * @param min
-     * @param max
-     * @return
-     */
-    public static Color getColorForValuex(double value, double min, double max) 
-    {
-        if (value != 0 && (value < min || value > max) ) {
-            return Color.BLACK ;
-        }
-        
-        else if (value == 0) {
-        	return Color.TRANSPARENT;
-        }
-        
-        else {
-        	return Color.hsb(Color.LIGHTBLUE.getHue() + (Color.DARKBLUE.getHue() - Color.LIGHTBLUE.getHue()) * (value - min) / (max - min), 1.0, 1.0);
-        }
-    }
-    
-    /**
      * Returns default color with saturation chosen depending on the relation of the specified argument to the
      * chosen maximal value.
      * @param value
@@ -123,7 +100,8 @@ public class ColorScale extends ImageView
     	
         else {
         	final double hue		= minColor.getHue() + (maxColor.getHue() - minColor.getHue()) * (value - min) / (max - min);
-        	final double saturation	= (value - min) / (max - min);
+        	//final double saturation	= (value - min) / (max - min);
+        	final double saturation	= minColor.getSaturation() + (maxColor.getSaturation() - minColor.getSaturation()) * (value - min) / (max - min);
         	
         	// Workaround: No hue difference calculation when both colors are grey - doesn't work (switches to red - why?).
         	if (minColor != Color.GRAY && maxColor != Color.GREY) {

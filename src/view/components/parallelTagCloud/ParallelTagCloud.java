@@ -13,6 +13,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
@@ -25,7 +26,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -35,6 +40,7 @@ import javafx.util.Pair;
 import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
 import view.components.VisualizationComponentType;
+import view.components.scatterchart.Scatterchart;
 
 /**
  * Component used for detail view of topic data.
@@ -105,6 +111,14 @@ public class ParallelTagCloud extends VisualizationComponent
 	 */
 	private String selectedKeyword;
 	
+	/**
+	 * Zoom factor currently used for PTC panel.
+	 */
+	private double zoomFactor;
+	/**
+	 * Delta for each mouse wheel action.
+	 */
+	private static final double ZOOM_DELTA = 0.1F;
 	
 	/**
 	 * Stores probability sums for a keyword over all topics.
@@ -161,6 +175,7 @@ public class ParallelTagCloud extends VisualizationComponent
 		keywordProbabilitySumOverTopicsMax	= 0;
 		keywordProbabilitySumOverTopicsMin	= Double.MAX_VALUE;
 		selectedKeyword						= "";
+		zoomFactor							= 1;
 	}
 	
 	private void addResizeListeners()
@@ -182,6 +197,29 @@ public class ParallelTagCloud extends VisualizationComponent
 			    }
 			});
 		}
+		
+		// Add zoom listener on mouse wheel action.
+		tagcloud_anchorpane.setOnScroll(new EventHandler<ScrollEvent>() {
+		    public void handle(ScrollEvent event) {
+		        event.consume();
+		        
+		        if (event.getDeltaY() == 0) {
+		            return;
+		        }
+
+		        // Calculate scale factor.
+		        final double deltaZoomFactor 	= event.getDeltaY() > 0 ? ParallelTagCloud.ZOOM_DELTA : - ParallelTagCloud.ZOOM_DELTA;
+		        
+		        if (event.getDeltaY() > 0)
+		        	zoomFactor					= zoomFactor + deltaZoomFactor <= 1 ? zoomFactor + deltaZoomFactor : 1;	
+		        
+		        else
+		        	zoomFactor					= zoomFactor + deltaZoomFactor > 0 ? zoomFactor + deltaZoomFactor : 0;
+		        	
+		        // Refresh PTC.
+		        refreshParallelTagCloud((ParallelTagCloudDataset)data, (ParallelTagCloudOptionset)options, false);
+		    }
+		});
 	}
 	
 	private void initProbabilityDistributionBarchart()
@@ -256,9 +294,6 @@ public class ParallelTagCloud extends VisualizationComponent
 		ParallelTagCloudOptionset ptcOptions	= (ParallelTagCloudOptionset)this.options;
 		
 		if (this.options != null && this.data != null) {
-			// Refresh probability distribution barchart.
-			//refreshBarchart(ptcData, ptcOptions);
-			
 			// Refresh actual parallel tag cloud.
 			refreshParallelTagCloud(ptcData, ptcOptions, true);
 		}
@@ -319,6 +354,16 @@ public class ParallelTagCloud extends VisualizationComponent
 	     */
 	    
 	    removeHoverHighlighting();
+	    
+	    /*
+	     * 6. Move canvas to background / tag clouds to foreground.
+	     */
+	    
+		// Move canvas to background.
+		canvas.toBack();
+		for (VBox vbox : tagCloudContainer) {
+			vbox.toFront();
+		}
 	}
 	
 	/**
@@ -486,6 +531,7 @@ public class ParallelTagCloud extends VisualizationComponent
 	    	label.setText(topicConfig.getKey() + "#" + topicConfig.getValue());
 	    	label.setFont(Font.font("Verdana", FontPosture.ITALIC, 10));
 	    	
+	    	// Add label to collections and GUI.
 	    	topicIDLabels.add(label);
 	    	node.getChildren().add(label);
 	    }
@@ -520,16 +566,25 @@ public class ParallelTagCloud extends VisualizationComponent
 			// Get keyword probability data.
 	    	ArrayList<Pair<String, Double>> topicKeywordProbabilityPairs = keywordProbabilitySet.getValue();
 
+	    	// Initialize VBox.
 			VBox vbox = new VBox();
 			tagCloudContainer.add(vbox);
+
+	    	// Set background color.
+			vbox.setBackground(new Background(new BackgroundFill(Color.rgb(255, 255, 255, 0.9), CornerRadii.EMPTY, Insets.EMPTY)) );
+
 			
-			// Init labels to container.
+			// Init labels and add them to container.
 			double probabilitySum = 0;
 			for (int j = 0; j < options.getNumberOfKeywordsToDisplay(); j++) {
+				/*
+				 * Init label.
+				 */
+				
 				String keyword		= topicKeywordProbabilityPairs.get(j).getKey();
 				double probability	= topicKeywordProbabilityPairs.get(j).getValue();
 				Label label 		= new Label();
-				
+		    	
 				/*
 				 * Add event listener.
 				 */
@@ -698,8 +753,8 @@ public class ParallelTagCloud extends VisualizationComponent
 		    
 		    // Calculate ratio to multiply current font size with.
 		    final double gap					= 5;
-		    final double widthRatio 			= (canvas.getWidth() - tagCloudContainer.size() * gap) / cloudWidthSum;
-		    final double heightRatio			= (canvas.getHeight() - 35) / maxCloudHeight;
+		    final double widthRatio 			= zoomFactor * (canvas.getWidth() - tagCloudContainer.size() * gap) / cloudWidthSum;
+		    final double heightRatio			= zoomFactor * (canvas.getHeight() - 35) / maxCloudHeight;
 		    final double ratio					= widthRatio < heightRatio ? widthRatio : heightRatio;
 		    
 		    // Determine new width of PTC container.
@@ -711,7 +766,7 @@ public class ParallelTagCloud extends VisualizationComponent
 		    tagcloud_anchorpane.setMaxWidth(newPTCContainerWidth);
 		    
 		    
-		    // Scale all clouds with determined ratio.
+		    // Scale all labels with determined ratio.
 		    for (VBox vbox : tagCloudContainer) {
 		    	// Adjust font sizes.
 		    	for (Node node : vbox.getChildren()) {
@@ -737,7 +792,7 @@ public class ParallelTagCloud extends VisualizationComponent
 	 */
 	private void drawBridges(final ParallelTagCloudDataset data, final ParallelTagCloudOptionset options)
 	{
-		final int numberOfTopics	= data.getTopicConfigurations().size() < tagCloudContainer.size() ? data.getTopicConfigurations().size() : tagCloudContainer.size(); 
+		final int numberOfTopics	= tagCloudContainer.size();//data.getTopicConfigurations().size() < tagCloudContainer.size() ? data.getTopicConfigurations().size() : tagCloudContainer.size(); 
 		final int numberOfKeywords 	= options.getNumberOfKeywordsToDisplay();
 		
 		// Redraw GUI.
@@ -756,58 +811,93 @@ public class ParallelTagCloud extends VisualizationComponent
 		// Loop over all tagclouds.
 		for (int i = 0; i < numberOfTopics - 1; i++) {
 			VBox currTagCloud							= tagCloudContainer.get(i);
-			VBox nextTagCloud							= tagCloudContainer.get(i + 1);
 			ArrayList<Pair<String, Double>> currData	= data.getNthKeywordProbabilityArray(i).getValue();
-			ArrayList<Pair<String, Double>> nextData	= data.getNthKeywordProbabilityArray(i + 1).getValue();;
 			
 			// Re-render tag cloud.
 			currTagCloud.applyCss();
 			currTagCloud.layout();
 			
+			// Calculate bridge offset for bridges starting at current tag cloud.
 			double currBridgeOffsetX					= currTagCloud.getLayoutX();
 			double currBridgeOffsetY					= currTagCloud.getLayoutY() - 3 + defaultLineWidth;
-			double nextBridgeOffsetX					= nextTagCloud.getLayoutX();
-			double nextBridgeOffsetY					= nextTagCloud.getLayoutY() - 3 + defaultLineWidth;
 			
 			// For all keywords in the current tag cloud: See if they exist in the next tagcloud too.
 			for (int keywordIndex = 0; keywordIndex < numberOfKeywords; keywordIndex++) {
 				String keyword		= currData.get(keywordIndex).getKey();
-				double probability	= currData.get(keywordIndex).getValue();
 				Label currLabel		= (Label)currTagCloud.getChildren().get(keywordIndex);
 				
 				// Proceed iff (1) no keyword is hovered over right now or (2) the current keyword is hovered over.
 				boolean noKeywordSelected 		= selectedKeyword.equals("");
 				boolean isThisKeywordSelected	= !selectedKeyword.equals("") && keyword.equals(selectedKeyword);
 				
-				if ( noKeywordSelected || isThisKeywordSelected ) {
-					// Calculate positions of connecting line on left side.				
-					double currBridgeX	= currBridgeOffsetX + currLabel.getBoundsInParent().getMaxX() + 5; 
-					double currBridgeY	= currBridgeOffsetY + (currLabel.getBoundsInParent().getMinY() + currLabel.getBoundsInParent().getMaxY()) / 2;
+				// Draw bridges for this keyword in this cloud.
+				drawBridgesForKeywordInTagCloud(	data, numberOfTopics, numberOfKeywords, i,
+													keyword, noKeywordSelected, isThisKeywordSelected,
+													currBridgeOffsetX, currBridgeOffsetY,
+													currLabel, defaultLineWidth,
+													gc);
+			}
+		}
+	}
+	
+	/**
+	 * Auxiliary method used to draw bridges for one keyword from one tag cloud to all other (relevant) clouds. 
+	 * @param data
+	 * @param numberOfTopics
+	 * @param numberOfKeywords
+	 * @param i
+	 * @param keyword
+	 * @param noKeywordSelected
+	 * @param isThisKeywordSelected
+	 * @param currBridgeOffsetX
+	 * @param currBridgeOffsetY
+	 * @param currLabel
+	 * @param defaultLineWidth
+	 * @param gc
+	 */
+	private void drawBridgesForKeywordInTagCloud(	final ParallelTagCloudDataset data, final int numberOfTopics, final int numberOfKeywords, final int i,
+													final String keyword, final boolean noKeywordSelected, final boolean isThisKeywordSelected,
+													final double currBridgeOffsetX, final double currBridgeOffsetY,
+													final Label currLabel, final double defaultLineWidth,
+													final GraphicsContext gc)
+	{
+		if ( noKeywordSelected || isThisKeywordSelected ) {
+			// Initialize flag to indicate whether a keyword was found in the next tag cloud.
+			boolean wasFound		= false;
+			
+			// Calculate positions of connecting line on left side.				
+			double currBridgeX	= currBridgeOffsetX + currLabel.getBoundsInParent().getMaxX() + 5; 
+			double currBridgeY	= currBridgeOffsetY + (currLabel.getBoundsInParent().getMinY() + currLabel.getBoundsInParent().getMaxY()) / 2;
+			
+			// Search 'til next appeareance of keyword.
+			for (int j = i + 1; j < numberOfTopics && !wasFound; j++) {
+				VBox nextTagCloud							= tagCloudContainer.get(j);
+				ArrayList<Pair<String, Double>> nextData	= data.getNthKeywordProbabilityArray(j).getValue();
+				
+				// Calculate offset from bridges of 
+				double nextBridgeOffsetX					= nextTagCloud.getLayoutX();
+				double nextBridgeOffsetY					= nextTagCloud.getLayoutY() - 3 + defaultLineWidth;
+				
+				// Search in next tag cloud for this word.
+				for (int nextKeywordIndex = 0; nextKeywordIndex < numberOfKeywords && !wasFound; nextKeywordIndex++) {
+					String nextKeyword		= nextData.get(nextKeywordIndex).getKey();
+					Label nextLabel			= (Label)nextTagCloud.getChildren().get(nextKeywordIndex); 
+				
+					// Calculate positions of connecting line on right side.
+					double nextBridgeX	= nextBridgeOffsetX + nextLabel.getBoundsInParent().getMinX() - 10; 
+					double nextBridgeY	= nextBridgeOffsetY + (nextLabel.getBoundsInParent().getMinY() + nextLabel.getBoundsInParent().getMaxY()) / 2;
 					
-					// Initialize flag to indicate whether a keyword was found in the next tag cloud.
-					boolean wasFound		= false;
-					// Search in next tag cloud for this word.
-					for (int nextKeywordIndex = 0; nextKeywordIndex < numberOfKeywords && !wasFound; nextKeywordIndex++) {
-						String nextKeyword		= nextData.get(nextKeywordIndex).getKey();
-						double nextProbability	= nextData.get(nextKeywordIndex).getValue();
-						Label nextLabel			= (Label)nextTagCloud.getChildren().get(nextKeywordIndex); 
-					
-						// Calculate positions of connecting line on right side.
-						double nextBridgeX	= nextBridgeOffsetX + nextLabel.getBoundsInParent().getMinX() - 10; 
-						double nextBridgeY	= nextBridgeOffsetY + (nextLabel.getBoundsInParent().getMinY() + nextLabel.getBoundsInParent().getMaxY()) / 2;
+					if (nextKeyword.equals(keyword)) {
+						wasFound			= true;
 						
-						if (nextKeyword.equals(keyword)) {
-							wasFound			= true;
-							
-							// Line width is proportional to the difference in probability between these two topics.
-							gc.setLineWidth(defaultLineWidth);
-							
-							// Set color.
-							gc.setStroke(Color.RED); 
-							
-							// Draw line.
-							gc.strokeLine(currBridgeX, currBridgeY, nextBridgeX, nextBridgeY);
-						}
+						// Line width is proportional to the difference in probability between these two topics.
+						gc.setLineWidth(defaultLineWidth);
+						
+						// Set color.
+						gc.setStroke(Color.RED); 
+						
+						// Draw line.
+						gc.strokeLine(currBridgeX, currBridgeY, nextBridgeX, nextBridgeY);
 					}
 				}
 			}
@@ -852,8 +942,6 @@ public class ParallelTagCloud extends VisualizationComponent
 	@Override
 	public void initHoverEventListeners()
 	{
-		// @todo Implement ParallelTagCloud::initHoverEventListener(...).
-
 		for (Label label : topicIDLabels) {
 	    	// Set event listener for hover and click action.
 	    	label.addEventHandler(MouseEvent.MOUSE_ENTERED, new EventHandler<MouseEvent>() {
@@ -916,29 +1004,33 @@ public class ParallelTagCloud extends VisualizationComponent
 					// If set of topic models to highlight contains topic model ID of current tag cloud:
 					// Increase opacity of current tag cloud.
 					if (dataPointIDs.contains(topicConfig.getKey())) {
-						tagCloudContainer.get(i).setOpacity(1);
-						
+						for (Node node : tagCloudContainer.get(i).getChildren()) {
+							node.setOpacity(1);
+						}
 						// Add to set of topics to display in distribution barchart.
 						topicsToDisplayInDistBarchart.add(topicConfig);
 					}
 					// Otherwise: Lower opacity to default value.
-					else
-						tagCloudContainer.get(i).setOpacity(VisualizationComponent.DEFAULT_OPACITY_FACTOR);
+					else {
+						for (Node node : tagCloudContainer.get(i).getChildren()) {
+							node.setOpacity(VisualizationComponent.DEFAULT_OPACITY_FACTOR);
+						}
+					}
 				}
 				
 				// Update barchart.
 				refreshBarchart(ptcData, (ParallelTagCloudOptionset)options, topicsToDisplayInDistBarchart);
 			}
 		}
-		
-		
 	}
 
 	@Override
 	public void removeHoverHighlighting()
 	{
-		for(VBox vbox : tagCloudContainer) {
-			vbox.setOpacity(VisualizationComponent.DEFAULT_OPACITY_FACTOR);
+		for (int i = 0; i < tagCloudContainer.size(); i++) {
+			for (Node node : tagCloudContainer.get(i).getChildren()) {
+				node.setOpacity(VisualizationComponent.DEFAULT_OPACITY_FACTOR);
+			}
 		}
 	}
 
