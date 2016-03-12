@@ -342,13 +342,13 @@ public class GenerationController extends DataSubViewController
 	private void updateNumberOfDatasets(ActionEvent e)
 	{
 		try {
-			System.out.println("updating number of datasets");
 			numberOfDatasetsToGenerate = Integer.parseInt(numberOfDatasets_textfield.getText());
 			
 			switch(sampling_combobox.getValue())
 			{
 				// If sampling mode == random: Number of datasets to generate equals number of divisions for each parameter.
 				case "Random":
+				case "Latin Hypercube":
 					// Disable divisions textfield.
 					numberOfDivisions_textfield.setDisable(true);
 					
@@ -368,32 +368,32 @@ public class GenerationController extends DataSubViewController
 					numberOfDatasets_textfield.setText(String.valueOf(numberOfDatasetsToGenerate));
 				break;
 				
-				case "Latin Hypercube":
-					// Enable divisions textfield.
-					numberOfDivisions_textfield.setDisable(false);
-					
-					// Get curr. number of divisions.
-					numberOfDivisions 			= Integer.parseInt(numberOfDivisions_textfield.getText());
-					
-					// Calculate max. number of combinations.
-					int maxNumberOfCombinations = 1;
-					//	1. n_divisions!
-					for (int m = numberOfDivisions; m >= 1; m--)
-						maxNumberOfCombinations *= m;
-					// 2. (n_divisions!) ^ (n_variables - 1)
-					maxNumberOfCombinations = (int) Math.pow(maxNumberOfCombinations, LDAConfiguration.SUPPORTED_PARAMETERS.length - 1);
-
-					// If current value in textfield for number of datasets to generate <= max. possible number of combinations:
-					// Keep value, otherwise lower it.
-					if (numberOfDatasetsToGenerate > maxNumberOfCombinations) {
-						// Update value.
-						numberOfDatasetsToGenerate = maxNumberOfCombinations;
-						// Update field with number of datasets.
-						numberOfDatasets_textfield.setText(String.valueOf(maxNumberOfCombinations));
-					}
-					
-					
-				break;
+//				case "Latin Hypercube":
+//					// Enable divisions textfield.
+//					numberOfDivisions_textfield.setDisable(false);
+//					
+//					// Get curr. number of divisions.
+//					numberOfDivisions 			= Integer.parseInt(numberOfDivisions_textfield.getText());
+//					
+//					// Calculate max. number of combinations.
+//					int maxNumberOfCombinations = 1;
+//					//	1. n_divisions!
+//					for (int m = numberOfDivisions; m >= 1; m--)
+//						maxNumberOfCombinations *= m;
+//					// 2. (n_divisions!) ^ (n_variables - 1)
+//					maxNumberOfCombinations = (int) Math.pow(maxNumberOfCombinations, LDAConfiguration.SUPPORTED_PARAMETERS.length - 1);
+//
+//					// If current value in textfield for number of datasets to generate <= max. possible number of combinations:
+//					// Keep value, otherwise lower it.
+//					if (numberOfDatasetsToGenerate > maxNumberOfCombinations) {
+//						// Update value.
+//						numberOfDatasetsToGenerate = maxNumberOfCombinations;
+//						// Update field with number of datasets.
+//						numberOfDatasets_textfield.setText(String.valueOf(maxNumberOfCombinations));
+//					}
+//					
+//					
+//				break;
 			}
 			
 			// Update textfield content.
@@ -412,14 +412,13 @@ public class GenerationController extends DataSubViewController
 	private void updateNumberOfDivisions(ActionEvent e)
 	{
 		try {
-			System.out.println("updating number of divisions");
-			
 			numberOfDivisions = Integer.parseInt(numberOfDivisions_textfield.getText());
 			
 			switch(sampling_combobox.getValue())
 			{
 				// If sampling mode == random: Number of datasets to generate equals number of divisions for each parameter.				
 				case "Random":
+				case "Latin Hypercube":
 					numberOfDatasetsToGenerate = numberOfDivisions;
 				break;
 				
@@ -431,27 +430,27 @@ public class GenerationController extends DataSubViewController
 //					numberOfDatasets_textfield.setText(String.valueOf(numberOfDatasetsToGenerate));
 				break;
 				
-				case "Latin Hypercube":
-					// Get curr. number of datasets to generate.
-					numberOfDatasetsToGenerate = Integer.parseInt(numberOfDatasets_textfield.getText());
-					
-					// Calculate max. number of combinations.
-					int maxNumberOfCombinations = 1;
-					//	1. n_divisions!
-					for (int m = numberOfDivisions; m >= 1; m--)
-						maxNumberOfCombinations *= m;
-					// 2. (n_divisions!) ^ (n_variables - 1)
-					maxNumberOfCombinations = (int) Math.pow(maxNumberOfCombinations, LDAConfiguration.SUPPORTED_PARAMETERS.length - 1);
-					
-					// If current value in textfield for number of datasets to generate <= max. possible number of combinations:
-					// Keep value, otherwise lower it.
-					if (numberOfDatasetsToGenerate > maxNumberOfCombinations) {
-						// Update value.
-						numberOfDatasetsToGenerate = maxNumberOfCombinations;
-						// Update field with number of datasets.
-						numberOfDatasets_textfield.setText(String.valueOf(maxNumberOfCombinations));
-					}
-				break;
+//				case "Latin Hypercube":
+//					// Get curr. number of datasets to generate.
+//					numberOfDatasetsToGenerate = Integer.parseInt(numberOfDatasets_textfield.getText());
+//					
+//					// Calculate max. number of combinations.
+//					int maxNumberOfCombinations = 1;
+//					//	1. n_divisions!
+//					for (int m = numberOfDivisions; m >= 1; m--)
+//						maxNumberOfCombinations *= m;
+//					// 2. (n_divisions!) ^ (n_variables - 1)
+//					maxNumberOfCombinations = (int) Math.pow(maxNumberOfCombinations, LDAConfiguration.SUPPORTED_PARAMETERS.length - 1);
+//					
+//					// If current value in textfield for number of datasets to generate <= max. possible number of combinations:
+//					// Keep value, otherwise lower it.
+//					if (numberOfDatasetsToGenerate > maxNumberOfCombinations) {
+//						// Update value.
+//						numberOfDatasetsToGenerate = maxNumberOfCombinations;
+//						// Update field with number of datasets.
+//						numberOfDatasets_textfield.setText(String.valueOf(maxNumberOfCombinations));
+//					}
+//				break;
 			}
 
 			// Update textfield content.
@@ -488,6 +487,9 @@ public class GenerationController extends DataSubViewController
 		parameterBinLists.put("eta", new int[numberOfBins]);
 		parameterBinLists.put("kappa", new int[numberOfBins]);
 		
+		// Init random number generator.
+		Random randomGenerator	= new Random();
+		
 		/*
 		 * Generate numberOfDivisions values for each parameter.
 		 */
@@ -495,8 +497,6 @@ public class GenerationController extends DataSubViewController
 		switch (sampling_combobox.getValue())
 		{
 			case "Random":
-				// Init random number generator.
-				Random randomGenerator	= new Random();
 				// Generated values are allowed to be up to rangeSlider.getHighValue() and as low as rangeSlider.getLowValue().
 				double intervalAlpha 	= rangeSliders.get("alpha").getHighValue() - rangeSliders.get("alpha").getLowValue();
 				double intervalEta		= rangeSliders.get("eta").getHighValue() - rangeSliders.get("eta").getLowValue();
@@ -512,25 +512,32 @@ public class GenerationController extends DataSubViewController
 			
 			case "Cartesian":
 				for (String param : LDAConfiguration.SUPPORTED_PARAMETERS) {
-					final double interval = (rangeSliders.get(param).getHighValue() - rangeSliders.get(param).getLowValue()) / (numberOfDivisions - 1);
+					final double interval = (rangeSliders.get(param).getHighValue() - rangeSliders.get(param).getLowValue()) / (numberOfDivisions);
 					
 					for (int i = 0; i < numberOfDivisions; i++) {
-						parameterValues.get(param).add(rangeSliders.get(param).getLowValue() + interval * i);
+						parameterValues.get(param).add(rangeSliders.get(param).getLowValue() + interval * i + interval / 2);
 					}
 				}
 			break;
 			
 			case "Latin Hypercube":
 				for (String param : LDAConfiguration.SUPPORTED_PARAMETERS) {
-					final double interval 	= (rangeSliders.get(param).getHighValue() - rangeSliders.get(param).getLowValue()) / (numberOfDivisions - 1);
-					Set<Integer> usedBins	= new HashSet<Integer>();
-					
-					to do:
-						- optional: adapt code for data generation; store configuration using generated parameter values directly
-						- mandatory: write parameter -> configuration assocation in LDAConfiguration.generateLDAConfigurations.
-						- test: check generate.txt.
-						- after that: START WRITING PAPER (SATURDAY!).
+					// Calcualte bin interval.
+					final double interval 		= (rangeSliders.get(param).getHighValue() - rangeSliders.get(param).getLowValue()) / (numberOfDivisions);
+
+					for (int i = 0; i < numberOfDivisions; i++) {
+						// Minimal value allowed for current bin.
+						final double currentBinMin = rangeSliders.get(param).getLowValue() + interval * i;
+						// Generate value for this bin.
+						parameterValues.get(param).add(currentBinMin + randomGenerator.nextFloat() * interval);
+					}
+						
+	//					to do:
+	//						- test: check generate.txt.
+	//						- after that: START WRITING PAPER (SATURDAY!).
+				
 				}
+				
 			break;
 		}
 		

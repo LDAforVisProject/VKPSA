@@ -3,7 +3,11 @@ package model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 
 public class LDAConfiguration
 {
@@ -167,7 +171,7 @@ public class LDAConfiguration
 	 * @param parameterValueLists
 	 * @return
 	 */
-	public static ArrayList<LDAConfiguration> generateLDAConfigurations(int numberOfDivisions, int numberOfDatasetsToGenerate, String samplingMode, Map<String, ArrayList<Double>> parameterValueLists)
+	public static ArrayList<LDAConfiguration> generateLDAConfigurations(final int numberOfDivisions, final int numberOfDatasetsToGenerate, final String samplingMode, Map<String, ArrayList<Double>> parameterValueLists)
 	{
 		ArrayList<LDAConfiguration> configList = new ArrayList<LDAConfiguration>();
 		
@@ -185,9 +189,49 @@ public class LDAConfiguration
 			break;
 			
 			case "Cartesian":
+				// For each dataset: Generate all possible combination of datasets with these parameter values. 
+				// Interate through alpha values.
+				for (int i = 0; i < numberOfDivisions; i++) {
+					// Interate through eta values.
+					for (int j = 0; j < numberOfDivisions; j++) {
+						// Interate through kappa values.
+						for (int k = 0; k < numberOfDivisions; k++) {
+							configList.add(new LDAConfiguration(-1, 
+																parameterValueLists.get("kappa").get(k).intValue(), 
+																parameterValueLists.get("alpha").get(i),
+																parameterValueLists.get("eta").get(j))
+							);
+						}	
+						
+					}	
+					
+				}
 			break;
 			
 			case "Latin Hypercube":
+				/*
+				 * 1. Prepare data.
+				 */
+				
+				// Initialize collection.
+				for (String param : LDAConfiguration.SUPPORTED_PARAMETERS) {
+					// Shuffle list.
+					Collections.shuffle(parameterValueLists.get(param));
+				}
+				
+				/*
+				 * 2. Pick configurations.
+				 */
+				
+				for (int i = 0; i < numberOfDatasetsToGenerate; i++) {
+					// Since all lists are shuffled: Use list sequence to generate configurations.
+					configList.add(new LDAConfiguration(-1, 
+														parameterValueLists.get("kappa").get(i).intValue(), 
+														parameterValueLists.get("alpha").get(i),
+														parameterValueLists.get("eta").get(i))
+					);
+					
+				}
 			break;
 			
 			default:
