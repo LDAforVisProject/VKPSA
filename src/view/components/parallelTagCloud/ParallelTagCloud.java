@@ -30,6 +30,10 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.Border;
+import javafx.scene.layout.BorderStroke;
+import javafx.scene.layout.BorderStrokeStyle;
+import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -547,7 +551,6 @@ public class ParallelTagCloud extends VisualizationComponent
 	{
 	    // Init tag cloud container.
 		final int numberOfTopics			= data.getTopicConfigurations().size();
-	    double intervalX					= canvas.getWidth() / (numberOfTopics);
 	    tagCloudContainer					= new ArrayList<VBox>(numberOfTopics);
 	    
 		// For exit from local scope instance: Reset selected label.
@@ -562,6 +565,7 @@ public class ParallelTagCloud extends VisualizationComponent
         });
 		
 	    // Iterate over all topics; create cloud for each one.
+	    int cloudCount = 0;
 	    for (Map.Entry<Pair<Integer, Integer>, ArrayList<Pair<String, Double>>> keywordProbabilitySet : data.getKeywordProbabilities().entrySet()) {
 			// Get keyword probability data.
 	    	ArrayList<Pair<String, Double>> topicKeywordProbabilityPairs = keywordProbabilitySet.getValue();
@@ -570,9 +574,10 @@ public class ParallelTagCloud extends VisualizationComponent
 			VBox vbox = new VBox();
 			tagCloudContainer.add(vbox);
 
-	    	// Set background color.
+	    	// Set background and border color.
 			vbox.setBackground(new Background(new BackgroundFill(Color.rgb(255, 255, 255, 0.9), CornerRadii.EMPTY, Insets.EMPTY)) );
-
+			vbox.setStyle("-fx-border-color: white; -fx-padding: 5px;");
+		
 			
 			// Init labels and add them to container.
 			double probabilitySum = 0;
@@ -586,7 +591,7 @@ public class ParallelTagCloud extends VisualizationComponent
 				Label label 		= new Label();
 		    	
 				/*
-				 * Add event listener.
+				 * Add event listener for labels.
 				 */
 				
 				// For entry into label:
@@ -647,6 +652,13 @@ public class ParallelTagCloud extends VisualizationComponent
 			
 			// Add tag clouds to parent.
 			tagcloud_anchorpane.getChildren().add(vbox);
+			
+			
+			/*
+			 * Add event listener for VBoxes and topic ID labels.
+			 */
+			
+			initHoverEventListeners();
 		}
 	}
 	
@@ -870,7 +882,7 @@ public class ParallelTagCloud extends VisualizationComponent
 			double currBridgeY	= currBridgeOffsetY + (currLabel.getBoundsInParent().getMinY() + currLabel.getBoundsInParent().getMaxY()) / 2;
 			
 			// Search 'til next appeareance of keyword.
-			for (int j = i + 1; j < numberOfTopics && !wasFound; j++) {
+			for (int j = i + 1; j < (i + 2) && !wasFound; j++) {
 				VBox nextTagCloud							= tagCloudContainer.get(j);
 				ArrayList<Pair<String, Double>> nextData	= data.getNthKeywordProbabilityArray(j).getValue();
 				
@@ -928,63 +940,89 @@ public class ParallelTagCloud extends VisualizationComponent
 	@Override
 	public void processKeyPressedEvent(KeyEvent ke)
 	{
-		// @todo Implement ParallelTagCloud::processKeyPressedEvent(...).
-		
 	}
 
 	@Override
 	public void processKeyReleasedEvent(KeyEvent ke)
-	{
-		// @todo Implement ParallelTagCloud::processKeyReleasedEvent(...).
-		
+	{	
 	}
 
 	@Override
 	public void initHoverEventListeners()
 	{
-		for (Label label : topicIDLabels) {
-	    	// Set event listener for hover and click action.
-	    	label.addEventHandler(MouseEvent.MOUSE_ENTERED, new EventHandler<MouseEvent>() {
-	            public void handle(MouseEvent event) 
-	            {
-	            	// Change cursor type.
-	            	analysisController.getScene().setCursor(Cursor.HAND);
-	            	
-	            	/*
-	            	 *  Display topic in barchart.
-	            	 */
-	            	
-	            	// 	Prepare set containing topics to display in distribution barchart.
-	    			Set<Pair<Integer, Integer>> topicsToDisplayInDistBarchart 	= new HashSet<Pair<Integer,Integer>>();
-	    			// Extract topic model and topic IDs from label text.
-	    			String[] idParts 											= label.getText().split("#");
-	    			// Add topic ID to collection.
-	    			topicsToDisplayInDistBarchart.add( new Pair<Integer, Integer>(Integer.parseInt(idParts[0]), Integer.parseInt(idParts[1])) );
-	    			
-	    			// Refresh barchart.
-	    			refreshBarchart((ParallelTagCloudDataset)data, (ParallelTagCloudOptionset)options, topicsToDisplayInDistBarchart);
-	    			
-	    			/*
-	    			 * Highlight topic model assoiated with hovered over topic in other visualizations.
-	    			 */
-	    			
-	    			analysisController.highlightDataPoints(Integer.parseInt(idParts[0]), DatapointIDMode.CONFIG_ID, VisualizationComponentType.PARALLEL_TAG_CLOUD);
-	            }
-	        });
-	    	
-	    	label.addEventHandler(MouseEvent.MOUSE_EXITED, new EventHandler<MouseEvent>() {
-	            public void handle(MouseEvent event) 
-	            {
-	            	// Change cursor type.
-	            	analysisController.getScene().setCursor(Cursor.DEFAULT);
-	            	
-	            	// Clear barchart.
-	            	probabilityDistribution_barchart.getData().clear();
-	            	
-	            	// Remove highlighting in other panels.
-	            	analysisController.removeHighlighting(VisualizationComponentType.PARALLEL_TAG_CLOUD);
-	            }
-	        });
+		int cloudCount = 0;
+		
+		if (topicIDLabels != null 		&& 	tagCloudContainer != null 		&&
+			topicIDLabels.size() > 0	&&	tagCloudContainer.size() > 0	&&
+			topicIDLabels.size() == tagCloudContainer.size()) {
+			for (Label label : topicIDLabels) {
+				// Get relevant tag cloud.
+				VBox vbox = tagCloudContainer.get(cloudCount);
+				
+				// Create event listener for hovering over tagcloud.
+				EventHandler<MouseEvent> onMouseEnteredEventHandler = new EventHandler<MouseEvent>() 
+			    {
+			        @Override
+			        public void handle(MouseEvent event) 
+			        {
+			        	// Draw border for current tag cloud.
+		            	vbox.setStyle("-fx-border-color: red; -fx-padding: 5px;");
+		            	
+		            	// Change cursor type.
+		            	analysisController.getScene().setCursor(Cursor.HAND);
+		            	
+		            	/*
+		            	 *  Display topic in barchart.
+		            	 */
+		            	
+		            	// 	Prepare set containing topics to display in distribution barchart.
+		    			Set<Pair<Integer, Integer>> topicsToDisplayInDistBarchart 	= new HashSet<Pair<Integer,Integer>>();
+		    			// Extract topic model and topic IDs from label text.
+		    			String[] idParts 											= label.getText().split("#");
+		    			// Add topic ID to collection.
+		    			topicsToDisplayInDistBarchart.add( new Pair<Integer, Integer>(Integer.parseInt(idParts[0]), Integer.parseInt(idParts[1])) );
+		    			
+		    			// Refresh barchart.
+		    			refreshBarchart((ParallelTagCloudDataset)data, (ParallelTagCloudOptionset)options, topicsToDisplayInDistBarchart);
+		    			
+		    			/*
+		    			 * Highlight topic model assoiated with hovered over topic in other visualizations.
+		    			 */
+		    			
+		    			analysisController.highlightDataPoints(Integer.parseInt(idParts[0]), DatapointIDMode.CONFIG_ID, VisualizationComponentType.PARALLEL_TAG_CLOUD);
+		            }
+			    };
+			    
+			    // Create event listener for exiting tagcloud.
+			    EventHandler<MouseEvent> onMouseExitEventHandler = new EventHandler<MouseEvent>() 
+			    {
+			        @Override
+			        public void handle(MouseEvent event) 
+			        {
+			        	// Hide border for current tag cloud.
+		            	vbox.setStyle("-fx-border-color: white; -fx-padding: 5px;");
+		            	
+		            	// Change cursor type.
+		            	analysisController.getScene().setCursor(Cursor.DEFAULT);
+		            	
+		            	// Clear barchart.
+		            	probabilityDistribution_barchart.getData().clear();
+		            	
+		            	// Remove highlighting in other panels.
+		            	analysisController.removeHighlighting(VisualizationComponentType.PARALLEL_TAG_CLOUD);
+		            }
+			    };
+	
+				// For entry into tagcloud / label:
+				label.addEventHandler(MouseEvent.MOUSE_ENTERED, onMouseEnteredEventHandler);
+				vbox.addEventHandler(MouseEvent.MOUSE_ENTERED, onMouseEnteredEventHandler);
+				// For exit from tagcloud / label:
+				label.addEventHandler(MouseEvent.MOUSE_EXITED, onMouseExitEventHandler);
+				vbox.addEventHandler(MouseEvent.MOUSE_EXITED, onMouseExitEventHandler);
+				
+				// Keep track of how many clouds are already processed.
+				cloudCount++;
+			}
 		}
 	}
 
