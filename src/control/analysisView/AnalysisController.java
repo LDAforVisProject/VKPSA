@@ -18,13 +18,11 @@ import model.AnalysisDataspace;
 import model.LDAConfiguration;
 import model.workspace.Workspace;
 import control.Controller;
-import control.analysisView.localScope.LocalScopeVisualizationType;
 import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
 import view.components.VisualizationComponentType;
 import view.components.heatmap.CategoricalHeatmap;
 import view.components.heatmap.HeatmapOptionset;
-import view.components.legacy.LocalScopeInstance;
 import view.components.legacy.mdsScatterchart.MDSScatterchart;
 import view.components.parallelTagCloud.ParallelTagCloud;
 import view.components.parallelTagCloud.ParallelTagCloudDataset;
@@ -483,8 +481,6 @@ public class AnalysisController extends Controller
 		
 		// TM comparison heatmap:
 		refreshTMCHeatmap(dataspace.getActiveLDAConfigurations());
-		
-		// @todo Refresh parallel tag cloud.
 	}
 
 	/**
@@ -523,7 +519,6 @@ public class AnalysisController extends Controller
 	 */
 	public void integrateTMCHeatmapSelection(Set<Pair<Integer, Integer>> selectedTopicConfigIDs)
 	{
-//		localScopeInstance.refreshPTC(selectedTopicConfigIDs);
 		ParallelTagCloudDataset ptcData 		= new ParallelTagCloudDataset(selectedTopicConfigIDs);
 		ParallelTagCloudOptionset ptcOptions 	= new ParallelTagCloudOptionset(true, true, false, (int) settingsPanel.getLocalScopeKeywordNumberSlider().getValue());
 		// Refresh parallel tag cloud.
@@ -568,8 +563,7 @@ public class AnalysisController extends Controller
 		paramSpaceScatterchart.refresh(new ScatterchartDataset(	dataspace.getLDAConfigurations(), dataspace.getDiscardedLDAConfigurations(),
 																dataspace.getInactiveLDAConfigurations(), dataspace.getActiveLDAConfigurations()));
 		
-		//	Local scope:
-//		localScopeInstance.refresh(dataspace.getActiveLDAConfigurations());
+		//	Topic model comparison heatmap:
 		refreshTMCHeatmap(dataspace.getActiveLDAConfigurations());
 		
 		// 	Parameter histograms:
@@ -592,8 +586,12 @@ public class AnalysisController extends Controller
 			tmcHeatmap.fetchTopicDistanceData(selectedLDAConfigurations, tmcOptions);
 		}
 		
-		else
+		else {
+			// Clear TMC heatmap.
 			tmcHeatmap.clear();
+			// Clear PTC.
+			parallelTagCloud.clear();
+		}
 	}
 	
 	/**

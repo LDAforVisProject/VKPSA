@@ -365,6 +365,9 @@ public class CategoricalHeatmap extends HeatMap
     	}
     	xAxisLabels.clear();
     	yAxisLabels.clear();
+    	
+    	// Clear color legend.
+    	colorLegend.clear();
 	}
 	
 	@Override

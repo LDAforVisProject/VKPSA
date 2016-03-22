@@ -243,10 +243,6 @@ public class ColorLegend extends VisualizationComponent
 		minLabel 		= new Label();
 		maxLabel 		= new Label();
 		
-		// Add to parent.
-		((AnchorPane) rootNode).getChildren().add(minLabel);
-		((AnchorPane) rootNode).getChildren().add(maxLabel);
-		
 		// Set position.
 		minLabel.setLayoutX(25);
 		maxLabel.setLayoutX(25);
@@ -366,6 +362,12 @@ public class ColorLegend extends VisualizationComponent
 	 */
 	private void updateLabels()
 	{
+		// Add labels to parent.
+		if (!((AnchorPane) rootNode).getChildren().contains(minLabel)) {
+			((AnchorPane) rootNode).getChildren().add(minLabel);
+			((AnchorPane) rootNode).getChildren().add(maxLabel);
+		}
+		
 		// Display extrema in lables.
 		minLabel.setText( String.valueOf(data.getMin()));
 		maxLabel.setText( String.valueOf(data.getMax()).substring(0, 5));
@@ -529,5 +531,27 @@ public class ColorLegend extends VisualizationComponent
 				dataPoint.getNode().setStyle("-fx-bar-fill: " + hex + ";");
 			}	
 		}
+	}
+	
+	/**
+	 * Clears component.
+	 */
+	public void clear()
+	{
+		// Remove labels.
+		((AnchorPane) rootNode).getChildren().remove(minLabel);
+		((AnchorPane) rootNode).getChildren().remove(maxLabel);
+		
+		// Remove slider.
+		((AnchorPane) rootNode).getChildren().remove(slider);
+		
+		// Remove border.
+		((AnchorPane) rootNode).getChildren().remove(legendBorder);
+		
+		// Remove barchart.
+		((AnchorPane) rootNode).getChildren().remove(histogram);
+		
+		// Remove legend.
+		((AnchorPane) rootNode).getChildren().remove(legend);		
 	}
 }

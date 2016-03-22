@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -40,6 +41,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
+import javafx.scene.text.FontWeight;
 import javafx.util.Pair;
 import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
@@ -114,6 +116,14 @@ public class ParallelTagCloud extends VisualizationComponent
 	 * Keyword that is currently hovered over.
 	 */
 	private String selectedKeyword;
+	/**
+	 * Name of topic the selected keyword belongs to.
+	 */
+	private String selectedTopicName;
+	/**
+	 * Reference to labels containing the currently selected keyword.
+	 */
+	private List<Label> labelsWithSelectedKeyword;
 	
 	/**
 	 * Zoom factor currently used for PTC panel.
@@ -169,6 +179,7 @@ public class ParallelTagCloud extends VisualizationComponent
 		
 		topicIDLabels 						= new ArrayList<Label>();
 		tagCloudContainer 					= new ArrayList<VBox>();
+		labelsWithSelectedKeyword			= new ArrayList<Label>();
 	
 		keywordProbabilitySumsOverTopics 	= new LinkedHashMap<String, Double>(); 
 		
@@ -179,6 +190,7 @@ public class ParallelTagCloud extends VisualizationComponent
 		keywordProbabilitySumOverTopicsMax	= 0;
 		keywordProbabilitySumOverTopicsMin	= Double.MAX_VALUE;
 		selectedKeyword						= "";
+		selectedTopicName					= "";
 		zoomFactor							= 1;
 	}
 	
@@ -320,12 +332,14 @@ public class ParallelTagCloud extends VisualizationComponent
 		ArrayList<Double> probabilitySums 	= new ArrayList<Double>(numberOfTopics);
 	 
 		// Reset visualization.
-		reset();
+		clear();
 		
 	    /*
 	     *	0. Create labels. 
 	     */
-	    if (hasDataChanged) {
+
+		if (hasDataChanged || topicIDLabels.size() == 0) {
+	    	//System.out.println("	creating topic labels");
 	    	createTopicIDLabels(data.getTopicConfigurations());
 	    }
 	    
@@ -510,6 +524,16 @@ public class ParallelTagCloud extends VisualizationComponent
 					probabilityDistribution_barchart.getData().add(series);
 				}
 			}
+			
+			// Bolden selected keyword.
+			for (XYChart.Series<Number, String> dataSeries : probabilityDistribution_barchart.getData()) {
+				// Bolden bar reflecting keyword in hovered over topic.
+				if (dataSeries.getName().equals(selectedTopicName)) {
+					for (XYChart.Data<Number, String> chartData : dataSeries.getData()) {
+						chartData.getNode().setScaleY(3);
+					}
+				}
+			}
 		}
 	}
 	
@@ -557,7 +581,11 @@ public class ParallelTagCloud extends VisualizationComponent
 	    tagcloud_anchorpane.addEventHandler(MouseEvent.MOUSE_EXITED_TARGET, new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) 
             {
-            	selectedKeyword = "";
+            	selectedKeyword 	= "";
+            	selectedTopicName	= "";
+            	
+            	// Reset opacity of labels containing selected keyword.
+            	removeHoverHighlighting(labelsWithSelectedKeyword);
             	
             	// Update visualizations.
             	drawBridges();
@@ -566,10 +594,14 @@ public class ParallelTagCloud extends VisualizationComponent
 		
 	    // Iterate over all topics; create cloud for each one.
 	    int cloudCount = 0;
+	    
 	    for (Map.Entry<Pair<Integer, Integer>, ArrayList<Pair<String, Double>>> keywordProbabilitySet : data.getKeywordProbabilities().entrySet()) {
 			// Get keyword probability data.
 	    	ArrayList<Pair<String, Double>> topicKeywordProbabilityPairs = keywordProbabilitySet.getValue();
 
+	    	// Get corresponding topic ID label.
+	    	final Label topicIDLabel = topicIDLabels.get(cloudCount++);
+	    	
 	    	// Initialize VBox.
 			VBox vbox = new VBox();
 			tagCloudContainer.add(vbox);
@@ -578,7 +610,6 @@ public class ParallelTagCloud extends VisualizationComponent
 			vbox.setBackground(new Background(new BackgroundFill(Color.rgb(255, 255, 255, 0.9), CornerRadii.EMPTY, Insets.EMPTY)) );
 			vbox.setStyle("-fx-border-color: white; -fx-padding: 5px;");
 		
-			
 			// Init labels and add them to container.
 			double probabilitySum = 0;
 			for (int j = 0; j < options.getNumberOfKeywordsToDisplay(); j++) {
@@ -587,7 +618,7 @@ public class ParallelTagCloud extends VisualizationComponent
 				 */
 				
 				String keyword		= topicKeywordProbabilityPairs.get(j).getKey();
-				double probability	= topicKeywordProbabilityPairs.get(j).getValue();
+//				double probability	= topicKeywordProbabilityPairs.get(j).getValue();
 				Label label 		= new Label();
 		    	
 				/*
@@ -601,10 +632,20 @@ public class ParallelTagCloud extends VisualizationComponent
 		            	Label label = (Label)event.getSource();
 		            	
 		            	if (!selectedKeyword.equals(label.getText())) {
-		            		selectedKeyword	= label.getText();
+		            		// Store selected keyword.
+		            		selectedKeyword		= label.getText();
+		            		// Store name of selected topic.
+		            		selectedTopicName	= topicIDLabel.getText();
+		            		
+		            		// Add label to collection of labels containing the selected keyword.
+		            		labelsWithSelectedKeyword.add(label);
 		            		
 			            	// Update connections between words in neighbouring tag clouds.
 			            	drawBridges();
+			            	
+			            	// Increase opacity of hovered over label, bolden text.
+			            	label.setOpacity(1);
+			            	label.setFont(Font.font(label.getFont().getName(), FontWeight.BOLD, label.getFont().getSize()));
 			            	
 			            	// Show hovered over keyword in prob. dist. barchart.
 			            	Set<String> allowedKeywords = new HashSet<String>();
@@ -622,29 +663,14 @@ public class ParallelTagCloud extends VisualizationComponent
 		            }
 		        });
 				
-
-				
-				//label.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+				// Update label, add it to containing VBox.
 				label.setText(keyword);
 				vbox.getChildren().add(label);
 				
 				// Update probability sums.
 				// Modify this statement to enable different approaches to ranking font sizes.
-				probabilitySum += probability; // Math.pow(probability, keywordProbabilityExponent);
-				
-				// Update probability sum for this keyword over all topics.
-				if (!keywordProbabilitySumsOverTopics.containsKey(keyword)) {
-					keywordProbabilitySumsOverTopics.put(keyword, probability);
-				}
-				
-				else {
-					double newSum = keywordProbabilitySumsOverTopics.get(keyword) + probability;
-					keywordProbabilitySumsOverTopics.put(keyword, newSum);
-				}
-				
-				// Check if there are new extrema in keyword probability sums over all topics.
-				keywordProbabilitySumOverTopicsMax = keywordProbabilitySumsOverTopics.get(keyword) > keywordProbabilitySumOverTopicsMax ? keywordProbabilitySumsOverTopics.get(keyword) : keywordProbabilitySumOverTopicsMax;
-				keywordProbabilitySumOverTopicsMin = keywordProbabilitySumsOverTopics.get(keyword) < keywordProbabilitySumOverTopicsMin ? keywordProbabilitySumsOverTopics.get(keyword) : keywordProbabilitySumOverTopicsMin;
+//				probabilitySum += probability; // Math.pow(probability, keywordProbabilityExponent);
+//				updateKeywordProbabilitySums(keyword, probability);
 			}
 			
 			// Set probability sum for this topic.
@@ -660,6 +686,27 @@ public class ParallelTagCloud extends VisualizationComponent
 			
 			initHoverEventListeners();
 		}
+	}
+	
+	/**
+	 * Updates keyword/probability data. 
+	 * @param keyword
+	 * @param probability
+	 */
+	private void updateKeywordProbabilitySums(final String keyword, final double probability)
+	{
+		// Update probability sum for this keyword over all topics.
+		if (!keywordProbabilitySumsOverTopics.containsKey(keyword)) {
+			keywordProbabilitySumsOverTopics.put(keyword, probability);
+		}
+		
+		else {
+			keywordProbabilitySumsOverTopics.put(keyword, keywordProbabilitySumsOverTopics.get(keyword) + probability);
+		}
+		
+		// Check if there are new extrema in keyword probability sums over all topics.
+		keywordProbabilitySumOverTopicsMax = keywordProbabilitySumsOverTopics.get(keyword) > keywordProbabilitySumOverTopicsMax ? keywordProbabilitySumsOverTopics.get(keyword) : keywordProbabilitySumOverTopicsMax;
+		keywordProbabilitySumOverTopicsMin = keywordProbabilitySumsOverTopics.get(keyword) < keywordProbabilitySumOverTopicsMin ? keywordProbabilitySumsOverTopics.get(keyword) : keywordProbabilitySumOverTopicsMin;
 	}
 	
 	/**
@@ -821,7 +868,7 @@ public class ParallelTagCloud extends VisualizationComponent
 		gc.setFill(Color.BLACK);
 		
 		// Loop over all tagclouds.
-		for (int i = 0; i < numberOfTopics - 1; i++) {
+		for (int i = 0; i < numberOfTopics ; i++) {
 			VBox currTagCloud							= tagCloudContainer.get(i);
 			ArrayList<Pair<String, Double>> currData	= data.getNthKeywordProbabilityArray(i).getValue();
 			
@@ -842,14 +889,25 @@ public class ParallelTagCloud extends VisualizationComponent
 				boolean noKeywordSelected 		= selectedKeyword.equals("");
 				boolean isThisKeywordSelected	= !selectedKeyword.equals("") && keyword.equals(selectedKeyword);
 				
-				// Draw bridges for this keyword in this cloud.
-				drawBridgesForKeywordInTagCloud(	data, numberOfTopics, numberOfKeywords, i,
-													keyword, noKeywordSelected, isThisKeywordSelected,
-													currBridgeOffsetX, currBridgeOffsetY,
-													currLabel, defaultLineWidth,
-													gc);
+				// Change opacity if this keyword is selected.
+				if (isThisKeywordSelected) {
+					// Change opacity of label.
+					currLabel.setOpacity(1);
+					// Add to collection of labels containing the selected keyword.
+					labelsWithSelectedKeyword.add(currLabel);
+				}
+				
+				// Draw bridges for this keyword in this cloud. Don't do that for last cloud.
+				if (i < numberOfTopics - 1) {
+					drawBridgesForKeywordInTagCloud(	data, numberOfTopics, numberOfKeywords, i,
+														keyword, noKeywordSelected, isThisKeywordSelected,
+														currBridgeOffsetX, currBridgeOffsetY,
+														currLabel, defaultLineWidth,
+														gc);
+				}
 			}
 		}
+		
 	}
 	
 	/**
@@ -952,6 +1010,7 @@ public class ParallelTagCloud extends VisualizationComponent
 	{
 		int cloudCount = 0;
 		
+		// Check that labels exist before hooking up event listener.
 		if (topicIDLabels != null 		&& 	tagCloudContainer != null 		&&
 			topicIDLabels.size() > 0	&&	tagCloudContainer.size() > 0	&&
 			topicIDLabels.size() == tagCloudContainer.size()) {
@@ -1071,6 +1130,25 @@ public class ParallelTagCloud extends VisualizationComponent
 			}
 		}
 	}
+	
+	/**
+	 * Removes hover highlighting from set of defined labels.
+	 * @param labels
+	 */
+	public void removeHoverHighlighting(List<Label> labels)
+	{
+		// Reset opacity of labels containing selected keyword, reset text weight.
+    	for (Label label : labelsWithSelectedKeyword) {
+    		// Set opacity.
+    		label.setOpacity(VisualizationComponent.DEFAULT_OPACITY_FACTOR);
+    		
+    		// Remove boldening.
+    		label.setFont(Font.font(label.getFont().getName(), FontWeight.NORMAL, label.getFont().getSize()));
+    	}
+    	
+    	// Reset collection.
+    	labelsWithSelectedKeyword.clear();
+	}
 
 	@Override
 	public void resizeContent(double width, double height)
@@ -1093,25 +1171,32 @@ public class ParallelTagCloud extends VisualizationComponent
 		canvas.setHeight(tagcloud_anchorpane.getHeight());
 		
 		// Clear canvas and redraw PTC.
-		if (this.data != null && this.options != null) {
+		ParallelTagCloudDataset ptcData = (ParallelTagCloudDataset)this.data;
+		if (	this.data != null && this.options != null	&& 
+				ptcData.getTopicConfigurations() != null 	&& 
+				ptcData.getTopicConfigurations().size() > 0) {
 			// Redraw.
 			refreshParallelTagCloud((ParallelTagCloudDataset)this.data, (ParallelTagCloudOptionset)this.options, false);
 		}
 	}
 
-	public void reset()
+	public void clear()
 	{
 		// Clear tag clouds.
 		if (tagCloudContainer != null) {
-			for (VBox vbox : tagCloudContainer) {
-				tagcloud_anchorpane.getChildren().remove(vbox);
-			}
-			
+			tagcloud_anchorpane.getChildren().removeAll(tagCloudContainer);
 			tagCloudContainer.clear();
 		}
 		
+		// Remove topic ID labels.
+		tagcloud_anchorpane.getChildren().removeAll(topicIDLabels);
+		topicIDLabels.clear();
+		
 		// Clear canvas.
 		canvas.getGraphicsContext2D().clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+		
+		// Clear barchart.
+		probabilityDistribution_barchart.getData().clear();
 	}
 	
 	@Override
