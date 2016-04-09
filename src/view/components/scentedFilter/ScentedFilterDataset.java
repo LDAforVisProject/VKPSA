@@ -8,6 +8,11 @@ import java.util.Set;
 import view.components.VisualizationComponentDataset;
 import model.LDAConfiguration;
 
+/**
+ * Dataset used for scented filters (both original and derivative).
+ * @author RM
+ *
+ */
 public class ScentedFilterDataset extends VisualizationComponentDataset
 {
 	/**

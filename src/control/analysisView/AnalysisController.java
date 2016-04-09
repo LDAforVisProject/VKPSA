@@ -1,18 +1,15 @@
 package control.analysisView;
 
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-
-
-
-
+import org.controlsfx.control.PopOver;
 
 import model.AnalysisDataspace;
 import model.LDAConfiguration;
@@ -21,6 +18,7 @@ import control.Controller;
 import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
 import view.components.VisualizationComponentType;
+import view.components.controls.keywordFilterSetup.KeywordFilterSetup;
 import view.components.heatmap.CategoricalHeatmap;
 import view.components.heatmap.HeatmapOptionset;
 import view.components.legacy.mdsScatterchart.MDSScatterchart;
@@ -39,11 +37,14 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.control.Accordion;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
@@ -55,11 +56,15 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -204,11 +209,6 @@ public class AnalysisController extends Controller
 	 * Parallel tag cloud component.
 	 */
 	private ParallelTagCloud parallelTagCloud;
-	
-	/**
-	 * Parallel tag cloud in local scope.
-	 */
-	//private LocalScopeInstance localScopeInstance;
 
 	/*
 	 * Filter controls.
@@ -222,6 +222,15 @@ public class AnalysisController extends Controller
 	 * Scented filters for parameters.
 	 */
 	private ArrayList<ScentedFilter> filters;
+	
+	/**
+	 * PopOver used for displaying setup for new keyword filter.
+	 */
+	private PopOver newKeywordFilter_popover;
+	/**
+	 * Component used for selection of keywords to filter by.
+	 */
+	private KeywordFilterSetup keywordFilterSetup;
 	
 	/*
 	 * Setting shortcuts icons.
@@ -334,7 +343,6 @@ public class AnalysisController extends Controller
 		initMDSScatterchart();
 		initParameterSpaceScatterchart();
 		initParallelTagCloud();
-		initLocalScopeView();
 		initComparisonHeatmaps();
 		
 		// Bring settings icons to front.
@@ -359,15 +367,6 @@ public class AnalysisController extends Controller
 		tmcHeatmap.embedIn(localscope_tmc_anchorPane);
 	}
 
-	private void initLocalScopeView()
-	{
-		// Create new instance of local scope.
-//		localScopeInstance = new LocalScopeInstance(this, 	localScope_ptc_anchorPane, localscope_tmc_anchorPane,
-//															settingsPanel.getLocalScopeTopicNumberSlider(), settingsPanel.getLocalScopeTopicNumberTextField(),
-//															settingsPanel.getLocalScopeKeywordNumberSlider(), settingsPanel.getLocalScopeTopicNumberTextField());
-//		localScopeInstance.load();
-	}
-
 	private void initParallelTagCloud()
 	{
 		parallelTagCloud = (ParallelTagCloud)VisualizationComponent.generateInstance(VisualizationComponentType.PARALLEL_TAG_CLOUD, this, null, null, null);
@@ -383,6 +382,11 @@ public class AnalysisController extends Controller
 		filters_vbox 				= new VBox();
 		filters_vbox.resize(100, filters_vbox.getHeight());
 		
+		// Create node for setup of new filter.
+		keywordFilterSetup 			= new KeywordFilterSetup(this);
+		// Init popover for setup of new keyword filter.
+		newKeywordFilter_popover	= new PopOver(keywordFilterSetup.getRoot());
+		
 		// Iterate over supported parameters.
 		for (String param : LDAConfiguration.SUPPORTED_PARAMETERS) {
 			// Create new filter.
@@ -390,9 +394,9 @@ public class AnalysisController extends Controller
 
 			// Init filter.
 			if (param != "kappa")
-				filter.applyOptions(new ScentedFilterOptionset(param, true, 0, 15, 50, 0.05, true, true, false));
+				filter.applyOptions(new ScentedFilterOptionset(param, true, 0, 15, 50, 0.05, true, true, false, true));
 			else
-				filter.applyOptions(new ScentedFilterOptionset(param, true, 2, 25, 50, 1, true, true, false));
+				filter.applyOptions(new ScentedFilterOptionset(param, true, 2, 25, 50, 1, true, true, false, false));
 			
 			// Add to collection of filters.
 			filters.add(filter);
@@ -406,13 +410,31 @@ public class AnalysisController extends Controller
 		separator.setTranslateY(15);
 		filters_vbox.getChildren().add(separator);
 		
+		/*
+		 * Add filters using derived data (i.e.: non-primitive
+		 * arguments. 
+		 */
+		
 		// Add distance filter - note: Is derived data.
 		ScentedFilter distanceFilter = (ScentedFilter) VisualizationComponent.generateInstance(VisualizationComponentType.SCENTED_FILTER, this, this.workspace, this.log_protocol_progressindicator, this.log_protocol_textarea);
-		distanceFilter.applyOptions(new ScentedFilterOptionset("distance", true, 0, 15, 50, 0.01, true, true, false));
+		distanceFilter.applyOptions(new ScentedFilterOptionset("distance", true, 0, 15, 50, 0.01, true, true, false, false));
 		// Add to collection of filters.
 		filters.add(distanceFilter);
 		// Embed in containing VBox.
 		distanceFilter.embedIn(filters_vbox);
+		
+		// Add seperating line.
+		Separator separator2 = new Separator();
+		separator2.setTranslateX(10);
+		separator2.setTranslateY(15);
+		filters_vbox.getChildren().add(separator2);
+		
+		// Add button for adding new keyword filter.
+		filters_vbox.getChildren().add(createKeywordFilterButton());
+		
+		/*
+		 * Add filters to GUI.
+		 */
 		
 		// Add containing VBox to pane.
 		filter_anchorpane.getChildren().add(filters_vbox);
@@ -422,6 +444,51 @@ public class AnalysisController extends Controller
 		filters_vbox.resize(100, filters_vbox.getHeight());
 	}
 
+	/**
+	 * Creates button for generating new keyword filter buttons.
+	 * @return
+	 */
+	private Button createKeywordFilterButton()
+	{
+		ImageView plusImage 			= new ImageView(new Image(getClass().getResourceAsStream("../../icons/add.png"), 25, 25, true, true));
+		Button addKeywordFilter_button 	= new Button("Create new keyword filter", plusImage);
+		
+		/*
+		 * Add event handler.
+		 */
+		
+		// Mouse entered: Change cursor type.
+		addKeywordFilter_button.addEventHandler(MouseEvent.MOUSE_ENTERED, (new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent me) 
+            {
+            	scene.setCursor(Cursor.HAND);
+            }
+		}));
+		// Mouse exited: Change cursor type.
+		addKeywordFilter_button.addEventHandler(MouseEvent.MOUSE_EXITED, (new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent me) 
+            {
+            	scene.setCursor(Cursor.DEFAULT);
+            }
+		}));
+		// Mouse clicked: Show setup for new filter.
+		addKeywordFilter_button.addEventHandler(MouseEvent.MOUSE_CLICKED, (new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent me) 
+            {
+            	if (!newKeywordFilter_popover.isShowing()) {
+            		newKeywordFilter_popover.setX(0);
+            		newKeywordFilter_popover.setY(0);
+            		newKeywordFilter_popover.show(addKeywordFilter_button);
+            	}
+            }
+		}));
+		
+		addKeywordFilter_button.setStyle("-fx-background-color:#fff; -fx-border-color:grey;");// setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+		addKeywordFilter_button.setTranslateY(25);
+		
+		return addKeywordFilter_button;
+	}
+	
 	private void initMDSScatterchart()
 	{
 		// Init scatterchart. checkbox_mdsHeatmap_distribution_dynAdjustment
@@ -972,8 +1039,6 @@ public class AnalysisController extends Controller
 		tmcHeatmap.setReferences(workspace, logPI, logTA);
 		// ...for parameter space visualizations. 
 		paramSpaceScatterchart.setReferences(workspace, logPI, logTA);
-		//	...for local scope instance.
-//		localScopeInstance.setReferences(workspace, logPI, logTA);
 		//	... for scented filter.
 		for (ScentedFilter filter : filters) {
 			filter.setReferences(workspace, logPI, logTA);
@@ -982,6 +1047,8 @@ public class AnalysisController extends Controller
 		parallelTagCloud.setReferences(workspace, logPI, logTA);
 		// ... for settings panel.
 		settingsPanel.setReferences(workspace, logPI, logTA);
+		// ... for keyword filter setup control.
+		keywordFilterSetup.setReferences(workspace, logPI, logTA);
 	}
 	
 	/**
@@ -1108,5 +1175,27 @@ public class AnalysisController extends Controller
 		// Remove highlighting from parallel tag cloud.
 		if (sourceVisType != VisualizationComponentType.PARALLEL_TAG_CLOUD)
 			parallelTagCloud.removeHoverHighlighting();		
+	}
+	
+	/**
+	 * Creates new keyword filter for the given keyword (as long as it's valid).
+	 * @param keyword
+	 */
+	public void createKeywordFilter(String keyword)
+	{
+		try {
+			System.out.println("keyword exists: " + workspace.getDatabaseManagement().doesKeywordExist(keyword));
+		} 
+		
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		// Add (static) keyword filter. 
+		ScentedFilter keywordFilter = (ScentedFilter) VisualizationComponent.generateInstance(VisualizationComponentType.SCENTED_FILTER, this, this.workspace, this.log_protocol_progressindicator, this.log_protocol_textarea);
+		keywordFilter.applyOptions(new ScentedFilterOptionset("keyword", true, 0, 15, 50, 0.01, true, true, false, true));
+		// Add to collection of filters.
+		filters.add(keywordFilter);
+		// Embed in containing VBox.
+		keywordFilter.embedIn(filters_vbox);
 	}
 }

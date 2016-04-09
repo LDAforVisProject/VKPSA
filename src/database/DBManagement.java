@@ -1552,4 +1552,61 @@ public class DBManagement
 
 		return numberOfTopics;
 	}
+	
+	/**
+	 * Returns list of suggestions used for auto-complete in control for new keyword filter.
+	 * @param userText Text entered by user.
+	 * @return
+	 */
+	public Collection<Object> getKeywordSuggestions(String userText) throws SQLException
+	{
+		Collection<Object> suggestions	= new ArrayList<Object>();
+		
+		String statementString 			= 	"select keyword " +
+											"from keywords " +
+											"where " +
+											"    keyword like '%" + userText + "%';";
+
+		// Prepare statement.
+		PreparedStatement statement = connection.prepareStatement(statementString);
+		
+		// Execute statement.
+		ResultSet rs				= statement.executeQuery();
+		// Read all similar keywords.
+		while (rs.next()) {
+			suggestions.add(rs.getString("keyword"));
+		}
+
+		return suggestions;
+	}
+	
+	/**
+	 * Checks if a given keyword exists.
+	 * @param keyword
+	 * @return True if keyword exists, false otherwise.
+	 * @throws SQLException
+	 */
+	public boolean doesKeywordExist(String keyword) throws SQLException
+	{
+		boolean doesExist		= false;
+		
+		String statementString 	= 	"select exists (" +
+										"select * " +
+										"from keywords " +
+										"where " +
+										"    keyword = '" + keyword + "'" +
+									") doesExist;";
+
+		// Prepare statement.
+		PreparedStatement statement = connection.prepareStatement(statementString);
+		
+		// Execute statement.
+		ResultSet rs				= statement.executeQuery();
+		// Reads result.
+		while (rs.next()) {
+			doesExist = rs.getBoolean("doesExist");
+		}
+
+		return doesExist;
+	}
 }

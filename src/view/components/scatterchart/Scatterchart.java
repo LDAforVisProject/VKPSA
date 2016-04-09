@@ -277,7 +277,8 @@ public abstract class Scatterchart extends VisualizationComponent
 				
 		// Resize on mouse wheel action.
 		scatterchart.setOnScroll(new EventHandler<ScrollEvent>() {
-		    public void handle(ScrollEvent event) {
+		    public void handle(ScrollEvent event)
+		    {
 		        event.consume();
 		        
 		        if (event.getDeltaY() == 0) {
@@ -288,13 +289,18 @@ public abstract class Scatterchart extends VisualizationComponent
 		        final double scaleFactor 	= event.getDeltaY() > 0 ? Scatterchart.ZOOM_DELTA : 1 / Scatterchart.ZOOM_DELTA;
 
 		        // Store current width and height.
-		        final double totalWidth		= scatterchart.getWidth();
-		        final double totalHeight	= scatterchart.getHeight();
+		        final double width			= scatterchart.getWidth();
+		        final double height			= scatterchart.getHeight();
 		      
-		        // Update chart's scale factor.
-		        double width 	= scatterchart.getWidth();
-		        double height	= scatterchart.getHeight();
+		        // Store relative position of event (i.e. focus point).
+		        final double offset					= 18;
+		        final double relativeFocusLocationX	= (event.getX() - offset) / scatterchart.getWidth();
+		        final double relativeFocusLocationY	= (event.getY() - offset) / scatterchart.getHeight();
 		        
+		        // Calculate difference on both axes.
+		        final double newX			= event.getX() * scaleFactor;
+		        final double shiftX			= (newX - event.getX()) / ( (width - 38) * scaleFactor);
+
 		        // Resize scatterchart.
 		        scatterchart.setMinWidth(width * scaleFactor);
 		        scatterchart.setMaxWidth(width * scaleFactor);
@@ -306,8 +312,8 @@ public abstract class Scatterchart extends VisualizationComponent
 		        zoomContainer_scrollpane.layout();
 		        
 		        // Scroll to mouse coordinates.
-		        zoomContainer_scrollpane.setHvalue(event.getX() / totalWidth);
-		        zoomContainer_scrollpane.setVvalue(event.getY() / totalHeight);
+		        zoomContainer_scrollpane.setHvalue(relativeFocusLocationX + offset / (width * scaleFactor));
+		        zoomContainer_scrollpane.setVvalue(relativeFocusLocationY + offset / (height * scaleFactor));
 		    }
 		});
 		

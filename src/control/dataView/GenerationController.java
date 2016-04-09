@@ -246,7 +246,7 @@ public class GenerationController extends DataSubViewController
 		
 		for (Map.Entry<String, RangeSlider> entry : rangeSliders.entrySet()) {
 			RangeSlider rs = entry.getValue();
-			
+
 			rs.setMaxWidth(337);
 			rs.setPrefWidth(337);
 			rs.setMax(15);
@@ -258,7 +258,7 @@ public class GenerationController extends DataSubViewController
 			rs.setHighValue(25);
 			
 			// Get some distance between range sliders and bar charts.
-			rs.setPadding(new Insets(10, 0, 0, -2));
+			rs.setPadding(new Insets(10, 0, 0, 1));
 			
 			addEventHandlerToRangeSlider(rs, entry.getKey());
 		}

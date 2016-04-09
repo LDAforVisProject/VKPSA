@@ -414,36 +414,6 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 			}
 //		}
 		
-//		else {
-//			// Process filtered, non-selected data.
-//			for (int i = 0; i < activeDataSeries.getData().size(); i++) {
-//			//for (Data<String, Integer> data : activeDataSeries.getData()) {
-//				Data<String, Number> barData 	= activeDataSeries.getData().get(i);
-//				Node dataNode 					= barData.getNode();
-//				String barKey					= "active_" + i;
-//				
-//				if (	data.getBarToDataAssociations().containsKey(barKey) && 
-//						data.getBarToDataAssociations().get(barKey).size() > 0 &&
-//						dataNode.getLayoutX() >= minX && dataNode.getLayoutX() + dataNode.getBoundsInLocal().getWidth() <= maxX &&
-//						dataNode.getLayoutY() >= minY && dataNode.getLayoutY() + dataNode.getBoundsInLocal().getHeight() <= maxY ) {
-//					// Highlight bar.
-//					setBarHighlighting(dataNode, true, Color.GREY);
-//					
-//					// Add to collection.
-//					if (!selectedBars.contains(barData.getXValue())) {
-//						selectedBars.add(String.valueOf(i));
-//					}
-//				}
-//				
-//				else {
-//					// Remove bar highlighting.
-//					setBarHighlighting(dataNode, false, null);
-//					
-//					// Remove from collection.
-//					selectedBars.remove(i);
-//				}
-//			}
-//		}
 	}
 
 	@Override

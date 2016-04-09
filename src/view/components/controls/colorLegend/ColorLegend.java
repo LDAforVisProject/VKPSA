@@ -104,7 +104,10 @@ public class ColorLegend extends VisualizationComponent
 	private int legendHeight;
 	private int legendOffsetX;
 	
-	
+	/**
+	 * Receives listener to be notified if slider values change.
+	 * @param listener
+	 */
 	public ColorLegend(ITaskListener listener)
 	{
 		System.out.println("Creating ColorLegend.");

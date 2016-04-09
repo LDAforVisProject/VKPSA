@@ -1,7 +1,6 @@
 package control.dataView;
 
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -15,7 +14,6 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.PopupWindow.AnchorLocation;
 import javafx.stage.WindowEvent;
 
 public class DataViewController extends Controller
