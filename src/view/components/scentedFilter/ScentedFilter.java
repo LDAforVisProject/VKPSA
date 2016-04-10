@@ -43,43 +43,43 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 	 * GUI elements.
 	 */
 	
-	private @FXML AnchorPane root_anchorPane;
+	protected @FXML AnchorPane root_anchorPane;
 	
-	private @FXML Label param_label;
-	private NumericSpinner min_spinner;
-	private NumericSpinner max_spinner;
+	protected @FXML Label param_label;
+	protected NumericSpinner min_spinner;
+	protected NumericSpinner max_spinner;
 	
 	/**
 	 * VBox containing barchart and slider.
 	 */
-	private @FXML VBox container_vbox;
+	protected @FXML VBox container_vbox;
 	
 	/**
 	 * Barchart displaying histogram.
 	 */
-	private @FXML StackedBarChart<String, Number> barchart;
+	protected @FXML StackedBarChart<String, Number> barchart;
 	
 	/**
 	 * Range slider for value interval control.
 	 */
-	private RangeSlider rangeSlider;
+	protected RangeSlider rangeSlider;
 	/**
 	 * Common slider for value control.
 	 */
-	private Slider slider;
+	protected Slider slider;
 	
 	/**
 	 * Series containing all data.
 	 */
-	private XYChart.Series<String, Number> discardedDataSeries;
+	protected XYChart.Series<String, Number> discardedDataSeries;
 	/**
 	 * Series containing filtered data.
 	 */
-	private XYChart.Series<String, Number> inactiveDataSeries;
+	protected XYChart.Series<String, Number> inactiveDataSeries;
 	/**
 	 * Series containing active data.
 	 */
-	private XYChart.Series<String, Number> activeDataSeries;
+	protected XYChart.Series<String, Number> activeDataSeries;
 
 	
 	/*
@@ -89,17 +89,17 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 	/**
 	 * Options for this scented filter.
 	 */
-	private ScentedFilterOptionset options;
+	protected ScentedFilterOptionset options;
 	
 	/**
 	 * Data for this scented filter.
 	 */
-	private ScentedFilterDataset data;
+	protected ScentedFilterDataset data;
 	
 	/**
 	 * Auxiliary variable used for check of extrema adjustments.
 	 */
-	private boolean isAdjustedToExtrema;
+	protected boolean isAdjustedToExtrema;
 	
 	/*
 	 * Data for selection mechanism. 
@@ -108,7 +108,7 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 	/**
 	 * Collection of the descriptions of selected bars.
 	 */
-	private Set<String> selectedBars;
+	protected Set<String> selectedBars;
 	
 	
 	@Override
@@ -135,7 +135,7 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 	/**
 	 * Initialize numeric spinners.
 	 */
-	private void initSpinners()
+	protected void initSpinners()
 	{
 		min_spinner = new NumericSpinner(new BigDecimal(0), new BigDecimal(1));
 		max_spinner = new NumericSpinner(new BigDecimal(0), new BigDecimal(1));
@@ -159,7 +159,7 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 		max_spinner.registerListener(this);
 	}
 	
-	private void initSelection()
+	protected void initSelection()
 	{
 		// Add rubberband selection tool.
         rubberbandSelection 	= new RubberBandSelection((Pane) barchart.getParent().getParent(), this);
@@ -242,7 +242,7 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 	 * @param rs
 	 * @param parameter
 	 */
-	private void addEventHandlerToRangeSlider(RangeSlider rs)
+	protected void addEventHandlerToRangeSlider(RangeSlider rs)
 	{
 		// Add listener to determine position during after release.
 		rs.addEventHandler(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
@@ -271,7 +271,7 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 	 * @param rs
 	 * @param parameter
 	 */
-	private void addEventHandlerToSlider(Slider s)
+	protected void addEventHandlerToSlider(Slider s)
 	{
 		// Add listener to determine position during after release.
 		s.addEventHandler(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
@@ -299,7 +299,7 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 	 * Updates control values after slide event ended.
 	 * @param rs
 	 */
-	private void updateControlValues(RangeSlider rs)
+	protected void updateControlValues(RangeSlider rs)
 	{
 		double parameterValue_low	= rs.getLowValue() 	>= rs.getMin() ? rs.getLowValue() 	: rs.getMin();
 		double parameterValue_high	= rs.getHighValue() <= rs.getMax() ? rs.getHighValue() 	: rs.getMax();
@@ -320,7 +320,7 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 	 * Updates control values after slide event ended.
 	 * @param rs
 	 */
-	private void updateControlValues(Slider s)
+	protected void updateControlValues(Slider s)
 	{
 		double parameterValue	= s.getValue() >= s.getMin() && s.getValue() <= s.getMax()? s.getValue() : 0;
 		
@@ -476,7 +476,7 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 	 * @param node
 	 * @param color 
 	 */
-	private void setBarHighlighting(Node node, boolean on, Color color)
+	protected void setBarHighlighting(Node node, boolean on, Color color)
 	{
 		if (!on) {
 			node.setEffect(null);
@@ -654,7 +654,7 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 	 * @param seriesIndex
 	 * @return Newly added data series.
 	 */
-	private XYChart.Series<String, Number> addParameterHistogramDataSeries(double[] parameterBinList, final int numberOfBins, final int seriesIndex)
+	protected XYChart.Series<String, Number> addParameterHistogramDataSeries(double[] parameterBinList, final int numberOfBins, final int seriesIndex)
 	{
 		// Add data series to barcharts.
 		XYChart.Series<String, Number> dataSeries = generateParameterHistogramDataSeries(parameterBinList, numberOfBins);
@@ -673,7 +673,7 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 	 * @param numberOfBins
 	 * @return
 	 */
-	private XYChart.Series<String, Number> generateParameterHistogramDataSeries(double[] parameterBinList, final int numberOfBins)
+	protected XYChart.Series<String, Number> generateParameterHistogramDataSeries(double[] parameterBinList, final int numberOfBins)
 	{
 		final XYChart.Series<String, Number> data_series = new XYChart.Series<String, Number>();
 		
@@ -690,7 +690,7 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 	 * @param barchart
 	 * @param seriesIndex Index of series to be colored. 0 for discarded, 1 for filtered data points.
 	 */
-	private void colorParameterHistogramBarchart(StackedBarChart<String, Number> barchart, int seriesIndex)
+	protected void colorParameterHistogramBarchart(StackedBarChart<String, Number> barchart, int seriesIndex)
 	{
 		// Color bars (todo: color according to defined options).
 		for (Node node : barchart.lookupAll(".chart-bar")) {
@@ -789,7 +789,7 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 	 * @param dataPointIDs
 	 * @return
 	 */
-	private boolean isBarToHighlight(int barIndex, String seriesPraefix, Set<Integer> dataPointIDs)
+	protected boolean isBarToHighlight(int barIndex, String seriesPraefix, Set<Integer> dataPointIDs)
 	{
 		for ( int i : data.getBarToDataAssociations().get(seriesPraefix + Integer.toString(barIndex)) ) {
 			if (dataPointIDs.contains(i)) {
@@ -816,7 +816,7 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 	 * Add hover event listener to single node.
 	 * @param dataPoint
 	 */
-	private void addHoverEventListenersToNode(XYChart.Data<String, Number> bar)
+	protected void addHoverEventListenersToNode(XYChart.Data<String, Number> bar)
 	{
 		bar.getNode().setOnMouseEntered(new EventHandler<MouseEvent>()
 		{

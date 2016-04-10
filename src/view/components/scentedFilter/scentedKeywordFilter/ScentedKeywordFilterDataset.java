@@ -1,96 +1,79 @@
-package view.components.scentedFilter;
+package view.components.scentedFilter.scentedKeywordFilter;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import view.components.VisualizationComponentDataset;
+import javafx.util.Pair;
 import model.LDAConfiguration;
+import model.misc.KeywordRankObject;
+import view.components.scentedFilter.ScentedFilterDataset;
 
-/**
- * Dataset used for scented filters (both original and derivative).
- * @author RM
- *
- */
-public class ScentedFilterDataset extends VisualizationComponentDataset
+public class ScentedKeywordFilterDataset extends ScentedFilterDataset
 {
 	/**
-	 * Indicates whether dataset refers to primitive (LDA-based) or derived (calculated in postprocessing) parameter.
+	 * Examined keyword.
 	 */
-	protected boolean isDerived;
+	private String keyword;
 	
 	/**
-	 * Indices of inactive datasets.
+	 * Stores which bars contain which LDA and topic configurations.
 	 */
-	protected Set<Integer> inactiveIndices;
-	/**
-	 * Indices of active datasets.
-	 */
-	protected Set<Integer> activeIndices;
+	protected Map<String, ArrayList<Pair<Integer, Integer>>> barToTopicDataAssociations;
 	
 	/**
-	 * Stores which bars contain which LDA configurations.
+	 * Association between state (active, inactive, discarded) of a LDA configuration
+	 * and its ID.
+	 * Used for more performant and convenient data binning.
 	 */
-	protected Map<String, ArrayList<Integer>> barToDataAssociations;
+	private Map<Integer, String> ldaConfigIDStates;
 	
 	/**
-	 * Optional. Holds derived data (necessary if filter accesses non-primitive/derived data). 
+	 * Collection of keyword rank objects for the specified keyword.
 	 */
-	protected double[] derivedData;
-	
-	
-	// -------------------------------
-	//			Methods
-	// -------------------------------
+	private Collection<KeywordRankObject> keywordRankObjects;
 	
 	/**
-	 * Generates dataset for filter accessing an primitive parameter.
+	 * Default constructor. Not used for ScentedKeywordFilterDataset.
 	 * @param data
 	 * @param inactiveIndices
 	 * @param activeIndices
 	 */
-	public ScentedFilterDataset(ArrayList<LDAConfiguration> data, Set<Integer> inactiveIndices, Set<Integer> activeIndices)
+	public ScentedKeywordFilterDataset(	ArrayList<LDAConfiguration> data, Set<Integer> inactiveIndices, Set<Integer> activeIndices,
+										Collection<KeywordRankObject> keywordRankObjects, final String keyword)
 	{
-		super(data);
-	
-		this.isDerived				= false;
-		this.inactiveIndices 		= inactiveIndices;
-		this.activeIndices 			= activeIndices;
-		this.barToDataAssociations	= new LinkedHashMap<String, ArrayList<Integer>>();
-	}
-	
-	/**
-	 * Generates dataset for filter accessing an primitive parameter.
-	 * @param data
-	 * @param inactiveIndices
-	 * @param activeIndices
-	 * @param derivedData List of derived data elements (one for each LDA configuration). Has to match data in length.
-	 */
-	public ScentedFilterDataset(ArrayList<LDAConfiguration> data, Set<Integer> inactiveIndices, Set<Integer> activeIndices, double[] derivedData)
-	{
-		super(data);
-	
-		this.isDerived				= true;
-		this.inactiveIndices 		= inactiveIndices;
-		this.activeIndices 			= activeIndices;
-		this.barToDataAssociations	= new LinkedHashMap<String, ArrayList<Integer>>();
-		this.derivedData			= derivedData;
+		super(data, inactiveIndices, activeIndices);
 		
-		// Check for equality in length of provided LDA configurations and provided derived data.
-		if (data.size() != derivedData.length) {
-			System.out.println("### ERROR ### List of LDA configurations and list of derived data elements have to match in length.");
+		this.isDerived					= true;
+		this.barToTopicDataAssociations = new HashMap<String, ArrayList<Pair<Integer,Integer>>>();
+		this.keywordRankObjects			= keywordRankObjects;
+		this.keyword					= keyword;
+		// Prepare map for association between state and ID of a LDA configuration.
+		this.ldaConfigIDStates			= new HashMap<Integer, String>();
+		
+		// Associate configuration ID with state.
+		for (int i = 0; i < allLDAConfigurations.size(); i++) {
+			if (activeIndices.contains(i))
+				ldaConfigIDStates.put(i, "active");
+			else if (inactiveIndices.contains(i))
+				ldaConfigIDStates.put(i, "inactive");
+			else
+				ldaConfigIDStates.put(i, "discarded");
 		}
 	}
-	
+
 	/**
-	 * Bins data. Accesses data directly through parameters in LDA configuration objects. 
+	 * Bins data. Accesses data through previously provided collection of KeywordRankObjects. 
 	 * @param param
 	 * @param numberOfBins
 	 * @param min
 	 * @param max
 	 * @return List of three arrays: (1) Inactive bin list, (2) active bin list, (3) discarded bin list.
 	 */
+	@Override
 	public ArrayList<double[]> binData(String param, int numberOfBins, final double min, final double max)
 	{
 		ArrayList<double[]> binnedData = new ArrayList<double[]>();
@@ -114,10 +97,14 @@ public class ScentedFilterDataset extends VisualizationComponentDataset
 		 */
 		
 		// Calculate bin interval.
-		final double binInterval			= (max - min) / numberOfBins;
+		final double binInterval				= (max - min) / numberOfBins;
 		
-		// ...iterate over all LDA configurations.
-		for (int i = 0; i < allLDAConfigurations.size(); i++) {
+		// ...iterate over all KeywordRankObjects.
+		for (int i = 0; i < keywordRankObjects.size(); i++) {
+			todo: 	get maximum (number of keywords), adapt binning mechanism.
+					goal: produce working keyword filter.
+					afterwards:
+							implement dynamic generation/scrollpane etc.
 			// Check if dataset is filtered (as opposed to discarded).
 			boolean isInactiveDataset 	= inactiveIndices.contains(i);
 			boolean isActiveDataset		= activeIndices.contains(i);
@@ -192,39 +179,16 @@ public class ScentedFilterDataset extends VisualizationComponentDataset
 		
 		return binnedData;
 	}
-
-	public ArrayList<LDAConfiguration> getLDAConfigurations()
+	
+	public Map<String, ArrayList<Pair<Integer, Integer>>> getBarToTopicDataAssociations()
 	{
-		return allLDAConfigurations;
+		return barToTopicDataAssociations;
 	}
 
-	public Set<Integer> getInactiveIndices()
-	{
-		return inactiveIndices;
-	}
-
-	public Set<Integer> getActiveIndices()
-	{
-		return activeIndices;
-	}
-
-	public Map<String, ArrayList<Integer>> getBarToDataAssociations()
-	{
-		return this.barToDataAssociations;
-	}
-
+	@Override
 	public void clearBarToDataAssociations()
 	{
-		this.barToDataAssociations.clear();
-	}
-
-	public boolean isDerived()
-	{
-		return isDerived;
-	}
-
-	public double[] getDerivedData()
-	{
-		return derivedData;
+		super.clearBarToDataAssociations();
+		this.barToTopicDataAssociations.clear();
 	}
 }

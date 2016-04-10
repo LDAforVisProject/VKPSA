@@ -3,6 +3,7 @@ package control.analysisView;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -13,8 +14,10 @@ import org.controlsfx.control.PopOver;
 
 import model.AnalysisDataspace;
 import model.LDAConfiguration;
+import model.misc.KeywordRankObject;
 import model.workspace.Workspace;
 import control.Controller;
+import database.DBManagement;
 import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
 import view.components.VisualizationComponentType;
@@ -1184,7 +1187,16 @@ public class AnalysisController extends Controller
 	public void createKeywordFilter(String keyword)
 	{
 		try {
-			System.out.println("keyword exists: " + workspace.getDatabaseManagement().doesKeywordExist(keyword));
+			boolean doesKeywordExist = workspace.getDatabaseManagement().doesKeywordExist(keyword);
+			System.out.println("keyword exists: " + doesKeywordExist);
+			
+			if (doesKeywordExist) {
+				Collection<KeywordRankObject> keywordRankObjects = workspace.getDatabaseManagement().loadKeywordRankInformation(keyword);
+				
+				
+				System.out.println("Finished loading");
+			}
+			
 		} 
 		
 		catch (SQLException e) {

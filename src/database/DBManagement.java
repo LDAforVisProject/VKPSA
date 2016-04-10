@@ -21,6 +21,7 @@ import javafx.concurrent.Task;
 import javafx.util.Pair;
 import mdsj.Data;
 import model.LDAConfiguration;
+import model.misc.KeywordRankObject;
 import model.topic.Topic;
 import model.topic.TopicKeywordAlignment;
 import model.workspace.Dataset;
@@ -812,6 +813,10 @@ public class DBManagement
 		return -1;
 	}
 	
+	/**
+	 * Read number of keywords in table "keywords".
+	 * @param useDedicatedTable
+	 */
 	private void readNumberOfKeywords(boolean useDedicatedTable)
 	{
 		try {
@@ -823,16 +828,13 @@ public class DBManagement
 			}
 			
 			else {
-				// Complete request:
-//				select lda.alpha, lda.kappa, lda.eta, topicID, count(*) from keywordInTopic kit
-//				join ldaConfigurations lda on lda.ldaConfigurationID = kit.ldaConfigurationID
-//				group by lda.alpha, lda.kappa, lda.eta, topicID
-//				order by lda.ldaConfigurationID, topicID;
-				
 				// Simplified request:
-				String stmtString					= 	"select count(*) as actualKWCount from keywordInTopic kit " +
-														"join ldaConfigurations lda on lda.ldaConfigurationID = kit.ldaConfigurationID " +
-														"group by lda.ldaConfigurationID, topicID";
+				String stmtString					= 	"select count(*) as actualKWCount " + 
+														"from keywordInTopic kit " +
+														"join ldaConfigurations lda on " +
+														"	lda.ldaConfigurationID = kit.ldaConfigurationID " +
+														"group by " +
+														"lda.ldaConfigurationID, topicID";
 				
 				PreparedStatement numKeywordsStmt	= connection.prepareStatement(stmtString);
 				ResultSet rs						= numKeywordsStmt.executeQuery();
@@ -1609,4 +1611,41 @@ public class DBManagement
 
 		return doesExist;
 	}
+
+	public Collection<KeywordRankObject> loadKeywordRankInformation(String keyword) throws SQLException
+	{
+		Collection<KeywordRankObject> results = new ArrayList<KeywordRankObject>(numberOfKeywordsPerTopic);
+		
+		/*
+		 * 1. Fetch data.	
+		 */
+		
+		String statementString 	= 		"select kit.topicID, kit.ldaConfigurationID, kit.rank " +
+										"from keywords k " +
+										"inner join keywordInTopic kit on " +
+										"    kit.keywordID = k.keywordID " +
+										"where " +
+										"    k.keyword = '" + keyword + "' " +
+										"order by " +
+										"    rank;";
+
+		// Prepare statement.
+		PreparedStatement statement = connection.prepareStatement(statementString);
+		
+		// Execute statement.
+		ResultSet rs				= statement.executeQuery();
+		
+		/*
+		 * 2. Process data.
+		 * 
+		 */
+		
+		// Read results, store in collection.
+		while (rs.next()) {
+			results.add( new KeywordRankObject(rs.getInt("topicID"), rs.getInt("ldaConfigurationID"), rs.getInt("rank")) );
+		}
+
+		return results;
+	}
+	
 }

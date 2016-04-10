@@ -31,10 +31,10 @@ public class ScentedFilterOptionset extends VisualizationComponentOptionset
 	 */
 	private double max;
 	
-	next: 		extend scentendfilterdataset for keyword filter; adapt optionset (e.g. usewholenumbers);
-	then:		use dedicated .fxml for scentedkeywordfilter, including (possibly) diff. arrangement for name label and (definitely) button for removing a filter.
-	after that:	create scentedkeywordfilter using available data (bin by percentage or absolute rank?); use scrollpane to allow for greater number of filters.
-	finally:	extend filtering methods to include data from keyword filter (necessary? filtering should use configIDs anyway).
+//	next: 		extend scentendfilterdataset for keyword filter; adapt optionset (e.g. usewholenumbers);
+//	then:		use dedicated .fxml for scentedkeywordfilter, including (possibly) diff. arrangement for name label and (definitely) button for removing a filter.
+//	after that:	create scentedkeywordfilter using available data (bin by percentage or absolute rank?); use scrollpane to allow for greater number of filters.
+//	finally:	extend filtering methods to include data from keyword filter (necessary? filtering should use configIDs anyway).
 		
 	public ScentedFilterOptionset(	String paramID, boolean useRangeSlider, double min, double max, int numberOfBins, double stepsize, 
 									boolean isSelectionEnabled, boolean showAxes, boolean relativeMode, boolean useWholeNumbers)
