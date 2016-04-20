@@ -816,8 +816,9 @@ public class DBManagement
 	/**
 	 * Read number of keywords in table "keywords".
 	 * @param useDedicatedTable
+	 * @return Number of keywords.
 	 */
-	private void readNumberOfKeywords(boolean useDedicatedTable)
+	public int readNumberOfKeywords(boolean useDedicatedTable)
 	{
 		try {
 			if (useDedicatedTable) {
@@ -846,6 +847,8 @@ public class DBManagement
 		catch (SQLException e) {
 			e.printStackTrace();
 		}
+		
+		return numberOfKeywordsPerTopic;
 	}
 
 	/**
@@ -1581,7 +1584,7 @@ public class DBManagement
 
 		return suggestions;
 	}
-	
+		
 	/**
 	 * Checks if a given keyword exists.
 	 * @param keyword
@@ -1612,9 +1615,15 @@ public class DBManagement
 		return doesExist;
 	}
 
-	public Collection<KeywordRankObject> loadKeywordRankInformation(String keyword) throws SQLException
+	/**
+	 * Loads information about rank of specified keyword in topics.
+	 * @param keyword
+	 * @return
+	 * @throws SQLException
+	 */
+	public ArrayList<KeywordRankObject> loadKeywordRankInformation(String keyword) throws SQLException
 	{
-		Collection<KeywordRankObject> results = new ArrayList<KeywordRankObject>(numberOfKeywordsPerTopic);
+		ArrayList<KeywordRankObject> results = new ArrayList<KeywordRankObject>(numberOfKeywordsPerTopic);
 		
 		/*
 		 * 1. Fetch data.	

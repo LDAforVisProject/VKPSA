@@ -150,7 +150,7 @@ public class CategoricalHeatmap extends HeatMap
 					dataPoints.add(hoveredOverLDAMatchID.getKey());
 					dataPoints.add(hoveredOverLDAMatchID.getValue());
 		        	// Notify AnalysisController about hover action.
-		        	analysisController.highlightDataPoints(dataPoints, DatapointIDMode.CONFIG_ID, VisualizationComponentType.CATEGORICAL_HEATMAP);
+		        	analysisController.highlightDataPoints(dataPoints, DatapointIDMode.CONFIG_ID, VisualizationComponentType.CATEGORICAL_HEATMAP, null);
 				}
             }
         });

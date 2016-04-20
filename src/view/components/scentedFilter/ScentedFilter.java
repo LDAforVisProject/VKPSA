@@ -186,8 +186,7 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 			rangeSlider.setLowValue(0);
 			rangeSlider.setHighValue(options.getMax());
 			
-			rangeSlider.setMajorTickUnit(5);
-			rangeSlider.setMinorTickCount(4);
+			rangeSlider.setMinorTickCount(0);
 			
 			rangeSlider.setSnapToTicks(false);
 			rangeSlider.setShowTickLabels(true);
@@ -216,7 +215,6 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 			slider.setMax(options.getMax());
 			slider.setValue(options.getMax());
 			
-			slider.setMajorTickUnit(5);
 			slider.setMinorTickCount(4);
 			
 			slider.setSnapToTicks(true);
@@ -604,6 +602,9 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 				slider.setMax(max);
 			}
 			
+			// Adjust major tick unit.
+			rangeSlider.setMajorTickUnit( (max - min) / (options.getMajorTickCount() - 1));
+			
 			// Update text values.
 			min_spinner.setNumber(new BigDecimal(min));
 			max_spinner.setNumber(new BigDecimal(max));
@@ -638,6 +639,9 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 				slider.setMin(min);
 				slider.setMax(max);
 			}
+			
+			// Adjust major tick unit.
+			rangeSlider.setMajorTickUnit( (max - min) / (options.getMajorTickCount() - 1));
 			
 			// Update text values.
 			min_spinner.setNumber(new BigDecimal(min));
@@ -833,7 +837,7 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 	        	highlightHoveredOverDataPoints(indices, DatapointIDMode.INDEX);
 	        	
 	        	// Notify AnalysisController about hover action.
-	        	analysisController.highlightDataPoints(indices, DatapointIDMode.INDEX, VisualizationComponentType.SCENTED_FILTER);
+	        	analysisController.highlightDataPoints(indices, DatapointIDMode.INDEX, VisualizationComponentType.SCENTED_FILTER, param_label.getText());
 		    }
 		});
 		

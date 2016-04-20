@@ -3,7 +3,6 @@ package control.analysisView;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -17,7 +16,6 @@ import model.LDAConfiguration;
 import model.misc.KeywordRankObject;
 import model.workspace.Workspace;
 import control.Controller;
-import database.DBManagement;
 import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
 import view.components.VisualizationComponentType;
@@ -34,30 +32,28 @@ import view.components.scatterchart.ParameterSpaceScatterchart;
 import view.components.scentedFilter.ScentedFilter;
 import view.components.scentedFilter.ScentedFilterDataset;
 import view.components.scentedFilter.ScentedFilterOptionset;
+import view.components.scentedFilter.scentedKeywordFilter.ScentedKeywordFilter;
+import view.components.scentedFilter.scentedKeywordFilter.ScentedKeywordFilterDataset;
 import view.components.settingsPopup.SettingsPanel;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.chart.ScatterChart;
-import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
-import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -65,9 +61,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -397,9 +390,29 @@ public class AnalysisController extends Controller
 
 			// Init filter.
 			if (param != "kappa")
-				filter.applyOptions(new ScentedFilterOptionset(param, true, 0, 15, 50, 0.05, true, true, false, true));
+				filter.applyOptions(new ScentedFilterOptionset(param, 
+																true, 
+																0, 
+																15, 
+																50, 
+																0.1,
+																5,
+																true, 
+																true, 
+																false, 
+																true));
 			else
-				filter.applyOptions(new ScentedFilterOptionset(param, true, 2, 25, 50, 1, true, true, false, false));
+				filter.applyOptions(new ScentedFilterOptionset(	param, 
+																true, 
+																2, 
+																25, 
+																50, 
+																1,
+																5,
+																true, 
+																true, 
+																false, 
+																false));
 			
 			// Add to collection of filters.
 			filters.add(filter);
@@ -420,7 +433,17 @@ public class AnalysisController extends Controller
 		
 		// Add distance filter - note: Is derived data.
 		ScentedFilter distanceFilter = (ScentedFilter) VisualizationComponent.generateInstance(VisualizationComponentType.SCENTED_FILTER, this, this.workspace, this.log_protocol_progressindicator, this.log_protocol_textarea);
-		distanceFilter.applyOptions(new ScentedFilterOptionset("distance", true, 0, 15, 50, 0.01, true, true, false, false));
+		distanceFilter.applyOptions(new ScentedFilterOptionset(	"distance", 
+																true, 
+																0, 
+																15, 
+																50, 
+																0.01,
+																5,
+																true, 
+																true, 
+																false, 
+																false));
 		// Add to collection of filters.
 		filters.add(distanceFilter);
 		// Embed in containing VBox.
@@ -454,7 +477,7 @@ public class AnalysisController extends Controller
 	private Button createKeywordFilterButton()
 	{
 		ImageView plusImage 			= new ImageView(new Image(getClass().getResourceAsStream("../../icons/add.png"), 25, 25, true, true));
-		Button addKeywordFilter_button 	= new Button("Create new keyword filter", plusImage);
+		Button addKeywordFilter_button 	= new Button("Create topic-based keyword filter", plusImage);
 		
 		/*
 		 * Add event handler.
@@ -726,7 +749,9 @@ public class AnalysisController extends Controller
 		
 		// Here: Consider only filter for primitive attributes.
 		for (ScentedFilter filter : filters) {
-			filter.addThresholdsToMap(parameterBoundaries);
+			// Filter by primitive and derivate attributes.
+			if (filter.getClass().getName().endsWith("ScentedFilter"))
+				filter.addThresholdsToMap(parameterBoundaries);
 		}
 		
 		// Filter indices.
@@ -1022,14 +1047,29 @@ public class AnalysisController extends Controller
 	 */
 	private void refreshScentedFilters()
 	{
-		// Refresh filters for primitive parameters.
+		/*
+		 *  Refresh filters for primitive parameters.
+		 */
 		for (ScentedFilter filter : filters.subList(0, 3)) {
 			filter.refresh(new ScentedFilterDataset(dataspace.getLDAConfigurations(), dataspace.getInactiveIndices(), dataspace.getActiveIndices()));
 		}
-		// Refresh filters for derived parameters.
+		
+		/*
+		 *  Refresh filters for derived parameters.
+		 */
+		
 		//	Distance filter:
 		filters.get(3).refresh(new ScentedFilterDataset(dataspace.getLDAConfigurations(), dataspace.getInactiveIndices(), dataspace.getActiveIndices(),
 														dataspace.getAverageDistances()));
+		
+		/*
+		 * Refresh keyword filters.
+		 */
+		
+		for (ScentedFilter filter : filters.subList(4, filters.size())) {
+			((ScentedKeywordFilter)filter).refresh(	dataspace.getInactiveIndices(), 
+													dataspace.getActiveIndices());
+		} 
 	}
 	
 	@Override
@@ -1097,7 +1137,7 @@ public class AnalysisController extends Controller
 	}
 	
 	/**
-	 * Wrapper method for AnalysisController::highlightDataPoints(...).
+	 * Wrapper method for {@link AnalysisController#highlightDataPoints(Set, DatapointIDMode, VisualizationComponentType)}.
 	 * @param dataPointID
 	 * @param idMode
 	 * @param visType
@@ -1108,7 +1148,7 @@ public class AnalysisController extends Controller
 		dataPointIDs.add(dataPointID);
 		
 		// Call actual method.
-		highlightDataPoints(dataPointIDs, idMode, visType);
+		highlightDataPoints(dataPointIDs, idMode, visType, null);
 	}
 	
 	/**
@@ -1116,8 +1156,10 @@ public class AnalysisController extends Controller
 	 * @param dataPointIDs
 	 * @param idMode
 	 * @param sourceVisType
+	 * @param componentInstanceID Arbitrarily chosen identification for a visualization component to distinguish  
+	 * between several instances of the same component. null is an accepted value if this is not requested.
 	 */
-	public void highlightDataPoints(Set<Integer> dataPointIDs, DatapointIDMode idMode, VisualizationComponentType sourceVisType)
+	public void highlightDataPoints(Set<Integer> dataPointIDs, DatapointIDMode idMode, VisualizationComponentType sourceVisType, String componentInstanceID)
 	{
 		/*
 		 * 1. Translate configuration IDs to indices.
@@ -1139,7 +1181,20 @@ public class AnalysisController extends Controller
 		// Workaround due to convenience: Apply on filters regardless - since only one of them was 
 		// being manipulated, we want the others to be updated too.
 		for (ScentedFilter filter : filters) {
-			filter.highlightHoveredOverDataPoints(dataPointIndices, DatapointIDMode.INDEX);
+			// For common scented filters: Use index mode.
+			if (filter.getClass().getName().endsWith("ScentedFilter"))
+				filter.highlightHoveredOverDataPoints(dataPointIndices, DatapointIDMode.INDEX);
+			
+			// Consider keyword filter: Use configuration IDs.
+			else if (filter.getClass().getName().endsWith("ScentedKeywordFilter")) {
+				// Only update if componend ID doesn't match, i.e. the same component is not updated twice.
+				if (	componentInstanceID == null || 
+						!componentInstanceID.equals(filter.getComponentIdentification())) {
+					filter.highlightHoveredOverDataPoints(dataPointIDs, DatapointIDMode.CONFIG_ID);
+				}
+			}
+			else 
+				System.out.println("what: " + filter.getClass().getName());
 		}
 		
 		if (sourceVisType != VisualizationComponentType.CATEGORICAL_HEATMAP)
@@ -1187,14 +1242,53 @@ public class AnalysisController extends Controller
 	public void createKeywordFilter(String keyword)
 	{
 		try {
-			boolean doesKeywordExist = workspace.getDatabaseManagement().doesKeywordExist(keyword);
-			System.out.println("keyword exists: " + doesKeywordExist);
-			
-			if (doesKeywordExist) {
-				Collection<KeywordRankObject> keywordRankObjects = workspace.getDatabaseManagement().loadKeywordRankInformation(keyword);
+			// Add new filter only if keyword exists.
+			if (	workspace.getDatabaseManagement().doesKeywordExist(keyword) &&
+					ScentedKeywordFilter.addToSetOfUsedKeywords(keyword)) {
+				/*
+				 * Retrive rank information for keyword. 
+				 */
+				ArrayList<KeywordRankObject> keywordRankObjects = workspace.getDatabaseManagement().loadKeywordRankInformation(keyword);
 				
+				/*
+				 * Add filter component to GUI. 
+				 */
 				
-				System.out.println("Finished loading");
+				// Add  keyword filter. 
+				ScentedKeywordFilter keywordFilter = (ScentedKeywordFilter) VisualizationComponent.generateInstance(VisualizationComponentType.SCENTED_KEYWORD_FILTER, this, this.workspace, this.log_protocol_progressindicator, this.log_protocol_textarea);
+				// For binning: Get number of keywords.
+				final int numberOfKeywords = workspace.getDatabaseManagement().readNumberOfKeywords(true);
+				// Apply option set.
+				keywordFilter.applyOptions(new ScentedFilterOptionset(	keyword, 
+																		true, 
+																		1, 
+																		numberOfKeywords, 
+																		20, 
+																		numberOfKeywords / 50,
+																		5,
+																		true, 
+																		true, 
+																		false, 
+																		true));
+				// Add vertical spacing.
+				final int gapBetweenKeywordFilters = 14;
+				keywordFilter.getRoot().setTranslateY(36 + (ScentedKeywordFilter.getKeywordCount() - 1) * gapBetweenKeywordFilters);
+				// Add to collection of filters.
+				filters.add(keywordFilter);
+				// Embed in containing VBox.
+				keywordFilter.embedIn(filters_vbox);
+				// Adapt height of containing pane.
+				filter_anchorpane.setPrefHeight(filter_anchorpane.getHeight() + 92 + (ScentedKeywordFilter.getKeywordCount() - 1) * gapBetweenKeywordFilters);
+				
+				/*
+				 * Fill component with data.
+				 */
+				keywordFilter.refresh(new ScentedKeywordFilterDataset(	dataspace.getLDAConfigurations(), 
+																		dataspace.getInactiveIndices(), 
+																		dataspace.getActiveIndices(),
+																		keywordRankObjects, 
+																		keyword,
+																		numberOfKeywords));
 			}
 			
 		} 
@@ -1202,12 +1296,14 @@ public class AnalysisController extends Controller
 		catch (SQLException e) {
 			e.printStackTrace();
 		}
-		// Add (static) keyword filter. 
-		ScentedFilter keywordFilter = (ScentedFilter) VisualizationComponent.generateInstance(VisualizationComponentType.SCENTED_FILTER, this, this.workspace, this.log_protocol_progressindicator, this.log_protocol_textarea);
-		keywordFilter.applyOptions(new ScentedFilterOptionset("keyword", true, 0, 15, 50, 0.01, true, true, false, true));
-		// Add to collection of filters.
-		filters.add(keywordFilter);
-		// Embed in containing VBox.
-		keywordFilter.embedIn(filters_vbox);
+	}
+	
+	/**
+	 * Returns dataspace used for analysis.
+	 * @return
+	 */
+	public final AnalysisDataspace getDataspace()
+	{
+		return dataspace;
 	}
 }

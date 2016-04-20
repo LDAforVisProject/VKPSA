@@ -20,6 +20,11 @@ public class ScentedKeywordFilterDataset extends ScentedFilterDataset
 	private String keyword;
 	
 	/**
+	 * Number of keywords (and implicitly ranks).
+	 */
+	private int numberOfKeywords;
+	
+	/**
 	 * Stores which bars contain which LDA and topic configurations.
 	 */
 	protected Map<String, ArrayList<Pair<Integer, Integer>>> barToTopicDataAssociations;
@@ -34,7 +39,16 @@ public class ScentedKeywordFilterDataset extends ScentedFilterDataset
 	/**
 	 * Collection of keyword rank objects for the specified keyword.
 	 */
-	private Collection<KeywordRankObject> keywordRankObjects;
+	private ArrayList<KeywordRankObject> keywordRankObjects;
+	
+	/**
+	 * Minimum in set of values.
+	 */
+	private double min;
+	/**
+	 * Maximum in set of values.
+	 */
+	private double max;
 	
 	/**
 	 * Default constructor. Not used for ScentedKeywordFilterDataset.
@@ -43,7 +57,7 @@ public class ScentedKeywordFilterDataset extends ScentedFilterDataset
 	 * @param activeIndices
 	 */
 	public ScentedKeywordFilterDataset(	ArrayList<LDAConfiguration> data, Set<Integer> inactiveIndices, Set<Integer> activeIndices,
-										Collection<KeywordRankObject> keywordRankObjects, final String keyword)
+										ArrayList<KeywordRankObject> keywordRankObjects, final String keyword, final int numberOfKeywords)
 	{
 		super(data, inactiveIndices, activeIndices);
 		
@@ -51,20 +65,36 @@ public class ScentedKeywordFilterDataset extends ScentedFilterDataset
 		this.barToTopicDataAssociations = new HashMap<String, ArrayList<Pair<Integer,Integer>>>();
 		this.keywordRankObjects			= keywordRankObjects;
 		this.keyword					= keyword;
+		this.numberOfKeywords			= numberOfKeywords;
 		// Prepare map for association between state and ID of a LDA configuration.
 		this.ldaConfigIDStates			= new HashMap<Integer, String>();
-		
-		// Associate configuration ID with state.
-		for (int i = 0; i < allLDAConfigurations.size(); i++) {
-			if (activeIndices.contains(i))
-				ldaConfigIDStates.put(i, "active");
-			else if (inactiveIndices.contains(i))
-				ldaConfigIDStates.put(i, "inactive");
-			else
-				ldaConfigIDStates.put(i, "discarded");
-		}
 	}
 
+	/**
+	 * Determines state of LDA configurations.
+	 */
+	private void determineLDAConfigurationStates()
+	{
+		// Clear collection.
+		ldaConfigIDStates.clear();
+		
+		// Associate configuration ID with state.
+		// Remark: Would have been cleaner to use LDAConfiguration instances "live", i.e. let them represent their state
+		// and share these objects across all visualizations. Next time.
+		for (int i = 0; i < allLDAConfigurations.size(); i++) {
+			// Get current LDA config. ID.
+			int ldaConfigID = allLDAConfigurations.get(i).getConfigurationID();
+			
+			// Associate LDA configuration with state.
+			if (activeIndices.contains(i))
+				ldaConfigIDStates.put(ldaConfigID, "active");
+			else if (inactiveIndices.contains(i))
+				ldaConfigIDStates.put(ldaConfigID, "inactive");
+			else
+				ldaConfigIDStates.put(ldaConfigID, "discarded");
+		}
+	}
+	
 	/**
 	 * Bins data. Accesses data through previously provided collection of KeywordRankObjects. 
 	 * @param param
@@ -76,13 +106,26 @@ public class ScentedKeywordFilterDataset extends ScentedFilterDataset
 	@Override
 	public ArrayList<double[]> binData(String param, int numberOfBins, final double min, final double max)
 	{
+		// Determine state of LDA configurations.
+		determineLDAConfigurationStates();
+		
+		// Update minimum and maximum in set of values.
+		this.min = min;
+		this.max = max;
+		
+		// Prepare collection for binned data.
 		ArrayList<double[]> binnedData = new ArrayList<double[]>();
 		
 		// Init barToDataAssociations collection.
 		for (int i = 0; i < numberOfBins; i++) {
+			// Bar to LDA config. associations.
 			barToDataAssociations.put("active_" + i, new ArrayList<Integer>());
 			barToDataAssociations.put("inactive_" + i, new ArrayList<Integer>());
 			barToDataAssociations.put("discarded_" + i, new ArrayList<Integer>());
+			// Bar to topic/LDA config. associations.
+			barToTopicDataAssociations.put("active_" + i, new ArrayList<Pair<Integer, Integer>>());
+			barToTopicDataAssociations.put("inactive_" + i, new ArrayList<Pair<Integer, Integer>>());
+			barToTopicDataAssociations.put("discarded_" + i, new ArrayList<Pair<Integer, Integer>>());			
 		}
 		
 		// Map storing one bin list for each parameter, counting only filtered datasets.
@@ -101,76 +144,41 @@ public class ScentedKeywordFilterDataset extends ScentedFilterDataset
 		
 		// ...iterate over all KeywordRankObjects.
 		for (int i = 0; i < keywordRankObjects.size(); i++) {
-			todo: 	get maximum (number of keywords), adapt binning mechanism.
-					goal: produce working keyword filter.
-					afterwards:
-							implement dynamic generation/scrollpane etc.
-			// Check if dataset is filtered (as opposed to discarded).
-			boolean isInactiveDataset 	= inactiveIndices.contains(i);
-			boolean isActiveDataset		= activeIndices.contains(i);
-			boolean isDiscardedDataset	= !isInactiveDataset && !isActiveDataset;
-
-			// Calculate index of bin in which to store the current value.
-			int index_key		= -1;
-			// If primitive parameter is accessed: Get value directly from LDA configuration instance.
-			if (!isDerived)
-				index_key		= (int) ( (allLDAConfigurations.get(i).getParameter(param) - min) / binInterval);
-			else
-				index_key		= (int) ( (derivedData[i] - min) / binInterval);
+			// Get LDA config. ID of current KeywordRankObject.
+			int ldaConfigIDOfKRO	= keywordRankObjects.get(i).getLDAConfigID();
+			int topicIDOfKRO		= keywordRankObjects.get(i).getTopicID();
 			
+			// Calculate index of bin in which to store the current value.
+			int index_key		= (int)( (keywordRankObjects.get(i).getRank() - min) / binInterval);
 			// Check if element is highest allowed entry.
 			index_key			= index_key < numberOfBins ? index_key : numberOfBins - 1;
 			// Check if element is lowest allowed entry.
 			index_key			= index_key >= 0 ? index_key : 0;
 			
-			// Check if this dataset fits all boundaries / is inactive, active or discarded - then increment content of corresponding bin.
-			if (isInactiveDataset) {
-				// Inactive dataset:
-				if (!isActiveDataset) {
-					parameterBinList_inactive[index_key]++;
-					// An inactive dataset may be selected later on, so we add it's
-					// index to the collection of bar to data associations:
-					barToDataAssociations.get("inactive_" + index_key).add(i);
-				}
-				// Active dataset:
-				else { 
-					parameterBinList_active[index_key]++;
-					// An inactive dataset may be de-selected later on, so we add
-					//  it's index to the collection of bar to data associations:
-					barToDataAssociations.get("active_" + index_key).add(i);
-				}
+			/*
+			 * Check if this dataset fits all boundaries / is inactive, active or discarded - then increment content of corresponding bin.
+			 */
+			
+			// Inactive dataset:
+			if (ldaConfigIDStates.get(ldaConfigIDOfKRO).equals("inactive")) {
+				parameterBinList_inactive[index_key]++;
 			}
-			else {
+			// Active dataset:
+			else if (ldaConfigIDStates.get(ldaConfigIDOfKRO).equals("active")) { 
+				parameterBinList_active[index_key]++;
+			}
+			// Discarded dataset:
+			else if (ldaConfigIDStates.get(ldaConfigIDOfKRO).equals("discarded")) {
 				parameterBinList_discarded[index_key]++;
-				// A discarded dataset may be hovered over later on, so we add
-				// it's index to the collection of bar to data associations:
-				barToDataAssociations.get("discarded_" + index_key).add(i);
 			}
-		}
-		
-		// Apply log transformation.
-		if (param == "distance") {
-			for (int i = 0; i < parameterBinList_active.length; i++) {
-				if (parameterBinList_active[i] == 1)
-					parameterBinList_active[i] = 1;
-				
-				else if (parameterBinList_active[i] > 1)
-					parameterBinList_active[i] = Math.log10(parameterBinList_active[i]) + 1;
-			}
-			for (int i = 0; i < parameterBinList_inactive.length; i++) {
-				if (parameterBinList_inactive[i] == 1)
-					parameterBinList_inactive[i] = 1;
-				
-				else if (parameterBinList_inactive[i] > 1)
-					parameterBinList_inactive[i] = Math.log10(parameterBinList_inactive[i]) + 1;
-			}
-			for (int i = 0; i < parameterBinList_discarded.length; i++) {
-				if (parameterBinList_discarded[i] == 1)
-					parameterBinList_discarded[i] = 1;
-				
-				else if (parameterBinList_discarded[i] > 1)
-					parameterBinList_discarded[i] = Math.log10(parameterBinList_discarded[i]) + 1;				
-			}
+			// An inactive dataset may be selected later on, so we add it's
+			// index to the collection of bar to data associations.
+			// An inactive dataset may be de-selected later on, so we add
+			//  it's index to the collection of bar to data associations.
+			// A discarded dataset may be hovered over later on, so we add
+			// it's index to the collection of bar to data associations.
+			barToDataAssociations.get(ldaConfigIDStates.get(ldaConfigIDOfKRO) + "_" + index_key).add(ldaConfigIDOfKRO);
+			barToTopicDataAssociations.get(ldaConfigIDStates.get(ldaConfigIDOfKRO) + "_" + index_key).add(new Pair<Integer, Integer>(ldaConfigIDOfKRO, topicIDOfKRO));
 		}
 		
 		binnedData.add(parameterBinList_inactive);
@@ -190,5 +198,20 @@ public class ScentedKeywordFilterDataset extends ScentedFilterDataset
 	{
 		super.clearBarToDataAssociations();
 		this.barToTopicDataAssociations.clear();
+	}
+
+	public double getMin()
+	{
+		return min;
+	}
+
+	public double getMax()
+	{
+		return max;
+	}
+
+	public String getKeyword()
+	{
+		return keyword;
 	}
 }

@@ -24,11 +24,15 @@
                     <items>
                       <AnchorPane fx:id="settings_anchorPane" minHeight="0.0" minWidth="0.0" prefHeight="528.0" prefWidth="322.0" style="-fx-background-color: #ffffff;">
                            <children>
-                              <TabPane fx:id="options_tabpane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              <TabPane fx:id="options_tabpane" style="-fx-background-color: #fff;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <tabs>
-                                    <Tab fx:id="filter_tab" closable="false" text="Filter">
+                                    <Tab fx:id="filter_tab" closable="false" style="-fx-background-color: #fff;" text="Filter">
                                        <content>
-                                      <AnchorPane fx:id="filter_anchorpane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: #ffffff;" />
+                                          <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefViewportHeight="611.0" prefViewportWidth="323.0" style="-fx-background: #fff;" vbarPolicy="ALWAYS">
+                                             <content>
+                                            <AnchorPane fx:id="filter_anchorpane" minHeight="0.0" minWidth="0.0" prefHeight="444.0" prefWidth="309.0" style="-fx-background-color: #ffffff;" />
+                                             </content>
+                                          </ScrollPane>
                                        </content>
                                     </Tab>
                                     <Tab fx:id="settings_tab" closable="false" text="Settings">

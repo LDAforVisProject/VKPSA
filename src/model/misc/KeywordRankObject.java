@@ -32,4 +32,19 @@ public class KeywordRankObject
 		this.ldaConfigID	= ldaConfigID;
 		this.rank			= rank;
 	}
+
+	public int getTopicID()
+	{
+		return topicID;
+	}
+
+	public int getLDAConfigID()
+	{
+		return ldaConfigID;
+	}
+
+	public int getRank()
+	{
+		return rank;
+	}
 }

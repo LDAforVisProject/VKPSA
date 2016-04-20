@@ -92,7 +92,7 @@ public class ScentedFilterDataset extends VisualizationComponentDataset
 	 * @return List of three arrays: (1) Inactive bin list, (2) active bin list, (3) discarded bin list.
 	 */
 	public ArrayList<double[]> binData(String param, int numberOfBins, final double min, final double max)
-	{
+	{		
 		ArrayList<double[]> binnedData = new ArrayList<double[]>();
 		
 		// Init barToDataAssociations collection.
@@ -226,5 +226,20 @@ public class ScentedFilterDataset extends VisualizationComponentDataset
 	public double[] getDerivedData()
 	{
 		return derivedData;
+	}
+
+	public void setInactiveIndices(Set<Integer> inactiveIndices)
+	{
+		this.inactiveIndices = inactiveIndices;
+	}
+
+	public void setActiveIndices(Set<Integer> activeIndices)
+	{
+		this.activeIndices = activeIndices;
+	}
+
+	public void setDerivedData(double[] derivedData)
+	{
+		this.derivedData = derivedData;
 	}
 }

@@ -71,6 +71,7 @@ public abstract class VisualizationComponent extends Controller implements ISele
 		FXML_PATHS.put(VisualizationComponentType.NUMERICAL_HEATMAP, "/view/fxml/components/NumericalHeatmap.fxml");
 		FXML_PATHS.put(VisualizationComponentType.CATEGORICAL_HEATMAP, "/view/fxml/components/CategoricalHeatmap.fxml");
 		FXML_PATHS.put(VisualizationComponentType.SCENTED_FILTER, "/view/fxml/components/ScentedFilter.fxml");
+		FXML_PATHS.put(VisualizationComponentType.SCENTED_KEYWORD_FILTER, "/view/fxml/components/ScentedKeywordFilter.fxml");
 		FXML_PATHS.put(VisualizationComponentType.PARAMSPACE_SCATTERCHART, "/view/fxml/components/ParameterSpaceScatterchart.fxml");
 		FXML_PATHS.put(VisualizationComponentType.PARALLEL_TAG_CLOUD, "/view/fxml/components/ParallelTagCloud.fxml");
 		FXML_PATHS.put(VisualizationComponentType.SETTINGS_PANEL, "/view/fxml/components/SettingsPanel.fxml");
@@ -219,4 +220,13 @@ public abstract class VisualizationComponent extends Controller implements ISele
 	 * Removes highlighting / repaints with default settings.
 	 */
 	public abstract void removeHoverHighlighting();
+	
+	/**
+	 * Return arbitrarily defined identification string for this instance.
+	 * @return
+	 */
+	public String getComponentIdentification()
+	{
+		return null;
+	}
 }

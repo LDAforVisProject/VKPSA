@@ -8,9 +8,9 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane fx:id="root_anchorPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.components.scentedFilter.ScentedFilter">
+<AnchorPane fx:id="root_anchorPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.components.scentedFilter.scentedKeywordFilter.ScentedKeywordFilter">
    <children>
-      <Label fx:id="param_label" layoutX="14.0" layoutY="42.0" text="SC" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="33.0">
+      <Label fx:id="param_label" layoutX="14.0" layoutY="42.0" text="SC" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="-5.0">
          <font>
             <Font name="System Bold" size="14.0" />
          </font>

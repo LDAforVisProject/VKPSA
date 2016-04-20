@@ -18,6 +18,11 @@ public class ScentedFilterOptionset extends VisualizationComponentOptionset
 	private double stepSize;
 	
 	/**
+	 * Major tick unit for slider.
+	 */
+	private double majorTickCount;
+	
+	/**
 	 * Determines if whole or real numbers should be used for x-axis.
 	 */
 	private boolean useWholeNumbers;
@@ -31,13 +36,25 @@ public class ScentedFilterOptionset extends VisualizationComponentOptionset
 	 */
 	private double max;
 	
-//	next: 		extend scentendfilterdataset for keyword filter; adapt optionset (e.g. usewholenumbers);
-//	then:		use dedicated .fxml for scentedkeywordfilter, including (possibly) diff. arrangement for name label and (definitely) button for removing a filter.
-//	after that:	create scentedkeywordfilter using available data (bin by percentage or absolute rank?); use scrollpane to allow for greater number of filters.
-//	finally:	extend filtering methods to include data from keyword filter (necessary? filtering should use configIDs anyway).
-		
-	public ScentedFilterOptionset(	String paramID, boolean useRangeSlider, double min, double max, int numberOfBins, double stepsize, 
-									boolean isSelectionEnabled, boolean showAxes, boolean relativeMode, boolean useWholeNumbers)
+	/**
+	 * Creates new option set for ScentedFilter.
+	 * @param paramID
+	 * @param useRangeSlider
+	 * @param min
+	 * @param max
+	 * @param numberOfBins
+	 * @param stepsize
+	 * @param majorTickUnit
+	 * @param isSelectionEnabled
+	 * @param showAxes
+	 * @param relativeMode
+	 * @param useWholeNumbers
+	 */
+	public ScentedFilterOptionset(	String paramID, boolean useRangeSlider, 
+									double min, double max, 
+									int numberOfBins, double stepsize, double majorTickCount, 
+									boolean isSelectionEnabled, boolean showAxes, boolean relativeMode, 
+									boolean useWholeNumbers)
 	{
 		super(isSelectionEnabled, showAxes, relativeMode);
 		
@@ -46,6 +63,7 @@ public class ScentedFilterOptionset extends VisualizationComponentOptionset
 		this.min				= min;
 		this.max				= max;
 		this.numberOfBins		= numberOfBins;
+		this.majorTickCount		= majorTickCount;
 		this.stepSize			= stepsize;
 		this.useWholeNumbers	= useWholeNumbers;
 	}
@@ -68,6 +86,16 @@ public class ScentedFilterOptionset extends VisualizationComponentOptionset
 	public double getMax()
 	{
 		return max;
+	}
+
+	public double getMajorTickCount()
+	{
+		return majorTickCount;
+	}
+
+	public boolean useWholeNumbers()
+	{
+		return useWholeNumbers;
 	}
 
 	public int getNumberOfBins()
