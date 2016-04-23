@@ -161,6 +161,12 @@ public class ScentedKeywordFilter extends ScentedFilter
 		    	ldaConfigIDs.addAll(data.getBarToDataAssociations().get("active_" + bar.getXValue()));
 		    	
 		    	// Highlight bar.
+//		    	next: 
+//		    			- cross.-vis. highlighting with topic-level granularity.
+//		    			- fix remaining issues, improve handling.
+//		    	after finishing dynamic keyword filters:
+//		    			see roadmap/feature requests/paper deadlines discussed with TMö on 2016-04-20.
+		    			
 		    	for (XYChart.Series<String, Number> series : barchart.getData()) {
 		    		for (XYChart.Data<String, Number> tmpBar : series.getData()) {
 		    			if (tmpBar.getXValue().equals(bar.getXValue())) {
