@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.image.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.chart.*?>
@@ -10,11 +11,19 @@
 
 <AnchorPane fx:id="root_anchorPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.components.scentedFilter.scentedKeywordFilter.ScentedKeywordFilter">
    <children>
-      <Label fx:id="param_label" layoutX="14.0" layoutY="42.0" text="SC" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="-5.0">
-         <font>
-            <Font name="System Bold" size="14.0" />
-         </font>
-      </Label>
+      <HBox layoutX="10.0" layoutY="-5.0">
+         <children>
+            <Label fx:id="param_label" layoutX="14.0" layoutY="42.0" text="SC" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="-5.0">
+               <font>
+                  <Font name="System Italic" size="14.0" />
+               </font>
+               <HBox.margin>
+                  <Insets right="5.0" />
+               </HBox.margin>
+            </Label>
+            <ImageView fx:id="closeButton_imageview" fitHeight="20.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
+         </children>
+      </HBox>
       <VBox fx:id="container_vbox" layoutX="88.0" layoutY="6.0" maxHeight="81.0" prefHeight="81.0" prefWidth="476.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="88.0" AnchorPane.rightAnchor="46.0" AnchorPane.topAnchor="0.0">
          <children>
             <StackedBarChart fx:id="barchart" alternativeRowFillVisible="false" animated="false" categoryGap="0.0" horizontalZeroLineVisible="false" legendVisible="false" maxHeight="75.0" minHeight="75.0" prefHeight="75.0" prefWidth="10.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">

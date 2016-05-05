@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -36,6 +35,7 @@ import view.components.VisualizationComponentType;
 import view.components.controls.spinner.ISpinnerListener;
 import view.components.controls.spinner.NumericSpinner;
 import view.components.rubberbandselection.RubberBandSelection;
+import view.components.scentedFilter.scentedKeywordFilter.ScentedKeywordFilterDataset;
 
 public class ScentedFilter extends VisualizationComponent implements ISpinnerListener
 {
@@ -853,5 +853,11 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 	        	analysisController.removeHighlighting(VisualizationComponentType.SCENTED_FILTER);
 		    }
 		});
+	}
+	
+	@Override
+	public String getComponentIdentification()
+	{
+		return options.getParamID();
 	}
 }

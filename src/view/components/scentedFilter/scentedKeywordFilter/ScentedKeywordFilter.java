@@ -1,19 +1,26 @@
 package view.components.scentedFilter.scentedKeywordFilter;
 
 import java.math.BigDecimal;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.ResourceBundle;
 import java.util.Set;
 
 import javafx.event.EventHandler;
+import javafx.scene.Cursor;
 import javafx.scene.chart.XYChart;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.fxml.FXML;
 import model.LDAConfiguration;
 import view.components.DatapointIDMode;
 import view.components.VisualizationComponentType;
 import view.components.scentedFilter.ScentedFilter;
 import view.components.scentedFilter.ScentedFilterDataset;
 import view.components.scentedFilter.ScentedFilterOptionset;
+
 
 /**
  * Scented filter for keywords.
@@ -28,6 +35,67 @@ public class ScentedKeywordFilter extends ScentedFilter
 	 */
 	static private Set<String> keywordsInUse = new HashSet<String>();
 	
+	/**
+	 * Keyword used for this Filter.
+	 */
+	private String keyword;
+	
+	/**
+	 * Button for closing filter.
+	 */
+	private @FXML ImageView closeButton_imageview;
+	
+	/**
+	 * Gap between adjacent keyword filters. 
+	 */
+	static public final int GAP = 24;
+	
+	@Override
+	public void initialize(URL location, ResourceBundle resources)
+	{
+		super.initialize(location, resources);
+	
+		// Initialize close button.
+		initCloseButton();
+	}
+	
+	/**
+	 * Initializes button for closing this keyword filter.
+	 */
+	private void initCloseButton()
+	{
+		// Use reference to this instance of ScentedKeywordFilter.
+		ScentedKeywordFilter autoReference = this;
+		
+		// Load image for closing button.
+		closeButton_imageview.setImage(new Image(getClass().getResourceAsStream("/icons/close-icon.png"), 25, 25, true, true));
+		System.out.println("adding handlers");
+		// Mouse entered: Change cursor type.
+		closeButton_imageview.addEventHandler(MouseEvent.MOUSE_ENTERED, (new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent me) 
+            {
+            	analysisController.getScene().setCursor(Cursor.HAND);
+            }
+		}));
+		// Mouse exited: Change cursor type.
+		closeButton_imageview.addEventHandler(MouseEvent.MOUSE_EXITED, (new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent me) 
+            {
+            	analysisController.getScene().setCursor(Cursor.DEFAULT);
+            }
+		}));
+		// Mouse clicked: Show setup for new filter.
+		closeButton_imageview.addEventHandler(MouseEvent.MOUSE_PRESSED, (new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent me) 
+            {
+            	// Remove keyword from set of used keywords.
+            	ScentedKeywordFilter.keywordsInUse.remove(autoReference.getComponentIdentification());
+            	// Remove keyword filter from UI, de-allocate resources.
+            	analysisController.removeKeywordFilter(autoReference);
+            }
+		}));
+	}
+
 	@Override
 	public void refresh(ScentedFilterDataset data)
 	{
@@ -160,13 +228,13 @@ public class ScentedKeywordFilter extends ScentedFilter
 		    	ldaConfigIDs.addAll(data.getBarToDataAssociations().get("inactive_" + bar.getXValue()));
 		    	ldaConfigIDs.addAll(data.getBarToDataAssociations().get("active_" + bar.getXValue()));
 		    	
-		    	// Highlight bar.
-//		    	next: 
+//		    	@todo next: 
 //		    			- cross.-vis. highlighting with topic-level granularity.
 //		    			- fix remaining issues, improve handling.
 //		    	after finishing dynamic keyword filters:
 //		    			see roadmap/feature requests/paper deadlines discussed with TMö on 2016-04-20.
-		    			
+		    	
+		    	// Highlight bar.
 		    	for (XYChart.Series<String, Number> series : barchart.getData()) {
 		    		for (XYChart.Data<String, Number> tmpBar : series.getData()) {
 		    			if (tmpBar.getXValue().equals(bar.getXValue())) {

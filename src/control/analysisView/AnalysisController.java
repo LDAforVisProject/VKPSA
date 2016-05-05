@@ -1270,15 +1270,14 @@ public class AnalysisController extends Controller
 																		true, 
 																		false, 
 																		true));
-				// Add vertical spacing.
-				final int gapBetweenKeywordFilters = 14;
-				keywordFilter.getRoot().setTranslateY(36 + (ScentedKeywordFilter.getKeywordCount() - 1) * gapBetweenKeywordFilters);
+		
 				// Add to collection of filters.
 				filters.add(keywordFilter);
 				// Embed in containing VBox.
 				keywordFilter.embedIn(filters_vbox);
-				// Adapt height of containing pane.
-				filter_anchorpane.setPrefHeight(filter_anchorpane.getHeight() + 92 + (ScentedKeywordFilter.getKeywordCount() - 1) * gapBetweenKeywordFilters);
+				
+				// Adjust height of filter pane.
+				adjustFilterPaneHeight(true);
 				
 				/*
 				 * Fill component with data.
@@ -1296,6 +1295,72 @@ public class AnalysisController extends Controller
 		catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Removes dynamic keyword filter from GUI and storage.
+	 * @param filterToRemove
+	 */
+	public void removeKeywordFilter(ScentedKeywordFilter filterToRemove)
+	{
+		boolean wasFilterFound = false;
+		
+		// Error checking: Try to identify filter.
+		for (ScentedFilter sf : filters) {
+			if (filterToRemove.getComponentIdentification().equals(sf.getComponentIdentification())) {
+				wasFilterFound = true;
+				break;
+			}
+		}
+		
+		if (wasFilterFound) {
+			// Remove filter from GUI.
+			filters_vbox.getChildren().remove(filterToRemove.getRoot());
+			
+			// Remove filter instance from collection.
+			filters.remove(filterToRemove);
+			
+			// Adapt height of filter pane.
+			adjustFilterPaneHeight(false);
+		}
+		
+		else {
+			log("### ERROR ### Trying to remove non-existent filter.");
+			System.out.println("### ERROR ### Trying to remove non-existent filter.");
+		}
+		
+	}
+	
+	/**
+	 * Adjust height of filter pane in accordance to number of registered filters.
+	 * @param isAddition Determines whether pane height should be in- or decreased.
+	 */
+	private void adjustFilterPaneHeight(boolean isAddition)
+	{
+		// Increase height of containing pane.
+		if (isAddition) {
+			System.out.println("pref height = " + filter_anchorpane.getHeight() + 92 + (ScentedKeywordFilter.getKeywordCount() - 1) * ScentedKeywordFilter.GAP);
+			filter_anchorpane.setPrefHeight(filter_anchorpane.getHeight() + 92 + ScentedKeywordFilter.GAP);
+		}
+		
+		// Decrease height of containing pane.
+		else {
+			filter_anchorpane.setPrefHeight(filter_anchorpane.getHeight() - 92 - ScentedKeywordFilter.GAP);
+		}
+		
+		/*
+		 * Re-position all dynamic keyword filter.
+		 */
+		
+		int count = 0;
+		for (ScentedFilter sf : filters) {
+			if (sf.getClass().toString().endsWith("ScentedKeywordFilter")) {
+				// Add spacing for keyword filter.
+				sf.getRoot().setTranslateY(36 + count++ * ScentedKeywordFilter.GAP);
+			}
+		}
+
+		
 	}
 	
 	/**
