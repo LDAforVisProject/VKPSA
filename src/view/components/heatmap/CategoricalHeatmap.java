@@ -246,6 +246,10 @@ public class CategoricalHeatmap extends HeatMap
     	
     	xAxisLabels = new ArrayList<Label>();
     	yAxisLabels = new ArrayList<Label>();
+    	
+		// Hide axes.
+		xAxis.setVisible(false);
+		yAxis.setVisible(false);
 	}
 
 	@Override
@@ -368,6 +372,10 @@ public class CategoricalHeatmap extends HeatMap
     	
     	// Clear color legend.
     	colorLegend.clear();
+    	
+    	// Hide axes.
+    	xAxis.setVisible(false);
+    	yAxis.setVisible(false);
 	}
 	
 	@Override

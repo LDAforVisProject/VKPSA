@@ -10,7 +10,7 @@
    <children>
       <ComboBox fx:id="paramX_combobox" layoutX="116.0" layoutY="169.0" onAction="#updateParamValue" prefHeight="25.0" prefWidth="75.0" promptText="kappa" AnchorPane.topAnchor="5.0" />
       <ComboBox fx:id="paramY_combobox" layoutX="-18.0" layoutY="71.0" onAction="#updateParamValue" prefHeight="25.0" prefWidth="75.0" promptText="alpha" rotate="270.0" AnchorPane.leftAnchor="-18.0" />
-      <ScrollPane fx:id="zoomContainer_scrollpane" layoutX="35.0" layoutY="25.0" prefHeight="159.0" prefViewportHeight="164.0" prefViewportWidth="219.0" prefWidth="217.0" style="-fx-background-color: #ffffff; -fx-border-color: #ccc;" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="35.0">
+      <ScrollPane fx:id="zoomContainer_scrollpane" hbarPolicy="ALWAYS" layoutX="35.0" layoutY="25.0" prefHeight="159.0" prefViewportHeight="164.0" prefViewportWidth="219.0" prefWidth="217.0" style="-fx-background-color: #ffffff; -fx-border-color: #ccc;" vbarPolicy="ALWAYS" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="35.0">
          <content>
             <AnchorPane fx:id="zoomContainer_anchorpane" prefHeight="155.0" prefWidth="215.0" style="-fx-background-color: #fff;">
                <children>

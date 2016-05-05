@@ -292,8 +292,8 @@ public class HeatMap extends VisualizationComponent_Legacy implements ISelectabl
     	
     	else {
 	    	// Draw data.
-	    	//boolean useBorders = dataType == HeatmapDataType.LDAConfiguration ? false : true;
-	    	draw(binnedData, false);
+    		if (binnedData != null)
+    			draw(binnedData, false);
     	}
     }
     

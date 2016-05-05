@@ -25,6 +25,7 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SplitPane;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -39,6 +40,7 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
@@ -60,6 +62,11 @@ public class ParallelTagCloud extends VisualizationComponent
 	 * GUI elements.
 	 * 
 	 */
+	
+	/**
+	 * Containing SplitPane.
+	 */
+	private @FXML SplitPane splitpane;
 	
 	/**
 	 * ScrollPane containing AnchorPane containing actual tag cloud.
@@ -192,6 +199,7 @@ public class ParallelTagCloud extends VisualizationComponent
 		selectedKeyword						= "";
 		selectedTopicName					= "";
 		zoomFactor							= 1;
+		
 	}
 	
 	private void addResizeListeners()
@@ -333,6 +341,9 @@ public class ParallelTagCloud extends VisualizationComponent
 	 
 		// Reset visualization.
 		clear();
+		
+		// Show barchart.
+		probabilityDistribution_barchart.setVisible(true);
 		
 	    /*
 	     *	0. Create labels. 
@@ -1153,24 +1164,40 @@ public class ParallelTagCloud extends VisualizationComponent
 	@Override
 	public void resizeContent(double width, double height)
 	{
-		// Resize barchart.
-		probabilityDistribution_barchart.setPrefWidth(barchart_anchorpane.getWidth());
-		probabilityDistribution_barchart.setPrefHeight(barchart_anchorpane.getHeight());
 		
-		// Adjust width of containing AnchorPane.
+		System.out.println("ta.w = " + tagcloud_anchorpane.getWidth() + ", ta.h = " + tagcloud_anchorpane.getHeight());
+		System.out.println("ts.w = " + tagcloud_scrollpane.getWidth() + ", ts.h = " + tagcloud_scrollpane.getHeight());
+		System.out.println("s.w = " + splitpane.getWidth() + ", s.h = " + splitpane.getHeight());
+		System.out.println("\tw = " + width + ", h = " + height);
+		/*
+		 * Resize elements.
+		 */
+		
+		if (width > 0) 
+			// Resize barchart.
+			probabilityDistribution_barchart.setPrefWidth(splitpane.getWidth() * (1 - splitpane.getDividerPositions()[0]));
+		
+		if (height > 0)
+			// Resize barchart.
+			probabilityDistribution_barchart.setPrefHeight(height - 5);
+
+		// Adjust height of containing AnchorPane.
 		tagcloud_anchorpane.setMinWidth(tagcloud_scrollpane.getWidth());
 		tagcloud_anchorpane.setPrefWidth(tagcloud_scrollpane.getWidth());
 		tagcloud_anchorpane.setMaxWidth(tagcloud_scrollpane.getWidth());
-		// Adjust height of containing AnchorPane.
 		tagcloud_anchorpane.setMinHeight(tagcloud_scrollpane.getHeight() - 13);
 		tagcloud_anchorpane.setPrefHeight(tagcloud_scrollpane.getHeight() - 13);
 		tagcloud_anchorpane.setMaxHeight(tagcloud_scrollpane.getHeight() - 13);
 		
 		// Resize canvas.
-		canvas.setWidth(tagcloud_anchorpane.getWidth());
-		canvas.setHeight(tagcloud_anchorpane.getHeight());
+		canvas.setWidth(tagcloud_anchorpane.getWidth() > 0 ? tagcloud_anchorpane.getWidth() : splitpane.getWidth() * splitpane.getDividerPositions()[0]);
+		canvas.setHeight(splitpane.getHeight() - 5);
+		System.out.println("ta.w = " + tagcloud_anchorpane.getWidth() + ", ta.h = " + tagcloud_anchorpane.getHeight());
+		System.out.println("c.w = " + canvas.getWidth() + ", c.h = " + canvas.getHeight() + "\n++++++++++++++++++++++");
 		
-		// Clear canvas and redraw PTC.
+		/*
+		 * Clear canvas and redraw PTC.
+		 */
 		ParallelTagCloudDataset ptcData = (ParallelTagCloudDataset)this.data;
 		if (	this.data != null && this.options != null	&& 
 				ptcData.getTopicConfigurations() != null 	&& 
@@ -1197,6 +1224,8 @@ public class ParallelTagCloud extends VisualizationComponent
 		
 		// Clear barchart.
 		probabilityDistribution_barchart.getData().clear();
+		// Hide barchart.
+		probabilityDistribution_barchart.setVisible(false);
 	}
 	
 	@Override

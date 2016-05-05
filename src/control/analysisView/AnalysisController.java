@@ -777,9 +777,8 @@ public class AnalysisController extends Controller
 			
 			// Resize scatter plot.
 			case "mds_anchorPane":
-				// Update content anchor pane. Deduct 5 pixels for scroll bars.
-				mds_content_anchorPane.setPrefWidth(mds_content_scrollPane.getWidth() - 5);
-				mds_content_anchorPane.setPrefHeight(mds_content_scrollPane.getHeight() - 5);
+				mds_content_anchorPane.setPrefWidth(mds_anchorPane.getWidth() - 5);
+				mds_content_anchorPane.setPrefHeight(mds_anchorPane.getHeight() - 5 - 30);
 				
 	        	// Update MDS heatmap position/indentation.
 				globalScatterplot.updateHeatmapPosition();
@@ -794,7 +793,42 @@ public class AnalysisController extends Controller
 			
 			// Resize local scope element: Parallel tag clouds.
 			case "localScope_ptc_anchorPane":
-//				localScopeInstance.resize(width, height, LocalScopeVisualizationType.PARALLEL_TAG_CLOUDS);
+				parallelTagCloud.resizeContent(width, height);
+			break;
+			
+			case "settings_anchorpane":
+				filters_vbox.setPrefWidth(width - 20);
+				for (ScentedFilter filter : filters) {
+					filter.resizeContent(width - 20, 0);
+				}
+			break;
+		}
+	}
+	
+	/**
+	 * Used for initial resizing of individual nodes.
+	 * @param node
+	 * @param width
+	 * @param height
+	 */
+	private void resizeElementManually(Node node, double width, double height)
+	{
+		switch (node.getId()) {
+			case "paramSpace_distribution_anchorPane_filtered":
+			break;
+			
+			case "paramSpace_distribution_anchorPane_selected":
+				// Adapt size.
+				paramSpaceScatterchart.resizeContent(width, height);
+			break;
+			
+			// Resize local scope element: Chord diagram.
+			case "localscope_tmc_anchorPane":
+				tmcHeatmap.resizeContent(width, height);
+			break;
+			
+			// Resize local scope element: Parallel tag clouds.
+			case "localScope_ptc_anchorPane":
 				parallelTagCloud.resizeContent(width, height);
 			break;
 			

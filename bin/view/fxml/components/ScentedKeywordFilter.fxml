@@ -18,7 +18,7 @@
                   <Font name="System Italic" size="14.0" />
                </font>
                <HBox.margin>
-                  <Insets right="10.0" />
+                  <Insets right="5.0" />
                </HBox.margin>
             </Label>
             <ImageView fx:id="closeButton_imageview" fitHeight="20.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />

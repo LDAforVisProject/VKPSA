@@ -231,9 +231,11 @@ public class ParameterSpaceScatterchart extends Scatterchart
 		}
 		
 		// Resize scatterchart.
-		zoomContainer_anchorpane.setPrefWidth(zoomContainer_scrollpane.getWidth() - 10);
-		zoomContainer_anchorpane.setPrefHeight(zoomContainer_scrollpane.getHeight() - 10);
-		
+		if (width > 0)
+			zoomContainer_anchorpane.setPrefWidth(zoomContainer_scrollpane.getWidth() > 0 ? zoomContainer_scrollpane.getWidth() - 12 : width - 59);			
+		if (height > 0)
+			zoomContainer_anchorpane.setPrefHeight(zoomContainer_scrollpane.getHeight() > 0 ? zoomContainer_scrollpane.getHeight() - 10 : height - 52);
+
 		// Resize and -position density heatmap.
 		updateHeatmapPosition();
 	}
@@ -260,7 +262,7 @@ public class ParameterSpaceScatterchart extends Scatterchart
 	@Override
 	protected void updateHeatmapPosition()
 	{
-		final double xBorderFactor = 0.07;
+		final double xBorderFactor = 0.065;
 		final double yBorderFactor = 0.06;
 		
 		// Initialize sequence: minX, minY, maxX, maxY.
@@ -268,8 +270,8 @@ public class ParameterSpaceScatterchart extends Scatterchart
 		extrema[0] = Double.MAX_VALUE;
 		extrema[1] = Double.MAX_VALUE;
 			
-		final double offsetX = 31 + scatterchart.getWidth() * xBorderFactor;
-		final double offsetY = -31 - scatterchart.getHeight() * yBorderFactor;
+		final double offsetX = 25 + scatterchart.getWidth() * xBorderFactor;
+		final double offsetY = -25 - scatterchart.getHeight() * yBorderFactor;
 		
 		// Set x position and new width.
 		densityHeatmap.getRoot().setTranslateX(offsetX);
