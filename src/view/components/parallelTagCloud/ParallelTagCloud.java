@@ -1112,9 +1112,9 @@ public class ParallelTagCloud extends VisualizationComponent
 					// If set of topic models to highlight contains topic model ID of current tag cloud:
 					// Increase opacity of current tag cloud.
 					if (dataPointIDs.contains(topicConfig.getKey())) {
-						for (Node node : tagCloudContainer.get(i).getChildren()) {
-							node.setOpacity(1);
-						}
+//						for (Node node : tagCloudContainer.get(i).getChildren()) {
+//							node.setOpacity(1);
+//						}
 						// Add to set of topics to display in distribution barchart.
 						topicsToDisplayInDistBarchart.add(topicConfig);
 					}
@@ -1164,11 +1164,6 @@ public class ParallelTagCloud extends VisualizationComponent
 	@Override
 	public void resizeContent(double width, double height)
 	{
-		
-		System.out.println("ta.w = " + tagcloud_anchorpane.getWidth() + ", ta.h = " + tagcloud_anchorpane.getHeight());
-		System.out.println("ts.w = " + tagcloud_scrollpane.getWidth() + ", ts.h = " + tagcloud_scrollpane.getHeight());
-		System.out.println("s.w = " + splitpane.getWidth() + ", s.h = " + splitpane.getHeight());
-		System.out.println("\tw = " + width + ", h = " + height);
 		/*
 		 * Resize elements.
 		 */
@@ -1181,19 +1176,20 @@ public class ParallelTagCloud extends VisualizationComponent
 			// Resize barchart.
 			probabilityDistribution_barchart.setPrefHeight(height - 5);
 
-		// Adjust height of containing AnchorPane.
-		tagcloud_anchorpane.setMinWidth(tagcloud_scrollpane.getWidth());
-		tagcloud_anchorpane.setPrefWidth(tagcloud_scrollpane.getWidth());
-		tagcloud_anchorpane.setMaxWidth(tagcloud_scrollpane.getWidth());
-		tagcloud_anchorpane.setMinHeight(tagcloud_scrollpane.getHeight() - 13);
-		tagcloud_anchorpane.setPrefHeight(tagcloud_scrollpane.getHeight() - 13);
-		tagcloud_anchorpane.setMaxHeight(tagcloud_scrollpane.getHeight() - 13);
+		// Adjust width and height to initialization procedure.
+		final double tagcloud_anchorpane_width	= tagcloud_anchorpane.getWidth() == 0 ? 542 : tagcloud_scrollpane.getWidth();
+		final double tagcloud_anchorpane_height = tagcloud_anchorpane.getWidth() == 0 ? 284 : tagcloud_scrollpane.getHeight() - 13;
+				
+		tagcloud_anchorpane.setMinWidth(tagcloud_anchorpane_width);
+		tagcloud_anchorpane.setPrefWidth(tagcloud_anchorpane_width);
+		tagcloud_anchorpane.setMaxWidth(tagcloud_anchorpane_width);
+		tagcloud_anchorpane.setMinHeight(tagcloud_anchorpane_height);
+		tagcloud_anchorpane.setPrefHeight(tagcloud_anchorpane_height);
+		tagcloud_anchorpane.setMaxHeight(tagcloud_anchorpane_height);
 		
 		// Resize canvas.
 		canvas.setWidth(tagcloud_anchorpane.getWidth() > 0 ? tagcloud_anchorpane.getWidth() : splitpane.getWidth() * splitpane.getDividerPositions()[0]);
 		canvas.setHeight(splitpane.getHeight() - 5);
-		System.out.println("ta.w = " + tagcloud_anchorpane.getWidth() + ", ta.h = " + tagcloud_anchorpane.getHeight());
-		System.out.println("c.w = " + canvas.getWidth() + ", c.h = " + canvas.getHeight() + "\n++++++++++++++++++++++");
 		
 		/*
 		 * Clear canvas and redraw PTC.

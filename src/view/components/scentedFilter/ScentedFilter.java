@@ -151,7 +151,7 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 		min_spinner.setLayoutX(25);
 		min_spinner.setLayoutY(30);
 		max_spinner.setPrefWidth(55);
-		max_spinner.setLayoutX(100);
+		max_spinner.setLayoutX(255);
 		max_spinner.setLayoutY(30);
 		
 		// Register listener.

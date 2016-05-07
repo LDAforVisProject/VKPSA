@@ -69,7 +69,7 @@ public class ScentedKeywordFilter extends ScentedFilter
 		
 		// Load image for closing button.
 		closeButton_imageview.setImage(new Image(getClass().getResourceAsStream("/icons/close-icon.png"), 25, 25, true, true));
-		System.out.println("adding handlers");
+		
 		// Mouse entered: Change cursor type.
 		closeButton_imageview.addEventHandler(MouseEvent.MOUSE_ENTERED, (new EventHandler<MouseEvent>() {
             public void handle(MouseEvent me) 

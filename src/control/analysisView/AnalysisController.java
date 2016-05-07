@@ -1373,7 +1373,6 @@ public class AnalysisController extends Controller
 	{
 		// Increase height of containing pane.
 		if (isAddition) {
-			System.out.println("pref height = " + filter_anchorpane.getHeight() + 92 + (ScentedKeywordFilter.getKeywordCount() - 1) * ScentedKeywordFilter.GAP);
 			filter_anchorpane.setPrefHeight(filter_anchorpane.getHeight() + 92 + ScentedKeywordFilter.GAP);
 		}
 		
