@@ -30,19 +30,8 @@
          <top>
             <AnchorPane maxHeight="40.0" minHeight="40.0" prefHeight="40.0" prefWidth="1366.0" style="-fx-background-color: #fff;" BorderPane.alignment="CENTER">
                <children>
-                  <HBox layoutX="544.0" layoutY="29.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" prefWidth="136.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="600.0" AnchorPane.rightAnchor="600.0" AnchorPane.topAnchor="0.0">
+                  <HBox layoutX="544.0" layoutY="29.0" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" prefWidth="250.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="600.0" AnchorPane.topAnchor="0.0">
                      <children>
-                        <Label fx:id="label_title" text="VKPSA">
-                           <font>
-                              <Font size="20.0" />
-                           </font>
-                           <padding>
-                              <Insets right="15.0" />
-                           </padding>
-                           <HBox.margin>
-                              <Insets />
-                           </HBox.margin>
-                        </Label>
                         <ImageView fx:id="icon_current" fitHeight="30.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@icons/eye_small.jpg" />
@@ -51,6 +40,17 @@
                               <Insets />
                            </HBox.margin>
                         </ImageView>
+                        <Label fx:id="label_title" prefHeight="30.0" prefWidth="235.0" text="VKPSA">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                           <padding>
+                              <Insets left="15.0" right="15.0" />
+                           </padding>
+                           <HBox.margin>
+                              <Insets />
+                           </HBox.margin>
+                        </Label>
                      </children>
                   </HBox>
                   <HBox layoutX="1216.0" layoutY="6.0" maxHeight="30.0" minHeight="20.0" prefHeight="20.0" prefWidth="90.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="0.0">

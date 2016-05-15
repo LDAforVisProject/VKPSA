@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import control.dataView.LoadController;
 import control.analysisView.AnalysisController;
 import control.dataView.DataSubViewController;
 import control.dataView.DataViewController;
@@ -19,6 +20,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextArea;
 import javafx.scene.effect.ColorAdjust;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -36,8 +38,8 @@ public class CoreController extends Controller
 	private @FXML ImageView icon_lock;
 	
 	private @FXML Label label_title;
-	private @FXML ImageView icon_current;
 	
+	private @FXML ImageView icon_current;
 	private @FXML ImageView icon_load;
 	private @FXML ImageView icon_generate;
 	private @FXML ImageView icon_preprocess;
@@ -92,25 +94,11 @@ public class CoreController extends Controller
 		workspace		= new Workspace("");
 		
 		blockAnalysisView();
+		blockDataView();
 		blockHelpView();
 		
 		// Enable logging in workspace.
 		workspace.setProtocolElements(protocol_progressindicator, protocol_textarea);
-		
-//		// Display data view at startup.
-//		Timer displayDataViewTimer = new Timer(true);
-//		displayDataViewTimer.scheduleAtFixedRate(
-//		    new TimerTask() {
-//		    	public void run() 
-//		    	{ 
-//		    		// Wait until CoreController is initialized, then display data view and cancel timer.
-//		    		if (!root.getStyleClass().isEmpty()) {
-//		    			initDataView();
-//		    			cancel();
-//		    		}
-//		    	}
-//		    }, 0, 10
-//		);
 	}
 	
 	public void setScene(Scene scene)
@@ -119,7 +107,26 @@ public class CoreController extends Controller
 	}
 	
 	/**
-	 * 
+	 * Initialize introduction screen.
+	 */
+	private void initIntroScreen()
+	{
+		label_title.setText("Choose Workspace");
+		
+		// Is controller already initiated? If so, node was already created.
+		if (!viewNodeMap.containsKey("load")) {
+			initView("load", "/view/fxml/content/Load.fxml");
+			
+			// Adjust header icon's image.
+			icon_current.setImage(new Image(getClass().getResourceAsStream("../icons/folder_small.jpg"), 30, 22, true, true));
+			
+			// Set scene and draw visualizations.
+			((LoadController)controllerMap.get("load")).setCoreController(this);
+		}
+	}
+	
+	/**
+	 * Handles processing of icons's action events.
 	 * @param e
 	 */
 	@FXML
@@ -136,39 +143,50 @@ public class CoreController extends Controller
 			case "icon_analyze":
 				label_title.setText("Analyze");
 				
-				// Hide workspace chooser, if it is still open.
-				((DataViewController)controllerMap.get("dataview")).hideWorkspaceChooser(true);
+				// Adjust header icon's image.
+				icon_current.setImage(new Image(getClass().getResourceAsStream("../icons/eye_small.jpg"), 30, 20, true, true));
 				
 				// Is controller already initiated? If so, node was already created.
 				if (!viewNodeMap.containsKey("analyze")) {
+					// Change cursor.
+					scene.setCursor(Cursor.WAIT);
+					
+					// Initialize analysis view.
 					initView("analyze", "/view/fxml/content/Analysis.fxml");
 					
 					// Set scene and draw visualizations.
 					((AnalysisController)controllerMap.get("analyze")).setScene(scene);
 					((AnalysisController)controllerMap.get("analyze")).refreshVisualizations(true);
+					
+					// Change cursor.
+					scene.setCursor(Cursor.DEFAULT);
 				}
 				
 				// Controller already exists: Switch to node.
-				else {					
+				else {
+					scene.setCursor(Cursor.WAIT);
 					// Show analysis view.
 					enableView("analyze");
+					scene.setCursor(Cursor.DEFAULT);
 				}
 			break;
 			
 			case "icon_dataview":
-				label_title.setText("Provide Data");
+				label_title.setText("Generate Data");
+				
+				// Adjust header icon's image.
+				icon_current.setImage(new Image(getClass().getResourceAsStream("../icons/data.png"), 50, 50, true, true));
 				
 				if (!viewNodeMap.containsKey("dataview")) {
+					scene.setCursor(Cursor.WAIT);
 					initDataView();
+					scene.setCursor(Cursor.DEFAULT);
 				}
 				
 				else {
+					scene.setCursor(Cursor.WAIT);
 					enableView("dataview");
-					
-					// Check if a workspace was already chosen. If not: Show workspace chooser.
-					if (workspace.getDirectory().isEmpty() || workspace.getDirectory() == "") {
-						((DataViewController)controllerMap.get("dataview")).showWorkspaceChooser(true);
-					}
+					scene.setCursor(Cursor.DEFAULT);
 				}
 			break;
 		}
@@ -232,9 +250,9 @@ public class CoreController extends Controller
 		/*
 		 * Init sub data views.
 		 */
-		
-        String[] viewIDs				= {"load", "preprocess", "generate"};
-        String[] fxmlFilePaths			= {"/view/fxml/content/Load.fxml", "/view/fxml/content/Postprocess.fxml", "/view/fxml/content/Generate.fxml"};
+		  
+        String[] viewIDs				= {"preprocess", "generate"};
+        String[] fxmlFilePaths			= {"/view/fxml/content/Postprocess.fxml", "/view/fxml/content/Generate.fxml"};
         
         try {
         	// Add all relevant sub-views to DataView.
@@ -288,10 +306,6 @@ public class CoreController extends Controller
 		
 		// Assign data sub views to DataViewController instance.
 		dvController.setDataSubViews(dataSubViewNodes, dataSubViewControllers);
-
-        // Show workspace chooser.
-		dvController.initWorkspaceChooser(viewNodeMap.get("load"), root, scene);
-		dvController.showWorkspaceChooser(true);
 	}
 	
 	private void hideAllViews()
@@ -322,10 +336,31 @@ public class CoreController extends Controller
 		}
 	}
 	
+	/**
+	 * Unblock data and analysis views once data has been loaded.
+	 */
+	public void unblockViews()
+	{
+		unblockDataView();
+		unblockAnalysisView();
+	}
+	
 	public void unblockAnalysisView()
 	{
 		icon_analyze.setDisable(false);
 		icon_analyze.setEffect(null);
+	}
+	
+	public void blockDataView()
+	{
+		icon_dataview.setDisable(true);
+		icon_dataview.setEffect(new ColorAdjust(0, 0, 0.75, 0));
+	}
+	
+	public void unblockDataView()
+	{
+		icon_dataview.setDisable(false);
+		icon_dataview.setEffect(null);
 	}
 	
 	public void blockAnalysisView()
@@ -381,7 +416,10 @@ public class CoreController extends Controller
 	 */
 	public void setInitialWorkspaceDirectory(String initialWorkspaceDirectory)
 	{
-		this.initialWorkspaceDirectory = initialWorkspaceDirectory; 
+		this.initialWorkspaceDirectory = initialWorkspaceDirectory;
+		
+		// Intialize loading/introduction view.
+		initIntroScreen();
 	}
 	
 	/**

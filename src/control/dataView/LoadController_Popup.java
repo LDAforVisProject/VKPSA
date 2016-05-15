@@ -7,8 +7,6 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import control.Controller;
-import control.CoreController;
 import model.workspace.Workspace;
 import model.workspace.TaskType;
 import javafx.event.ActionEvent;
@@ -22,7 +20,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 import javafx.stage.DirectoryChooser;
 
-public class LoadController extends Controller
+public class LoadController_Popup extends DataSubViewController
 {
 	private @FXML TextField textfield_directory;
 	private @FXML Button button_browse;
@@ -37,11 +35,6 @@ public class LoadController extends Controller
 	
 	private DirectoryChooser directoryChooser;
 	private String currentPath;
-	
-	/**
-	 * Reference to CoreController instance.
-	 */
-	private CoreController coreController;
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources)
@@ -61,24 +54,30 @@ public class LoadController extends Controller
 		currentPath = "";
 	}
 	
-	public void setCoreController(CoreController coreController)
+	public void setDataViewController(DataViewController dataViewController)
 	{
-		this.coreController = coreController;
+		this.dataViewController = dataViewController;
 		
 		// Set default directory, if specified.
-		System.out.println("initial = " + coreController.getInitialWorkspaceDirectory());
-		directoryChooser.setInitialDirectory(new File(coreController.getInitialWorkspaceDirectory()));	
+		System.out.println("initial = " + dataViewController.getInitialWorkspaceDirectory());
+		directoryChooser.setInitialDirectory(new File(dataViewController.getInitialWorkspaceDirectory()));	
 	}
 	
 	@FXML
 	public void openFileBrowser(ActionEvent event)
 	{
-		log("Looking for working directory.");
+		log("Looking for working directory");
 		setProgressStatus(true);
+		
+		// Hide workspace chooser popup.
+		dataViewController.toggleWorkspaceChooserStatus(false);
 		
 		// Get current path from file dialog.
 		currentPath = directoryChooser.showDialog(null).getAbsolutePath();
 		textfield_directory.setText(currentPath);
+
+		// Show workspace chooser popup.
+		dataViewController.toggleWorkspaceChooserStatus(false);
 	
 		// Show progress indicator.
 		progressIndicator_load.setVisible(true);
@@ -87,9 +86,6 @@ public class LoadController extends Controller
 		loadData(event);
 		
 		setProgressStatus(false);
-		
-		// Notice core controller that data has been loaded.
-		coreController.unblockViews();
 	}
 	
 	/**
@@ -170,10 +166,10 @@ public class LoadController extends Controller
 				
 				// Once MDS coordinates are loaded: Execute and display integrity check.
 				showIntegrityCheckTooltip(displayIntegrityCheck());
-//				dataViewController.setDataLoaded(true);
+				dataViewController.setDataLoaded(true);
 				
 				// Check if all data is available.
-//				dataViewController.checkOnDataAvailability();
+				dataViewController.checkOnDataAvailability();
 			break;
 
 			default:
@@ -247,6 +243,16 @@ public class LoadController extends Controller
 	public void reset()
 	{
 		currentPath = workspace.getDirectory(); 
+	}
+
+	@Override
+	public void freezeOptionControls()
+	{
+	}
+
+	@Override
+	public void unfreezeOptionControls()
+	{	
 	}
 
 	@Override
