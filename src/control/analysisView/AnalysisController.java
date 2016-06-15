@@ -13,6 +13,7 @@ import org.controlsfx.control.PopOver;
 
 import model.AnalysisDataspace;
 import model.LDAConfiguration;
+import model.documents.Document;
 import model.misc.KeywordRankObject;
 import model.workspace.Workspace;
 import control.Controller;
@@ -20,6 +21,8 @@ import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
 import view.components.VisualizationComponentType;
 import view.components.controls.keywordFilterSetup.KeywordFilterSetup;
+import view.components.documentLookup.DocumentLookup;
+import view.components.contextSearch.ContextSearch;
 import view.components.heatmap.CategoricalHeatmap;
 import view.components.heatmap.HeatmapOptionset;
 import view.components.legacy.mdsScatterchart.MDSScatterchart;
@@ -126,6 +129,15 @@ public class AnalysisController extends Controller
 	 */
 	private @FXML AnchorPane filter_anchorpane;
 	
+	/**
+	 * For source document component.
+	 */
+	private @FXML AnchorPane documentLookup_anchorpane;
+
+	/**
+	 * For keyword context component.
+	 */
+	private @FXML AnchorPane contextSearch_anchorpane;
 	
 	// For global scatterchart.
 
@@ -252,6 +264,20 @@ public class AnalysisController extends Controller
 	 */
 	private SettingsPanel settingsPanel;
 	
+	/*
+	 * Components for linking back to source documents.
+	 */
+	
+	/**
+	 * Document lookup.
+	 */
+	private DocumentLookup documentLookup;
+	
+	/**
+	 * Context search.
+	 */
+	private ContextSearch contextSearch;
+	
 	// -----------------------------------------------
 	// 				Data.
 	// -----------------------------------------------
@@ -340,6 +366,8 @@ public class AnalysisController extends Controller
 		initParameterSpaceScatterchart();
 		initParallelTagCloud();
 		initComparisonHeatmaps();
+		initDocumentLookup();
+		initContextSearch();
 		
 		// Bring settings icons to front.
 		settings_mds_icon.toFront();
@@ -348,6 +376,26 @@ public class AnalysisController extends Controller
 		settings_ptc_icon.toFront();
 		// Bring maximization icons to front.
 		maximize_ptc_icon.toFront();
+	}
+	
+	/**
+	 * Sets up component for document lookup.
+	 */
+	private void initDocumentLookup()
+	{
+		
+		documentLookup 	= (DocumentLookup)VisualizationComponent.generateInstance(VisualizationComponentType.DOCUMENT_LOOKUP, this, null, null, null);		
+		documentLookup.embedIn(documentLookup_anchorpane);
+	}
+	
+	/**
+	 * Sets up component for context search.
+	 */
+	private void initContextSearch()
+	{
+		
+		contextSearch 	= (ContextSearch)VisualizationComponent.generateInstance(VisualizationComponentType.CONTEXT_SEARCH, this, null, null, null);		
+		contextSearch.embedIn(contextSearch_anchorpane);
 	}
 	
 	private void initSettingsPanel()
@@ -684,6 +732,10 @@ public class AnalysisController extends Controller
 			tmcHeatmap.clear();
 			// Clear PTC.
 			parallelTagCloud.clear();
+			// Clear DocumentLookup.
+			documentLookup.clear();
+			// Clear ContextSearch.
+			contextSearch.clear();
 		}
 	}
 	
@@ -1391,9 +1443,44 @@ public class AnalysisController extends Controller
 				// Add spacing for keyword filter.
 				sf.getRoot().setTranslateY(36 + count++ * ScentedKeywordFilter.GAP);
 			}
-		}
-
+		}		
+	}
+	
+	/**
+	 * List relevant documents in DocumentLookup component.
+	 * Is called after topic is selected in ParallelTagCloud.
+	 * @param topicID
+	 */
+	public void listRelevantDocuments(Pair<Integer, Integer> topicID)
+	{
+		log("Listing documents for topic " + topicID.getKey() + "#" + topicID.getValue());
 		
+		// Load documents sorted by relevance.
+		try {
+			// Updating DocumentLookup.
+			documentLookup.refresh(workspace.getDatabaseManagement().loadDocuments(topicID));
+		}
+		
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Show context for specified keyword.
+	 * @param keyword
+	 */
+	public void showKeywordContext(String keyword)
+	{
+		// Load keyword context.
+		try {
+			// Updating DocumentLookup.
+			contextSearch.refresh(workspace.getDatabaseManagement().loadContext(keyword));
+		}
+		
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**

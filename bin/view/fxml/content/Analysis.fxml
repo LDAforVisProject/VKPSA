@@ -16,7 +16,7 @@
 
 <AnchorPane fx:id="analysisRoot_anchorPane" maxHeight="694.0" maxWidth="1366.0" prefHeight="694.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.analysisView.AnalysisController">
    <children>
-      <SplitPane fx:id="content_history_splitpane" dividerPositions="0.9320809248554913" orientation="VERTICAL" prefHeight="850.0" prefWidth="1440.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <SplitPane fx:id="content_history_splitpane" dividerPositions="0.6098265895953757" orientation="VERTICAL" prefHeight="850.0" prefWidth="1440.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                <children>
@@ -181,39 +181,49 @@
             </AnchorPane>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="139.0" prefWidth="1328.0">
                <children>
-                <AnchorPane minHeight="212.0" minWidth="300.0" prefHeight="212.0" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
-                     <children>
-                        <Label layoutX="51.0" layoutY="15.0" text="History" AnchorPane.topAnchor="13.0">
-                           <font>
-                              <Font name="System Bold" size="12.0" />
-                           </font>
-                        </Label>
-                        <ImageView fitHeight="30.0" fitWidth="30.0" layoutX="10.0" layoutY="7.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="7.0">
-                           <image>
-                              <Image url="@icons/clock-128.png" />
-                           </image>
-                        </ImageView>
-                        <Label layoutX="167.0" layoutY="14.0" text="Advanced Settings" />
-                        <ImageView fitHeight="15.0" fitWidth="15.0" layoutX="272.0" layoutY="16.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@icons/cog.png" />
-                           </image>
-                        </ImageView>
-                        <TextField layoutX="42.0" layoutY="46.0" prefHeight="25.0" prefWidth="243.0" text="Search Term" />
-                        <ImageView fitHeight="15.0" fitWidth="15.0" layoutX="16.0" layoutY="49.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@icons/490px-Magnifying_glass_icon.svg.png" />
-                           </image>
-                        </ImageView>
-                        <Label layoutX="15.0" layoutY="90.0" text="Scope" />
-                        <Label layoutX="15.0" layoutY="124.0" text="Type" />
-                        <ComboBox layoutX="142.0" layoutY="85.0" prefHeight="25.0" prefWidth="140.0" />
-                        <ComboBox layoutX="142.0" layoutY="120.0" prefHeight="25.0" prefWidth="140.0" />
-                     </children>
-                  </AnchorPane>
-                  <SplitPane layoutX="300.0" layoutY="6.0" prefHeight="149.0" prefWidth="1062.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <SplitPane dividerPositions="0.24008810572687225, 0.6226138032305433" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <items>
-                        <ScrollPane hbarPolicy="ALWAYS" layoutX="300.0" layoutY="6.0" vbarPolicy="NEVER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="6.0" />
+                        <AnchorPane minWidth="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <SplitPane layoutX="300.0" prefHeight="149.0" prefWidth="1062.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <items>
+                                    <ScrollPane hbarPolicy="ALWAYS" layoutX="300.0" layoutY="6.0" prefHeight="83.0" prefWidth="1062.0" vbarPolicy="NEVER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="6.0" />
+                                 </items>
+                              </SplitPane>
+                            <AnchorPane minHeight="212.0" prefHeight="212.0" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <children>
+                                    <Label layoutX="51.0" layoutY="15.0" text="History" AnchorPane.topAnchor="13.0">
+                                       <font>
+                                          <Font name="System Bold" size="12.0" />
+                                       </font>
+                                    </Label>
+                                    <ImageView fitHeight="30.0" fitWidth="30.0" layoutX="10.0" layoutY="7.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="7.0">
+                                       <image>
+                                          <Image url="@icons/clock-128.png" />
+                                       </image>
+                                    </ImageView>
+                                    <Label layoutX="167.0" layoutY="14.0" text="Advanced Settings" />
+                                    <ImageView fitHeight="15.0" fitWidth="15.0" layoutX="272.0" layoutY="16.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@icons/cog.png" />
+                                       </image>
+                                    </ImageView>
+                                    <TextField layoutX="42.0" layoutY="46.0" prefHeight="25.0" prefWidth="243.0" text="Search Term" />
+                                    <ImageView fitHeight="15.0" fitWidth="15.0" layoutX="16.0" layoutY="49.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@icons/490px-Magnifying_glass_icon.svg.png" />
+                                       </image>
+                                    </ImageView>
+                                    <Label layoutX="15.0" layoutY="90.0" text="Scope" />
+                                    <Label layoutX="15.0" layoutY="124.0" text="Type" />
+                                    <ComboBox layoutX="142.0" layoutY="85.0" prefHeight="25.0" prefWidth="140.0" />
+                                    <ComboBox layoutX="142.0" layoutY="120.0" prefHeight="25.0" prefWidth="140.0" />
+                                 </children>
+                              </AnchorPane>
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane fx:id="contextSearch_anchorpane" prefHeight="265.0" prefWidth="160.0" style="-fx-background-color: #fff;" />
+                        <AnchorPane fx:id="documentLookup_anchorpane" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #fff;" />
                      </items>
                   </SplitPane>
                </children>

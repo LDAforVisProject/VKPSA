@@ -618,7 +618,7 @@ public class ParallelTagCloud extends VisualizationComponent
 			tagCloudContainer.add(vbox);
 
 	    	// Set background and border color.
-			vbox.setBackground(new Background(new BackgroundFill(Color.rgb(255, 255, 255, 0.9), CornerRadii.EMPTY, Insets.EMPTY)) );
+			//vbox.setBackground(new Background(new BackgroundFill(Color.rgb(255, 255, 255, 0.9), CornerRadii.EMPTY, Insets.EMPTY)) );
 			vbox.setStyle("-fx-border-color: white; -fx-padding: 5px;");
 		
 			// Init labels and add them to container.
@@ -629,7 +629,6 @@ public class ParallelTagCloud extends VisualizationComponent
 				 */
 				
 				String keyword		= topicKeywordProbabilityPairs.get(j).getKey();
-//				double probability	= topicKeywordProbabilityPairs.get(j).getValue();
 				Label label 		= new Label();
 		    	
 				/*
@@ -674,14 +673,17 @@ public class ParallelTagCloud extends VisualizationComponent
 		            }
 		        });
 				
+				// At click in label: Show context for this keyword.
+				label.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+		            public void handle(MouseEvent event) 
+		            {
+		            	analysisController.showKeywordContext(label.getText());
+		            }
+		        });
+				
 				// Update label, add it to containing VBox.
 				label.setText(keyword);
 				vbox.getChildren().add(label);
-				
-				// Update probability sums.
-				// Modify this statement to enable different approaches to ranking font sizes.
-//				probabilitySum += probability; // Math.pow(probability, keywordProbabilityExponent);
-//				updateKeywordProbabilitySums(keyword, probability);
 			}
 			
 			// Set probability sum for this topic.
@@ -988,21 +990,16 @@ public class ParallelTagCloud extends VisualizationComponent
 	@Override
 	public void processSelectionManipulationRequest(double minX, double minY, double maxX, double maxY)
 	{
-		// @todo Implement ParallelTagCloud::processSelectionManipulationRequest(...).
-		
 	}
 
 	@Override
 	public void processEndOfSelectionManipulation()
 	{
-		// @todo Implement ParallelTagCloud::processEndOfSelectionManipulation(...).
-		
 	}
 
 	@Override
 	public Pair<Integer, Integer> provideOffsets()
 	{
-		// @todo Implement ParallelTagCloud::provideOffsets(...).
 		return null;
 	}
 
@@ -1082,6 +1079,20 @@ public class ParallelTagCloud extends VisualizationComponent
 		            	analysisController.removeHighlighting(VisualizationComponentType.PARALLEL_TAG_CLOUD);
 		            }
 			    };
+			    
+			    // Create event listener for clicking tag cloud.
+			    EventHandler<MouseEvent> onMouseClickEventHandler = new EventHandler<MouseEvent>() 
+			    {
+			        @Override
+			        public void handle(MouseEvent event) 
+			        {
+			        	int ldaConfigID = Integer.valueOf(label.getText().substring(0, label.getText().indexOf("#")));
+			        	int topicID 	= Integer.valueOf(label.getText().substring(label.getText().indexOf("#") + 1));
+			        			
+		            	// Get document data, list it in table.
+		            	analysisController.listRelevantDocuments(new Pair<Integer, Integer>(ldaConfigID, topicID));
+		            }
+			    };
 	
 				// For entry into tagcloud / label:
 				label.addEventHandler(MouseEvent.MOUSE_ENTERED, onMouseEnteredEventHandler);
@@ -1089,6 +1100,10 @@ public class ParallelTagCloud extends VisualizationComponent
 				// For exit from tagcloud / label:
 				label.addEventHandler(MouseEvent.MOUSE_EXITED, onMouseExitEventHandler);
 				vbox.addEventHandler(MouseEvent.MOUSE_EXITED, onMouseExitEventHandler);
+				
+				// For click in tagcloud / label:
+				label.addEventHandler(MouseEvent.MOUSE_CLICKED, onMouseClickEventHandler);
+				vbox.addEventHandler(MouseEvent.MOUSE_CLICKED, onMouseClickEventHandler);
 				
 				// Keep track of how many clouds are already processed.
 				cloudCount++;
@@ -1120,9 +1135,9 @@ public class ParallelTagCloud extends VisualizationComponent
 					}
 					// Otherwise: Lower opacity to default value.
 					else {
-						for (Node node : tagCloudContainer.get(i).getChildren()) {
-							node.setOpacity(VisualizationComponent.DEFAULT_OPACITY_FACTOR);
-						}
+//						for (Node node : tagCloudContainer.get(i).getChildren()) {
+//							node.setOpacity(VisualizationComponent.DEFAULT_OPACITY_FACTOR);
+//						}
 					}
 				}
 				

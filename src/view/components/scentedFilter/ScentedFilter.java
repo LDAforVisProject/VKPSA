@@ -641,9 +641,9 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 			}
 			
 			// Adjust major tick unit.
-			rangeSlider.setMajorTickUnit( (max - min) / (options.getMajorTickCount() - 1));
+			rangeSlider.setMajorTickUnit( (max - min) / (options.getMajorTickCount() - 1) > 0 ? (max - min) / (options.getMajorTickCount() - 1) : 1);
 			
-			// Update text values.
+			// Update text values. 
 			min_spinner.setNumber(new BigDecimal(min));
 			max_spinner.setNumber(new BigDecimal(max));
 		}

@@ -21,6 +21,8 @@ import javafx.concurrent.Task;
 import javafx.util.Pair;
 import mdsj.Data;
 import model.LDAConfiguration;
+import model.documents.Document;
+import model.documents.KeywordContext;
 import model.misc.KeywordRankObject;
 import model.topic.Topic;
 import model.topic.TopicKeywordAlignment;
@@ -1570,7 +1572,8 @@ public class DBManagement
 		String statementString 			= 	"select keyword " +
 											"from keywords " +
 											"where " +
-											"    keyword like '%" + userText + "%';";
+											"   keyword like '%" + userText + "' or " +
+											"	keyword like '" + userText + "%';";
 
 		// Prepare statement.
 		PreparedStatement statement = connection.prepareStatement(statementString);
@@ -1657,4 +1660,113 @@ public class DBManagement
 		return results;
 	}
 	
+	/**
+	 * Loads all documents; sorts them by relevance for the specified topic. 
+	 * @param topicID
+	 * @return
+	 */
+	public ArrayList<Document> loadDocuments(Pair<Integer, Integer> topicID) throws SQLException
+	{
+		ArrayList<Document> documents = new ArrayList<Document>();
+		
+		/*
+		 * 1. Fetch data.	
+		 */
+		
+		String statementString 	=	"select " + 
+									"	 d.id, " +
+									"    tid.probability, " +
+									"    d.title, " +
+									"    d.authors, " +
+									"    d.abstract, " +
+									"    d.refinedAbstract, " +
+									"    d.conference, " +
+									"    d.date, " +
+									"    d.keywords " +
+									"from " +
+									"    topics_in_documents tid " +
+									"inner join documents d on " +
+									"    d.id                   = tid.documentsID " +
+									"where " +
+									"    tid.ldaConfigurationID = " + topicID.getKey() + " and " +
+									"    tid.topicID            = " + topicID.getValue() + " " +
+									"order by " +
+									"    tid.probability desc; "
+									;
+		
+		// Prepare statement.
+		PreparedStatement statement = connection.prepareStatement(statementString);
+		
+		// Execute statement.
+		ResultSet rs				= statement.executeQuery();
+	
+		/*
+		 * 2. Process data.
+		 * 
+		 */
+
+		// Read results, store in collection.
+		while (rs.next()) {
+			documents.add( new Document(rs.getInt("id"), 
+										rs.getFloat("probability"), 
+										rs.getString("title"),
+										rs.getString("authors"),
+										rs.getString("keywords"),
+										rs.getString("abstract"),
+										rs.getString("refinedAbstract"),
+										rs.getString("date"),
+										rs.getString("conference")) );
+		}
+		
+		return documents;
+	}
+	
+	/**
+	 * Load context for keyword: Appearances in abstracts, be it refined or un-refined.
+	 * @param keyword
+	 * @return
+	 * @throws SQLException
+	 */
+	public ArrayList<KeywordContext> loadContext(String keyword) throws SQLException
+	{
+		ArrayList<KeywordContext> keywordContextList = new ArrayList<KeywordContext>();
+		
+		/*
+		 * 1. Fetch data.	
+		 */
+		
+		String statementString 	=	"select " +
+									"    id, " +
+									"    title, " +
+									"    abstract, " +
+									"    refinedAbstract " +
+									"from " +
+									"    documents d " +
+									"where " +
+									"    d.abstract like '%" + keyword + "%' or " +
+									"    d.refinedAbstract like '%" + keyword + "%'; "
+									;
+		
+		// Prepare statement.
+		PreparedStatement statement = connection.prepareStatement(statementString);
+		
+		// Execute statement.
+		ResultSet rs				= statement.executeQuery();
+	
+		/*
+		 * 2. Process data.
+		 * 
+		 */
+
+		// Read results, store in collection.
+		while (rs.next()) {
+			keywordContextList.add( new KeywordContext(	rs.getInt("id"), 
+														keyword,
+														rs.getString("title"), 
+														rs.getString("abstract"),
+														rs.getString("refinedAbstract")) );
+		}
+		
+		return keywordContextList;
+	}	
 }
