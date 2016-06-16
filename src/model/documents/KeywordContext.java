@@ -29,18 +29,28 @@ public class KeywordContext
 		return keyword;
 	}
 
-	public SimpleStringProperty getDocumentTitle()
+	public SimpleStringProperty documentTitleProperty()
 	{
 		return documentTitle;
 	}
 
-	public SimpleStringProperty getOriginalAbstract()
+	public SimpleStringProperty originalAbstractProperty()
 	{
 		return originalAbstract;
 	}
 
-	public SimpleStringProperty getRefinedAbstract()
+	public SimpleStringProperty refinedAbstractProperty()
 	{
 		return refinedAbstract;
-	}	
+	}
+	
+	public void setOriginalAbstract(SimpleStringProperty originalAbstract)
+	{
+		this.originalAbstract = originalAbstract;
+	}
+
+	public void setRefinedAbstract(SimpleStringProperty refinedAbstract)
+	{
+		this.refinedAbstract = refinedAbstract;
+	}
 }

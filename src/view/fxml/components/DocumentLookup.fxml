@@ -7,8 +7,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-
-<AnchorPane prefHeight="265.0" prefWidth="510.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="view.components.documentLookup.DocumentLookup">
+<AnchorPane prefHeight="265.0" prefWidth="510.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.components.documentLookup.DocumentLookup">
    <children>
       <AnchorPane prefHeight="200.0" prefWidth="200.0" style="-fx-border-color: #ccc;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
          <children>
@@ -34,5 +33,11 @@
          </image>
       </ImageView>
       <TextField fx:id="search_textfield" layoutX="371.0" layoutY="3.0" prefHeight="25.0" prefWidth="127.0" text="Search Term" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="2.0" />
+      <Label layoutX="194.0" layoutY="14.0" text="ordered by relevance for topic" AnchorPane.leftAnchor="80.0" AnchorPane.topAnchor="7.0" />
+      <Label fx:id="topicID_label" layoutX="255.0" layoutY="14.0" text="TOPICID_LABEL" AnchorPane.leftAnchor="245.0" AnchorPane.topAnchor="7.0">
+         <font>
+            <Font name="System Italic" size="12.0" />
+         </font>
+      </Label>
    </children>
 </AnchorPane>

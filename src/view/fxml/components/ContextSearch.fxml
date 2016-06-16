@@ -14,8 +14,8 @@
             <TableView fx:id="table" layoutX="55.0" layoutY="14.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
               <columns>
                 <TableColumn prefWidth="97.0" text="Title" />
-                  <TableColumn prefWidth="211.0" text="Abstract (original)" />
-                  <TableColumn prefWidth="179.0" text="Abstract (processed)" />
+                  <TableColumn prefWidth="211.0" text="In original abstract" />
+                  <TableColumn prefWidth="179.0" text="In processed abstract" />
               </columns>
             </TableView>
          </children>
@@ -31,5 +31,11 @@
          </image>
       </ImageView>
       <TextField fx:id="search_textfield" layoutX="371.0" layoutY="3.0" prefHeight="25.0" prefWidth="127.0" text="Search Term" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="2.0" />
+      <Label layoutX="75.0" layoutY="7.0" text="for keyword" AnchorPane.leftAnchor="60.0" AnchorPane.topAnchor="7.0" />
+      <Label fx:id="keyword_label" layoutX="135.0" layoutY="7.0" text="KEYWORD_LABEL" AnchorPane.leftAnchor="128.0" AnchorPane.topAnchor="7.0">
+         <font>
+            <Font name="System Italic" size="12.0" />
+         </font>
+      </Label>
    </children>
 </AnchorPane>

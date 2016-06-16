@@ -1475,7 +1475,7 @@ public class AnalysisController extends Controller
 		// Load keyword context.
 		try {
 			// Updating DocumentLookup.
-			contextSearch.refresh(workspace.getDatabaseManagement().loadContext(keyword));
+			contextSearch.refresh(keyword, workspace.getDatabaseManagement().loadContext(keyword));
 		}
 		
 		catch (SQLException e) {

@@ -44,10 +44,10 @@ public class DocumentLookup extends VisualizationComponent
 		ObservableList<TableColumn<DocumentForLookupTable, ?>> columns = table.getColumns();
 		// Bind columns to properties.
 		((TableColumn<DocumentForLookupTable, Float>)columns.get(0)).setCellValueFactory(new PropertyValueFactory<DocumentForLookupTable, Float>("probability"));
-		((TableColumn<DocumentForLookupTable, Float>)columns.get(1)).setCellValueFactory(new PropertyValueFactory<DocumentForLookupTable, Float>("title"));
-		((TableColumn<DocumentForLookupTable, Float>)columns.get(2)).setCellValueFactory(new PropertyValueFactory<DocumentForLookupTable, Float>("date"));
-		((TableColumn<DocumentForLookupTable, Float>)columns.get(3)).setCellValueFactory(new PropertyValueFactory<DocumentForLookupTable, Float>("authors"));
-		((TableColumn<DocumentForLookupTable, Float>)columns.get(4)).setCellValueFactory(new PropertyValueFactory<DocumentForLookupTable, Float>("conference"));
+		((TableColumn<DocumentForLookupTable, String>)columns.get(1)).setCellValueFactory(new PropertyValueFactory<DocumentForLookupTable, String>("title"));
+		((TableColumn<DocumentForLookupTable, String>)columns.get(2)).setCellValueFactory(new PropertyValueFactory<DocumentForLookupTable, String>("date"));
+		((TableColumn<DocumentForLookupTable, String>)columns.get(3)).setCellValueFactory(new PropertyValueFactory<DocumentForLookupTable, String>("authors"));
+		((TableColumn<DocumentForLookupTable, String>)columns.get(4)).setCellValueFactory(new PropertyValueFactory<DocumentForLookupTable, String>("conference"));
 	}
 	
 	@Override
