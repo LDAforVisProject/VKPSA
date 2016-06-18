@@ -1178,6 +1178,10 @@ public class AnalysisController extends Controller
 		settingsPanel.setReferences(workspace, logPI, logTA);
 		// ... for keyword filter setup control.
 		keywordFilterSetup.setReferences(workspace, logPI, logTA);
+		// ...for document lookup.
+		documentLookup.setReferences(workspace, logPI, logTA);
+		// ...for context search.
+		contextSearch.setReferences(workspace, logPI, logTA);		
 	}
 	
 	/**
@@ -1458,7 +1462,7 @@ public class AnalysisController extends Controller
 		// Load documents sorted by relevance.
 		try {
 			// Updating DocumentLookup.
-			documentLookup.refresh(workspace.getDatabaseManagement().loadDocuments(topicID));
+			documentLookup.refresh(topicID, workspace.getDatabaseManagement().loadDocuments(topicID), null);
 		}
 		
 		catch (SQLException e) {
@@ -1475,7 +1479,7 @@ public class AnalysisController extends Controller
 		// Load keyword context.
 		try {
 			// Updating DocumentLookup.
-			contextSearch.refresh(keyword, workspace.getDatabaseManagement().loadContext(keyword));
+			contextSearch.refresh(keyword, workspace.getDatabaseManagement().loadContext(keyword), null);
 		}
 		
 		catch (SQLException e) {

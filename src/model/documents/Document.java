@@ -79,4 +79,22 @@ public class Document
 	{
 		return probability;
 	}
+	
+	/**
+	 * Determines whether instance contains specified string in one of it's attributes.
+	 * @param term
+	 * @return
+	 */
+	public boolean containsTerm(final String term)
+	{
+		return 	term == null								||
+				String.valueOf(probability).contains(term) 	||
+				title.contains(term)						||
+				authors.contains(term) 						||
+				keywords.contains(term) 					||
+				originalAbstract.contains(term) 			||
+				refinedAbstract.contains(term) 				||
+				date.contains(term) 						||
+				conference.contains(term);			
+	}
 }

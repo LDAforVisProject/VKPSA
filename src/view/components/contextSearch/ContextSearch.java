@@ -10,7 +10,9 @@ import model.documents.DocumentForLookupTable;
 import model.documents.KeywordContext;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -26,11 +28,22 @@ public class ContextSearch extends VisualizationComponent
 	private @FXML ImageView searchIcon_imageview;
 	private @FXML TextField search_textfield;
 	private @FXML TableView<KeywordContext> table;
+	private @FXML Label keyword_label;
 	
 	/**
 	 * Define number of allowed words in context (both previous and afterwards).
 	 */
 	private static final int CONTEXT_WORD_COUNT = 3;
+	
+	/**
+	 * Currently selected keyword.
+	 */
+	private String keyword;
+	
+	/**
+	 * Collection of instances of KeywordContext.
+	 */
+	private ArrayList<KeywordContext> keywordContextList;
 	
 	
 	@Override
@@ -86,11 +99,17 @@ public class ContextSearch extends VisualizationComponent
 	 * Refresh ContextSearch component.
 	 * @param keyword
 	 * @param keywordContextList List of keyword's appearances. 
+	 * @param searchTerm String to filter by.
 	 */
-	public void refresh(final String keyword, final ArrayList<KeywordContext> keywordContextList)
+	public void refresh(final String keyword, final ArrayList<KeywordContext> keywordContextList, final String searchTerm)
 	{
 		// Clear table.
 		table.getItems().clear();
+		
+		// Update selected keyword.
+		this.keyword			= keyword;
+		// Update collection of context instances.
+		this.keywordContextList	= keywordContextList;
 		
 //		CONTINUE HERE:
 //			- Mails: Interest in tests?
@@ -99,30 +118,43 @@ public class ContextSearch extends VisualizationComponent
 //			- Create pop-up for detail info on paper.
 //			- Cosmetic improvements (e.g. reduce filter width relative to panel width.)
 		
+		// Update keyword label.
+		keyword_label.setText(keyword);
+		
 		// Iterate over all instances of KeywordContext.
 		for (KeywordContext kc : keywordContextList) {
-			/*
-			 * 1. Generate context strings.
-			 */
 			
-			Pair<String, String> contextStringsForDocument = generateContextStrings(keyword, kc);
+			// Check if KeywordContext contains search term.
+			if (kc.containsTerm(searchTerm)) {
+				/*
+				 * 1. Generate context strings.
+				 */
+				
+				Pair<String, String> contextStringsForDocument = generateContextStrings(keyword, kc);
+				
+				/*
+				 * 2. Add context summaries for this document to collection. 
+				 */
 			
-			/*
-			 * 2. Add context summaries for this document to collection. 
-			 */
-		
-			kc.setOriginalAbstract(new SimpleStringProperty(contextStringsForDocument.getKey()));
-			kc.setRefinedAbstract(new SimpleStringProperty(contextStringsForDocument.getValue()));
-			
-			/*
-			 * 3. Update table.  
-			 */
-			
-			table.getItems().add(new KeywordContext(kc.getID(), kc.getKeyword(), kc.documentTitleProperty().get(), contextStringsForDocument.getKey(), contextStringsForDocument.getValue()));
+				kc.setOriginalAbstract(new SimpleStringProperty(contextStringsForDocument.getKey()));
+				kc.setRefinedAbstract(new SimpleStringProperty(contextStringsForDocument.getValue()));
+				
+				/*
+				 * 3. Update table.  
+				 */
+				
+				table.getItems().add(new KeywordContext(kc.getID(), kc.getKeyword(), kc.documentTitleProperty().get(), contextStringsForDocument.getKey(), contextStringsForDocument.getValue()));
+			}
 		}
 	}
 	
-	
+	/**
+	 * Generate string containing context in specified document.
+	 * @param keyword
+	 * @param keywordContext
+	 * @param searchTerm
+	 * @return
+	 */
 	private Pair<String, String> generateContextStrings(final String keyword, final KeywordContext keywordContext)
 	{
 		// Context string for original abstract.
@@ -194,7 +226,7 @@ public class ContextSearch extends VisualizationComponent
 		
 		 // Find first index from which to add to context neighbourhood:
 	   	 // Go backwards until the n-th space was found (-> n words before currently processed keyword occurence).
-	   	 for (startIndex = keywordIndex; startIndex > 0 && spaceCount < 4; startIndex--) {
+	   	 for (startIndex = keywordIndex; startIndex > 0 && spaceCount <= ContextSearch.CONTEXT_WORD_COUNT; startIndex--) {
 	   		 // If space is found: Increase space count.
 	   		 if (target.charAt(startIndex) == ' ')
 	   			 spaceCount++;
@@ -205,7 +237,7 @@ public class ContextSearch extends VisualizationComponent
 			
 	   	 // Find last index from which to add to context neighbourhood:
     	 // Go forward until the n-th space was found (-> n after before currently processed keyword occurence).
-    	 for (endIndex = keywordIndex; endIndex < target.length() && spaceCount < 4; endIndex++) {
+    	 for (endIndex = keywordIndex; endIndex < target.length() && spaceCount <= ContextSearch.CONTEXT_WORD_COUNT; endIndex++) {
     		 // If space is found: Increase space count.
     		 if (target.charAt(endIndex) == ' ')
     			 spaceCount++;
@@ -258,5 +290,16 @@ public class ContextSearch extends VisualizationComponent
 	public void clear()
 	{
 		table.getItems().clear();
+		keyword_label.setText("");
+	}
+	
+	@FXML
+	public void searchForTerm(ActionEvent e)
+	{
+		System.out.println("Searching for term " + search_textfield.getText() + ".");
+		log("Searching for term " + search_textfield.getText() + ".");
+		
+		// Refresh table, only displaying items containing the specified term.
+		refresh(this.keyword, this.keywordContextList, search_textfield.getText());
 	}
 }

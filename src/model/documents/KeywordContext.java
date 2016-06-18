@@ -53,4 +53,23 @@ public class KeywordContext
 	{
 		this.refinedAbstract = refinedAbstract;
 	}
+
+	public SimpleStringProperty getDocumentTitle()
+	{
+		return documentTitle;
+	}
+	
+	/**
+	 * Determines whether instance contains specified string in one of it's attributes.
+	 * @param term
+	 * @return
+	 */
+	public boolean containsTerm(final String term)
+	{
+		return 	term == null							||
+				documentTitle.get().contains(term) 		||
+				originalAbstract.get().contains(term)	||
+				refinedAbstract.get().contains(term);
+			
+	}
 }

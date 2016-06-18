@@ -9,7 +9,9 @@ import java.util.Set;
 import model.documents.Document;
 import model.documents.DocumentForLookupTable;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -25,6 +27,18 @@ public class DocumentLookup extends VisualizationComponent
 	private @FXML ImageView searchIcon_imageview;
 	private @FXML TextField search_textfield;
 	private @FXML TableView<DocumentForLookupTable> table;
+	private @FXML Label topicID_label;
+	
+	/**
+	 * ID of currently selected topic.
+	 */
+	private Pair<Integer, Integer> topicID;
+	
+	/**
+	 * Selection of currently loaded documents.
+	 */
+	private ArrayList<Document> documents;
+	
 	
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1)
@@ -79,16 +93,27 @@ public class DocumentLookup extends VisualizationComponent
 
 	/**
 	 * Refreshes data.
+	 * @param topicID
 	 * @param document List of documents, sorted by probability.
+	 * @param searchTerm String to filter by.
 	 */
-	public void refresh(ArrayList<Document> documents)
+	public void refresh(Pair<Integer, Integer> topicID, ArrayList<Document> documents, String searchTerm)
 	{
 		// Clear previous state.
 		table.getItems().clear();
 		
+		// Update topic ID.
+		this.topicID	= topicID;
+		// Update collection of documents.
+		this.documents	= documents;
+		
+		// Update label for topic ID.
+		topicID_label.setText(topicID.getKey() + "#" + topicID.getValue());
+		
 		// Update table data.
 		for (Document doc : documents) {
-			table.getItems().add(doc.generateDocumentForLookup());
+			if (doc.containsTerm(searchTerm))
+				table.getItems().add(doc.generateDocumentForLookup());
 		}
 	}
 	
@@ -98,6 +123,7 @@ public class DocumentLookup extends VisualizationComponent
 	public void clear()
 	{
 		table.getItems().clear();
+		topicID_label.setText("");
 	}
 	
 	@Override
@@ -131,4 +157,13 @@ public class DocumentLookup extends VisualizationComponent
 		return null;
 	}
 
+	@FXML
+	public void searchForTerm(ActionEvent e)
+	{
+		System.out.println("Searching for term " + search_textfield.getText() + ".");
+		log("Searching for term " + search_textfield.getText() + ".");
+		
+		// Refresh table, only displaying items containing the specified term.
+		refresh(this.topicID, this.documents, search_textfield.getText());
+	}
 }
