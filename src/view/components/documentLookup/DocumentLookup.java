@@ -8,11 +8,13 @@ import java.util.Set;
 
 import model.documents.Document;
 import model.documents.DocumentForLookupTable;
+import model.documents.KeywordContext;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -62,8 +64,29 @@ public class DocumentLookup extends VisualizationComponent
 		((TableColumn<DocumentForLookupTable, String>)columns.get(2)).setCellValueFactory(new PropertyValueFactory<DocumentForLookupTable, String>("date"));
 		((TableColumn<DocumentForLookupTable, String>)columns.get(3)).setCellValueFactory(new PropertyValueFactory<DocumentForLookupTable, String>("authors"));
 		((TableColumn<DocumentForLookupTable, String>)columns.get(4)).setCellValueFactory(new PropertyValueFactory<DocumentForLookupTable, String>("conference"));
+	
+		// Init on-click listeners for table.
+		initTableRowListener();
 	}
 	
+	/**
+	 * Initialize on-click listener for table.
+	 */
+	private void initTableRowListener()
+	{
+		// Add listener for double-click on row.
+		table.setRowFactory( tv -> {
+		    TableRow<DocumentForLookupTable> row = new TableRow<>();
+		    row.setOnMouseClicked(event -> {
+		        if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
+		        	// Show document details.
+		            analysisController.showDocumentDetail(row.getItem().getID());
+		        }
+		    });
+		    
+		    return row;
+		});
+	}
 	@Override
 	public void processSelectionManipulationRequest(double minX, double minY, double maxX, double maxY)
 	{	

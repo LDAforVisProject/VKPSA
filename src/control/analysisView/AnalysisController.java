@@ -21,6 +21,7 @@ import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
 import view.components.VisualizationComponentType;
 import view.components.controls.keywordFilterSetup.KeywordFilterSetup;
+import view.components.documentDetail.DocumentDetail;
 import view.components.documentLookup.DocumentLookup;
 import view.components.contextSearch.ContextSearch;
 import view.components.heatmap.CategoricalHeatmap;
@@ -278,6 +279,15 @@ public class AnalysisController extends Controller
 	 */
 	private ContextSearch contextSearch;
 	
+	/**
+	 * Document detail view.
+	 */
+	private DocumentDetail documentDetail;
+	/**
+	 * Pop-over used for document detail component.
+	 */
+	private PopOver documentDetail_popover;
+	
 	// -----------------------------------------------
 	// 				Data.
 	// -----------------------------------------------
@@ -368,6 +378,7 @@ public class AnalysisController extends Controller
 		initComparisonHeatmaps();
 		initDocumentLookup();
 		initContextSearch();
+		initDocumentDetail();
 		
 		// Bring settings icons to front.
 		settings_mds_icon.toFront();
@@ -393,11 +404,26 @@ public class AnalysisController extends Controller
 	 */
 	private void initContextSearch()
 	{
-		
 		contextSearch 	= (ContextSearch)VisualizationComponent.generateInstance(VisualizationComponentType.CONTEXT_SEARCH, this, null, null, null);		
 		contextSearch.embedIn(contextSearch_anchorpane);
 	}
 	
+	/**
+	 * Sets up document detail view.
+	 */
+	private void initDocumentDetail()
+	{
+		documentDetail 			= (DocumentDetail)VisualizationComponent.generateInstance(VisualizationComponentType.DOCUMENT_DETAIL, this, null, null, null);
+		
+		documentDetail_popover	= new PopOver();
+		documentDetail_popover.setDetached(true);
+		
+		documentDetail_popover.setContentNode(documentDetail.getRoot());
+	}
+	
+	/**
+	 * Sets up setting panel.
+	 */
 	private void initSettingsPanel()
 	{
 		settingsPanel 	= (SettingsPanel)VisualizationComponent.generateInstance(VisualizationComponentType.SETTINGS_PANEL, this, null, null, null);		
@@ -405,18 +431,27 @@ public class AnalysisController extends Controller
 		settingsPanel.embedIn(settings_anchorpane);
 	}
 	
+	/**
+	 * Sets up heatmap used for comparison of topics.
+	 */
 	private void initComparisonHeatmaps()
 	{
 		tmcHeatmap = (CategoricalHeatmap)VisualizationComponent.generateInstance(VisualizationComponentType.CATEGORICAL_HEATMAP, this, null, null, null);
 		tmcHeatmap.embedIn(localscope_tmc_anchorPane);
 	}
 
+	/**
+	 * Sets up parallel tag cloud.
+	 */
 	private void initParallelTagCloud()
 	{
 		parallelTagCloud = (ParallelTagCloud)VisualizationComponent.generateInstance(VisualizationComponentType.PARALLEL_TAG_CLOUD, this, null, null, null);
 		parallelTagCloud.embedIn(localScope_ptc_anchorPane);
 	}
 	
+	/**
+	 * Sets up all used filters (primitive as well as derivated and dynamic).
+	 */
 	private void initFilterControls()
 	{
 		// Init collections.
@@ -1485,6 +1520,26 @@ public class AnalysisController extends Controller
 		catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Show document details in pop-up.
+	 * @param documentID
+	 */
+	public void showDocumentDetail(int documentID)
+	{
+		System.out.println("showing document details - " + documentID);
+		CONTINUE HERE:
+			- Get document from DB, test document detail.
+			- Mails: Interest in tests?
+			- Plan: When to start data generation?
+			x Prepare text for display in table.
+			- Color keyword occurences.
+			x Create pop-up for detail info on paper.
+			- Cosmetic improvements (e.g. reduce filter width relative to panel width.)
+		
+		documentDetail.update();
+		documentDetail_popover.show(analysisRoot_anchorPane);
 	}
 	
 	/**

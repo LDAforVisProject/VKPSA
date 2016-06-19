@@ -60,7 +60,7 @@ public class Document
 		return originalAbstract;
 	}
 	
-	public String getRefinedAbstract()
+	public String getProcessedAbstract()
 	{
 		return refinedAbstract;
 	}

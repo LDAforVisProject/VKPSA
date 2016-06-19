@@ -77,6 +77,7 @@ public abstract class VisualizationComponent extends Controller implements ISele
 		FXML_PATHS.put(VisualizationComponentType.SETTINGS_PANEL, "/view/fxml/components/SettingsPanel.fxml");
 		FXML_PATHS.put(VisualizationComponentType.DOCUMENT_LOOKUP, "/view/fxml/components/DocumentLookup.fxml");
 		FXML_PATHS.put(VisualizationComponentType.CONTEXT_SEARCH, "/view/fxml/components/ContextSearch.fxml");
+		FXML_PATHS.put(VisualizationComponentType.DOCUMENT_DETAIL, "/view/fxml/components/DocumentDetail.fxml");
 	}
 	
 	/**

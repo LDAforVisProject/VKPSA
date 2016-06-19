@@ -27,7 +27,7 @@ public class DocumentForLookupTable
 		this.conference			= new SimpleStringProperty(conference);
 	}
 	
-	public int getId()
+	public int getID()
 	{
 		return id;
 	}

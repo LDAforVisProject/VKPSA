@@ -8,13 +8,17 @@ import java.util.Set;
 
 import model.documents.DocumentForLookupTable;
 import model.documents.KeywordContext;
+import model.workspace.Workspace;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
@@ -66,6 +70,28 @@ public class ContextSearch extends VisualizationComponent
 		((TableColumn<KeywordContext, String>)columns.get(0)).setCellValueFactory(new PropertyValueFactory<KeywordContext, String>("documentTitle"));
 		((TableColumn<KeywordContext, String>)columns.get(1)).setCellValueFactory(new PropertyValueFactory<KeywordContext, String>("originalAbstract"));
 		((TableColumn<KeywordContext, String>)columns.get(2)).setCellValueFactory(new PropertyValueFactory<KeywordContext, String>("refinedAbstract"));
+		
+		// Init on-click listeners for table.
+		initTableRowListener();
+	}
+	
+	/**
+	 * Initialize on-click listener for table.
+	 */
+	private void initTableRowListener()
+	{
+		// Add listener for double-click on row.
+		table.setRowFactory( tv -> {
+		    TableRow<KeywordContext> row = new TableRow<>();
+		    row.setOnMouseClicked(event -> {
+		        if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
+		        	// Show document details.
+		            analysisController.showDocumentDetail(row.getItem().getID());
+		        }
+		    });
+		    
+		    return row;
+		});
 	}
 	
 	@Override
@@ -110,13 +136,6 @@ public class ContextSearch extends VisualizationComponent
 		this.keyword			= keyword;
 		// Update collection of context instances.
 		this.keywordContextList	= keywordContextList;
-		
-//		CONTINUE HERE:
-//			- Mails: Interest in tests?
-//			- Prepare text for display in table.
-//			- Color keyword occurences.
-//			- Create pop-up for detail info on paper.
-//			- Cosmetic improvements (e.g. reduce filter width relative to panel width.)
 		
 		// Update keyword label.
 		keyword_label.setText(keyword);
@@ -302,4 +321,5 @@ public class ContextSearch extends VisualizationComponent
 		// Refresh table, only displaying items containing the specified term.
 		refresh(this.keyword, this.keywordContextList, search_textfield.getText());
 	}
+	
 }
