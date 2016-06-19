@@ -1769,4 +1769,51 @@ public class DBManagement
 		
 		return keywordContextList;
 	}	
+	
+	/**
+	 * Loads document as specified by its ID.
+	 * @param documentID
+	 * @return
+	 * @throws SQLException
+	 */
+	public Document loadDocumentByID(int documentID) throws SQLException
+	{	
+		/*
+		 * 1. Fetch data.	
+		 */
+		
+		String statementString 	=	"select " +
+									"    * " +
+									"from " +
+									"    documents d " +
+									"where " +
+									"    d.id = " + documentID
+									;
+		
+		// Prepare statement.
+		PreparedStatement statement = connection.prepareStatement(statementString);
+		
+		// Execute statement.
+		ResultSet rs				= statement.executeQuery();
+	
+		/*
+		 * 2. Process data.
+		 * 
+		 */
+
+		// Read results, store in collection.
+		if (rs.next()) {
+			return new Document(rs.getInt("id"),
+								1,
+								rs.getString("title"), 
+								rs.getString("authors"), 
+								rs.getString("keywords"), 
+								rs.getString("abstract"), 
+								rs.getString("refinedAbstract"), 
+								rs.getString("date"), 
+								rs.getString("conference")); 
+		}
+		
+		return null;
+	}	
 }

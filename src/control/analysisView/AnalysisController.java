@@ -415,10 +415,11 @@ public class AnalysisController extends Controller
 	{
 		documentDetail 			= (DocumentDetail)VisualizationComponent.generateInstance(VisualizationComponentType.DOCUMENT_DETAIL, this, null, null, null);
 		
-		documentDetail_popover	= new PopOver();
-		documentDetail_popover.setDetached(true);
-		
+		documentDetail_popover	= new PopOver();	
+		// Set content node.
 		documentDetail_popover.setContentNode(documentDetail.getRoot());
+		// Close on escape.
+		documentDetail_popover.setHideOnEscape(true);
 	}
 	
 	/**
@@ -657,6 +658,9 @@ public class AnalysisController extends Controller
 		
 		// TM comparison heatmap:
 		refreshTMCHeatmap(dataspace.getActiveLDAConfigurations());
+		
+		System.out.println("blub = " + paramSpaceScatterchart.getRoot().getBoundsInLocal().getHeight());
+		
 	}
 
 	/**
@@ -854,9 +858,6 @@ public class AnalysisController extends Controller
 	protected void resizeElement(Node node, double width, double height)
 	{
 		switch (node.getId()) {
-			case "paramSpace_distribution_anchorPane_filtered":
-			break;
-			
 			case "paramSpace_distribution_anchorPane_selected":
 				// Adapt size.
 				paramSpaceScatterchart.resizeContent(width, height);
@@ -884,42 +885,7 @@ public class AnalysisController extends Controller
 			break;
 			
 			case "settings_anchorpane":
-				filters_vbox.setPrefWidth(width - 20);
-				for (ScentedFilter filter : filters) {
-					filter.resizeContent(width - 20, 0);
-				}
-			break;
-		}
-	}
-	
-	/**
-	 * Used for initial resizing of individual nodes.
-	 * @param node
-	 * @param width
-	 * @param height
-	 */
-	private void resizeElementManually(Node node, double width, double height)
-	{
-		switch (node.getId()) {
-			case "paramSpace_distribution_anchorPane_filtered":
-			break;
-			
-			case "paramSpace_distribution_anchorPane_selected":
-				// Adapt size.
-				paramSpaceScatterchart.resizeContent(width, height);
-			break;
-			
-			// Resize local scope element: Chord diagram.
-			case "localscope_tmc_anchorPane":
-				tmcHeatmap.resizeContent(width, height);
-			break;
-			
-			// Resize local scope element: Parallel tag clouds.
-			case "localScope_ptc_anchorPane":
-				parallelTagCloud.resizeContent(width, height);
-			break;
-			
-			case "settings_anchorpane":
+				System.out.println("width = " + width);
 				filters_vbox.setPrefWidth(width - 20);
 				for (ScentedFilter filter : filters) {
 					filter.resizeContent(width - 20, 0);
@@ -1413,6 +1379,13 @@ public class AnalysisController extends Controller
 																		keywordRankObjects, 
 																		keyword,
 																		numberOfKeywords));
+				
+				/*
+				 * Resize filter to expected size.
+				 */
+				System.out.println("f_a.w = " + filter_anchorpane.getWidth());
+				resizeElement(settings_anchorpane, filter_anchorpane.getWidth() + 14, 1);
+				
 			}
 			
 		} 
@@ -1528,18 +1501,35 @@ public class AnalysisController extends Controller
 	 */
 	public void showDocumentDetail(int documentID)
 	{
-		System.out.println("showing document details - " + documentID);
-		CONTINUE HERE:
-			- Get document from DB, test document detail.
-			- Mails: Interest in tests?
-			- Plan: When to start data generation?
-			x Prepare text for display in table.
-			- Color keyword occurences.
-			x Create pop-up for detail info on paper.
-			- Cosmetic improvements (e.g. reduce filter width relative to panel width.)
+//		CONTINUE HERE:
+//			x Get document from DB, test document detail.
+//			- Mails: Interest in tests?
+//			- Plan: When to start data generation?
+//			x Prepare text for display in table.
+//			o Color keyword occurences.
+//			x Create pop-up for detail info on paper.
+//			- Cosmetic improvements (e.g. reduce filter width relative to panel width.)
 		
-		documentDetail.update();
-		documentDetail_popover.show(analysisRoot_anchorPane);
+		try {
+			// Load document, update component.
+			documentDetail.update(workspace.getDatabaseManagement().loadDocumentByID(documentID));
+			
+			// Show document detail.
+			documentDetail_popover.show(analysisRoot_anchorPane);
+			// Detach popup.
+			documentDetail_popover.setAnchorX(0);
+			documentDetail_popover.setAnchorY(0);
+			documentDetail_popover.setX(0);
+			documentDetail_popover.setY(0);
+			documentDetail_popover.setDetached(true);
+			documentDetail_popover.setDetachedTitle("Document #" + documentID);
+			// Center on screen.
+			documentDetail_popover.centerOnScreen();
+		} 
+		
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**

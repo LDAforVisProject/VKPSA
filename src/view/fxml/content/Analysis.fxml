@@ -16,7 +16,7 @@
 
 <AnchorPane fx:id="analysisRoot_anchorPane" maxHeight="694.0" maxWidth="1366.0" prefHeight="694.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="control.analysisView.AnalysisController">
    <children>
-      <SplitPane fx:id="content_history_splitpane" dividerPositions="0.6098265895953757" orientation="VERTICAL" prefHeight="850.0" prefWidth="1440.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <SplitPane fx:id="content_history_splitpane" dividerPositions="0.7384393063583815" orientation="VERTICAL" prefHeight="850.0" prefWidth="1440.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                <children>
@@ -60,11 +60,11 @@
                                     </AnchorPane>
                                 </items>
                               </SplitPane>
-                              <SplitPane fx:id="overview_detail_splitpane" dividerPositions="0.5" orientation="VERTICAL" prefHeight="526.0" prefWidth="1033.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              <SplitPane fx:id="overview_detail_splitpane" dividerPositions="0.5515873015873016" orientation="VERTICAL" prefHeight="526.0" prefWidth="1033.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <items>
-                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="96.0" prefWidth="774.0">
+                                  <AnchorPane minHeight="280.0" minWidth="0.0" prefWidth="774.0">
                                        <children>
-                                          <SplitPane dividerPositions="0.37998056365403304, 0.7055393586005831" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                          <SplitPane dividerPositions="0.37998056365403304, 0.7055393586005831" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <items>
                                               <AnchorPane fx:id="mds_anchorPane" minHeight="0.0" minWidth="0.0" onMouseEntered="#showSettingsIcon" onMouseExited="#hideSettingsIcon" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #ffffff; -fx-border: #ccc;">
                                                    <children>
@@ -183,14 +183,14 @@
                <children>
                   <SplitPane dividerPositions="0.24008810572687225, 0.6226138032305433" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <items>
-                        <AnchorPane minWidth="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <AnchorPane minWidth="323.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
                               <SplitPane layoutX="300.0" prefHeight="149.0" prefWidth="1062.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <items>
                                     <ScrollPane hbarPolicy="ALWAYS" layoutX="300.0" layoutY="6.0" prefHeight="83.0" prefWidth="1062.0" vbarPolicy="NEVER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="6.0" />
                                  </items>
                               </SplitPane>
-                            <AnchorPane minHeight="212.0" prefHeight="212.0" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <AnchorPane prefWidth="323.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <children>
                                     <Label layoutX="51.0" layoutY="15.0" text="History" AnchorPane.topAnchor="13.0">
                                        <font>

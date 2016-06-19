@@ -482,9 +482,8 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 		
 		else {
 			 // Setting the uniform variable for the glow width and height
-			int depth = 20;
-			
-			DropShadow borderGlow= new DropShadow();
+			int depth 				= 20;
+			DropShadow borderGlow 	= new DropShadow();
 			borderGlow.setOffsetY(0f);
 			borderGlow.setOffsetX(0f);
 			
@@ -503,12 +502,12 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 	{
 		if (width > 0) {
 			// Delta between entire width and width of scented widget.
-			final double delta	= 150;
+			final double delta	= 160;
 			double newWidth 	= width - delta > 0 ? width - delta : 0;
 			
-			barchart.setPrefWidth(newWidth);
-			barchart.setMinWidth(newWidth);
-			barchart.setPrefWidth(newWidth);
+			barchart.setPrefWidth(newWidth + 38);
+			barchart.setMinWidth(newWidth + 38);
+			barchart.setMaxWidth(newWidth + 38);
 			
 			if (options.useRangeSlider()) {			
 				rangeSlider.setPrefWidth(newWidth + 10);
@@ -522,7 +521,7 @@ public class ScentedFilter extends VisualizationComponent implements ISpinnerLis
 			}
 			
 			// Place max_stepper accordingly.
-			max_spinner.setLayoutX(width - max_spinner.getWidth() + 10);
+			max_spinner.setLayoutX(width - max_spinner.getWidth());
 		}
 	}
 	

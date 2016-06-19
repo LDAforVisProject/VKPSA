@@ -22,7 +22,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 import javafx.stage.DirectoryChooser;
 
-public class LoadController extends Controller
+public class LoadController extends DataSubViewController
 {
 	private @FXML TextField textfield_directory;
 	private @FXML Button button_browse;
@@ -258,5 +258,15 @@ public class LoadController extends Controller
 	protected Map<String, Integer> prepareOptionSet()
 	{
 		return null;
+	}
+
+	@Override
+	public void freezeOptionControls()
+	{
+	}
+
+	@Override
+	public void unfreezeOptionControls()
+	{
 	}
 }

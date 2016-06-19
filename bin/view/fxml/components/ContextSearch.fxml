@@ -30,7 +30,7 @@
             <Image url="icons\490px-Magnifying_glass_icon.svg.png" />
          </image>
       </ImageView>
-      <TextField fx:id="search_textfield" layoutX="371.0" layoutY="3.0" onAction="#searchForTerm" prefHeight="25.0" prefWidth="127.0" text="Search Term" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="2.0" />
+      <TextField fx:id="search_textfield" layoutX="371.0" layoutY="3.0" onAction="#searchForTerm" prefHeight="25.0" prefWidth="127.0" promptText="Search Term" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="2.0" />
       <Label layoutX="75.0" layoutY="7.0" text="for keyword" AnchorPane.leftAnchor="60.0" AnchorPane.topAnchor="7.0" />
       <Label fx:id="keyword_label" layoutX="135.0" layoutY="7.0" AnchorPane.leftAnchor="128.0" AnchorPane.topAnchor="7.0">
          <font>

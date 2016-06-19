@@ -117,7 +117,6 @@ public class ScentedKeywordFilter extends ScentedFilter
 		data.setInactiveIndices(inactiveIndices);
 		data.setActiveIndices(activeIndices);
 		
-		System.out.println("refreshing skf");
 		// Refresh chart.
 		refresh((ScentedKeywordFilterDataset)data);
 	}
@@ -228,12 +227,6 @@ public class ScentedKeywordFilter extends ScentedFilter
 		    	ldaConfigIDs.addAll(data.getBarToDataAssociations().get("inactive_" + bar.getXValue()));
 		    	ldaConfigIDs.addAll(data.getBarToDataAssociations().get("active_" + bar.getXValue()));
 		    	
-//		    	@todo next: 
-//		    			- cross.-vis. highlighting with topic-level granularity.
-//		    			- fix remaining issues, improve handling.
-//		    	after finishing dynamic keyword filters:
-//		    			see roadmap/feature requests/paper deadlines discussed with TMö on 2016-04-20.
-		    	
 		    	// Highlight bar.
 		    	for (XYChart.Series<String, Number> series : barchart.getData()) {
 		    		for (XYChart.Data<String, Number> tmpBar : series.getData()) {
@@ -330,5 +323,33 @@ public class ScentedKeywordFilter extends ScentedFilter
 	public static int getKeywordCount()
 	{
 		return ScentedKeywordFilter.keywordsInUse.size();
+	}
+	
+	@Override
+	public void resizeContent(double width, double height)
+	{
+		if (width > 0) {
+			// Delta between entire width and width of scented widget.
+			final double delta	= 160;
+			double newWidth 	= width - delta > 0 ? width - delta : 0;
+			
+			barchart.setPrefWidth(newWidth + 38);
+			barchart.setMinWidth(newWidth + 38);
+			barchart.setMaxWidth(newWidth + 38);
+			
+			if (options.useRangeSlider()) {			
+				rangeSlider.setPrefWidth(newWidth + 10);
+				rangeSlider.setMinWidth(newWidth + 10);
+				rangeSlider.setMaxWidth(newWidth + 10);
+			}
+			else {
+				slider.setPrefWidth(newWidth - 5);
+				slider.setMinWidth(newWidth - 5);
+				slider.setMaxWidth(newWidth - 5);
+			}
+			
+			// Place max_stepper accordingly.
+			max_spinner.setLayoutX(max_spinner.getWidth() > 0 ? width - max_spinner.getWidth() : width - 55);
+		}
 	}
 }

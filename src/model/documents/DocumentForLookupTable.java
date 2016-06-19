@@ -2,6 +2,8 @@ package model.documents;
 
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 
 /**
  * Document class containing fewer attributes. Used in table in DocumentLookup.
