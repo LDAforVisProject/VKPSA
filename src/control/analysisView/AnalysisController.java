@@ -885,7 +885,6 @@ public class AnalysisController extends Controller
 			break;
 			
 			case "settings_anchorpane":
-				System.out.println("width = " + width);
 				filters_vbox.setPrefWidth(width - 20);
 				for (ScentedFilter filter : filters) {
 					filter.resizeContent(width - 20, 0);

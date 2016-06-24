@@ -328,7 +328,7 @@ public class ParallelTagCloud extends VisualizationComponent
 	
 	/**
 	 * Refreshes parallel tag cloud visualization (as opposed to parallel tag cloud component, which
-	 * includes the probabiltiy distribution barchart).
+	 * includes the probability distribution barchart).
 	 * @param data
 	 * @param options
 	 * @param hasDataChanged Indicates whether new  data has loaded (or if only bridges are redrawn).
@@ -373,7 +373,7 @@ public class ParallelTagCloud extends VisualizationComponent
 	    adjustTagcloudPlacement();
 	    
 	    /*
-	     * 4. Draw connections between tags with same content in different topics. 
+	     * 4. Draw connections between tags with same content in different topics. .
 	     */
 	   
 	    drawBridges(data, options);
