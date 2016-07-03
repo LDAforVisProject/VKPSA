@@ -120,7 +120,20 @@ public class ParallelTagCloud extends VisualizationComponent
      */
 	
 	/**
-	 * Keyword that is currently hovered over.
+	 * Keyword requested for semi-persistent/non-transient external action (e.g. selection for context search component). 
+	 */
+	private String requestedKeyword;
+	/**
+	 * Store reference to specific instance of requested label.
+	 */
+	private Label requestedKeywordLabel;
+	/**
+	 * Reference to labels containing the currently selected keyword.
+	 */
+	private List<Label> labelsWithRequestedKeywords;
+	
+	/**
+	 * Keyword that is currently selected, e.g. by hovering over it.
 	 */
 	private String selectedKeyword;
 	/**
@@ -187,7 +200,8 @@ public class ParallelTagCloud extends VisualizationComponent
 		topicIDLabels 						= new ArrayList<Label>();
 		tagCloudContainer 					= new ArrayList<VBox>();
 		labelsWithSelectedKeyword			= new ArrayList<Label>();
-	
+		labelsWithRequestedKeywords			= new ArrayList<Label>();
+		
 		keywordProbabilitySumsOverTopics 	= new LinkedHashMap<String, Double>(); 
 		
 		/*
@@ -198,6 +212,7 @@ public class ParallelTagCloud extends VisualizationComponent
 		keywordProbabilitySumOverTopicsMin	= Double.MAX_VALUE;
 		selectedKeyword						= "";
 		selectedTopicName					= "";
+		requestedKeyword					= "";
 		zoomFactor							= 1;
 		
 	}
@@ -680,11 +695,36 @@ public class ParallelTagCloud extends VisualizationComponent
 			        	final int ldaConfigID 	= Integer.valueOf(topicIDLabel.getText().substring(0, topicIDLabel.getText().indexOf("#")));
 			        	final int topicID		= Integer.valueOf(topicIDLabel.getText().substring(topicIDLabel.getText().indexOf("#") + 1));
 			        	
+			        	// Remove highlighting in other labels.
+//			        	removeHoverHighlighting(labelsWithKeywordInContextSearch);
+			        	// Clear collection of labels with keywords in context search.
+//			        	labelsWithKeywordInContextSearch.clear();
+			        	
+			        	// Update requested keyword.
+			        	requestedKeyword 		= label.getText();
+			        	// Update requested label.
+			        	requestedKeywordLabel	= label; 
+			        	
+			        	// Clear previously requested labels.
+			        	removeHoverHighlighting(labelsWithRequestedKeywords);
+			        	labelsWithRequestedKeywords.clear();
+
+			        	// Add all labels containing the requested keyword.
+			        	for (int i = 0; i < tagCloudContainer.size(); i++) {
+			    			for (Node node : tagCloudContainer.get(i).getChildren()) {
+			    				Label label = (Label)node;
+			    				
+			    				if (label.getText().equals(requestedKeyword))
+			    					labelsWithRequestedKeywords.add(label);
+			    			}
+			        	}
+			        	
 			        	// List relevant documents, fetch results.
 		            	Map<Integer, Integer> documentRanksByID = analysisController.listRelevantDocuments(new Pair<Integer, Integer>(ldaConfigID, topicID));
 		            	// Show keyword context (provide rank results to keyword context component).
 		            	analysisController.showKeywordContext(label.getText(), documentRanksByID);
 		            	
+		            	// Stop event's propagation.
 		            	event.consume();
 		            }
 		        });
@@ -1148,9 +1188,13 @@ public class ParallelTagCloud extends VisualizationComponent
 	@Override
 	public void removeHoverHighlighting()
 	{
+		System.out.println("removeHH()");
 		for (int i = 0; i < tagCloudContainer.size(); i++) {
 			for (Node node : tagCloudContainer.get(i).getChildren()) {
-				node.setOpacity(VisualizationComponent.DEFAULT_OPACITY_FACTOR);
+				Label label = (Label)node;
+				
+				if (!label.getText().equals(requestedKeyword))
+					node.setOpacity(VisualizationComponent.DEFAULT_OPACITY_FACTOR);
 			}
 		}
 	}
@@ -1162,16 +1206,22 @@ public class ParallelTagCloud extends VisualizationComponent
 	public void removeHoverHighlighting(List<Label> labels)
 	{
 		// Reset opacity of labels containing selected keyword, reset text weight.
-    	for (Label label : labelsWithSelectedKeyword) {
-    		// Set opacity.
-    		label.setOpacity(VisualizationComponent.DEFAULT_OPACITY_FACTOR);
-    		
-    		// Remove boldening.
-    		label.setFont(Font.font(label.getFont().getName(), FontWeight.NORMAL, label.getFont().getSize()));
+    	for (Label label : labels) {
+    		// If label is not requested keyword label:
+    		if (!label.equals(requestedKeywordLabel)) {
+	    		// Remove boldening (except keyword is keyword in context search component).
+	    		label.setFont(Font.font(label.getFont().getName(), FontWeight.NORMAL, label.getFont().getSize()));
+	    		
+	    		// If labels don't carry requested keyword: Reset opacity.
+	    		if (!label.getText().equals(requestedKeyword)) {
+					// Set opacity.
+					label.setOpacity(VisualizationComponent.DEFAULT_OPACITY_FACTOR);
+	    		}
+    		}
     	}
     	
     	// Reset collection.
-    	labelsWithSelectedKeyword.clear();
+    	labels.clear();
 	}
 
 	@Override
