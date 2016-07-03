@@ -12,8 +12,12 @@ import model.workspace.Workspace;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -23,6 +27,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.util.Pair;
 import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
@@ -33,6 +38,11 @@ public class ContextSearch extends VisualizationComponent
 	private @FXML TextField search_textfield;
 	private @FXML TableView<KeywordContext> table;
 	private @FXML Label keyword_label;
+	
+	/**
+	 * Menu item used for jumping to document in DocumentLookup.
+	 */
+	private MenuItem jumpToMenuItem;
 	
 	/**
 	 * Define number of allowed words in context (both previous and afterwards).
@@ -68,6 +78,9 @@ public class ContextSearch extends VisualizationComponent
 		// Table isn't editable.
 		table.setEditable(false);
 		
+		// Init context menu for table.
+		initTableContextMenu();
+		
 		// Get columns in table.
 		ObservableList<TableColumn<KeywordContext, ?>> columns = table.getColumns();
 		// Bind columns to properties.
@@ -80,6 +93,24 @@ public class ContextSearch extends VisualizationComponent
 		initTableRowListener();
 	}
 	
+	private void initTableContextMenu()
+	{
+		ContextMenu menu	= new ContextMenu();
+		jumpToMenuItem		= new MenuItem("Jump to entry in document lookup");
+		menu.getItems().add(jumpToMenuItem);
+		
+		// Define context menu.
+		table.setContextMenu(menu);
+		
+		// removeMenuItem will remove the row from the table:
+		jumpToMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+		    public void handle(ActionEvent e) {
+		    	// Fetch selected entry, jump to entry in document lookup.
+		        analysisController.getDocumentLookup().jumpToDocument(table.getSelectionModel().getSelectedItem().getDocumentID());
+		    }
+		});
+	}
+	
 	/**
 	 * Initialize on-click listener for table.
 	 */
@@ -89,10 +120,28 @@ public class ContextSearch extends VisualizationComponent
 		table.setRowFactory( tv -> {
 		    TableRow<KeywordContext> row = new TableRow<>();
 		    row.setOnMouseClicked(event -> {
+		    	// On double click: Show document detail.
 		        if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
 		        	// Show document details.
-		            analysisController.showDocumentDetail(row.getItem().getID());
+		            analysisController.showDocumentDetail(row.getItem().getDocumentID());
 		        }
+		        
+		        // On right click: Check if document is currently shown in DocumentLookup.
+		        // If not, temporarily disable context menu's "Jump to" item.
+		        else if (event.getClickCount() == 1 && event.getButton() == MouseButton.SECONDARY) {
+		        	// Get requested document ID.
+		        	final int documentID	= table.getSelectionModel().getSelectedItem().getDocumentID();
+		        	
+		        	// Enable, if document was found in table.
+		        	if (analysisController.getDocumentLookup().findDocumentInCurrentTable(documentID) >= 0)
+		        		jumpToMenuItem.setDisable(false);
+		        	// Disable, if not.
+		        	else
+		        		jumpToMenuItem.setDisable(true);
+		        }
+		        
+
+		        
 		    });
 		    
 		    return row;
@@ -171,7 +220,7 @@ public class ContextSearch extends VisualizationComponent
 				 * 3. Update table.  
 				 */
 				
-				table.getItems().add(new KeywordContext(kc.getID(), kc.getKeyword(), this.documentRanksByID.get(kc.getID()), kc.getDocumentTitle(), contextStringsForDocument.getKey(), contextStringsForDocument.getValue()));
+				table.getItems().add(new KeywordContext(kc.getDocumentID(), kc.getKeyword(), this.documentRanksByID.get(kc.getDocumentID()), kc.getDocumentTitle(), contextStringsForDocument.getKey(), contextStringsForDocument.getValue()));
 			}
 		}
 	}

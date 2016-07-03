@@ -659,8 +659,6 @@ public class AnalysisController extends Controller
 		// TM comparison heatmap:
 		refreshTMCHeatmap(dataspace.getActiveLDAConfigurations());
 		
-		System.out.println("blub = " + paramSpaceScatterchart.getRoot().getBoundsInLocal().getHeight());
-		
 	}
 
 	/**
@@ -1498,6 +1496,15 @@ public class AnalysisController extends Controller
 		catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Return DocumentLookup instance.
+	 * @return
+	 */
+	public DocumentLookup getDocumentLookup()
+	{
+		return documentLookup;
 	}
 	
 	/**

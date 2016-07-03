@@ -89,7 +89,7 @@ public class DocumentLookup extends VisualizationComponent
 		    row.setOnMouseClicked(event -> {
 		        if (event.getClickCount() == 2 && (!row.isEmpty()) ) {
 		        	// Show document details.
-		            analysisController.showDocumentDetail(row.getItem().getID());
+		            analysisController.showDocumentDetail(row.getItem().getDocumentID());
 		        }
 		    });
 		    
@@ -214,5 +214,63 @@ public class DocumentLookup extends VisualizationComponent
 	public Map<Integer, Integer> getDocumentRanksByID()
 	{
 		return documentRanksByID;
+	}
+	
+	/**
+	 * Find document with specified ID in current table view.
+	 * @param documentID 
+	 * @return -1, if document with ID wasn't found. It's row index, if found.
+	 */
+	public int findDocumentInCurrentTable(final int documentID)
+	{
+		int row = -1;
+		for (DocumentForLookupTable doc : table.getItems()) {
+			if (doc.getDocumentID() == documentID) {
+				return row;
+			}
+			
+			// Keep track of investigated rows.
+			row++;
+		}
+		
+		return -1;
+	}
+
+	/**
+	 * Jumps to table row containing document with specified ID.
+	 * @param documentID
+	 * @return True, if document contained in current table view. False, if not.
+	 */
+	public boolean jumpToDocument(final int documentID)
+	{
+		// Search for document in table with specified ID.
+		int row = 0;
+		for (DocumentForLookupTable doc : table.getItems()) {
+			if (doc.getDocumentID() == documentID) {
+				// Select entry in table.
+				table.getSelectionModel().select(row);
+				// Scroll to entry.
+				table.scrollTo(row);
+				
+				return true;
+			}
+			
+			// Keep track of investigated rows.
+			row++;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Jumps to specified table row.
+	 * @param rowIndex 
+	 */
+	public void jumpToRow(final int rowIndex)
+	{
+		// Select entry in table.
+		table.getSelectionModel().select(rowIndex);
+		// Scroll to entry.
+		table.scrollTo(rowIndex);
 	}
 }

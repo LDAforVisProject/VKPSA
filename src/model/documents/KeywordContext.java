@@ -5,16 +5,16 @@ import javafx.beans.property.SimpleStringProperty;
 
 public class KeywordContext
 {
-	private int id;
+	private int documentID;
 	private String keyword;
 	private SimpleIntegerProperty documentRank;
 	private SimpleStringProperty documentTitle;
 	private SimpleStringProperty originalAbstract;
 	private SimpleStringProperty refinedAbstract;
 	
-	public KeywordContext(int id, String keyword, int documentRank, String documentTitle, String originalAbstract, String refinedAbstract)
+	public KeywordContext(int documentID, String keyword, int documentRank, String documentTitle, String originalAbstract, String refinedAbstract)
 	{
-		this.id 				= id;
+		this.documentID 		= documentID;
 		this.keyword 			= keyword;
 		this.documentRank		= new SimpleIntegerProperty(documentRank);
 		this.documentTitle 		= new SimpleStringProperty(documentTitle);
@@ -22,9 +22,9 @@ public class KeywordContext
 		this.refinedAbstract 	= new SimpleStringProperty(refinedAbstract);
 	}
 
-	public int getID()
+	public int getDocumentID()
 	{
-		return id;
+		return documentID;
 	}
 
 	public String getKeyword()

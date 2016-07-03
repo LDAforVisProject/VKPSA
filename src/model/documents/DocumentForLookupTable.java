@@ -13,7 +13,7 @@ import javafx.scene.text.Text;
  */
 public class DocumentForLookupTable
 {
-	private final int id;
+	private final int documentID;
 	private SimpleIntegerProperty rankProperty;
 	private final SimpleFloatProperty probability;
 	private final SimpleStringProperty title;
@@ -21,9 +21,9 @@ public class DocumentForLookupTable
 	private final SimpleStringProperty date;
 	private final SimpleStringProperty conference;
 	
-	public DocumentForLookupTable(int id, int rank, float probability, String title, String authors, String date, String conference)
+	public DocumentForLookupTable(int documentID, int rank, float probability, String title, String authors, String date, String conference)
 	{
-		this.id					= id;
+		this.documentID			= documentID;
 		this.rankProperty		= new SimpleIntegerProperty(rank);
 		this.probability		= new SimpleFloatProperty(probability);
 		this.title				= new SimpleStringProperty(title);
@@ -32,9 +32,9 @@ public class DocumentForLookupTable
 		this.conference			= new SimpleStringProperty(conference);
 	}
 	
-	public int getID()
+	public int getDocumentID()
 	{
-		return id;
+		return documentID;
 	}
 
 	public String getTitle()

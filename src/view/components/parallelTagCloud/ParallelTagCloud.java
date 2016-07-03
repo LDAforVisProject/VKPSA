@@ -1188,11 +1188,10 @@ public class ParallelTagCloud extends VisualizationComponent
 	@Override
 	public void removeHoverHighlighting()
 	{
-		System.out.println("removeHH()");
 		for (int i = 0; i < tagCloudContainer.size(); i++) {
 			for (Node node : tagCloudContainer.get(i).getChildren()) {
 				Label label = (Label)node;
-				
+				// Reset opacity if label does not contain requested keyword.
 				if (!label.getText().equals(requestedKeyword))
 					node.setOpacity(VisualizationComponent.DEFAULT_OPACITY_FACTOR);
 			}
