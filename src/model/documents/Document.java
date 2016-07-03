@@ -30,12 +30,12 @@ public class Document
 		this.conference			= conference;
 	}
 	
-	public DocumentForLookupTable generateDocumentForLookup()
+	public DocumentForLookupTable generateDocumentForLookup(final int rank)
 	{
-		return new DocumentForLookupTable(id, probability, title, authors, date, conference);
+		return new DocumentForLookupTable(id, rank, probability, title, authors, date, conference);
 	}
 	
-	public int getId()
+	public int getID()
 	{
 		return id;
 	}

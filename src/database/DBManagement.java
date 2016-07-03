@@ -1744,7 +1744,8 @@ public class DBManagement
 									"    documents d " +
 									"where " +
 									"    d.abstract like '%" + keyword + "%' or " +
-									"    d.refinedAbstract like '%" + keyword + "%'; "
+									"    d.refinedAbstract like '%" + keyword + "%' " + 
+									"order by date desc, authors asc; "
 									;
 		
 		// Prepare statement.
@@ -1762,6 +1763,7 @@ public class DBManagement
 		while (rs.next()) {
 			keywordContextList.add( new KeywordContext(	rs.getInt("id"), 
 														keyword,
+														-1,
 														rs.getString("title"), 
 														rs.getString("abstract"),
 														rs.getString("refinedAbstract")) );

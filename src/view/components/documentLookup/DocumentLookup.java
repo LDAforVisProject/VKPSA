@@ -2,6 +2,7 @@ package view.components.documentLookup;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -41,12 +42,19 @@ public class DocumentLookup extends VisualizationComponent
 	 */
 	private ArrayList<Document> documents;
 	
+	/**
+	 * Remember documents' ranks.
+	 */
+	private Map<Integer, Integer> documentRanksByID;
 	
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1)
 	{
 		System.out.println("Initializing DocumentLookup component.");
 	
+		// Set up map for document ID -> rank associations.
+		documentRanksByID = new HashMap<Integer, Integer>();
+		
 		// Initialize table.
 		initTable();
 	}
@@ -59,11 +67,12 @@ public class DocumentLookup extends VisualizationComponent
 		// Get columns in table.
 		ObservableList<TableColumn<DocumentForLookupTable, ?>> columns = table.getColumns();
 		// Bind columns to properties.
-		((TableColumn<DocumentForLookupTable, Float>)columns.get(0)).setCellValueFactory(new PropertyValueFactory<DocumentForLookupTable, Float>("probability"));
-		((TableColumn<DocumentForLookupTable, String>)columns.get(1)).setCellValueFactory(new PropertyValueFactory<DocumentForLookupTable, String>("title"));
-		((TableColumn<DocumentForLookupTable, String>)columns.get(2)).setCellValueFactory(new PropertyValueFactory<DocumentForLookupTable, String>("date"));
-		((TableColumn<DocumentForLookupTable, String>)columns.get(3)).setCellValueFactory(new PropertyValueFactory<DocumentForLookupTable, String>("authors"));
-		((TableColumn<DocumentForLookupTable, String>)columns.get(4)).setCellValueFactory(new PropertyValueFactory<DocumentForLookupTable, String>("conference"));
+		((TableColumn<DocumentForLookupTable, Integer>)columns.get(0)).setCellValueFactory(new PropertyValueFactory<DocumentForLookupTable, Integer>("rank"));
+		((TableColumn<DocumentForLookupTable, Float>)columns.get(1)).setCellValueFactory(new PropertyValueFactory<DocumentForLookupTable, Float>("probability"));
+		((TableColumn<DocumentForLookupTable, String>)columns.get(2)).setCellValueFactory(new PropertyValueFactory<DocumentForLookupTable, String>("title"));
+		((TableColumn<DocumentForLookupTable, String>)columns.get(3)).setCellValueFactory(new PropertyValueFactory<DocumentForLookupTable, String>("date"));
+		((TableColumn<DocumentForLookupTable, String>)columns.get(4)).setCellValueFactory(new PropertyValueFactory<DocumentForLookupTable, String>("authors"));
+		((TableColumn<DocumentForLookupTable, String>)columns.get(5)).setCellValueFactory(new PropertyValueFactory<DocumentForLookupTable, String>("conference"));
 	
 		// Init on-click listeners for table.
 		initTableRowListener();
@@ -78,7 +87,7 @@ public class DocumentLookup extends VisualizationComponent
 		table.setRowFactory( tv -> {
 		    TableRow<DocumentForLookupTable> row = new TableRow<>();
 		    row.setOnMouseClicked(event -> {
-		        if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
+		        if (event.getClickCount() == 2 && (!row.isEmpty()) ) {
 		        	// Show document details.
 		            analysisController.showDocumentDetail(row.getItem().getID());
 		        }
@@ -124,6 +133,7 @@ public class DocumentLookup extends VisualizationComponent
 	{
 		// Clear previous state.
 		table.getItems().clear();
+		documentRanksByID.clear();
 		
 		// Update topic ID.
 		this.topicID	= topicID;
@@ -133,10 +143,21 @@ public class DocumentLookup extends VisualizationComponent
 		// Update label for topic ID.
 		topicID_label.setText(topicID.getKey() + "#" + topicID.getValue());
 		
+		// Count document ranks.
+		int count = 1;
+		
 		// Update table data.
 		for (Document doc : documents) {
-			if (doc.containsTerm(searchTerm))
-				table.getItems().add(doc.generateDocumentForLookup());
+			// Show in table only if document contains search term in any form.
+			if (doc.containsTerm(searchTerm)) {
+				table.getItems().add(doc.generateDocumentForLookup(count));
+			}
+			
+			// Store rank in map.
+			documentRanksByID.put(doc.getID(), count);
+			
+			// Iterate count.
+			count++;
 		}
 	}
 	
@@ -188,5 +209,10 @@ public class DocumentLookup extends VisualizationComponent
 		
 		// Refresh table, only displaying items containing the specified term.
 		refresh(this.topicID, this.documents, search_textfield.getText());
+	}
+
+	public Map<Integer, Integer> getDocumentRanksByID()
+	{
+		return documentRanksByID;
 	}
 }

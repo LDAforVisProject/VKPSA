@@ -6,8 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-
-<AnchorPane prefHeight="500.0" prefWidth="400.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="view.components.documentDetail.DocumentDetail">
+<AnchorPane prefHeight="500.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.components.documentDetail.DocumentDetail">
    <children>
       <Label fx:id="title_label" layoutX="99.0" layoutY="14.0" prefHeight="64.0" prefWidth="240.0" text="Label Label Label Label Label Label Label  Label Label Label Label" wrapText="true" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="10.0">
          <font>
@@ -65,6 +64,6 @@
             <Font name="System Italic" size="12.0" />
          </font>
       </Label>
-      <TextArea fx:id="processedAbstract_textfield" cacheShape="false" scaleShape="false" text="Abstract" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="410.0" />
+      <TextArea fx:id="processedAbstract_textfield" cacheShape="false" scaleShape="false" text="Abstract" wrapText="true" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="410.0" />
    </children>
 </AnchorPane>

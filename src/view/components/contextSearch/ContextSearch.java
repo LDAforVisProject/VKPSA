@@ -49,6 +49,10 @@ public class ContextSearch extends VisualizationComponent
 	 */
 	private ArrayList<KeywordContext> keywordContextList;
 	
+	/**
+	 * Map of results in document lookup table: Document ID -> rank.
+	 */
+	Map<Integer, Integer> documentRanksByID;
 	
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1)
@@ -67,9 +71,10 @@ public class ContextSearch extends VisualizationComponent
 		// Get columns in table.
 		ObservableList<TableColumn<KeywordContext, ?>> columns = table.getColumns();
 		// Bind columns to properties.
-		((TableColumn<KeywordContext, String>)columns.get(0)).setCellValueFactory(new PropertyValueFactory<KeywordContext, String>("documentTitle"));
-		((TableColumn<KeywordContext, String>)columns.get(1)).setCellValueFactory(new PropertyValueFactory<KeywordContext, String>("originalAbstract"));
-		((TableColumn<KeywordContext, String>)columns.get(2)).setCellValueFactory(new PropertyValueFactory<KeywordContext, String>("refinedAbstract"));
+		((TableColumn<KeywordContext, Integer>)columns.get(0)).setCellValueFactory(new PropertyValueFactory<KeywordContext, Integer>("documentRank"));
+		((TableColumn<KeywordContext, String>)columns.get(1)).setCellValueFactory(new PropertyValueFactory<KeywordContext, String>("documentTitle"));
+		((TableColumn<KeywordContext, String>)columns.get(2)).setCellValueFactory(new PropertyValueFactory<KeywordContext, String>("originalAbstract"));
+		((TableColumn<KeywordContext, String>)columns.get(3)).setCellValueFactory(new PropertyValueFactory<KeywordContext, String>("refinedAbstract"));
 		
 		// Init on-click listeners for table.
 		initTableRowListener();
@@ -125,9 +130,10 @@ public class ContextSearch extends VisualizationComponent
 	 * Refresh ContextSearch component.
 	 * @param keyword
 	 * @param keywordContextList List of keyword's appearances. 
+	 * @param documentRanksByID Map with document ID -> rank in document lookup results.
 	 * @param searchTerm String to filter by.
 	 */
-	public void refresh(final String keyword, final ArrayList<KeywordContext> keywordContextList, final String searchTerm)
+	public void refresh(final String keyword, final ArrayList<KeywordContext> keywordContextList, final Map<Integer, Integer> documentRanksByID, final String searchTerm)
 	{
 		// Clear table.
 		table.getItems().clear();
@@ -138,7 +144,10 @@ public class ContextSearch extends VisualizationComponent
 		this.keywordContextList	= keywordContextList;
 		
 		// Update keyword label.
-		keyword_label.setText(keyword);
+		this.keyword_label.setText(keyword);
+		
+		// Update document rank listing.
+		this.documentRanksByID	= documentRanksByID;
 		
 		// Iterate over all instances of KeywordContext.
 		for (KeywordContext kc : keywordContextList) {
@@ -162,7 +171,7 @@ public class ContextSearch extends VisualizationComponent
 				 * 3. Update table.  
 				 */
 				
-				table.getItems().add(new KeywordContext(kc.getID(), kc.getKeyword(), kc.documentTitleProperty().get(), contextStringsForDocument.getKey(), contextStringsForDocument.getValue()));
+				table.getItems().add(new KeywordContext(kc.getID(), kc.getKeyword(), this.documentRanksByID.get(kc.getID()), kc.getDocumentTitle(), contextStringsForDocument.getKey(), contextStringsForDocument.getValue()));
 			}
 		}
 	}
@@ -223,6 +232,12 @@ public class ContextSearch extends VisualizationComponent
 		     keywordIndex = keywordContext.refinedAbstractProperty().get().indexOf(keyword, keywordIndex + 1);
 		} while(keywordIndex >= 0);		
 		
+		// Remove dots, if no results.
+		if (originalAbstractContextSummary.equals("..."))
+			originalAbstractContextSummary = "";
+		if (refinedAbstractContextSummary.equals("..."))
+			refinedAbstractContextSummary = "";
+		
 		// Return results.
 		return new Pair<String, String>(originalAbstractContextSummary, refinedAbstractContextSummary);
 	}
@@ -271,11 +286,6 @@ public class ContextSearch extends VisualizationComponent
 		// Return results.
 		return new Pair<Integer, Integer>(startIndex, endIndex);
 	}
-	
-	@Override
-	public void refresh()
-	{
-	}
 
 	@Override
 	public void initHoverEventListeners()
@@ -319,7 +329,11 @@ public class ContextSearch extends VisualizationComponent
 		log("Searching for term " + search_textfield.getText() + ".");
 		
 		// Refresh table, only displaying items containing the specified term.
-		refresh(this.keyword, this.keywordContextList, search_textfield.getText());
+		refresh(this.keyword, this.keywordContextList, this.documentRanksByID, search_textfield.getText());
 	}
-	
+
+	@Override
+	public void refresh()
+	{
+	}
 }

@@ -1460,8 +1460,9 @@ public class AnalysisController extends Controller
 	 * List relevant documents in DocumentLookup component.
 	 * Is called after topic is selected in ParallelTagCloud.
 	 * @param topicID
+	 * @return Map with ID -> rank associations in table.
 	 */
-	public void listRelevantDocuments(Pair<Integer, Integer> topicID)
+	public Map<Integer, Integer> listRelevantDocuments(Pair<Integer, Integer> topicID)
 	{
 		log("Listing documents for topic " + topicID.getKey() + "#" + topicID.getValue());
 		
@@ -1469,23 +1470,29 @@ public class AnalysisController extends Controller
 		try {
 			// Updating DocumentLookup.
 			documentLookup.refresh(topicID, workspace.getDatabaseManagement().loadDocuments(topicID), null);
+			
+			// Return result.
+			return documentLookup.getDocumentRanksByID();
 		}
 		
 		catch (SQLException e) {
 			e.printStackTrace();
 		}
+		
+		return null;
 	}
 	
 	/**
 	 * Show context for specified keyword.
 	 * @param keyword
+	 * @param documentRanksByID 
 	 */
-	public void showKeywordContext(String keyword)
+	public void showKeywordContext(final String keyword, final Map<Integer, Integer> documentRanksByID)
 	{
 		// Load keyword context.
 		try {
 			// Updating DocumentLookup.
-			contextSearch.refresh(keyword, workspace.getDatabaseManagement().loadContext(keyword), null);
+			contextSearch.refresh(keyword, workspace.getDatabaseManagement().loadContext(keyword), documentRanksByID, null);
 		}
 		
 		catch (SQLException e) {
@@ -1497,17 +1504,8 @@ public class AnalysisController extends Controller
 	 * Show document details in pop-up.
 	 * @param documentID
 	 */
-	public void showDocumentDetail(int documentID)
-	{
-//		CONTINUE HERE:
-//			x Get document from DB, test document detail.
-//			- Mails: Interest in tests?
-//			- Plan: When to start data generation?
-//			x Prepare text for display in table.
-//			o Color keyword occurences.
-//			x Create pop-up for detail info on paper.
-//			- Cosmetic improvements (e.g. reduce filter width relative to panel width.)
-		
+	public void showDocumentDetail(final int documentID)
+	{		
 		try {
 			// Load document, update component.
 			documentDetail.update(workspace.getDatabaseManagement().loadDocumentByID(documentID));

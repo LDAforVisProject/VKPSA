@@ -677,7 +677,15 @@ public class ParallelTagCloud extends VisualizationComponent
 				label.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
 		            public void handle(MouseEvent event) 
 		            {
-		            	analysisController.showKeywordContext(label.getText());
+			        	final int ldaConfigID 	= Integer.valueOf(topicIDLabel.getText().substring(0, topicIDLabel.getText().indexOf("#")));
+			        	final int topicID		= Integer.valueOf(topicIDLabel.getText().substring(topicIDLabel.getText().indexOf("#") + 1));
+			        	
+			        	// List relevant documents, fetch results.
+		            	Map<Integer, Integer> documentRanksByID = analysisController.listRelevantDocuments(new Pair<Integer, Integer>(ldaConfigID, topicID));
+		            	// Show keyword context (provide rank results to keyword context component).
+		            	analysisController.showKeywordContext(label.getText(), documentRanksByID);
+		            	
+		            	event.consume();
 		            }
 		        });
 				
@@ -1086,10 +1094,10 @@ public class ParallelTagCloud extends VisualizationComponent
 			        @Override
 			        public void handle(MouseEvent event) 
 			        {
-			        	int ldaConfigID = Integer.valueOf(label.getText().substring(0, label.getText().indexOf("#")));
-			        	int topicID 	= Integer.valueOf(label.getText().substring(label.getText().indexOf("#") + 1));
+			        	final int ldaConfigID 	= Integer.valueOf(label.getText().substring(0, label.getText().indexOf("#")));
+			        	final int topicID		= Integer.valueOf(label.getText().substring(label.getText().indexOf("#") + 1));
 			        			
-		            	// Get document data, list it in table.
+			        	// Get document data, list it in table.
 		            	analysisController.listRelevantDocuments(new Pair<Integer, Integer>(ldaConfigID, topicID));
 		            }
 			    };
@@ -1127,17 +1135,7 @@ public class ParallelTagCloud extends VisualizationComponent
 					// If set of topic models to highlight contains topic model ID of current tag cloud:
 					// Increase opacity of current tag cloud.
 					if (dataPointIDs.contains(topicConfig.getKey())) {
-//						for (Node node : tagCloudContainer.get(i).getChildren()) {
-//							node.setOpacity(1);
-//						}
-						// Add to set of topics to display in distribution barchart.
 						topicsToDisplayInDistBarchart.add(topicConfig);
-					}
-					// Otherwise: Lower opacity to default value.
-					else {
-//						for (Node node : tagCloudContainer.get(i).getChildren()) {
-//							node.setOpacity(VisualizationComponent.DEFAULT_OPACITY_FACTOR);
-//						}
 					}
 				}
 				

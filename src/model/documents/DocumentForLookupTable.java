@@ -1,6 +1,7 @@
 package model.documents;
 
 import javafx.beans.property.SimpleFloatProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -13,15 +14,17 @@ import javafx.scene.text.Text;
 public class DocumentForLookupTable
 {
 	private final int id;
+	private SimpleIntegerProperty rankProperty;
 	private final SimpleFloatProperty probability;
 	private final SimpleStringProperty title;
 	private final SimpleStringProperty authors;
 	private final SimpleStringProperty date;
 	private final SimpleStringProperty conference;
 	
-	public DocumentForLookupTable(int id, float probability, String title, String authors, String date, String conference)
+	public DocumentForLookupTable(int id, int rank, float probability, String title, String authors, String date, String conference)
 	{
 		this.id					= id;
+		this.rankProperty		= new SimpleIntegerProperty(rank);
 		this.probability		= new SimpleFloatProperty(probability);
 		this.title				= new SimpleStringProperty(title);
 		this.authors			= new SimpleStringProperty(authors);
@@ -57,5 +60,15 @@ public class DocumentForLookupTable
 	public float getProbability()
 	{
 		return probability.get();
+	}
+	
+	public int getRank()
+	{
+		return rankProperty.get();
+	}
+	
+	public SimpleIntegerProperty rankProperty()
+	{
+		return rankProperty;
 	}
 }

@@ -1,19 +1,22 @@
 package model.documents;
 
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
 public class KeywordContext
 {
 	private int id;
 	private String keyword;
+	private SimpleIntegerProperty documentRank;
 	private SimpleStringProperty documentTitle;
 	private SimpleStringProperty originalAbstract;
 	private SimpleStringProperty refinedAbstract;
 	
-	public KeywordContext(int id, String keyword, String documentTitle, String originalAbstract, String refinedAbstract)
+	public KeywordContext(int id, String keyword, int documentRank, String documentTitle, String originalAbstract, String refinedAbstract)
 	{
 		this.id 				= id;
 		this.keyword 			= keyword;
+		this.documentRank		= new SimpleIntegerProperty(documentRank);
 		this.documentTitle 		= new SimpleStringProperty(documentTitle);
 		this.originalAbstract 	= new SimpleStringProperty(originalAbstract);
 		this.refinedAbstract 	= new SimpleStringProperty(refinedAbstract);
@@ -44,6 +47,11 @@ public class KeywordContext
 		return refinedAbstract;
 	}
 	
+	public SimpleIntegerProperty documentRankProperty()
+	{
+		return documentRank;
+	}
+	
 	public void setOriginalAbstract(SimpleStringProperty originalAbstract)
 	{
 		this.originalAbstract = originalAbstract;
@@ -54,9 +62,9 @@ public class KeywordContext
 		this.refinedAbstract = refinedAbstract;
 	}
 
-	public SimpleStringProperty getDocumentTitle()
+	public String getDocumentTitle()
 	{
-		return documentTitle;
+		return documentTitle.get();
 	}
 	
 	/**
@@ -69,7 +77,8 @@ public class KeywordContext
 		return 	term == null							||
 				documentTitle.get().contains(term) 		||
 				originalAbstract.get().contains(term)	||
-				refinedAbstract.get().contains(term);
+				refinedAbstract.get().contains(term)	||
+				String.valueOf((documentRank.get())).contains(term);
 			
 	}
 }
