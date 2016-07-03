@@ -1383,7 +1383,6 @@ public class AnalysisController extends Controller
 				/*
 				 * Resize filter to expected size.
 				 */
-				System.out.println("f_a.w = " + filter_anchorpane.getWidth());
 				resizeElement(settings_anchorpane, filter_anchorpane.getWidth() + 14, 1);
 				
 			}
