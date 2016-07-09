@@ -13,6 +13,9 @@ import model.documents.KeywordContext;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -33,6 +36,16 @@ public class DocumentLookup extends VisualizationComponent
 	private @FXML Label topicID_label;
 	
 	/**
+	 * Barchart displaying distribution of probability over words in topic.
+	 */
+	private @FXML BarChart<String, Number> probability_barchart;
+	private @FXML NumberAxis probability_barchart_yAxis_numberaxis;
+	
+	/*
+	 * Non-GUI data.
+	 */
+	
+	/**
 	 * ID of currently selected topic.
 	 */
 	private Pair<Integer, Integer> topicID;
@@ -46,6 +59,7 @@ public class DocumentLookup extends VisualizationComponent
 	 * Remember documents' ranks.
 	 */
 	private Map<Integer, Integer> documentRanksByID;
+	
 	
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1)
@@ -76,8 +90,27 @@ public class DocumentLookup extends VisualizationComponent
 	
 		// Init on-click listeners for table.
 		initTableRowListener();
+		
+		// Initialize probability bar chart.
+		initProbabilityBarchart();
 	}
 	
+	/**
+	 * Initiailze probabiilty bar chart.
+	 */
+	private void initProbabilityBarchart()
+	{
+		// Hide x-axis.
+		probability_barchart.getXAxis().setTickLabelsVisible(false);
+		probability_barchart.getXAxis().setOpacity(0);
+		
+		// Set boundaries for y-axis.
+		probability_barchart_yAxis_numberaxis.setAutoRanging(false);
+		probability_barchart_yAxis_numberaxis.setLowerBound(0);
+		probability_barchart_yAxis_numberaxis.setUpperBound(1);
+		probability_barchart_yAxis_numberaxis.setTickUnit(0.25);
+	}
+
 	/**
 	 * Initialize on-click listener for table.
 	 */
@@ -159,6 +192,30 @@ public class DocumentLookup extends VisualizationComponent
 			// Iterate count.
 			count++;
 		}
+		
+		// Refresh probability bar chart.
+		refreshBarchart();
+	}
+	
+	/**
+	 * Refresh bar chart.
+	 */
+	private void refreshBarchart()
+	{
+		// Clear bar chart.
+		probability_barchart.getData().clear();
+		
+		// Allocate new data series.
+		XYChart.Series<String, Number> dataSeries = new XYChart.Series<String, Number>(); 
+		
+		// Get probability for all documents; add to data series.
+		int count = 0;
+		for (DocumentForLookupTable doc : table.getItems()) {
+			dataSeries.getData().add(new XYChart.Data<String, Number>(String.valueOf(count++), doc.getProbability()));
+		}
+		
+		// Add data series to chart.
+		probability_barchart.getData().add(dataSeries);
 	}
 	
 	/**
@@ -166,8 +223,12 @@ public class DocumentLookup extends VisualizationComponent
 	 */
 	public void clear()
 	{
+		// Clear table.
 		table.getItems().clear();
+		// Clear label.
 		topicID_label.setText("");
+		// Clear bar chart.
+		probability_barchart.getData().clear();
 	}
 	
 	@Override
