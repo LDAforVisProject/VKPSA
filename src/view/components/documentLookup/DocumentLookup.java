@@ -16,6 +16,7 @@ import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Data;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -90,6 +91,12 @@ public class DocumentLookup extends VisualizationComponent
 	
 		// Init on-click listeners for table.
 		initTableRowListener();
+
+		 // Set listener for mouse exit.
+		table.setOnMouseExited(event -> {
+			// Reset all bars.
+			highlightDocumentInProbabilityChart(-1);
+	    });
 		
 		// Initialize probability bar chart.
 		initProbabilityBarchart();
@@ -119,6 +126,8 @@ public class DocumentLookup extends VisualizationComponent
 		// Add listener for double-click on row.
 		table.setRowFactory( tv -> {
 		    TableRow<DocumentForLookupTable> row = new TableRow<>();
+		    
+		    // Set listener for click.
 		    row.setOnMouseClicked(event -> {
 		        if (event.getClickCount() == 2 && (!row.isEmpty()) ) {
 		        	// Show document details.
@@ -126,9 +135,39 @@ public class DocumentLookup extends VisualizationComponent
 		        }
 		    });
 		    
+		    // Set listener for hover.
+		    row.setOnMouseEntered(event -> {
+		        if (!row.isEmpty()) {
+		        	// Highlight document in chart.
+		            highlightDocumentInProbabilityChart(row.getItem().getDocumentID());
+		        }
+		    });
+		    
 		    return row;
 		});
 	}
+	
+	/**
+	 * Highlight document in probability chart.
+	 * @param documentID
+	 */
+	private void highlightDocumentInProbabilityChart(final int documentID)
+	{
+		// Highlight document with specified ID.
+		for (XYChart.Data<String, Number> item : probability_barchart.getData().get(0).getData()) {
+			// If item is not selected one: Reset opacity and scale factor.
+			if (item == null || (int)item.getExtraValue() != documentID) {
+				item.getNode().setOpacity(VisualizationComponent.DEFAULT_OPACITY_FACTOR);
+				item.getNode().setScaleX(1);
+			}
+			// Otherwise: Scale up, maximize opacity.
+			else {
+				item.getNode().setOpacity(1);
+				item.getNode().setScaleX(30);
+			}
+		}
+	}
+	
 	@Override
 	public void processSelectionManipulationRequest(double minX, double minY, double maxX, double maxY)
 	{	
@@ -211,11 +250,20 @@ public class DocumentLookup extends VisualizationComponent
 		// Get probability for all documents; add to data series.
 		int count = 0;
 		for (DocumentForLookupTable doc : table.getItems()) {
-			dataSeries.getData().add(new XYChart.Data<String, Number>(String.valueOf(count++), doc.getProbability()));
+			// Create new entry.
+			Data<String, Number> entry = new XYChart.Data<String, Number>(String.valueOf(count++), doc.getProbability());
+			entry.setExtraValue(doc.getDocumentID());
+			// Add entry to data series.
+			dataSeries.getData().add(entry);
 		}
 		
 		// Add data series to chart.
 		probability_barchart.getData().add(dataSeries);
+	
+		// Adjust opacity.
+		for (XYChart.Data<String, Number> item : probability_barchart.getData().get(0).getData()) {
+			item.getNode().setOpacity(VisualizationComponent.DEFAULT_OPACITY_FACTOR);
+		}
 	}
 	
 	/**
