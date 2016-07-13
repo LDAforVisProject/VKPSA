@@ -369,6 +369,9 @@ public class ContextSearch extends VisualizationComponent
 	{
 		table.getItems().clear();
 		keyword_label.setText("");
+		
+		// Clear search text field.
+		search_textfield.clear();
 	}
 	
 	@FXML

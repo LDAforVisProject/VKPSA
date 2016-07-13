@@ -42,6 +42,11 @@ public class DocumentLookup extends VisualizationComponent
 	private @FXML BarChart<String, Number> probability_barchart;
 	private @FXML NumberAxis probability_barchart_yAxis_numberaxis;
 	
+	/**
+	 * Scale factor for highlighting bars in probability bar chart. 
+	 */
+	final double BAR_SCALE_X_FACTOR = 30;
+	
 	/*
 	 * Non-GUI data.
 	 */
@@ -163,7 +168,8 @@ public class DocumentLookup extends VisualizationComponent
 			// Otherwise: Scale up, maximize opacity.
 			else {
 				item.getNode().setOpacity(1);
-				item.getNode().setScaleX(30);
+				double adjustedScaleFactor = BAR_SCALE_X_FACTOR * probability_barchart.getData().get(0).getData().size() / 2019.0; 
+				item.getNode().setScaleX(adjustedScaleFactor >= 1 ? adjustedScaleFactor : 1);
 			}
 		}
 	}
@@ -277,6 +283,8 @@ public class DocumentLookup extends VisualizationComponent
 		topicID_label.setText("");
 		// Clear bar chart.
 		probability_barchart.getData().clear();
+		// Clear search text field.
+		search_textfield.clear();
 	}
 	
 	@Override

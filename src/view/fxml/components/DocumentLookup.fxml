@@ -8,7 +8,6 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-
 <SplitPane dividerPositions="0.6388526727509778" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.components.documentLookup.DocumentLookup">
    <items>
       <AnchorPane prefHeight="265.0" prefWidth="510.0" style="-fx-background-color: #fff;">
@@ -38,8 +37,8 @@
                </image>
             </ImageView>
             <TextField fx:id="search_textfield" layoutX="371.0" layoutY="3.0" onAction="#searchForTerm" prefHeight="25.0" prefWidth="127.0" promptText="Search Term" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="2.0" />
-            <Label layoutX="194.0" layoutY="14.0" text="ordered by relevance for topic" AnchorPane.leftAnchor="80.0" AnchorPane.topAnchor="7.0" />
-            <Label fx:id="topicID_label" layoutX="255.0" layoutY="14.0" AnchorPane.leftAnchor="245.0" AnchorPane.topAnchor="7.0">
+            <Label layoutX="194.0" layoutY="14.0" text="by relevance for topic" AnchorPane.leftAnchor="80.0" AnchorPane.topAnchor="7.0" />
+            <Label fx:id="topicID_label" layoutX="255.0" layoutY="14.0" AnchorPane.leftAnchor="200.0" AnchorPane.topAnchor="7.0">
                <font>
                   <Font name="System Bold Italic" size="12.0" />
                </font>
