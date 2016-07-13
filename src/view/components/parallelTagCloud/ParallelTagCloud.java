@@ -720,7 +720,7 @@ public class ParallelTagCloud extends VisualizationComponent
 			        	}
 			        	
 			        	// List relevant documents, fetch results.
-		            	Map<Integer, Integer> documentRanksByID = analysisController.listRelevantDocuments(new Pair<Integer, Integer>(ldaConfigID, topicID));
+		            	Map<Integer, Integer> documentRanksByID = analysisController.listRelevantDocuments(new Pair<Integer, Integer>(ldaConfigID, topicID), false);
 		            	// Show keyword context (provide rank results to keyword context component).
 		            	analysisController.showKeywordContext(label.getText(), documentRanksByID);
 		            	
@@ -1138,7 +1138,7 @@ public class ParallelTagCloud extends VisualizationComponent
 			        	final int topicID		= Integer.valueOf(label.getText().substring(label.getText().indexOf("#") + 1));
 			        			
 			        	// Get document data, list it in table.
-		            	analysisController.listRelevantDocuments(new Pair<Integer, Integer>(ldaConfigID, topicID));
+		            	analysisController.listRelevantDocuments(new Pair<Integer, Integer>(ldaConfigID, topicID), true);
 		            }
 			    };
 	

@@ -1458,11 +1458,16 @@ public class AnalysisController extends Controller
 	 * List relevant documents in DocumentLookup component.
 	 * Is called after topic is selected in ParallelTagCloud.
 	 * @param topicID
+	 * @param clearContextSearch
 	 * @return Map with ID -> rank associations in table.
 	 */
-	public Map<Integer, Integer> listRelevantDocuments(Pair<Integer, Integer> topicID)
+	public Map<Integer, Integer> listRelevantDocuments(final Pair<Integer, Integer> topicID, final boolean clearContextSearch)
 	{
 		log("Listing documents for topic " + topicID.getKey() + "#" + topicID.getValue());
+		
+		// Clear context search, if requested.
+		if (clearContextSearch)
+			contextSearch.clear();
 		
 		// Load documents sorted by relevance.
 		try {
