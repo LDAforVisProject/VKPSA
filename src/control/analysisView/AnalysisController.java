@@ -1181,7 +1181,9 @@ public class AnalysisController extends Controller
 		// ...for document lookup.
 		documentLookup.setReferences(workspace, logPI, logTA);
 		// ...for context search.
-		contextSearch.setReferences(workspace, logPI, logTA);		
+		contextSearch.setReferences(workspace, logPI, logTA);
+		// ...for document detail.
+		documentDetail.setReferences(workspace, logPI, logTA);
 	}
 	
 	/**
@@ -1526,37 +1528,14 @@ public class AnalysisController extends Controller
 			
 			// Show document detail.
 			documentDetail_popover.show(documentLookup_anchorpane);
+			
 			// Detach popup.
 			documentDetail_popover.setDetached(true);
 			documentDetail_popover.setDetachedTitle("Document #" + documentID);            
-            // Center popover in application window.
+            
+			// Center popover in application window.
 			documentDetail_popover.setX(scene.getWindow().getX() + scene.getWindow().getWidth() / 2 - documentDetail_popover.getWidth() / 2);
 			documentDetail_popover.setY(scene.getWindow().getY() + scene.getWindow().getHeight() / 2 - documentDetail_popover.getHeight() / 2);
-
-			// Set mouse listener.
-			documentDetail_popover.addEventHandler(MouseEvent.MOUSE_DRAGGED, (new EventHandler<MouseEvent>() {
-	            public void handle(MouseEvent me) 
-	            {
-	            	scene.setCursor(Cursor.HAND);
-	            }
-			}));
-			
-			documentDetail_popover.addEventHandler(MouseEvent.MOUSE_PRESSED, (new EventHandler<MouseEvent>() {
-	            public void handle(MouseEvent me) 
-	            {
-	            	scene.setCursor(Cursor.HAND);
-	            	System.out.println("clickingstuff: ");
-	            	System.out.println("\t" + documentDetail_popover.getAnchorX() + " / " + documentDetail_popover.getAnchorY());
-	            	System.out.println("\t" + documentDetail_popover.getX() + " / " + documentDetail_popover.getY());
-	            	me.consume();
-	            }
-			}));
-			
-			System.out.println("placing stuff: ");
-        	System.out.println("\t" + documentDetail_popover.getAnchorX() + " / " + documentDetail_popover.getAnchorY());
-        	System.out.println("\t" + documentDetail_popover.getX() + " / " + documentDetail_popover.getY());
-			
-			
 		} 
 		
 		catch (SQLException e) {
