@@ -11,6 +11,8 @@ import java.util.Set;
 
 import org.controlsfx.control.PopOver;
 
+import com.sun.javafx.geom.Point2D;
+
 import model.AnalysisDataspace;
 import model.LDAConfiguration;
 import model.documents.Document;
@@ -1523,16 +1525,38 @@ public class AnalysisController extends Controller
 			documentDetail.update(workspace.getDatabaseManagement().loadDocumentByID(documentID));
 			
 			// Show document detail.
-			documentDetail_popover.show(analysisRoot_anchorPane);
+			documentDetail_popover.show(documentLookup_anchorpane);
 			// Detach popup.
-			documentDetail_popover.setAnchorX(0);
-			documentDetail_popover.setAnchorY(0);
-			documentDetail_popover.setX(0);
-			documentDetail_popover.setY(0);
 			documentDetail_popover.setDetached(true);
-			documentDetail_popover.setDetachedTitle("Document #" + documentID);
-			// Center on screen.
-			documentDetail_popover.centerOnScreen();
+			documentDetail_popover.setDetachedTitle("Document #" + documentID);            
+            // Center popover in application window.
+			documentDetail_popover.setX(scene.getWindow().getX() + scene.getWindow().getWidth() / 2 - documentDetail_popover.getWidth() / 2);
+			documentDetail_popover.setY(scene.getWindow().getY() + scene.getWindow().getHeight() / 2 - documentDetail_popover.getHeight() / 2);
+
+			// Set mouse listener.
+			documentDetail_popover.addEventHandler(MouseEvent.MOUSE_DRAGGED, (new EventHandler<MouseEvent>() {
+	            public void handle(MouseEvent me) 
+	            {
+	            	scene.setCursor(Cursor.HAND);
+	            }
+			}));
+			
+			documentDetail_popover.addEventHandler(MouseEvent.MOUSE_PRESSED, (new EventHandler<MouseEvent>() {
+	            public void handle(MouseEvent me) 
+	            {
+	            	scene.setCursor(Cursor.HAND);
+	            	System.out.println("clickingstuff: ");
+	            	System.out.println("\t" + documentDetail_popover.getAnchorX() + " / " + documentDetail_popover.getAnchorY());
+	            	System.out.println("\t" + documentDetail_popover.getX() + " / " + documentDetail_popover.getY());
+	            	me.consume();
+	            }
+			}));
+			
+			System.out.println("placing stuff: ");
+        	System.out.println("\t" + documentDetail_popover.getAnchorX() + " / " + documentDetail_popover.getAnchorY());
+        	System.out.println("\t" + documentDetail_popover.getX() + " / " + documentDetail_popover.getY());
+			
+			
 		} 
 		
 		catch (SQLException e) {
