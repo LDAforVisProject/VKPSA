@@ -169,6 +169,12 @@ public class DocumentDetail extends VisualizationComponent
             	firstResizeDragPosition	= null;            	
             	// Reset previously used position.
             	prevResizeDragPosition	= null;
+            	
+            	/*
+            	 * Resize content.
+            	 */
+            	
+            	resizeContent(paneSizeBeforeModification.getKey() + absoluteDeltaX, paneSizeBeforeModification.getValue() + absoluteDeltaY);
             }
 		}));
 	}
@@ -240,7 +246,11 @@ public class DocumentDetail extends VisualizationComponent
 
 	@Override
 	public void resizeContent(double width, double height)
-	{	
+	{
+		// Resize original abstract text field.
+		originalAbstract_textfield.setPrefWidth((width - 35 * 2) / 2 - 5);
+		// Resize processed abstract text field.
+		processedAbstract_textfield.setPrefWidth((width - 35 * 2) / 2 - 5);
 	}
 
 	@Override
