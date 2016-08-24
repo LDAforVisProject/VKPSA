@@ -10,6 +10,7 @@ import model.workspace.Workspace;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
+import javafx.scene.chart.BarChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextArea;
@@ -19,6 +20,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import javafx.util.Pair;
 import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
@@ -43,6 +45,11 @@ public class DocumentDetail extends VisualizationComponent
 	private @FXML TextArea originalAbstract_textfield;
 	private @FXML TextArea processedAbstract_textfield;
 	private @FXML ImageView resize_imageview;
+	
+	// Metadata (information on doc. source and topic probability distribution) elements.
+	private @FXML GridPane metadata_gridpane;
+	private @FXML Label topicProbabilities_label;
+	private @FXML BarChart topicProbabilities_barchart;
 	
 	/*
 	 * Information on pane resizing.
@@ -251,6 +258,12 @@ public class DocumentDetail extends VisualizationComponent
 		originalAbstract_textfield.setPrefWidth((width - 35 * 2) / 2 - 5);
 		// Resize processed abstract text field.
 		processedAbstract_textfield.setPrefWidth((width - 35 * 2) / 2 - 5);
+		
+		// Resize grid.
+		metadata_gridpane.setPrefWidth((width - 35 - 35 - 10) * 0.5);
+		// Resize bar chart.
+		
+		topicProbabilities_barchart.setPrefWidth((width - 35 - 35 - 10) * 0.5);
 	}
 
 	@Override
