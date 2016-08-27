@@ -267,7 +267,7 @@ public class ParallelTagCloud extends VisualizationComponent
         probDistBarchart_yAxis 				= new CategoryAxis();
         probabilityDistribution_barchart 	= new BarChart<Number, String>(probDistBarchart_xAxis, probDistBarchart_yAxis);
         
-        probabilityDistribution_barchart.setTitle("Probability Distribution over Keywords");
+        // Set chart's properties.
         probabilityDistribution_barchart.setAnimated(false);
         probDistBarchart_xAxis.setLabel("Probability");  
         probDistBarchart_xAxis.setTickLabelRotation(90);
@@ -281,6 +281,9 @@ public class ParallelTagCloud extends VisualizationComponent
 		AnchorPane.setBottomAnchor(barchart_anchorpane, 0.0);
 		AnchorPane.setLeftAnchor(barchart_anchorpane, 0.0);
 		AnchorPane.setRightAnchor(barchart_anchorpane, 0.0);
+		
+		// Move bar chart down to not obfuscate the title lable.
+		probabilityDistribution_barchart.setLayoutY(17);
 	}
 	
 	@Override
@@ -722,7 +725,7 @@ public class ParallelTagCloud extends VisualizationComponent
 			        	// List relevant documents, fetch results.
 		            	Map<Integer, Integer> documentRanksByID = analysisController.listRelevantDocuments(new Pair<Integer, Integer>(ldaConfigID, topicID), false);
 		            	// Show keyword context (provide rank results to keyword context component).
-		            	analysisController.showKeywordContext(label.getText(), documentRanksByID);
+		            	analysisController.showKeywordContext(label.getText(), documentRanksByID, ldaConfigID, topicID);
 		            	
 		            	// Stop event's propagation.
 		            	event.consume();
@@ -1236,7 +1239,7 @@ public class ParallelTagCloud extends VisualizationComponent
 		
 		if (height > 0)
 			// Resize barchart.
-			probabilityDistribution_barchart.setPrefHeight(height - 5);
+			probabilityDistribution_barchart.setPrefHeight(height - 22);
 
 		// Adjust width and height to initialization procedure.
 		final double tagcloud_anchorpane_width	= tagcloud_anchorpane.getWidth() == 0 ? 542 : tagcloud_scrollpane.getWidth();

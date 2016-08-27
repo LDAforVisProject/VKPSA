@@ -1,16 +1,22 @@
 package view.components.documentDetail;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import database.DBManagement;
 import model.documents.Document;
+import model.documents.DocumentForLookupTable;
 import model.workspace.Workspace;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.chart.BarChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Data;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextArea;
@@ -49,7 +55,9 @@ public class DocumentDetail extends VisualizationComponent
 	// Metadata (information on doc. source and topic probability distribution) elements.
 	private @FXML GridPane metadata_gridpane;
 	private @FXML Label topicProbabilities_label;
-	private @FXML BarChart topicProbabilities_barchart;
+	private @FXML BarChart<String, Number> topicProbabilities_barchart;
+	private @FXML NumberAxis topicProbabilities_barchart_yAxis_numberaxis;
+	private @FXML Label highlightInfo_label;
 	
 	/*
 	 * Information on pane resizing.
@@ -63,10 +71,6 @@ public class DocumentDetail extends VisualizationComponent
 	 * Position of first point used for current resize drag.
 	 */
 	private Pair<Double, Double> firstResizeDragPosition;
-	/**
-	 * Position of previous point used for resize drag.
-	 */
-	private Pair<Double, Double> prevResizeDragPosition;
 	
 	/**
 	 * Currently displayed document.
@@ -81,6 +85,25 @@ public class DocumentDetail extends VisualizationComponent
 		
 		// Initialize resize functionality.
 		initResizeButton();
+		
+		// Init topic probability bar chart.
+		initTopicProbabilityBarchart();
+	}
+	
+	/**
+	 * Initiailze probabiilty bar chart.
+	 */
+	private void initTopicProbabilityBarchart()
+	{
+		// Hide x-axis.
+		topicProbabilities_barchart.getXAxis().setTickLabelsVisible(false);
+		topicProbabilities_barchart.getXAxis().setOpacity(0);
+		
+		// Set boundaries for y-axis.
+		topicProbabilities_barchart_yAxis_numberaxis.setAutoRanging(false);
+		topicProbabilities_barchart_yAxis_numberaxis.setLowerBound(0);
+		topicProbabilities_barchart_yAxis_numberaxis.setUpperBound(1);
+		topicProbabilities_barchart_yAxis_numberaxis.setTickUnit(0.25);
 	}
 	
 	public void initResizeButton()
@@ -96,8 +119,7 @@ public class DocumentDetail extends VisualizationComponent
 		paneSizeBeforeModification	= null; 
 		// Init first drag position.
 		firstResizeDragPosition 	= null;		
-		// Init last drag position.
-		prevResizeDragPosition 		= null;
+
 		
 		/*
 		 * 2. Add event listener.
@@ -126,7 +148,6 @@ public class DocumentDetail extends VisualizationComponent
             	if (firstResizeDragPosition == null) {
             		// Store current mose position.
             		firstResizeDragPosition 	= new Pair<Double, Double>(me.getX(), me.getY());
-            		prevResizeDragPosition		= new Pair<Double, Double>(me.getX(), me.getY());
             		// Store current pane size.
             		paneSizeBeforeModification	= new Pair<Double, Double>(root_anchorpane.getWidth(), root_anchorpane.getHeight());
             	}
@@ -134,9 +155,6 @@ public class DocumentDetail extends VisualizationComponent
             	// During drag:
             	else {
             	}
-            	
-            	// Update last position used for resize drag.
-            	prevResizeDragPosition = new Pair<Double, Double>(me.getX(), me.getY());
             }
 		}));
 		
@@ -174,8 +192,6 @@ public class DocumentDetail extends VisualizationComponent
             
             	// Reset first used position.
             	firstResizeDragPosition	= null;            	
-            	// Reset previously used position.
-            	prevResizeDragPosition	= null;
             	
             	/*
             	 * Resize content.
@@ -187,10 +203,13 @@ public class DocumentDetail extends VisualizationComponent
 	}
 	
 	/**
-	 * Updates UI.
-	 * @param document
+	 * Refreshes component.
+	 * @param document Document to display.
+	 * @param topicProbabilitiesInDoc List of topics for this document, listed descendingly.
+	 * @param topicID Currently examined topic's comprehensive ID.
 	 */
-	public void update(final Document document)
+	public void refresh(final Document document, final ArrayList<Pair<Pair<Integer, Integer>, Float>> topicProbabilitiesInDoc,
+						final Pair<Integer, Integer> topicID)
 	{
 		// Store displayed document.
 		this.document = document;
@@ -203,8 +222,65 @@ public class DocumentDetail extends VisualizationComponent
 		keywords_label.setText(document.getKeywords());
 		originalAbstract_textfield.setText(document.getOriginalAbstract());
 		processedAbstract_textfield.setText(document.getProcessedAbstract());
+		
+		// Update bar chart.
+		refreshBarchart(topicProbabilitiesInDoc, topicID);
 	}
 	
+	/**
+	 * Refreshes bar chart.
+	 * @param topicProbabilitiesInDoc
+	 * @param topicID Currently examined topic's identification.
+	 */
+	private void refreshBarchart(ArrayList<Pair<Pair<Integer, Integer>, Float>> topicProbabilitiesInDoc, Pair<Integer, Integer> topicID)
+	{
+		// Clear bar chart.
+		topicProbabilities_barchart.getData().clear();
+		
+		// Allocate new data series.
+		XYChart.Series<String, Number> dataSeries = new XYChart.Series<String, Number>();
+		
+		// Get probability for all topics; add to data series.
+		int count = 0;
+		for (Pair<Pair<Integer, Integer>, Float> topicProbabilityEntry : topicProbabilitiesInDoc) {
+			// Create new entry.
+			Data<String, Number> entry = new XYChart.Data<String, Number>(String.valueOf(count++), topicProbabilityEntry.getValue());
+			entry.setExtraValue(topicProbabilityEntry.getKey());
+			// Add entry to data series.
+			dataSeries.getData().add(entry);
+		}
+		
+		// Add data series to chart.
+		topicProbabilities_barchart.getData().add(dataSeries);
+	
+		// Adjust opacity.
+		for (XYChart.Data<String, Number> item : topicProbabilities_barchart.getData().get(0).getData()) {
+			if ( !((Pair<Integer, Integer>)item.getExtraValue()).equals(topicID) ) {
+				item.getNode().setOpacity(VisualizationComponent.DEFAULT_OPACITY_FACTOR);
+			}
+			
+			else {
+				item.getNode().setOpacity(1);
+				
+				final double adjustedBarChartWidth = topicProbabilities_barchart.getWidth() > 0 ? topicProbabilities_barchart.getWidth() : 260; 
+				final double adjustedScaleFactor = 10 * 2.0 /  ( (adjustedBarChartWidth - 30) / topicProbabilities_barchart.getData().get(0).getData().size() );
+				item.getNode().setScaleX(adjustedScaleFactor >= 1 ? adjustedScaleFactor : 1);
+			}
+		}
+		
+		// Update info label.
+		highlightInfo_label.setText("Highlighted: " + topicID.getKey() + "#" + topicID.getValue());
+	}
+	
+	/**
+	 * Refreshes bar chart after resize.
+	 * @param topicID Currently examined topic's identification.
+	 */
+	private void refreshBarchart(Pair<Integer, Integer> topicID)
+	{
+		
+	}
+
 	@Override
 	public void processSelectionManipulationRequest(double minX, double minY, double maxX, double maxY)
 	{		

@@ -108,7 +108,7 @@ public class DocumentLookup extends VisualizationComponent
 	}
 	
 	/**
-	 * Initiailze probabiilty bar chart.
+	 * Initiailze probability bar chart.
 	 */
 	private void initProbabilityBarchart()
 	{
@@ -136,7 +136,7 @@ public class DocumentLookup extends VisualizationComponent
 		    row.setOnMouseClicked(event -> {
 		        if (event.getClickCount() == 2 && (!row.isEmpty()) ) {
 		        	// Show document details.
-		            analysisController.showDocumentDetail(row.getItem().getDocumentID());
+		            analysisController.showDocumentDetail(row.getItem().getDocumentID(), topicID.getKey(), topicID.getValue());
 		        }
 		    });
 		    

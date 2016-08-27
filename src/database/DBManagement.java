@@ -1817,5 +1817,99 @@ public class DBManagement
 		}
 		
 		return null;
-	}	
+	}
+	
+	/**
+	 * Loads probabilities for topics in given document with a specified LDA configuration. 
+	 * @param documentID
+	 * @param ldaConfigID
+	 * @return List of topics for this document and LDA configuration, listed descendingly.
+	 */
+	public ArrayList<Pair<Pair<Integer, Integer>, Float>> loadTopicProbabilitiesInDocument(final int documentID, final int ldaConfigID) throws SQLException
+	{
+		ArrayList<Pair<Pair<Integer, Integer>, Float>> res = new ArrayList<Pair<Pair<Integer, Integer>, Float>>();
+		
+		/*
+		 * 1. Fetch data.	
+		 */
+		
+		String statementString 	=	"select " +
+									"    * " +
+									"from " +
+									"    topics_in_documents tid " +
+									"where " +
+									"    tid.documentsID = " 		+ documentID + 
+									" 	 tid.ldaConfigurationID = "	+ ldaConfigID + " " +
+									"order by " +
+									"	 tid.probability desc;"
+									;
+		
+		// Prepare statement.
+		PreparedStatement statement = connection.prepareStatement(statementString);
+		
+		// Execute statement.
+		ResultSet rs				= statement.executeQuery();
+		
+		/*
+		 * 2. Process data.
+		 * 
+		 */
+
+		// Read results, store in collection.
+		if (rs.next()) {
+			// Get comprehensive topic ID.
+			Pair<Integer, Integer> topicID = new Pair<Integer, Integer>(rs.getInt("ldaConfigurationID"), rs.getInt("topicID"));
+			
+			// Get probability; add to list.
+			res.add(new Pair<Pair<Integer, Integer>, Float>(topicID, rs.getFloat("probability")));
+		}
+		
+		return res;
+	}
+	
+	/**
+	 * Loads probabilities for topics in given document for all LDA configurations. 
+	 * @param documentID
+	 * @return List of topics for this document, listed descendingly.
+	 */
+	public ArrayList<Pair<Pair<Integer, Integer>, Float>> loadTopicProbabilitiesInDocument(final int documentID) throws SQLException
+	{
+		ArrayList<Pair<Pair<Integer, Integer>, Float>> res = new ArrayList<Pair<Pair<Integer, Integer>, Float>>();
+		
+		/*
+		 * 1. Fetch data.	
+		 */
+		
+		String statementString 	=	"select " +
+									"    * " +
+									"from " +
+									"    topics_in_documents tid " +
+									"where " +
+									"    tid.documentsID = " 		+ documentID + " " +
+									"order by " +
+									"	 tid.probability desc;"
+									;
+		
+		// Prepare statement.
+		PreparedStatement statement = connection.prepareStatement(statementString);
+		
+		// Execute statement.
+		ResultSet rs				= statement.executeQuery();
+		
+		/*
+		 * 2. Process data.
+		 * 
+		 */
+
+		// Read results, store in collection.
+		while (rs.next()) {
+			// Get comprehensive topic ID.
+			Pair<Integer, Integer> topicID = new Pair<Integer, Integer>(rs.getInt("ldaConfigurationID"), rs.getInt("topicID"));
+			
+			// Get probability; add to list.
+			res.add(new Pair<Pair<Integer, Integer>, Float>(topicID, rs.getFloat("probability")));
+		}
+		
+		return res;
+	}
 }

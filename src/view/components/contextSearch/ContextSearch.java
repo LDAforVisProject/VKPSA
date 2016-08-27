@@ -50,6 +50,12 @@ public class ContextSearch extends VisualizationComponent
 	private static final int CONTEXT_WORD_COUNT = 3;
 	
 	/**
+	 * Currently examined topic's comprehensive ID.
+	 * Actually not neeeded in ContextSearch except to forward it to DocumentDetail.
+	 */
+	private Pair<Integer, Integer> topicID;
+	
+	/**
 	 * Currently selected keyword.
 	 */
 	private String keyword;
@@ -90,7 +96,7 @@ public class ContextSearch extends VisualizationComponent
 		((TableColumn<KeywordContext, String>)columns.get(3)).setCellValueFactory(new PropertyValueFactory<KeywordContext, String>("refinedAbstract"));
 		
 		// Init on-click listeners for table.
-		initTableRowListener();
+		setTableRowListener();
 	}
 	
 	private void initTableContextMenu()
@@ -114,7 +120,7 @@ public class ContextSearch extends VisualizationComponent
 	/**
 	 * Initialize on-click listener for table.
 	 */
-	private void initTableRowListener()
+	private void setTableRowListener()
 	{
 		// Add listener for double-click on row.
 		table.setRowFactory( tv -> {
@@ -123,7 +129,7 @@ public class ContextSearch extends VisualizationComponent
 		    	// On double click: Show document detail.
 		        if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
 		        	// Show document details.
-		            analysisController.showDocumentDetail(row.getItem().getDocumentID());
+		            analysisController.showDocumentDetail(row.getItem().getDocumentID(), topicID.getKey(), topicID.getValue());
 		        }
 		        
 		        // On right click: Check if document is currently shown in DocumentLookup.
@@ -177,15 +183,20 @@ public class ContextSearch extends VisualizationComponent
 
 	/**
 	 * Refresh ContextSearch component.
+	 * @param topicID Comprehensive topic ID.
 	 * @param keyword
 	 * @param keywordContextList List of keyword's appearances. 
 	 * @param documentRanksByID Map with document ID -> rank in document lookup results.
 	 * @param searchTerm String to filter by.
 	 */
-	public void refresh(final String keyword, final ArrayList<KeywordContext> keywordContextList, final Map<Integer, Integer> documentRanksByID, final String searchTerm)
+	public void refresh(final Pair<Integer, Integer> topicID, final String keyword, final ArrayList<KeywordContext> keywordContextList, 
+						final Map<Integer, Integer> documentRanksByID, final String searchTerm)
 	{
 		// Clear table.
 		table.getItems().clear();
+		
+		// Update LDA configuration ID.
+		this.topicID			= topicID;
 		
 		// Update selected keyword.
 		this.keyword			= keyword;
@@ -197,6 +208,9 @@ public class ContextSearch extends VisualizationComponent
 		
 		// Update document rank listing.
 		this.documentRanksByID	= documentRanksByID;
+		
+		// Set listener for table row action.
+		setTableRowListener();
 		
 		// Iterate over all instances of KeywordContext.
 		for (KeywordContext kc : keywordContextList) {
@@ -381,7 +395,7 @@ public class ContextSearch extends VisualizationComponent
 		log("Searching for term " + search_textfield.getText() + ".");
 		
 		// Refresh table, only displaying items containing the specified term.
-		refresh(this.keyword, this.keywordContextList, this.documentRanksByID, search_textfield.getText());
+		refresh(this.topicID, this.keyword, this.keywordContextList, this.documentRanksByID, search_textfield.getText());
 	}
 
 	@Override

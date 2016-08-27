@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.chart.*?>
 <?import javafx.scene.canvas.*?>
@@ -24,7 +25,15 @@
                   </ScrollPane>
                </children>
             </AnchorPane>
-          <AnchorPane fx:id="barchart_anchorpane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" style="-fx-background-color: #fff;" />
+          <AnchorPane fx:id="barchart_anchorpane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" style="-fx-background-color: #fff;">
+               <children>
+                  <Label layoutX="81.0" layoutY="10.0" text="of keyword(s) in topic(s)" AnchorPane.leftAnchor="84.0" AnchorPane.topAnchor="7.0" />
+                  <Label layoutX="26.0" layoutY="27.0" text="Probabilities" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="7.0">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                  </Label>
+               </children></AnchorPane>
         </items>
       </SplitPane>
    </children>

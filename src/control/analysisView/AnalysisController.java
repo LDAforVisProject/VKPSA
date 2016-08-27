@@ -1493,13 +1493,16 @@ public class AnalysisController extends Controller
 	 * Show context for specified keyword.
 	 * @param keyword
 	 * @param documentRanksByID 
+	 * @param ldaConfigID Currently examined LDA configuration's ID to provide context.
+	 * @param topicID Currently examined topic's ID to provide context.
 	 */
-	public void showKeywordContext(final String keyword, final Map<Integer, Integer> documentRanksByID)
+	public void showKeywordContext(final String keyword, final Map<Integer, Integer> documentRanksByID, final int ldaConfigID, final int topicID)
 	{
 		// Load keyword context.
 		try {
 			// Updating DocumentLookup.
-			contextSearch.refresh(keyword, workspace.getDatabaseManagement().loadContext(keyword), documentRanksByID, null);
+			contextSearch.refresh(	new Pair<Integer, Integer>(ldaConfigID, topicID), keyword, 
+									workspace.getDatabaseManagement().loadContext(keyword), documentRanksByID, null);
 		}
 		
 		catch (SQLException e) {
@@ -1519,12 +1522,16 @@ public class AnalysisController extends Controller
 	/**
 	 * Show document details in pop-up.
 	 * @param documentID
+	 * @param ldaConfigID ID of currently examined LDA configuration to provide context.
+	 * @param topiciD ID of currently examined topic.
 	 */
-	public void showDocumentDetail(final int documentID)
+	public void showDocumentDetail(final int documentID, final int ldaConfigID, final int topicID)
 	{		
 		try {
 			// Load document, update component.
-			documentDetail.update(workspace.getDatabaseManagement().loadDocumentByID(documentID));
+			documentDetail.refresh(	workspace.getDatabaseManagement().loadDocumentByID(documentID), 
+									workspace.getDatabaseManagement().loadTopicProbabilitiesInDocument(documentID),
+									new Pair<Integer, Integer>(ldaConfigID, topicID));
 			
 			// Show document detail.
 			documentDetail_popover.show(documentLookup_anchorpane);
