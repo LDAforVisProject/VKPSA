@@ -15,8 +15,9 @@
               <columns>
                   <TableColumn prefWidth="96.0" text="Document rank" />
                 <TableColumn prefWidth="76.0" text="Title" />
-                  <TableColumn prefWidth="211.0" text="In original abstract" />
-                  <TableColumn prefWidth="179.0" text="In processed abstract" />
+                  <TableColumn prefWidth="75.0" text="Occurence count" />
+                  <TableColumn prefWidth="133.0" text="In original abstract" />
+                  <TableColumn prefWidth="107.0" text="In processed abstract" />
               </columns>
             </TableView>
          </children>

@@ -92,8 +92,14 @@ public class ContextSearch extends VisualizationComponent
 		// Bind columns to properties.
 		((TableColumn<KeywordContext, Integer>)columns.get(0)).setCellValueFactory(new PropertyValueFactory<KeywordContext, Integer>("documentRank"));
 		((TableColumn<KeywordContext, String>)columns.get(1)).setCellValueFactory(new PropertyValueFactory<KeywordContext, String>("documentTitle"));
-		((TableColumn<KeywordContext, String>)columns.get(2)).setCellValueFactory(new PropertyValueFactory<KeywordContext, String>("originalAbstract"));
-		((TableColumn<KeywordContext, String>)columns.get(3)).setCellValueFactory(new PropertyValueFactory<KeywordContext, String>("refinedAbstract"));
+		((TableColumn<KeywordContext, String>)columns.get(2)).setCellValueFactory(new PropertyValueFactory<KeywordContext, String>("occurenceCount"));
+		((TableColumn<KeywordContext, String>)columns.get(3)).setCellValueFactory(new PropertyValueFactory<KeywordContext, String>("originalAbstract"));
+		((TableColumn<KeywordContext, String>)columns.get(4)).setCellValueFactory(new PropertyValueFactory<KeywordContext, String>("refinedAbstract"));
+		
+		// Set sort order.
+		((TableColumn<KeywordContext, String>)columns.get(2)).setSortType(TableColumn.SortType.DESCENDING);
+		table.getSortOrder().add((TableColumn<KeywordContext, String>)columns.get(2));
+		
 		
 		// Init on-click listeners for table.
 		setTableRowListener();
@@ -129,7 +135,7 @@ public class ContextSearch extends VisualizationComponent
 		    	// On double click: Show document detail.
 		        if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
 		        	// Show document details.
-		            analysisController.showDocumentDetail(row.getItem().getDocumentID(), topicID.getKey(), topicID.getValue());
+		            analysisController.showDocumentDetail(row.getItem().getDocumentID(), topicID.getKey(), topicID.getValue(), keyword);
 		        }
 		        
 		        // On right click: Check if document is currently shown in DocumentLookup.
@@ -218,13 +224,20 @@ public class ContextSearch extends VisualizationComponent
 			// Check if KeywordContext contains search term.
 			if (kc.containsTerm(searchTerm)) {
 				/*
-				 * 1. Generate context strings.
+				 * 1. Generate context information.
 				 */
 				
-				Pair<String, String> contextStringsForDocument = generateContextStrings(keyword, kc);
+				Pair<Pair<String, String>, Pair<Integer, Integer>> contextInformation 	= generateContextStrings(keyword, kc);
+				// Extract context strings.
+				final Pair<String, String> contextStringsForDocument 					= contextInformation.getKey();
+				// Occurence count.
+				final int occurenceCount												= 	contextInformation.getValue().getKey() + 
+																							contextInformation.getValue().getValue() + 
+																							kc.getKeywordOccurenceInTitle(keyword);
 				
 				/*
-				 * 2. Add context summaries for this document to collection. 
+				 * 2. Add context summaries for this document to collection.
+				 * 	  Count number of keyword's occurences. 
 				 */
 			
 				kc.setOriginalAbstract(new SimpleStringProperty(contextStringsForDocument.getKey()));
@@ -234,9 +247,15 @@ public class ContextSearch extends VisualizationComponent
 				 * 3. Update table.  
 				 */
 				
-				table.getItems().add(new KeywordContext(kc.getDocumentID(), kc.getKeyword(), this.documentRanksByID.get(kc.getDocumentID()), kc.getDocumentTitle(), contextStringsForDocument.getKey(), contextStringsForDocument.getValue()));
+				table.getItems().add(new KeywordContext(
+						kc.getDocumentID(), kc.getKeyword(), this.documentRanksByID.get(kc.getDocumentID()), kc.getDocumentTitle(), 
+						occurenceCount, contextStringsForDocument.getKey(), contextStringsForDocument.getValue()
+				));
 			}
 		}
+		
+		// Sort table by occurence count.
+		table.sort();
 	}
 	
 	/**
@@ -246,12 +265,17 @@ public class ContextSearch extends VisualizationComponent
 	 * @param searchTerm
 	 * @return
 	 */
-	private Pair<String, String> generateContextStrings(final String keyword, final KeywordContext keywordContext)
+	private Pair<Pair<String, String>, Pair<Integer, Integer>> generateContextStrings(final String keyword, final KeywordContext keywordContext)
 	{
 		// Context string for original abstract.
 		String originalAbstractContextSummary	= "...";
 		// Context string for processed abstract.
 		String refinedAbstractContextSummary	= "...";
+		
+		// Number of keyword's occurence in original abstract.
+		int originalAbstractOccurenceCount		= 0;
+		// Number of keyword's occurence in processed abstract.
+		int refinedAbstractOccurenceCount		= 0;
 		
 		// Index of found keyword.
 		int keywordIndex						= -1;
@@ -268,6 +292,9 @@ public class ContextSearch extends VisualizationComponent
 		    	 
 		    	 // Add neighbourhood to context string.
 		    	 originalAbstractContextSummary += keywordContext.originalAbstractProperty().get().substring(delimiterPositions.getKey(), delimiterPositions.getValue()) + "...";
+		    	 
+		    	 // Increment occurence count.
+		    	 originalAbstractOccurenceCount++;
 		     }
 		     
 		     // Find next occurence.
@@ -289,6 +316,9 @@ public class ContextSearch extends VisualizationComponent
 		    	 
 		    	 // Add neighbourhood to context string.
 		    	 refinedAbstractContextSummary += keywordContext.refinedAbstractProperty().get().substring(delimiterPositions.getKey(), delimiterPositions.getValue()) + "...";
+		    	 
+		    	 // Increment occurence count.
+		    	 refinedAbstractOccurenceCount++;
 		     }
 		     
 		     // Find next occurence.
@@ -302,7 +332,10 @@ public class ContextSearch extends VisualizationComponent
 			refinedAbstractContextSummary = "";
 		
 		// Return results.
-		return new Pair<String, String>(originalAbstractContextSummary, refinedAbstractContextSummary);
+		return new Pair<Pair<String,String>, Pair<Integer,Integer>>(
+				new Pair<String, String>(originalAbstractContextSummary, refinedAbstractContextSummary),
+				new Pair<Integer, Integer>(originalAbstractOccurenceCount, refinedAbstractOccurenceCount)
+		);
 	}
 	
 	/**

@@ -44,6 +44,7 @@ public class DocumentDetail extends VisualizationComponent
 	
 	private @FXML AnchorPane root_anchorpane;
 	private @FXML Label title_label;
+	private @FXML Label searchedForKeyword_label;
 	private @FXML Label authors_label;
 	private @FXML Label date_label;
 	private @FXML Label conference_label;
@@ -57,7 +58,7 @@ public class DocumentDetail extends VisualizationComponent
 	private @FXML Label topicProbabilities_label;
 	private @FXML BarChart<String, Number> topicProbabilities_barchart;
 	private @FXML NumberAxis topicProbabilities_barchart_yAxis_numberaxis;
-	private @FXML Label highlightInfo_label;
+	private @FXML Label examinedTopicID_label;
 	
 	/*
 	 * Information on pane resizing.
@@ -207,15 +208,17 @@ public class DocumentDetail extends VisualizationComponent
 	 * @param document Document to display.
 	 * @param topicProbabilitiesInDoc List of topics for this document, listed descendingly.
 	 * @param topicID Currently examined topic's comprehensive ID.
+	 * @param keyword Currently selected keyword.
 	 */
 	public void refresh(final Document document, final ArrayList<Pair<Pair<Integer, Integer>, Float>> topicProbabilitiesInDoc,
-						final Pair<Integer, Integer> topicID)
+						final Pair<Integer, Integer> topicID, final String keyword)
 	{
 		// Store displayed document.
 		this.document = document;
 		
 		// Update UI elements.
 		title_label.setText(document.getTitle());
+		searchedForKeyword_label.setText(keyword);
 		authors_label.setText(document.getAuthors());
 		date_label.setText(document.getDate());
 		conference_label.setText(document.getConference());
@@ -269,7 +272,7 @@ public class DocumentDetail extends VisualizationComponent
 		}
 		
 		// Update info label.
-		highlightInfo_label.setText("Highlighted: " + topicID.getKey() + "#" + topicID.getValue());
+		examinedTopicID_label.setText(topicID.getKey() + "#" + topicID.getValue());
 	}
 	
 	/**

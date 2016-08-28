@@ -1765,6 +1765,7 @@ public class DBManagement
 														keyword,
 														-1,
 														rs.getString("title"), 
+														-1,
 														rs.getString("abstract"),
 														rs.getString("refinedAbstract")) );
 		}

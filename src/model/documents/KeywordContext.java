@@ -7,15 +7,17 @@ public class KeywordContext
 {
 	private int documentID;
 	private String keyword;
+	private int occurenceCount;
 	private SimpleIntegerProperty documentRank;
 	private SimpleStringProperty documentTitle;
 	private SimpleStringProperty originalAbstract;
 	private SimpleStringProperty refinedAbstract;
 	
-	public KeywordContext(int documentID, String keyword, int documentRank, String documentTitle, String originalAbstract, String refinedAbstract)
+	public KeywordContext(int documentID, String keyword, int documentRank, String documentTitle, int occurenceCount, String originalAbstract, String refinedAbstract)
 	{
 		this.documentID 		= documentID;
 		this.keyword 			= keyword;
+		this.occurenceCount		= occurenceCount;
 		this.documentRank		= new SimpleIntegerProperty(documentRank);
 		this.documentTitle 		= new SimpleStringProperty(documentTitle);
 		this.originalAbstract 	= new SimpleStringProperty(originalAbstract);
@@ -30,6 +32,11 @@ public class KeywordContext
 	public String getKeyword()
 	{
 		return keyword;
+	}
+	
+	public int getOccurenceCount()
+	{
+		return occurenceCount;
 	}
 
 	public SimpleStringProperty documentTitleProperty()
@@ -80,5 +87,25 @@ public class KeywordContext
 				refinedAbstract.get().contains(term)	||
 				String.valueOf((documentRank.get())).contains(term);
 			
+	}
+	
+	/**
+	 * Determine number of search term's occurences in title. 
+	 * @param term
+	 * @return
+	 */
+	public int getKeywordOccurenceInTitle(final String term)
+	{
+		int count 		= 0;
+		int currIndex	= 0;
+		
+		if (documentTitle != null && documentTitle.get() != null && term != null) {
+			while ( (currIndex = documentTitle.get().indexOf(term, currIndex)) >= 0 ) {
+				count++;
+				currIndex++;
+			}
+		}
+		
+		return count;
 	}
 }

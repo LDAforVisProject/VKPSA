@@ -66,6 +66,11 @@ public class DocumentLookup extends VisualizationComponent
 	 */
 	private Map<Integer, Integer> documentRanksByID;
 	
+	/**
+	 * Currently selected keyword.
+	 */
+	private String keyword;
+	
 	
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1)
@@ -136,7 +141,7 @@ public class DocumentLookup extends VisualizationComponent
 		    row.setOnMouseClicked(event -> {
 		        if (event.getClickCount() == 2 && (!row.isEmpty()) ) {
 		        	// Show document details.
-		            analysisController.showDocumentDetail(row.getItem().getDocumentID(), topicID.getKey(), topicID.getValue());
+		            analysisController.showDocumentDetail(row.getItem().getDocumentID(), topicID.getKey(), topicID.getValue(), keyword);
 		        }
 		    });
 		    
@@ -203,11 +208,12 @@ public class DocumentLookup extends VisualizationComponent
 
 	/**
 	 * Refreshes data.
-	 * @param topicID
+	 * @param topicID Currently examined topic's comprehensive ID.
+	 * @param keyword Currently examined keyword.
 	 * @param document List of documents, sorted by probability.
 	 * @param searchTerm String to filter by.
 	 */
-	public void refresh(Pair<Integer, Integer> topicID, ArrayList<Document> documents, String searchTerm)
+	public void refresh(final Pair<Integer, Integer> topicID, final String keyword, final ArrayList<Document> documents, final String searchTerm)
 	{
 		// Clear previous state.
 		table.getItems().clear();
@@ -220,6 +226,9 @@ public class DocumentLookup extends VisualizationComponent
 		
 		// Update label for topic ID.
 		topicID_label.setText(topicID.getKey() + "#" + topicID.getValue());
+		
+		// Update keyword.
+		this.keyword	= keyword;
 		
 		// Count document ranks.
 		int count = 1;
@@ -325,7 +334,7 @@ public class DocumentLookup extends VisualizationComponent
 		log("Searching for term " + search_textfield.getText() + ".");
 		
 		// Refresh table, only displaying items containing the specified term.
-		refresh(this.topicID, this.documents, search_textfield.getText());
+		refresh(this.topicID, this.keyword, this.documents, search_textfield.getText());
 	}
 
 	public Map<Integer, Integer> getDocumentRanksByID()

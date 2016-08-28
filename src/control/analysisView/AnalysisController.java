@@ -1463,9 +1463,10 @@ public class AnalysisController extends Controller
 	 * Is called after topic is selected in ParallelTagCloud.
 	 * @param topicID
 	 * @param clearContextSearch
+	 * @param keyword
 	 * @return Map with ID -> rank associations in table.
 	 */
-	public Map<Integer, Integer> listRelevantDocuments(final Pair<Integer, Integer> topicID, final boolean clearContextSearch)
+	public Map<Integer, Integer> listRelevantDocuments(final Pair<Integer, Integer> topicID, final boolean clearContextSearch, final String keyword)
 	{
 		log("Listing documents for topic " + topicID.getKey() + "#" + topicID.getValue());
 		
@@ -1476,7 +1477,7 @@ public class AnalysisController extends Controller
 		// Load documents sorted by relevance.
 		try {
 			// Updating DocumentLookup.
-			documentLookup.refresh(topicID, workspace.getDatabaseManagement().loadDocuments(topicID), null);
+			documentLookup.refresh(topicID, keyword, workspace.getDatabaseManagement().loadDocuments(topicID), null);
 			
 			// Return result.
 			return documentLookup.getDocumentRanksByID();
@@ -1523,15 +1524,17 @@ public class AnalysisController extends Controller
 	 * Show document details in pop-up.
 	 * @param documentID
 	 * @param ldaConfigID ID of currently examined LDA configuration to provide context.
-	 * @param topiciD ID of currently examined topic.
+	 * @param topicID ID of currently examined topic.
+	 * @param examinedKeyword Currently investigated keyword.
 	 */
-	public void showDocumentDetail(final int documentID, final int ldaConfigID, final int topicID)
+	public void showDocumentDetail(final int documentID, final int ldaConfigID, final int topicID, final String examinedKeyword)
 	{		
 		try {
 			// Load document, update component.
 			documentDetail.refresh(	workspace.getDatabaseManagement().loadDocumentByID(documentID), 
 									workspace.getDatabaseManagement().loadTopicProbabilitiesInDocument(documentID),
-									new Pair<Integer, Integer>(ldaConfigID, topicID));
+									new Pair<Integer, Integer>(ldaConfigID, topicID),
+									examinedKeyword);
 			
 			// Show document detail.
 			documentDetail_popover.show(documentLookup_anchorpane);
