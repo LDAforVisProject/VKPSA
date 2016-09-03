@@ -61,6 +61,11 @@ public class ContextSearch extends VisualizationComponent
 	private String keyword;
 	
 	/**
+	 * Content of field for keywords.
+	 */
+	private String keywordFieldContent;
+	
+	/**
 	 * Collection of instances of KeywordContext.
 	 */
 	private ArrayList<KeywordContext> keywordContextList;
@@ -227,13 +232,10 @@ public class ContextSearch extends VisualizationComponent
 				 * 1. Generate context information.
 				 */
 				
-				Pair<Pair<String, String>, Pair<Integer, Integer>> contextInformation 	= generateContextStrings(keyword, kc);
 				// Extract context strings.
-				final Pair<String, String> contextStringsForDocument 					= contextInformation.getKey();
+				Pair<String, String> contextStringsForDocument	= generateContextStrings(keyword, kc);
 				// Occurence count.
-				final int occurenceCount												= 	contextInformation.getValue().getKey() + 
-																							contextInformation.getValue().getValue() + 
-																							kc.getKeywordOccurenceInTitle(keyword);
+				final int occurenceCount						= kc.countTermOccurances(keyword);
 				
 				/*
 				 * 2. Add context summaries for this document to collection.
@@ -248,7 +250,7 @@ public class ContextSearch extends VisualizationComponent
 				 */
 				
 				table.getItems().add(new KeywordContext(
-						kc.getDocumentID(), kc.getKeyword(), this.documentRanksByID.get(kc.getDocumentID()), kc.getDocumentTitle(), 
+						kc.getDocumentID(), kc.getActiveKewyord(), kc.getKeywords(), this.documentRanksByID.get(kc.getDocumentID()), kc.getDocumentTitle(), 
 						occurenceCount, contextStringsForDocument.getKey(), contextStringsForDocument.getValue()
 				));
 			}
@@ -265,17 +267,12 @@ public class ContextSearch extends VisualizationComponent
 	 * @param searchTerm
 	 * @return
 	 */
-	private Pair<Pair<String, String>, Pair<Integer, Integer>> generateContextStrings(final String keyword, final KeywordContext keywordContext)
+	private Pair<String, String> generateContextStrings(final String keyword, final KeywordContext keywordContext)
 	{
 		// Context string for original abstract.
 		String originalAbstractContextSummary	= "...";
 		// Context string for processed abstract.
 		String refinedAbstractContextSummary	= "...";
-		
-		// Number of keyword's occurence in original abstract.
-		int originalAbstractOccurenceCount		= 0;
-		// Number of keyword's occurence in processed abstract.
-		int refinedAbstractOccurenceCount		= 0;
 		
 		// Index of found keyword.
 		int keywordIndex						= -1;
@@ -292,13 +289,10 @@ public class ContextSearch extends VisualizationComponent
 		    	 
 		    	 // Add neighbourhood to context string.
 		    	 originalAbstractContextSummary += keywordContext.originalAbstractProperty().get().substring(delimiterPositions.getKey(), delimiterPositions.getValue()) + "...";
-		    	 
-		    	 // Increment occurence count.
-		    	 originalAbstractOccurenceCount++;
 		     }
 		     
 		     // Find next occurence.
-		     keywordIndex = keywordContext.originalAbstractProperty().get().indexOf(keyword, keywordIndex + 1);
+		     keywordIndex = keywordContext.originalAbstractProperty().get().toLowerCase().indexOf(keyword.toLowerCase(), keywordIndex + 1);
 		} while(keywordIndex >= 0);
 		
 		// Reset keyword index.
@@ -316,26 +310,20 @@ public class ContextSearch extends VisualizationComponent
 		    	 
 		    	 // Add neighbourhood to context string.
 		    	 refinedAbstractContextSummary += keywordContext.refinedAbstractProperty().get().substring(delimiterPositions.getKey(), delimiterPositions.getValue()) + "...";
-		    	 
-		    	 // Increment occurence count.
-		    	 refinedAbstractOccurenceCount++;
 		     }
 		     
 		     // Find next occurence.
-		     keywordIndex = keywordContext.refinedAbstractProperty().get().indexOf(keyword, keywordIndex + 1);
-		} while(keywordIndex >= 0);		
+		     keywordIndex = keywordContext.refinedAbstractProperty().get().toLowerCase().indexOf(keyword.toLowerCase(), keywordIndex + 1);
+		} while(keywordIndex >= 0);
 		
 		// Remove dots, if no results.
 		if (originalAbstractContextSummary.equals("..."))
 			originalAbstractContextSummary = "";
 		if (refinedAbstractContextSummary.equals("..."))
-			refinedAbstractContextSummary = "";
+			refinedAbstractContextSummary = "";				
 		
 		// Return results.
-		return new Pair<Pair<String,String>, Pair<Integer,Integer>>(
-				new Pair<String, String>(originalAbstractContextSummary, refinedAbstractContextSummary),
-				new Pair<Integer, Integer>(originalAbstractOccurenceCount, refinedAbstractOccurenceCount)
-		);
+		return new Pair<String,String>(originalAbstractContextSummary, refinedAbstractContextSummary);
 	}
 	
 	/**

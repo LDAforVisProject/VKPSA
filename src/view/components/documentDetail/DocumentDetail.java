@@ -6,10 +6,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import database.DBManagement;
 import model.documents.Document;
-import model.documents.DocumentForLookupTable;
-import model.workspace.Workspace;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
@@ -18,15 +15,18 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.util.Pair;
 import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
@@ -43,14 +43,10 @@ public class DocumentDetail extends VisualizationComponent
 	 */
 	
 	private @FXML AnchorPane root_anchorpane;
-	private @FXML Label title_label;
 	private @FXML Label searchedForKeyword_label;
 	private @FXML Label authors_label;
 	private @FXML Label date_label;
 	private @FXML Label conference_label;
-	private @FXML Label keywords_label;
-	private @FXML TextArea originalAbstract_textfield;
-	private @FXML TextArea processedAbstract_textfield;
 	private @FXML ImageView resize_imageview;
 	
 	// Metadata (information on doc. source and topic probability distribution) elements.
@@ -59,6 +55,34 @@ public class DocumentDetail extends VisualizationComponent
 	private @FXML BarChart<String, Number> topicProbabilities_barchart;
 	private @FXML NumberAxis topicProbabilities_barchart_yAxis_numberaxis;
 	private @FXML Label examinedTopicID_label;
+	
+	/*
+	 * TextFlows and their containers.
+	 */
+	
+	// AnchorPane containing TextFlow for title.
+	private @FXML AnchorPane title_anchorpane;
+	// Original abstract: TextFlow for title.
+	private TextFlow title_textflow;
+	
+	// AnchorPane containing TextFlow for keywords.
+	private @FXML AnchorPane keywords_anchorpane;
+	// Original abstract: TextFlows for keywords.
+	private TextFlow keywords_textflow;
+	
+	// Original abstract: ScrollPane containing AnchorPane containing TextFlow.
+	private @FXML ScrollPane originalAbstract_scrollpane;
+	// Original abstract: AnchorPane containing TextFlow.
+	private @FXML AnchorPane originalAbstract_anchorpane;
+	// Original abstract: TextFlows for abstracts.
+	private TextFlow originalAbstract_textflow;
+	
+	// Processed abstract: ScrollPane containing TextFlow.
+	private @FXML ScrollPane processedAbstract_scrollpane;
+	// Processed AnchorPane containing TextFlow.
+	private @FXML AnchorPane processedAbstract_anchorpane;
+	// Processed TextFlows for abstracts.
+	private TextFlow processedAbstract_textflow;
 	
 	/*
 	 * Information on pane resizing.
@@ -89,8 +113,44 @@ public class DocumentDetail extends VisualizationComponent
 		
 		// Init topic probability bar chart.
 		initTopicProbabilityBarchart();
+		
+		// Init text fields.
+		initTextfields();
 	}
 	
+	/**
+	 * Prepare text fields.
+	 */
+	private void initTextfields()
+	{
+		/*
+		 * Create instances of TextFlow.
+		 */
+		
+		// For title.
+		title_textflow				= new TextFlow();
+		title_anchorpane.getChildren().add(title_textflow);
+		
+		// For keywords.
+		keywords_textflow			= new TextFlow();
+		keywords_anchorpane.getChildren().add(keywords_textflow);
+		
+		// For original abstract.
+		originalAbstract_textflow 	= new TextFlow();
+		originalAbstract_anchorpane.getChildren().add(originalAbstract_textflow);
+		// Important: Caching is needed, since rendering TextFlow in ScrollPane doesn't work otherwise.
+		originalAbstract_textflow.setCache(true);
+		
+		// For processed abstract.
+		processedAbstract_textflow = new TextFlow();
+		processedAbstract_anchorpane.getChildren().add(processedAbstract_textflow);
+		// Important: Caching is needed, since rendering TextFlow in ScrollPane doesn't work otherwise.
+		processedAbstract_textflow.setCache(true);
+		
+		// Resize components.
+		resizeContent(600, 550);
+	}
+
 	/**
 	 * Initiailze probabiilty bar chart.
 	 */
@@ -216,18 +276,96 @@ public class DocumentDetail extends VisualizationComponent
 		// Store displayed document.
 		this.document = document;
 		
-		// Update UI elements.
-		title_label.setText(document.getTitle());
+		/*
+		 * Update UI elements.
+		 */
+		
+		// Update title TextFlow..
+		updateTextFlow(title_textflow, document.getTitle(), keyword, FontWeight.BOLD);
 		searchedForKeyword_label.setText(keyword);
 		authors_label.setText(document.getAuthors());
 		date_label.setText(document.getDate());
 		conference_label.setText(document.getConference());
-		keywords_label.setText(document.getKeywords());
-		originalAbstract_textfield.setText(document.getOriginalAbstract());
-		processedAbstract_textfield.setText(document.getProcessedAbstract());
+		updateTextFlow(keywords_textflow, document.getKeywords(), keyword, FontWeight.NORMAL);
+		
+		// Update text fields for abstracts. Highlight searched for keywords.
+		updateAbstracts(this.document, keyword);
 		
 		// Update bar chart.
 		refreshBarchart(topicProbabilitiesInDoc, topicID);
+	}
+	
+	private void updateAbstracts(final Document document, final String term)
+	{
+		// Update field for original abstract.
+		updateTextFlow(originalAbstract_textflow, document.getOriginalAbstract(), term, FontWeight.NORMAL);
+		
+		// Update field for processed abstract.
+		updateTextFlow(processedAbstract_textflow, document.getProcessedAbstract(), term, FontWeight.NORMAL);
+	}
+
+	/**
+	 * Highlights keyword's every occurence in specified TextArea.
+	 * See http://stackoverflow.com/questions/9128535/highlighting-strings-in-javafx-textarea 
+	 * @param textFlow
+	 * @param keyword
+	 * @param term
+	 * @param defaultFontWeight FontWeight value to use for non-highlighted text.
+	 */
+	private void updateTextFlow(TextFlow textFlow, final String content, final String term, final FontWeight defaultFontWeight)
+	{
+		// Clear text field.
+		textFlow.getChildren().clear();
+		
+		// Arrange text flow.
+		if (textFlow != null && content != null) {
+			String tmpContent 	= "";
+			// Get all words.
+			String[] words		= content.split(" |;");
+			
+			// Look in all words for term.
+			for (int i = 0; i < words.length; i++) {
+				// Get current word.
+				String word = words[i];
+				
+				// If word doesn't contain term: Append to tmpContent.
+				if (!word.toLowerCase().contains(term.toLowerCase())) {
+					tmpContent += word;
+					// Append space if this isn't the last word.
+					if(i < words.length - 1)
+						tmpContent += " ";
+					// If this is the last word: Append to TextFlow.
+					else {
+						Text textWithoutTerm	= new Text(tmpContent);
+						textWithoutTerm.setFill(new Color(0, 0, 0, 0.75));
+						textWithoutTerm.setFont(Font.font(textWithoutTerm.getFont().getName(), defaultFontWeight, textWithoutTerm.getFont().getSize()));
+						
+						// Add node to text field.
+						textFlow.getChildren().add(textWithoutTerm);
+					}
+				}
+				
+				// If word contains term: Push new Text instances into TextFlow.
+				else {
+					// Text instance for part not containing term.
+					Text textWithoutTerm	= new Text(tmpContent);
+					textWithoutTerm.setFill(new Color(0, 0, 0, 0.75));
+					textWithoutTerm.setFont(Font.font(textWithoutTerm.getFont().getName(), defaultFontWeight, textWithoutTerm.getFont().getSize()));
+					
+					// Text instance for key term.
+					Text textWithTerm		= new Text(word + " ");
+					textWithTerm.setFill(Color.RED);
+					textWithTerm.setFont(Font.font(textWithTerm.getFont().getName(), FontWeight.BOLD, textWithTerm.getFont().getSize() - 1));
+					
+					// Add nodes to text field.
+					textFlow.getChildren().add(textWithoutTerm);
+					textFlow.getChildren().add(textWithTerm);
+					
+					// Reset tmpContent.
+					tmpContent = "";
+				}
+			}
+		}
 	}
 	
 	/**
@@ -333,16 +471,28 @@ public class DocumentDetail extends VisualizationComponent
 	@Override
 	public void resizeContent(double width, double height)
 	{
-		// Resize original abstract text field.
-		originalAbstract_textfield.setPrefWidth((width - 35 * 2) / 2 - 5);
+		final double adjustedTextfieldWidth = (width - 35 * 2) / 2 - 5;
+		final double adjustedGridpaneWidth	= (width - 35 - 35 - 10) * 0.5;
+		final double adjustedBarchartWidth	= (width - 35 - 35 - 10) * 0.5;
+		
+		// Resize keywords text field.
+		keywords_anchorpane.setPrefWidth(adjustedBarchartWidth * 0.5);
+		keywords_textflow.setPrefWidth(adjustedBarchartWidth * 0.5);
+		
 		// Resize processed abstract text field.
-		processedAbstract_textfield.setPrefWidth((width - 35 * 2) / 2 - 5);
+		processedAbstract_scrollpane.setPrefWidth(adjustedTextfieldWidth);
+		processedAbstract_anchorpane.setPrefWidth(adjustedTextfieldWidth - 25);
+		processedAbstract_textflow.setPrefWidth(adjustedTextfieldWidth - 25);
+		
+		// Resize original abstract text field.
+		originalAbstract_scrollpane.setPrefWidth(adjustedTextfieldWidth);
+		originalAbstract_anchorpane.setPrefWidth(adjustedTextfieldWidth - 25);
+		originalAbstract_textflow.setPrefWidth(adjustedTextfieldWidth - 25);
 		
 		// Resize grid.
-		metadata_gridpane.setPrefWidth((width - 35 - 35 - 10) * 0.5);
+		metadata_gridpane.setPrefWidth(adjustedGridpaneWidth);
 		// Resize bar chart.
-		
-		topicProbabilities_barchart.setPrefWidth((width - 35 - 35 - 10) * 0.5);
+		topicProbabilities_barchart.setPrefWidth(adjustedBarchartWidth);
 	}
 
 	@Override

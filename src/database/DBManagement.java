@@ -1739,7 +1739,8 @@ public class DBManagement
 									"    id, " +
 									"    title, " +
 									"    abstract, " +
-									"    refinedAbstract " +
+									"    refinedAbstract, " +
+									"	 keywords " + 
 									"from " +
 									"    documents d " +
 									"where " +
@@ -1763,6 +1764,7 @@ public class DBManagement
 		while (rs.next()) {
 			keywordContextList.add( new KeywordContext(	rs.getInt("id"), 
 														keyword,
+														rs.getString("keywords"),
 														-1,
 														rs.getString("title"), 
 														-1,

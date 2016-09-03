@@ -6,17 +6,24 @@ import javafx.beans.property.SimpleStringProperty;
 public class KeywordContext
 {
 	private int documentID;
-	private String keyword;
+	/**
+	 * Currently examined keyword.
+	 */
+	private String activeKeyword;
+	/**
+	 * Field in document containing paper's keywords.
+	 */
+	private String keywords;
 	private int occurenceCount;
 	private SimpleIntegerProperty documentRank;
 	private SimpleStringProperty documentTitle;
 	private SimpleStringProperty originalAbstract;
 	private SimpleStringProperty refinedAbstract;
 	
-	public KeywordContext(int documentID, String keyword, int documentRank, String documentTitle, int occurenceCount, String originalAbstract, String refinedAbstract)
+	public KeywordContext(int documentID, String keyword, String keywordsContent, int documentRank, String documentTitle, int occurenceCount, String originalAbstract, String refinedAbstract)
 	{
 		this.documentID 		= documentID;
-		this.keyword 			= keyword;
+		this.activeKeyword 			= keyword;
 		this.occurenceCount		= occurenceCount;
 		this.documentRank		= new SimpleIntegerProperty(documentRank);
 		this.documentTitle 		= new SimpleStringProperty(documentTitle);
@@ -29,9 +36,9 @@ public class KeywordContext
 		return documentID;
 	}
 
-	public String getKeyword()
+	public String getActiveKewyord()
 	{
-		return keyword;
+		return activeKeyword;
 	}
 	
 	public int getOccurenceCount()
@@ -81,12 +88,27 @@ public class KeywordContext
 	 */
 	public boolean containsTerm(final String term)
 	{
-		return 	term == null							||
-				documentTitle.get().contains(term) 		||
-				originalAbstract.get().contains(term)	||
-				refinedAbstract.get().contains(term)	||
-				String.valueOf((documentRank.get())).contains(term);
+		return 	term == null														||
+				documentTitle.get().toLowerCase().contains(term.toLowerCase()) 		||
+				originalAbstract.get().toLowerCase().contains(term.toLowerCase())	||
+				refinedAbstract.get().toLowerCase().contains(term.toLowerCase())	||
+				String.valueOf((documentRank.get())).toLowerCase().contains(term.toLowerCase());
 			
+	}
+	
+	/**
+	 * Count occurences of all terms in all fields.
+	 * @param term
+	 * @return
+	 */
+	public int countTermOccurances(final String term)
+	{
+		this.occurenceCount = 	getTermOccurenceInTitle(term) +
+								getTermOccurenceInKeywords(term) + 
+								getTermOccurenceInOriginalAbstract(term) + 
+								getTermOccurenceInRefinedAbstract(term);
+		
+		return this.occurenceCount;
 	}
 	
 	/**
@@ -94,18 +116,83 @@ public class KeywordContext
 	 * @param term
 	 * @return
 	 */
-	public int getKeywordOccurenceInTitle(final String term)
+	private int getTermOccurenceInTitle(final String term)
 	{
 		int count 		= 0;
 		int currIndex	= 0;
 		
 		if (documentTitle != null && documentTitle.get() != null && term != null) {
-			while ( (currIndex = documentTitle.get().indexOf(term, currIndex)) >= 0 ) {
+			while ( (currIndex = documentTitle.get().toLowerCase().indexOf(term.toLowerCase(), currIndex)) >= 0 ) {
 				count++;
 				currIndex++;
 			}
 		}
 		
 		return count;
+	}
+	
+	/**
+	 * Determine number of search term's occurences in keywords. 
+	 * @param term
+	 * @return
+	 */
+	private int getTermOccurenceInKeywords(final String term)
+	{
+		int count 		= 0;
+		int currIndex	= 0;
+		
+		if (keywords != null && term != null) {
+			while ( (currIndex = keywords.toLowerCase().indexOf(term.toLowerCase(), currIndex)) >= 0 ) {
+				count++;
+				currIndex++;
+			}
+		}
+		
+		return count;
+	}
+	
+	/**
+	 * Determine number of search term's occurences in refined abstract. 
+	 * @param term
+	 * @return
+	 */
+	private int getTermOccurenceInRefinedAbstract(final String term)
+	{
+		int count 		= 0;
+		int currIndex	= 0;
+		
+		if (refinedAbstract != null && refinedAbstract.get() != null && term != null) {
+			while ( (currIndex = refinedAbstract.get().toLowerCase().indexOf(term.toLowerCase(), currIndex)) >= 0 ) {
+				count++;
+				currIndex++;
+			}
+		}
+		
+		return count;
+	}
+	
+	/**
+	 * Determine number of search term's occurences in original abstract. 
+	 * @param term
+	 * @return
+	 */
+	private int getTermOccurenceInOriginalAbstract(final String term)
+	{
+		int count 		= 0;
+		int currIndex	= 0;
+		
+		if (originalAbstract != null && originalAbstract.get() != null && term != null) {
+			while ( (currIndex = originalAbstract.get().toLowerCase().indexOf(term.toLowerCase(), currIndex)) >= 0 ) {
+				count++;
+				currIndex++;
+			}
+		}
+		
+		return count;
+	}
+
+	public String getKeywords()
+	{
+		return keywords;
 	}
 }
