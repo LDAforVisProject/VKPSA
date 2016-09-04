@@ -164,17 +164,19 @@ public class DocumentLookup extends VisualizationComponent
 	private void highlightDocumentInProbabilityChart(final int documentID)
 	{
 		// Highlight document with specified ID.
-		for (XYChart.Data<String, Number> item : probability_barchart.getData().get(0).getData()) {
-			// If item is not selected one: Reset opacity and scale factor.
-			if (item == null || (int)item.getExtraValue() != documentID) {
-				item.getNode().setOpacity(VisualizationComponent.DEFAULT_OPACITY_FACTOR);
-				item.getNode().setScaleX(1);
-			}
-			// Otherwise: Scale up, maximize opacity.
-			else {
-				item.getNode().setOpacity(1);
-				double adjustedScaleFactor = BAR_SCALE_X_FACTOR * probability_barchart.getData().get(0).getData().size() / 2019.0; 
-				item.getNode().setScaleX(adjustedScaleFactor >= 1 ? adjustedScaleFactor : 1);
+		if (probability_barchart.getData().size() > 0) {
+			for (XYChart.Data<String, Number> item : probability_barchart.getData().get(0).getData()) {
+				// If item is not selected one: Reset opacity and scale factor.
+				if (item == null || (int)item.getExtraValue() != documentID) {
+					item.getNode().setOpacity(VisualizationComponent.DEFAULT_OPACITY_FACTOR);
+					item.getNode().setScaleX(1);
+				}
+				// Otherwise: Scale up, maximize opacity.
+				else {
+					item.getNode().setOpacity(1);
+					double adjustedScaleFactor = BAR_SCALE_X_FACTOR * probability_barchart.getData().get(0).getData().size() / 2019.0; 
+					item.getNode().setScaleX(adjustedScaleFactor >= 1 ? adjustedScaleFactor : 1);
+				}
 			}
 		}
 	}

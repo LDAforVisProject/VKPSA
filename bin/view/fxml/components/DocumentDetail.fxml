@@ -47,7 +47,7 @@
             <Label fx:id="authors_label" text="Label" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" />
             <Label fx:id="date_label" text="Label" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" />
             <Label fx:id="conference_label" text="Label" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
-            <AnchorPane fx:id="keywords_anchorpane" style="-fx-background-color: #ccc;" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" />
+            <AnchorPane fx:id="keywords_anchorpane" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" />
          </children>
       </GridPane>
       <Separator layoutX="30.0" layoutY="262.0" prefWidth="200.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" />

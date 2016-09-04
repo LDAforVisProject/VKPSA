@@ -1,6 +1,8 @@
 package view.components.parallelTagCloud;
 
 import java.net.URL;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -14,7 +16,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
@@ -30,25 +31,17 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.util.Pair;
+import javafx.util.StringConverter;
 import view.components.DatapointIDMode;
 import view.components.VisualizationComponent;
 import view.components.VisualizationComponentType;
-import view.components.scatterchart.Scatterchart;
 
 /**
  * Component used for detail view of topic data.
@@ -100,6 +93,11 @@ public class ParallelTagCloud extends VisualizationComponent
 	 * Y-Axis for prob. dist. barchart..
 	 */
     private CategoryAxis probDistBarchart_yAxis;
+    /**
+     * Number of ticks to be displayed.
+     * First and last tick are not considered, so the total number of ticks is NUMBER_OF_TICKS_IN_BARCHART + 2. 
+     */
+    private static final int NUMBER_OF_TICKS_IN_BARCHART = 3;
     
     /*
      * Collections for PTC vis. elements.
@@ -171,6 +169,11 @@ public class ParallelTagCloud extends VisualizationComponent
 	 * Auxiliary variable serving as storage for collection of data point IDs to highlight.
 	 */
 	private Set<Integer> dataPointConfigIDsToHighlight;
+	
+	/**
+	 * Formatter for barchart's x-axis labels.
+	 */
+	private NumberFormat probDistBarchar_xAxisLabelFormatter;
 	
 	
 	@Override
@@ -271,8 +274,28 @@ public class ParallelTagCloud extends VisualizationComponent
         probabilityDistribution_barchart.setAnimated(false);
         probDistBarchart_xAxis.setLabel("Probability");  
         probDistBarchart_xAxis.setTickLabelRotation(90);
+        probDistBarchart_xAxis.setMinorTickVisible(false);
+        probDistBarchart_xAxis.setAutoRanging(false);
+        probDistBarchart_xAxis.setLowerBound(0);
         probDistBarchart_yAxis.setLabel("n-th most relevant keyword for each topic");        
- 
+        
+        // Initialize formatter used for x-axis' labels.
+        probDistBarchar_xAxisLabelFormatter = new DecimalFormat("0.#E0");
+        // Set up number formatter for x-axis' labels.
+        probDistBarchart_xAxis.setTickLabelFormatter(new StringConverter<Number>() {
+            @Override
+            public String toString(Number object) 
+            {
+                return probDistBarchar_xAxisLabelFormatter.format(object.doubleValue());
+            }
+
+            @Override
+            public Number fromString(String string)
+            {
+                return 0;
+            }
+        });
+        
         // Add to pane.
         barchart_anchorpane.getChildren().add(probabilityDistribution_barchart);
         
@@ -414,58 +437,22 @@ public class ParallelTagCloud extends VisualizationComponent
 	}
 	
 	/**
-	 * Refreshes barchart. Adds all available data to it. 
-	 * @param data
-	 * @param options
-	 */
-	private void refreshBarchart(final ParallelTagCloudDataset data, final ParallelTagCloudOptionset options)
-	{
-		// Clear data.
-		probabilityDistribution_barchart.getData().clear();
-		
-		// Add new data to chart.
-		for (Pair<Integer, Integer> topicConfig : data.getKeywordProbabilities().keySet()) {
-			// Allocate series object, set name.
-			XYChart.Series<Number, String> series = new XYChart.Series<Number, String>();
-			series.setName(String.valueOf(topicConfig.getKey()) + "#" + String.valueOf(topicConfig.getValue()));
-			
-			/*
-			 *  Process all n requested keyword/probability pairs.
-			 */
-			
-			// Add all keyword/probability pairs to data series.
-			// Sort by priority for each topic (as opposed to alphabetically).
-			// Important: One bar most probably represents different keywords for different topics.
-			// Get data.
-			ArrayList<Pair<String, Double>> keywordProbabilityData = data.getKeywordProbabilities().get(topicConfig);
-			
-			// Calculate start index.
-			final int startIndex = options.getNumberOfKeywordsToDisplay() <= keywordProbabilityData.size() ? options.getNumberOfKeywordsToDisplay() - 1 : keywordProbabilityData.size() - 1; 
-			
-			// Iterate over keyword/probablity pairs.
-			for (int i = startIndex; i >= 0; i--) {
-				Pair<String, Double> keywordProbPair = keywordProbabilityData.get(i);				
-				series.getData().add(new XYChart.Data<Number, String>(	keywordProbPair.getValue(), "#" + String.valueOf( i + 1 )) );
-			}
-			
-			// Add data series to barchart.
-			probabilityDistribution_barchart.getData().add(series);
-		}
-	}
-	
-	/**
 	 * Refreshes barchart. Adds data from allowed topics to it.
 	 * @param data
 	 * @param options
 	 * @param allowedTopicIDs
 	 */
-	private void refreshBarchart(final ParallelTagCloudDataset data, final ParallelTagCloudOptionset options, final Set<Pair<Integer, Integer>> allowedTopicIDs)
+	private void refreshBarchart(	final ParallelTagCloudDataset data, final ParallelTagCloudOptionset options, 
+									final Set<Pair<Integer, Integer>> allowedTopicIDs)
 	{
 		// Clear data.
 		probabilityDistribution_barchart.getData().clear();
 		
 		// Add new data to chart.
 		if (data != null && data.getKeywordProbabilities() != null && allowedTopicIDs != null && allowedTopicIDs.size() > 0) {
+			// Store highest probability in order to adjust tick unit accordingly.
+			double maxKeywordProbability = -1;
+			
 			for (Pair<Integer, Integer> topicConfig : data.getKeywordProbabilities().keySet()) {
 				// Display only topic configurations existing in provided set.
 				if (allowedTopicIDs.contains(topicConfig)) {
@@ -489,14 +476,22 @@ public class ParallelTagCloud extends VisualizationComponent
 					// Iterate over keyword/probablity pairs.
 					for (int i = startIndex; i >= 0; i--) {
 						Pair<String, Double> keywordProbPair = keywordProbabilityData.get(i);
-						
+						// Add to series.
 						series.getData().add( new XYChart.Data<Number, String>(	keywordProbPair.getValue(), "#" + String.valueOf( i + 1 )) );
+						
+						// Update max. probability for keywords.
+						maxKeywordProbability = maxKeywordProbability < keywordProbPair.getValue() ? keywordProbPair.getValue() : maxKeywordProbability;
 					}
 					
 					// Add data series to barchart.
 					probabilityDistribution_barchart.getData().add(series);
 				}
 			}
+			
+			// Set tick unit.
+			probDistBarchart_xAxis.setUpperBound(maxKeywordProbability * 1.1);
+			probDistBarchart_xAxis.setTickUnit(maxKeywordProbability / ParallelTagCloud.NUMBER_OF_TICKS_IN_BARCHART); 
+			
 		}
 	}
 	
@@ -513,6 +508,9 @@ public class ParallelTagCloud extends VisualizationComponent
 		
 		// Add new data to chart.
 		if (data != null && data.getKeywordProbabilities() != null && allowedKeywords != null && allowedKeywords.size() > 0) {
+			// Store highest probability in order to adjust tick unit accordingly.
+			double maxKeywordProbability = -1;
+			
 			for (Pair<Integer, Integer> topicConfig : data.getKeywordProbabilities().keySet()) {
 				// Allocate series object, set name.
 				XYChart.Series<Number, String> series = new XYChart.Series<Number, String>();
@@ -546,6 +544,9 @@ public class ParallelTagCloud extends VisualizationComponent
 					
 					else
 						series.getData().add( new XYChart.Data<Number, String>(0, "#" + String.valueOf( i + 1 )) );
+					
+					// Update max. probability for keywords.
+					maxKeywordProbability = maxKeywordProbability < keywordProbPair.getValue() ? keywordProbPair.getValue() : maxKeywordProbability;
 				}
 				
 				// Add data series to barchart, if keyword was found in data.
@@ -553,6 +554,10 @@ public class ParallelTagCloud extends VisualizationComponent
 					probabilityDistribution_barchart.getData().add(series);
 				}
 			}
+			
+			// Set tick unit.
+			probDistBarchart_xAxis.setUpperBound(maxKeywordProbability * 1.1);
+			probDistBarchart_xAxis.setTickUnit(maxKeywordProbability / ParallelTagCloud.NUMBER_OF_TICKS_IN_BARCHART);
 			
 			// Bolden selected keyword.
 			for (XYChart.Series<Number, String> dataSeries : probabilityDistribution_barchart.getData()) {
@@ -1285,6 +1290,7 @@ public class ParallelTagCloud extends VisualizationComponent
 		
 		// Clear barchart.
 		probabilityDistribution_barchart.getData().clear();
+		probDistBarchart_xAxis.setUpperBound(1);
 		// Hide barchart.
 		probabilityDistribution_barchart.setVisible(false);
 	}
