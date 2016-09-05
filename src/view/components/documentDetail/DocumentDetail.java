@@ -135,6 +135,11 @@ public class DocumentDetail extends VisualizationComponent
 		keywords_textflow			= new TextFlow();
 		keywords_anchorpane.getChildren().add(keywords_textflow);
 		
+		keywords_anchorpane.setTopAnchor(keywords_textflow, 0.0);
+		keywords_anchorpane.setBottomAnchor(keywords_textflow, 0.0);
+		keywords_anchorpane.setLeftAnchor(keywords_textflow, 0.0);
+		keywords_anchorpane.setRightAnchor(keywords_textflow, 0.0);
+		
 		// For original abstract.
 		originalAbstract_textflow 	= new TextFlow();
 		originalAbstract_anchorpane.getChildren().add(originalAbstract_textflow);
@@ -329,7 +334,7 @@ public class DocumentDetail extends VisualizationComponent
 				String word = words[i];
 				
 				// If word doesn't contain term: Append to tmpContent.
-				if (!word.toLowerCase().contains(term.toLowerCase())) {
+				if (term == null || !word.toLowerCase().contains(term.toLowerCase())) {
 					tmpContent += word;
 					// Append space if this isn't the last word.
 					if(i < words.length - 1)
@@ -478,6 +483,12 @@ public class DocumentDetail extends VisualizationComponent
 		// Resize keywords text field.
 		keywords_anchorpane.setPrefWidth(adjustedBarchartWidth * 0.5);
 		keywords_textflow.setPrefWidth(adjustedBarchartWidth * 0.5);
+//		keywords_textflow.setMinHeight(30);
+		keywords_textflow.setMaxHeight(30);
+//		keywords_textflow.setPrefHeight(30);
+//		keywords_anchorpane.setMinHeight(30);
+		keywords_anchorpane.setMaxHeight(30);
+//		keywords_anchorpane.setPrefHeight(30);
 		
 		// Resize processed abstract text field.
 		processedAbstract_scrollpane.setPrefWidth(adjustedTextfieldWidth);

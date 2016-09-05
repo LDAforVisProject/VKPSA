@@ -42,7 +42,7 @@
                               <GridPane prefHeight="22.0" prefWidth="323.0">
                                  <children>
                                     <Label text="Default opacity" />
-                                    <Slider fx:id="defaultOpacity_slider" blockIncrement="0.1" majorTickUnit="0.2" max="1.0" minorTickCount="0" showTickLabels="true" showTickMarks="true" value="0.1" GridPane.columnIndex="1" />
+                                    <Slider fx:id="defaultOpacity_slider" blockIncrement="0.1" majorTickUnit="0.2" max="1.0" minorTickCount="0" showTickLabels="true" showTickMarks="true" value="0.5" GridPane.columnIndex="1" />
                                  </children>
                                  <columnConstraints>
                                     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
