@@ -19,3 +19,6 @@ hs_err_pid*
 
 # No classpath files. #
 # *.classpath
+
+# Nothing in the data folder (but the folder itself).
+data/*
