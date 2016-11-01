@@ -22,4 +22,6 @@ hs_err_pid*
 
 # Nothing in the data folder (but the folder itself).
 data/*
-src/data/*
+
+# No eclipse settings.
+.settings/*

@@ -1,6 +1,0 @@
-LICENSE
-bin
-build.fxbuild
-dependencies
-src
-test.txt

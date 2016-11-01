@@ -44,7 +44,7 @@ import model.workspace.tasks.WorkspaceTask;
  *  - Datasets in this directory
  *  - Distance files and other metadata in this directory
  *  - Administration of processes revolving around the mentioned items
- *  
+ *
  * @author RM
  * @date 2015-04-14
  */
@@ -53,7 +53,7 @@ public class Workspace implements ITaskListener
 	// -----------------------------------------------
 	// 				Path variables
 	// -----------------------------------------------
-	
+
 	/**
 	 * Current directory.
 	 */
@@ -74,17 +74,17 @@ public class Workspace implements ITaskListener
 	 * Name of file database.
 	 */
 	public static final String DBNAME					= "vkpsa.db";
-	
+
 	// -----------------------------------------------
 	// 		Variables storing configuration data
 	// -----------------------------------------------
-	
+
 	Map<String, String> configurationOptions;
-	
+
 	// -----------------------------------------------
 	// 		Actual (raw and (pre-)processed) data
 	// -----------------------------------------------
-	
+
 	/**
 	 * Contains newly generated parameter values that yet have to generated.
 	 * After the generation is done, this collection is emptied.
@@ -98,7 +98,7 @@ public class Workspace implements ITaskListener
 	 * Contains pre-calculated distance values (between datasets). Read from .FILENAME_DISTANCES.
 	 */
 	private double[][] distances;
-	
+
 	/**
 	 * Holds all (loaded) datasets from the specified directory.
 	 */
@@ -107,7 +107,7 @@ public class Workspace implements ITaskListener
 	 * Holds all LDA configurations found in workspace.
 	 */
 	private ArrayList<LDAConfiguration> ldaConfigurations;
-	
+
 	/**
 	 * Number of MDS coordinates in in this workspace's .mds file. Used to check workspace integrity.
 	 */
@@ -120,11 +120,11 @@ public class Workspace implements ITaskListener
 	 * Number of datasets/LDA configurations in in this workspace's .dis file. Used to check workspace integrity.
 	 */
 	private int numberOfDatasetsInDISTable;
-	
+
 	// -----------------------------------------------
 	// 		Auxiliary options and flags
-	// -----------------------------------------------	
-	
+	// -----------------------------------------------
+
 	/**
 	 * Define whether or not calculated distances are appended to an existing
 	 * distance matrix or if the entire matrix is to be calculated anew.
@@ -152,37 +152,37 @@ public class Workspace implements ITaskListener
 	 * Indicates whether metadata from raw topic files were loaded and processed or not.
 	 */
 	private boolean isMetadataLoaded;
-	
+
 	// -----------------------------------------------
 	// 			Logging utilities.
-	// -----------------------------------------------	
-	
+	// -----------------------------------------------
+
 	/**
 	 * Protocol pane's ProgressIndicator.
 	 */
 	protected ProgressIndicator log_protocol_progressindicator;
-	
+
 	/**
 	 * Protocol pane's TextArea.
 	 */
 	protected TextArea log_protocol_textarea;
-	
+
 	// -----------------------------------------------
 	// 			Database management.
-	// -----------------------------------------------	
-	
+	// -----------------------------------------------
+
 	/**
 	 * Database management.
 	 */
 	private DBManagement db;
-	
-	// -----------------------------------------------	
+
+	// -----------------------------------------------
 	// -----------------------------------------------
 	// 					Methods
 	// -----------------------------------------------
-	// -----------------------------------------------	
-	
-	
+	// -----------------------------------------------
+
+
 	public Workspace(String directory)
 	{
 		this.directory					= directory;
@@ -190,18 +190,18 @@ public class Workspace implements ITaskListener
 		this.ldaConfigurations			= new ArrayList<LDAConfiguration>();
 		this.configurationsToGenerate	= new ArrayList<LDAConfiguration>();
 		this.configurationOptions		= new HashMap<String, String>();
-		
+
 		// Set initial values for various flags.
-		
+
 		appendToDistanceMatrix			= false;
 		appendToMDSCoordinateMatrix		= false;
-		
+
 		isMetadataLoaded				= false;
 		isRawDataLoaded					= false;
 		isDistanceDataLoaded			= false;
 		isMDSDataLoaded					= false;
 	}
-	
+
 	/**
 	 * Executes workspace actions (such as "load files in directory", "generate new files",
 	 * "calculate distances" etc.).
@@ -211,148 +211,148 @@ public class Workspace implements ITaskListener
 	 * @param optionSet Provides additional options, if needed. Is optional, may be null.
 	 * @return Task processing the request.
 	 */
-	public WorkspaceTask executeWorkspaceAction(TaskType workspaceAction, DoubleProperty progressProperty, 
+	public WorkspaceTask executeWorkspaceAction(TaskType workspaceAction, DoubleProperty progressProperty,
 												ITaskListener listener, final Map<String, Integer> optionSet)
 	{
 		WorkspaceTask task	= null;
-		
+
 		switch (workspaceAction) {
 			// -----------------------------------------------
 			// 				Loading operations
 			// -----------------------------------------------
-			
+
 			case COLLECT_METADATA:
 				isMetadataLoaded		= false;
 				isRawDataLoaded			= false;
 				isDistanceDataLoaded	= false;
 				isMDSDataLoaded			= false;
-				
+
 				// Collect metadata from raw topic files.
 				task					= new Task_CollectMetadata(this, TaskType.COLLECT_METADATA, optionSet);
 			break;
-			
+
 			case LOAD_RAW_DATA:
 				// Load datasets.
 				isRawDataLoaded 		= false;
 				task					= new Task_LoadRawData(this, TaskType.LOAD_RAW_DATA, optionSet);
 			break;
-			
+
 			case LOAD_DISTANCES:
 				isDistanceDataLoaded	= false;
 				task					= new Task_LoadDistanceData(this, TaskType.LOAD_DISTANCES, optionSet);
 			break;
-			
+
 			case LOAD_MDS_COORDINATES:
 				// Load MDS coordinates from file.
 				isMDSDataLoaded 		= false;
 				task					= new Task_LoadMDSCoordinates(this, TaskType.LOAD_MDS_COORDINATES, optionSet);
 			break;
-			
+
 			case LOAD_SPECIFIC_DATASETS:
 				// Plan: Queue instruction in frontend to backend.
 				// Execute data reading task in workspace.
 				task					= new Task_LoadSpecificDatasets(this, TaskType.LOAD_SPECIFIC_DATASETS, optionSet);
 			break;
-			
+
 			// -----------------------------------------------
 			// 		Calculation / writing operations
 			// -----------------------------------------------
-			
+
 			case CALCULATE_DISTANCES:
 				task = new Task_CalculateDistances(this, TaskType.CALCULATE_DISTANCES, optionSet);
 			break;
-			
+
 			case CALCULATE_MDS_COORDINATES:
 				task = new Task_CalculateMDSCoordinates(this, TaskType.CALCULATE_MDS_COORDINATES, optionSet);
 			break;
-			
+
 			case GENERATE_PARAMETER_LIST:
 				task = new Task_GenerateParameterList(this, TaskType.GENERATE_PARAMETER_LIST, optionSet);
 			break;
-			
+
 			case GENERATE_DATA:
 				task = new Task_GenerateData(this, TaskType.GENERATE_DATA, optionSet);
 			break;
-			
+
 			// -----------------------------------------------
 			// 			Collective operations
 			// -----------------------------------------------
-			
+
 			// -----------------------------------------------
 			// 			Maintainance operations
 			// -----------------------------------------------
-			
+
 			case SWITCH:
 				// Reset directory path.
 				directory = "";
 				// Reset other data.
 				resetData();
 			break;
-			
+
 			case RESET:
 				resetData();
 			break;
-			
+
 			case NONE:
 			break;
-			
+
 			default:
 				System.out.println("ERROR: Non-implemented workspace action " + workspaceAction);
 		}
-		
+
 		// Add listener to task, then start it.
 		if (task != null) {
 			task.addListener(listener);
 			if (progressProperty != null) {
 				progressProperty.bind(task.progressProperty());
 			}
-			
+
 			new Thread(task).start();
 		}
-		
+
 		return task;
 	}
-	
+
 	@Override
 	public void notifyOfTaskCompleted(TaskType workspaceAction)
 	{
-		switch (workspaceAction) 
+		switch (workspaceAction)
 		{
 			case COLLECT_METADATA:
 				// Load raw data.
 				System.out.println("[Post-generation] Collected metadata.");
 				//workspace.executeWorkspaceAction(WorkspaceAction.LOAD_RAW_DATA, generate_progressIndicator.progressProperty(), this);
 			break;
-			
+
 			// After raw data was loaded: Calculate distances.
 			case LOAD_RAW_DATA:
 				//System.out.println("[Post-generation] Loading raw data.");
 			break;
 		}
 	}
-	
+
 	private void resetData()
 	{
 		// Clear containers.
 		datasetMap.clear();
 		ldaConfigurations.clear();
-		
+
 		// Clear arrays.
 		distances					= null;
 		mdsCoordinates				= null;
-		
+
 		// Reset counters.
 		numberOfDatasetsInDISTable	= -1;
 		numberOfDatasetsInMDSFile	= -1;
 		numberOfDatasetsInWS		= -1;
-		
+
 		// Reset flags.
 		isMetadataLoaded			= false;
 		isRawDataLoaded				= false;
 		isDistanceDataLoaded		= false;
 		isMDSDataLoaded				= false;
 	}
-	
+
 	/**
 	 * Returns number of .csv files in this directory.
 	 * Does not check whether this .csv is actually an appropriate file.
@@ -362,10 +362,10 @@ public class Workspace implements ITaskListener
 	{
 		// Open connection to database.
 		numberOfDatasetsInWS = db.readNumberOfLDAConfigurations();
-		
+
 		return numberOfDatasetsInWS;
 	}
-	
+
 	/**
 	 * Reads number of datasets in dataset distance table.
 	 * @return
@@ -373,12 +373,12 @@ public class Workspace implements ITaskListener
 	public int readNumberOfDatasetsInDISTable()
 	{
 		numberOfDatasetsInDISTable = db.readNumberOfDatasetsInDISTable();
-		
+
 		return numberOfDatasetsInDISTable;
 	}
-	
+
 	/**
-	 * Returns number of .csv files in this directory modified later than the specified timestamp. 
+	 * Returns number of .csv files in this directory modified later than the specified timestamp.
 	 * Does not check whether this .csv is actually an appropriate file.
 	 * @param minCreationTimestamp
 	 * @deprecated
@@ -387,19 +387,19 @@ public class Workspace implements ITaskListener
 	public int readNumberOfDatasets(long minCreationTimestamp)
 	{
 		numberOfDatasetsInWS = 0;
-		
+
 		for(File f : new File(directory).listFiles()) {
 			String filePath			= f.getAbsolutePath();
 			String fileExtension	= filePath.substring(filePath.lastIndexOf(".") + 1, filePath.length());
-			
+
 			// Consider file only if it was modified after the specified timestamp.
 			if (f.lastModified() >= minCreationTimestamp)
 				numberOfDatasetsInWS = "csv".equals(fileExtension) ? numberOfDatasetsInWS + 1 : numberOfDatasetsInWS;
 		}
-		
+
 		return numberOfDatasetsInWS;
 	}
-	
+
 	/**
 	 * Checks if .mds file exists.
 	 * @return
@@ -408,7 +408,7 @@ public class Workspace implements ITaskListener
 	{
 		return Files.exists(Paths.get(directory, Workspace.FILENAME_MDSCOORDINATES));
 	}
-	
+
 	/**
 	 * Checks whether or not the .dis and .mds files are consistent with the data files contained in the workspace.
 	 * Executed after all available metadata was loaded.
@@ -419,7 +419,7 @@ public class Workspace implements ITaskListener
 	{
 		boolean isIntegrous			= true;
 		int numberOfDatasetsInWS	= getNumberOfDatasetsInWS();
-		
+
 		// Check for integrity of pre-calculated distance data.
 		if (numberOfDatasetsInWS != numberOfDatasetsInDISTable) {
 			isIntegrous = false;
@@ -430,23 +430,23 @@ public class Workspace implements ITaskListener
 			if (numberOfDatasetsInWS != numberOfDatasetsInMDSFile) {
 				isIntegrous = false;
 			}
-			
+
 			// Check if configuration in line in .mds file is consistent with configuration line
 			// parsed from raw topic data files.
 			else {
-				isIntegrous = compareToLDAConfiguration(Paths.get(directory, FILENAME_MDSCOORDINATES), " "); 
+				isIntegrous = compareToLDAConfiguration(Paths.get(directory, FILENAME_MDSCOORDINATES), " ");
 			}
 		}
-	
+
 		// Check if number of datasets in DIS table and MDS file match each other.
 		if (numberOfDatasetsInDISTable != numberOfDatasetsInMDSFile)
 			isIntegrous = false;
-		
+
 		return isIntegrous;
 	}
-	
+
 	/**
-	 * Compares LDA configuration string in first line of given line (LDA configurations 
+	 * Compares LDA configuration string in first line of given line (LDA configurations
 	 * are separated by spaces) to the current workspace.ldaConfigurations.
 	 * @param path
 	 * @param delimiter
@@ -459,13 +459,13 @@ public class Workspace implements ITaskListener
 			InputStream fis			= new FileInputStream(path.toString());
 		    InputStreamReader isr	= new InputStreamReader(fis, Charset.forName("UTF-8"));
 		    BufferedReader reader	= new BufferedReader(isr);
-		    
+
 			// Read first line in dataset (contains metadata).
 		    String line				= reader.readLine();
-		    
+
 			// Close reader.
 			reader.close();
-			
+
 		    int i = 0;
 		    // Process and compare LDA configuration data.
 		    for (String ldaConfigString : line.split(delimiter)) {
@@ -475,19 +475,19 @@ public class Workspace implements ITaskListener
 		    		if (!LDAConfiguration.generateLDAConfiguration(ldaConfigString).equals(ldaConfigurations.get(i))) {
 		    			return false;
 		    		}
-		    		
+
 		    		i++;
 		    	}
 		    }
 		}
-		
+
 		catch (Exception exception) {
 			exception.printStackTrace();
 		}
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * Parses .config file in working directory; stores specified options.
 	 */
@@ -497,50 +497,50 @@ public class Workspace implements ITaskListener
 		if (Files.exists(Paths.get(directory, FILENAME_CONFIGURATION))) {
 			Path path		= Paths.get(directory, Workspace.FILENAME_CONFIGURATION);
 		    Charset charset	= Charset.forName("UTF-8");
-		    
+
 		    try {
 				List<String> lines = Files.readAllLines(path, charset);
-				
+
 				for (String line : lines) {
 					String[] optionParts = line.split("=");
-					
+
 					if (optionParts.length == 2) {
 						configurationOptions.put(optionParts[0], optionParts[1]);
 					}
-					
+
 					else {
 						System.out.println("### WARNING ### Option '" + line + "' was ignored.");
 					}
 				}
-			} 
-		    
+			}
+
 		    catch (IOException e) {
 				e.printStackTrace();
 			}
-			
+
 		}
-		
+
 		else {
 			System.out.println("### ERROR ### Add a configuration file to the current workspace.");
 		}
 	}
-	
+
 	public void closeDB()
 	{
 		System.out.println("Closing database.");
-		
+
 		if (db != null) {
 			db.close();
 		}
 	}
-	
+
 	public void reopenDB()
 	{
 		if (db != null) {
 			db.reopen();
 		}
 	}
-	
+
 	/**
 	 * Adds specified line to the protocol panel.
 	 * @param additionalLogString
@@ -549,19 +549,19 @@ public class Workspace implements ITaskListener
 	{
 		log_protocol_textarea.setText(log_protocol_textarea.getText() + "\n" + additionalLogString);
 	}
-	
+
 	/**
 	 * Sets indicator to busy/idle.
 	 */
 	public void setProgressStatus(boolean isBusy)
 	{
-		log_protocol_progressindicator.setVisible(isBusy);		
+		log_protocol_progressindicator.setVisible(isBusy);
 	}
-	
+
 	// ------------------------------
 	// From here: Getter and setter.
 	// ------------------------------
-	
+
 	public String getDirectory()
 	{
 		return directory;
@@ -581,33 +581,33 @@ public class Workspace implements ITaskListener
 	public void setDirectory(String directory)
 	{
 		this.directory = directory;
-		
+
 		if (db == null) {
-			String dbPath	= directory + "\\" + Workspace.DBNAME;
+			String dbPath	= directory + "/" + Workspace.DBNAME;
 			db				= new DBManagement(dbPath);
 			log("Successfully initiated database at " + dbPath + ".");
 			System.out.println("Successfully initiated database at " + dbPath + ".");
 		}
-		
+
 		else {
 			log("### ERROR ### Directory switch currently not supported.");
 			System.out.println("### ERROR ### Directory switch currently not supported.");
 		}
-		
+
 		// Parse configuration file in directory.
 		parseConfigurationFile();
 	}
-	
+
 	public int getNumberOfDatasetsInMDSFile()
 	{
 		return numberOfDatasetsInMDSFile;
 	}
-	
+
 	public int getNumberOfDatasetsInWS()
 	{
 		return readNumberOfDatasets();
 	}
-	
+
 	public double[][] getMDSCoordinates()
 	{
 		return mdsCoordinates;
@@ -722,7 +722,7 @@ public class Workspace implements ITaskListener
 	{
 		if (numberOfDatasetsInDISTable < 0)
 			return readNumberOfDatasetsInDISTable();
-		
+
 		return numberOfDatasetsInDISTable;
 	}
 
